@@ -8,6 +8,9 @@
 #include "Damageable.h"
 #include "CombatComponent.generated.h"
 
+class UWeaponBase;
+class ASoulLikeCharacter;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SOULLIKEDEMO_API UCombatComponent : public UActorComponent
 {
@@ -17,12 +20,40 @@ public:
 	// Sets default values for this component's properties
 	UCombatComponent();
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void EquipPrimaryWeapon(UWeaponBase* NewWeapon);
+
+	// 武器操作接口
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void DrawWeapon(UWeaponBase* NewWeapon);
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void SheathWeapon();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void PerformAttack(EAttackType AttackType);
+
+	// 武器切换
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void SwitchToWeapon(int32 Index);
+
 	// 精准盾反判定（仅C++可用）
 	bool CheckPerfectParry(float PlayerInputTime, float EnemyAttackTime);
 
 	// 暴露给蓝图的伤害应用接口
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ProcessAttackHit(AActor* HitActor, const FHitResult& HitResult);
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		virtual void InitializeComponent() override;
+
+protected:
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void SetupPlayerInput(UInputComponent* PlayerInputComponent);
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void StartAttack();
 
 	// 抗性数据（C++计算）
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")

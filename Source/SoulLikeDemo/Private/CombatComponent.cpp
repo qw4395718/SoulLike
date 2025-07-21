@@ -2,6 +2,8 @@
 
 
 #include "CombatComponent.h"
+#include "SoulLikeCharacter.h"
+#include "WeaponBase.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -13,6 +15,38 @@ UCombatComponent::UCombatComponent()
 	// ...
 }
 
+
+void UCombatComponent::EquipPrimaryWeapon(UWeaponBase* NewWeapon)
+{
+
+}
+
+void UCombatComponent::DrawWeapon(UWeaponBase* NewWeapon)
+{
+	if (EquippedWeapon) {
+		SheathWeapon();
+	}
+
+	if (NewWeapon) {
+		EquippedWeapon = NewWeapon;
+		EquippedWeapon->Initialize(CharacterOwner);
+	}
+}
+
+void UCombatComponent::SheathWeapon()
+{
+
+}
+
+void UCombatComponent::PerformAttack(EAttackType AttackType)
+{
+
+}
+
+void UCombatComponent::SwitchToWeapon(int32 Index)
+{
+
+}
 
 bool UCombatComponent::CheckPerfectParry(float PlayerInputTime,float EnemyAttackTime)
 {
@@ -46,5 +80,38 @@ void UCombatComponent::ProcessAttackHit(AActor* HitActor, const FHitResult& HitR
 			//PlayHitEffect(DamageEvent.HitLocation);
 		}
 	}
+}
+
+void UCombatComponent::SetupPlayerInput(UInputComponent* PlayerInputComponent)
+{
+	PlayerInputComponent->BindAction("LightAttack", IE_Pressed, this, &UCombatComponent::StartAttack);
+	//PlayerInputComponent->BindAction("HeavyAttack", IE_Pressed, this, &UCombatComponent::StartHeavyAttack);
+	//PlayerInputComponent->BindAction("Block", IE_Pressed, this, &UCombatComponent::StartBlocking);
+}
+
+
+void UCombatComponent::StartAttack()
+{
+	if (EquippedWeapon && CharacterOwner->CanAttack()) {
+		EquippedWeapon->PlayAttackMontage(EAttackType::Normal_Combo_Phase_1);
+
+		// 类魂特性：消耗耐力
+		CharacterOwner->ConsumeStamina(EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
+	}
+}
+
+void UCombatComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+
+	// 获取所属角色
+	ASoulLikeCharacter* OwnerCharacter = Cast<ASoulLikeCharacter>(GetOwner());
+	if (!OwnerCharacter) return;
+
+	// 初始化武器库存
+	WeaponInventory.Empty(4); // 类魂标准4武器槽
+
+	// 绑定输入
+	SetupPlayerInput(OwnerCharacter->InputComponent);
 }
 

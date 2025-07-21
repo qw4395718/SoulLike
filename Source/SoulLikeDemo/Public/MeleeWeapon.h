@@ -16,8 +16,10 @@ class SOULLIKEDEMO_API UMeleeWeapon : public UWeaponBase
 
 public:
 	// 初始化武器（绑定到角色）
-		virtual void InitializeWeapon(ASoulLikeCharacter* OwnerCharacter) override;
+		virtual void Initialize(ASoulLikeCharacter* OwnerCharacter) override;
 
+	// 武器体力消耗
+		virtual float GetStaminaCost(EAttackType AttackType) override;
 
 	// 碰撞检测回调
 		virtual void OnWeaponHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,

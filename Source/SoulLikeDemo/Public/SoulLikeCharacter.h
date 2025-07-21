@@ -9,6 +9,10 @@
 #include "Damageable.h"
 #include "SoulLikeCharacter.generated.h"
 
+class UCombatComponent;
+class UDamageEventDispatcher;
+class UMeleeWeapon;
+
 UCLASS()
 class SOULLIKEDEMO_API ASoulLikeCharacter : public ACharacter ,public IDamageable
 {
@@ -39,9 +43,27 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 		void HandleDamage(const FDamageEventData& DamageEvent);
+	//ÎäÆ÷°ó¶¨µ½Socket
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void AttachWeaponToSocket(UWeaponBase* Weapon, FName SocketName);
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		FName GetWeaponHandSocket();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		bool CanAttack();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void ConsumeStamina(float costAp);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		UDamageEventDispatcher* DamageDispatcher;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		UCombatComponent* CombatComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+		UMeleeWeapon* DefaultWeaponClass;
 
 };

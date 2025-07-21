@@ -19,7 +19,7 @@ class SOULLIKEDEMO_API UWeaponBase : public UObject
 public:
 	// 初始化武器（绑定到角色）
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-		virtual void InitializeWeapon(ASoulLikeCharacter* OwnerCharacter);
+		virtual void Initialize(ASoulLikeCharacter* OwnerCharacter);
 
 	// 获取伤害数据（含类魂特性计算）
 	UFUNCTION(BlueprintNativeEvent, Category = "Combat")
@@ -35,7 +35,10 @@ public:
 			UPrimitiveComponent* OtherComp, FVector NormalImpulse,
 			const FHitResult& Hit);
 
-protected:
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+		virtual float GetStaminaCost(EAttackType AttackType);
+
+public:
 	//状态
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		bool IsStaticMesh;

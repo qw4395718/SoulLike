@@ -10,27 +10,60 @@ UCombatComponent::UCombatComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
-}
-
-
-void UCombatComponent::EquipPrimaryWeapon(UWeaponBase* NewWeapon)
-{
+	// 创建事件分发器
+	DamageDispatcher = CreateDefaultSubobject<UDamageEventDispatcher>(TEXT("DamageDispatcher"));
 
 }
 
-void UCombatComponent::DrawWeapon(UWeaponBase* NewWeapon)
+void UCombatComponent::InitializeComponent()
 {
-	if (EquippedWeapon) {
-		SheathWeapon();
-	}
+	Super::InitializeComponent();
 
-	if (NewWeapon) {
-		EquippedWeapon = NewWeapon;
-		EquippedWeapon->Initialize(CharacterOwner);
-	}
+	// 获取所属角色
+	ASoulLikeCharacter* OwnerCharacter = Cast<ASoulLikeCharacter>(GetOwner());
+	if (!OwnerCharacter) return;
+
+	// 初始化武器库存
+	WeaponInventory.Empty(4); // 类魂标准4武器槽
+
+	// 绑定输入
+	SetupPlayerInput(OwnerCharacter->InputComponent);
+
+	//默认初始化变量
+	HealthPoint = 100.0f;
+	ActionPoint = 100.0f;
+
+	//将函数绑定到事件上
+	DamageDispatcher->OnDamageEvent.AddDynamic(this, &UCombatComponent::HandleDamage);
+}
+
+void UCombatComponent::DrawWeapon()
+{
+	//if (EquippedWeapon == nullptr) 
+	//{//如果当前未有武器装备,则从武器仓库中拿一把
+	//	bool bFindValidWeapon = false;
+	//	for each (UWeaponBase* pWeapon in WeaponInventory)
+	//	{
+	//		if (pWeapon != nullptr)
+	//		{
+	//			EquippedWeapon = pWeapon;
+	//			bFindValidWeapon = true;
+	//			break;
+	//		}
+	//		if (bFindValidWeapon == true)
+	//		{
+	//			
+	//		}
+	//		else
+	//		{
+	//			//无有效的武器
+	//		}
+	//	}
+	//}
+
 }
 
 void UCombatComponent::SheathWeapon()
@@ -38,9 +71,9 @@ void UCombatComponent::SheathWeapon()
 
 }
 
-void UCombatComponent::PerformAttack(EAttackType AttackType)
+void UCombatComponent::PerformAttack()
 {
-
+	StartAttack();
 }
 
 void UCombatComponent::SwitchToWeapon(int32 Index)
@@ -82,36 +115,59 @@ void UCombatComponent::ProcessAttackHit(AActor* HitActor, const FHitResult& HitR
 	}
 }
 
-void UCombatComponent::SetupPlayerInput(UInputComponent* PlayerInputComponent)
+void UCombatComponent::HandleDamage(const FDamageEventData& DamageEvent)
 {
-	PlayerInputComponent->BindAction("LightAttack", IE_Pressed, this, &UCombatComponent::StartAttack);
-	//PlayerInputComponent->BindAction("HeavyAttack", IE_Pressed, this, &UCombatComponent::StartHeavyAttack);
-	//PlayerInputComponent->BindAction("Block", IE_Pressed, this, &UCombatComponent::StartBlocking);
-}
-
-
-void UCombatComponent::StartAttack()
-{
-	if (EquippedWeapon && CharacterOwner->CanAttack()) {
-		EquippedWeapon->PlayAttackMontage(EAttackType::Normal_Combo_Phase_1);
-
-		// 类魂特性：消耗耐力
-		CharacterOwner->ConsumeStamina(EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
+	//处理伤害
+	float ResultHP = 0;
+	ResultHP = HealthPoint - DamageEvent.BaseDamage > 0? HealthPoint - DamageEvent.BaseDamage : 0;
+	
+	if (ResultHP == 0)
+	{
+		HealthPoint = 0;
+		//播放角色死亡动画
+	}
+	else
+	{
+		HealthPoint = ResultHP;
+		//播放角色受击动画
 	}
 }
 
-void UCombatComponent::InitializeComponent()
+void UCombatComponent::SetupPlayerInput(UInputComponent* PlayerInputComponent)
 {
-	Super::InitializeComponent();
-
-	// 获取所属角色
-	ASoulLikeCharacter* OwnerCharacter = Cast<ASoulLikeCharacter>(GetOwner());
-	if (!OwnerCharacter) return;
-
-	// 初始化武器库存
-	WeaponInventory.Empty(4); // 类魂标准4武器槽
-
-	// 绑定输入
-	SetupPlayerInput(OwnerCharacter->InputComponent);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &UCombatComponent::StartAttack);
 }
 
+void UCombatComponent::StartAttack()
+{
+	if (EquippedWeapon /*&& CanAttack()*/) {
+		EquippedWeapon->PlayAttackMontage(EAttackType::Normal_Combo_Phase_1);
+
+		// 类魂特性：消耗耐力
+		//CharacterOwner->ConsumeStamina(EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
+	}
+}
+
+
+void UCombatComponent::InitWeaponInventory(TArray<UWeaponBase*> arrWeaponInventory)
+{
+
+}
+
+void UCombatComponent::WeaponInventoryChange(int32 Weaponindex, UWeaponBase* NewWeapon)
+{
+
+}
+
+void UCombatComponent::ReceiveDamage_Implementation(const FDamageEventData& DamageEvent)
+{
+	if (CanReceiveDamage()) {
+		//广播给所有FOnDamageSignature
+		DamageDispatcher->BroadcastDamageEvent(DamageEvent);
+	}
+}
+
+bool UCombatComponent::CanReceiveDamage_Implementation() const
+{//判定当前状态能否受到伤害
+	return true;
+}

@@ -5,37 +5,7 @@
 
 void UWeaponBase::Initialize(ASoulLikeCharacter* Owner)
 {
-	OwningCharacter = Owner;
-
-	// 创建武器网格体
-	SkeletalWeaponMesh = NewObject<USkeletalMeshComponent>(Owner);
-	SkeletalWeaponMesh->RegisterComponent();
-	StaticWeaponMesh = NewObject<UStaticMeshComponent>(Owner);
-	StaticWeaponMesh->RegisterComponent();
-
-	// 获取ALS骨骼套接字
-	FName SocketName = Owner->GetWeaponHandSocket();
-
-	if (IsStaticMesh)
-	{
-		StaticWeaponMesh->AttachToComponent(
-			Owner->GetMesh(),
-			FAttachmentTransformRules::SnapToTargetIncludingScale,
-			SocketName
-		);
-	}
-	else
-	{
-		SkeletalWeaponMesh->AttachToComponent(
-			Owner->GetMesh(),
-			FAttachmentTransformRules::SnapToTargetIncludingScale,
-			SocketName
-		);
-	}
-
-
-	//// 类魂特性：绑定武器轨迹
-	//SetupWeaponTrail();
+	
 }
 
 FDamageData UWeaponBase::GetDamageData_Implementation() const
@@ -45,7 +15,12 @@ FDamageData UWeaponBase::GetDamageData_Implementation() const
 
 void UWeaponBase::PlayAttackMontage_Implementation(EAttackType AttackType)
 {
-
+	if (AttackMontages.Find(AttackType) != nullptr && OwningCharacter)
+	{
+		UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+		if(!AnimInstance)return;
+		AnimInstance->Montage_Play(*AttackMontages.Find(AttackType));
+	}
 }
 
 void UWeaponBase::OnWeaponHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

@@ -23,14 +23,14 @@ void UCombatComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	// 获取所属角色
-	ASoulLikeCharacter* OwnerCharacter = Cast<ASoulLikeCharacter>(GetOwner());
-	if (!OwnerCharacter) return;
+	CharacterOwner = Cast<ASoulLikeCharacter>(GetOwner());
+	if (!CharacterOwner) return;
 
 	// 初始化武器库存
 	WeaponInventory.Empty(4); // 类魂标准4武器槽
 
 	// 绑定输入
-	SetupPlayerInput(OwnerCharacter->InputComponent);
+	SetupPlayerInput(CharacterOwner->InputComponent);
 
 	//默认初始化变量
 	HealthPoint = 100.0f;
@@ -45,7 +45,7 @@ void UCombatComponent::DrawWeapon()
 	//if (EquippedWeapon == nullptr) 
 	//{//如果当前未有武器装备,则从武器仓库中拿一把
 	//	bool bFindValidWeapon = false;
-	//	for each (UWeaponBase* pWeapon in WeaponInventory)
+	//	for each (AWeaponBase* pWeapon in WeaponInventory)
 	//	{
 	//		if (pWeapon != nullptr)
 	//		{
@@ -135,7 +135,7 @@ void UCombatComponent::HandleDamage(const FDamageEventData& DamageEvent)
 
 void UCombatComponent::SetupPlayerInput(UInputComponent* PlayerInputComponent)
 {
-	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &UCombatComponent::StartAttack);
+	//PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &UCombatComponent::StartAttack);
 }
 
 void UCombatComponent::StartAttack()
@@ -149,12 +149,12 @@ void UCombatComponent::StartAttack()
 }
 
 
-void UCombatComponent::InitWeaponInventory(TArray<UWeaponBase*> arrWeaponInventory)
+void UCombatComponent::InitWeaponInventory(TArray<AWeaponBase*> arrWeaponInventory)
 {
 
 }
 
-void UCombatComponent::WeaponInventoryChange(int32 Weaponindex, UWeaponBase* NewWeapon)
+void UCombatComponent::WeaponInventoryChange(int32 Weaponindex, AWeaponBase* NewWeapon)
 {
 
 }

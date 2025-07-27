@@ -33,6 +33,12 @@ struct FWeaponStats {
 	//	EWeaponScalingType ScalingType;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float WeaponCollisonHalfHeight = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float WeaponCollisonRadius = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		TMap<EAttackType, float> AttackTypeMultipliers;
 };
 

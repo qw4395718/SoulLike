@@ -11,7 +11,6 @@
 
 class UCombatComponent;
 class UDamageEventDispatcher;
-class UMeleeWeapon;
 
 UCLASS()
 class SOULLIKEDEMO_API ASoulLikeCharacter : public ACharacter 
@@ -42,9 +41,9 @@ protected:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-protected:
+public:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		UCombatComponent* CombatComponent;
 
 };

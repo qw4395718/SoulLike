@@ -9,11 +9,11 @@
 ASoulLikeCharacter::ASoulLikeCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	
 	//初始化组件
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
-
+	
 }
 
 void ASoulLikeCharacter::PerformAttack()
@@ -27,8 +27,8 @@ void ASoulLikeCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// 绑定自身伤害处理
-
 	CombatComponent->InitializeComponent();
+	
 	
 }
 

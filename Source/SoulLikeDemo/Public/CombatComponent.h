@@ -8,7 +8,7 @@
 #include "Damageable.h"
 #include "CombatComponent.generated.h"
 
-class UWeaponBase;
+class AWeaponBase;
 class ASoulLikeCharacter;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -27,9 +27,9 @@ public:
 		virtual void InitializeComponent() override;
 	//提供给外部初始化武器背包
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponInventoryManage")
-		void InitWeaponInventory(TArray<UWeaponBase*> arrWeaponInventory);
+		void InitWeaponInventory(TArray<AWeaponBase*> arrWeaponInventory);
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponInventoryManage")
-		void WeaponInventoryChange(int32 Weaponindex, UWeaponBase* NewWeapon);
+		void WeaponInventoryChange(int32 Weaponindex, AWeaponBase* NewWeapon);
 
 	/************************************************************************/
 	/* 外部调用                                                                     */
@@ -83,13 +83,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		UDamageEventDispatcher* DamageDispatcher;
 
+public:
+
 	// 当前装备武器
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-		UWeaponBase* EquippedWeapon;
+		AWeaponBase* EquippedWeapon;
 
 	// 武器库存
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-		TArray<UWeaponBase*> WeaponInventory;
+		TArray<AWeaponBase*> WeaponInventory;
 
 	// 组件引用
 	UPROPERTY()

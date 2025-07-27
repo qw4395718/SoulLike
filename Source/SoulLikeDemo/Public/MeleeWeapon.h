@@ -10,13 +10,13 @@
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API UMeleeWeapon : public UWeaponBase
+class SOULLIKEDEMO_API AMeleeWeapon : public AWeaponBase
 {
 	GENERATED_BODY()
 
 public:
 	// 初始化武器（绑定到角色）
-		virtual void Initialize(ASoulLikeCharacter* OwnerCharacter) override;
+		virtual void Initialize() override;
 
 	// 武器体力消耗
 		virtual float GetStaminaCost(EAttackType AttackType) override;

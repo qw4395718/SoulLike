@@ -31,12 +31,14 @@ struct FWeaponStats {
 
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	//	EWeaponScalingType ScalingType;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float WeaponCollisonBoxLength = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-		float WeaponCollisonHalfHeight = 1.0f;
+		float WeaponCollisonBoxWidth = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-		float WeaponCollisonRadius = 1.0f;
+		float WeaponCollisonBoxHeight = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		TMap<EAttackType, float> AttackTypeMultipliers;

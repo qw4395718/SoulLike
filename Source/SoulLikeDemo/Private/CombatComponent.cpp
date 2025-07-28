@@ -125,11 +125,13 @@ void UCombatComponent::HandleDamage(const FDamageEventData& DamageEvent)
 	{
 		HealthPoint = 0;
 		//播放角色死亡动画
+		UE_LOG(LogTemp, Display, TEXT("Player Die"));
 	}
 	else
 	{
 		HealthPoint = ResultHP;
 		//播放角色受击动画
+		UE_LOG(LogTemp, Display, TEXT("Player Currnet HP:%f"), HealthPoint);
 	}
 }
 
@@ -141,7 +143,7 @@ void UCombatComponent::SetupPlayerInput(UInputComponent* PlayerInputComponent)
 void UCombatComponent::StartAttack()
 {
 	if (EquippedWeapon /*&& CanAttack()*/) {
-		EquippedWeapon->PlayAttackMontage(EAttackType::Normal_Combo_Phase_1);
+		EquippedWeapon->PerformAttack();
 
 		// 类魂特性：消耗耐力
 		//CharacterOwner->ConsumeStamina(EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));

@@ -28,10 +28,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-
 public:
 	// 初始化武器（绑定到角色）
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -41,17 +37,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Combat")
 		FDamageData GetDamageData() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-		void SetEnableCapsuleCheck(bool enable);
-
-	// 伤害碰撞检测
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-		void CheckHit();
-
-
-	// 武器动作接口
-	UFUNCTION(BlueprintNativeEvent, Category = "Animation")
-		void PlayAttackMontage(EAttackType AttackType);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void PerformAttack();
 
 	// 碰撞检测回调
 	UFUNCTION()
@@ -62,26 +49,50 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		virtual float GetStaminaCost(EAttackType AttackType);
 
+	// 外部调用-用以开启碰撞盒检测
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+		void EnableAttackCollisonCheck();
+
+	// 外部调用-用以关闭碰撞盒检测
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+		void DisableAttackCollisonCheck();
+
+protected:
+	// 武器动作接口
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+		void PlayAttackMontage(FName MontageSectionName);
+
+	//重叠开始
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+			bool bFromSweep, const FHitResult& SweepResult);
+	
+	//重叠结束
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
+	// 处理重叠actor
+	void ApplyDamageToOverlappingActors();
 public:
 	//状态
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Condition")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 		bool IsStaticMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Condition")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 		bool bEnableCapsuleCheck;
 	// 组件
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		USkeletalMeshComponent* SkeletalWeaponMesh;
 
 	// 组件
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		UStaticMeshComponent* StaticWeaponMesh;
 
-	// 胶囊体-高频检测
+	// 胶囊体-椭球形状
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		UCapsuleComponent* CapsuleComp;
 
-	// 碰撞盒-低频检测,有需要的时候动态生产
+	// 碰撞盒-规则多边形
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		UBoxComponent* CollisonBox;
 
@@ -90,11 +101,18 @@ public:
 		FWeaponStats WeaponData;
 
 	// 动画资源
-	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-		TMap<EAttackType, UAnimMontage*> AttackMontages;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
+		UAnimMontage* AttackMontage;
 
 	// 持有者引用
 	UPROPERTY(Transient)
 		ASoulLikeCharacter* OwningCharacter;
 	
+protected:
+	// 伤害定时器handle
+	FTimerHandle DamageTimerHandle;
+	// 定时器间隔
+	float DamageInterval = 0.1f;
+	// 命中actor数组
+	TArray<AActor*> OverlappingActors;
 };

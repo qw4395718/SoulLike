@@ -86,7 +86,7 @@ protected:
 public:
 
 	// 当前装备武器
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 		AWeaponBase* EquippedWeapon;
 
 	// 武器库存

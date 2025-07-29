@@ -7,6 +7,7 @@
 #include "SoulLikeGameGlobal.h"
 #include "SoulLikeCharacter.h"
 #include "Components/BoxComponent.h"
+#include "SoulLike_JumpSection_NS.h"
 #include "WeaponBase.generated.h"
 
 /**
@@ -57,6 +58,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void DisableAttackCollisonCheck();
 
+	void SetComboContinueState(bool Enable);
+
+	void SetJumpSection_NS(USoulLike_JumpSection_NS* NS);
+
 protected:
 	// 武器动作接口
 	UFUNCTION(BlueprintCallable, Category = "Animation")
@@ -73,36 +78,46 @@ protected:
 	
 	// 处理重叠actor
 	void ApplyDamageToOverlappingActors();
+
+
 public:
 	//状态
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 		bool IsStaticMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 		bool bEnableCapsuleCheck;
 	// 组件
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
 		USkeletalMeshComponent* SkeletalWeaponMesh;
 
 	// 组件
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
 		UStaticMeshComponent* StaticWeaponMesh;
 
 	// 胶囊体-椭球形状
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 		UCapsuleComponent* CapsuleComp;
 
 	// 碰撞盒-规则多边形
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 		UBoxComponent* CollisonBox;
 
 	// 武器属性
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 		FWeaponStats WeaponData;
 
 	// 动画资源
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* AttackMontage;
+
+	// 动画状态通知引用
+	UPROPERTY(VisibleAnywhere, Category = "Animation")
+		USoulLike_JumpSection_NS* AttackSection_NS;
+
+	// 是否可以连击
+	UPROPERTY(VisibleAnywhere, Category = "Animation")
+		bool EnableComboContinue;
 
 	// 持有者引用
 	UPROPERTY(Transient)
@@ -114,5 +129,6 @@ protected:
 	// 定时器间隔
 	float DamageInterval = 0.1f;
 	// 命中actor数组
+	UPROPERTY()
 	TArray<AActor*> OverlappingActors;
 };

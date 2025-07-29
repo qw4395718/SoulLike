@@ -25,6 +25,7 @@ AWeaponBase::AWeaponBase()
 	CollisonBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisonBox"));
 	CollisonBox->SetupAttachment(RootComponent);
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CollisonBox->SetGenerateOverlapEvents(false);
 
 	// 骨骼网格体-
 	SkeletalWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
@@ -42,6 +43,7 @@ AWeaponBase::AWeaponBase()
 	WeaponData.WeaponCollisonBoxLength = 100.0f;
 	WeaponData.WeaponCollisonBoxWidth = 5.0f;
 	WeaponData.WeaponCollisonBoxHeight = 5.0f;
+	EnableComboContinue = false;
 }
 
 // Called when the game starts or when spawned
@@ -75,7 +77,15 @@ FDamageData AWeaponBase::GetDamageData_Implementation() const
 void AWeaponBase::PerformAttack()
 {
 	// 根据通知来确定播放的montage片段
+	if (AttackSection_NS != nullptr && EnableComboContinue == true)
+	{
 
+		PlayAttackMontage(AttackSection_NS->JumpSectionName);
+	}
+	else
+	{
+		PlayAttackMontage(FName(""));
+	}
 
 }
 
@@ -86,7 +96,8 @@ void AWeaponBase::PlayAttackMontage(FName MontageSectionName)
 		return;
 
 	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-	if (AnimInstance->Montage_IsActive(AttackMontage))
+	if (AnimInstance->Montage_IsActive(AttackMontage) &&
+		MontageSectionName != FName(""))
 	{
 		AnimInstance->Montage_JumpToSection(MontageSectionName);
 	}
@@ -115,6 +126,7 @@ void AWeaponBase::EnableAttackCollisonCheck()
 	CollisonBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisonBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CollisonBox->SetGenerateOverlapEvents(true);
 	// 开启定时器
 	GetWorld()->GetTimerManager().SetTimer(DamageTimerHandle, this,
 		&AWeaponBase::ApplyDamageToOverlappingActors,
@@ -125,6 +137,7 @@ void AWeaponBase::DisableAttackCollisonCheck()
 {
 	// 关闭碰撞检测
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CollisonBox->SetGenerateOverlapEvents(false);
 	// 关闭定时器
 	if (DamageTimerHandle.IsValid())
 	{
@@ -174,4 +187,15 @@ void AWeaponBase::ApplyDamageToOverlappingActors()
 			
 		}
 	}
+}
+
+void AWeaponBase::SetComboContinueState(bool Enable)
+{
+	EnableComboContinue = Enable;
+}
+
+void AWeaponBase::SetJumpSection_NS(USoulLike_JumpSection_NS* NS)
+{
+	if(NS != nullptr)
+		AttackSection_NS = NS;
 }

@@ -4,6 +4,7 @@
 #include "CombatComponent.h"
 #include "SoulLikeCharacter.h"
 #include "WeaponBase.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -12,10 +13,13 @@ UCombatComponent::UCombatComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
+	/************************************************************************/
+	/*                              组件初始化                                        */
+	/************************************************************************/
+	EquippedWeapon = nullptr;
 	// ...
 	// 创建事件分发器
-	DamageDispatcher = CreateDefaultSubobject<UDamageEventDispatcher>(TEXT("DamageDispatcher"));
-
+	DamageDispatcher = nullptr;
 }
 
 void UCombatComponent::InitializeComponent()
@@ -25,6 +29,11 @@ void UCombatComponent::InitializeComponent()
 	// 获取所属角色
 	CharacterOwner = Cast<ASoulLikeCharacter>(GetOwner());
 	if (!CharacterOwner) return;
+
+	if (DamageDispatcher == nullptr)
+	{
+		DamageDispatcher = NewObject<UDamageEventDispatcher>(this,TEXT("DamageDispatcher"));
+	}
 
 	// 初始化武器库存
 	WeaponInventory.Empty(4); // 类魂标准4武器槽
@@ -38,6 +47,33 @@ void UCombatComponent::InitializeComponent()
 
 	//将函数绑定到事件上
 	DamageDispatcher->OnDamageEvent.AddDynamic(this, &UCombatComponent::HandleDamage);
+
+	Initialize();
+}
+
+
+
+void UCombatComponent::Initialize()
+{
+	if (EquippedWeapon == nullptr)
+	{
+		EquippedWeapon = NewObject<AWeaponBase>(this, TEXT("EquippedWeapon"));
+	}
+
+	//将武器绑定到指定虚拟骨骼
+	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("VB RHS_ik_hand_gun")))
+	{
+		EquippedWeapon->AttachToComponent(
+			CharacterOwner->GetMesh(),
+			FAttachmentTransformRules::SnapToTargetIncludingScale, // 保持相对变换
+			TEXT("VB RHS_ik_hand_gun") // Socket 名称
+		);
+
+		EquippedWeapon->StaticWeaponMesh->SetVisibility(true);
+		EquippedWeapon->StaticWeaponMesh->SetHiddenInGame(false);
+
+	}
+
 }
 
 void UCombatComponent::DrawWeapon()

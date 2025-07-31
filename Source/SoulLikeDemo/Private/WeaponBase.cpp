@@ -37,13 +37,8 @@ AWeaponBase::AWeaponBase()
 	/************************************************************************/
 	/*                              变量初始化                                        */
 	/************************************************************************/
-	// 默认初始化
-	bEnableCapsuleCheck = false;
-	IsStaticMesh = true;
-	WeaponData.WeaponCollisonBoxLength = 100.0f;
-	WeaponData.WeaponCollisonBoxWidth = 5.0f;
-	WeaponData.WeaponCollisonBoxHeight = 5.0f;
-	EnableComboContinue = false;
+
+	Initialize();
 }
 
 // Called when the game starts or when spawned
@@ -64,7 +59,34 @@ void AWeaponBase::BeginPlay()
 
 void AWeaponBase::Initialize()
 {
-	
+	// 变量初始化
+	bEnableCapsuleCheck = false;
+	IsStaticMesh = true;
+	WeaponData.WeaponCollisonBoxLength = 100.0f;
+	WeaponData.WeaponCollisonBoxWidth = 5.0f;
+	WeaponData.WeaponCollisonBoxHeight = 5.0f;
+	EnableComboContinue = false;
+
+	// 资源初始化
+	UStaticMesh* Mesh = LoadObject<UStaticMesh>(
+		nullptr, // Outer对象（通常为null或GetTransientPackage）
+		TEXT("/Game/EssentialSwordShieldAnimations/Mannequin/Character/Mesh/Sword.Sword") // 资源路径
+		);
+	if (Mesh)
+	{
+		StaticWeaponMesh->SetStaticMesh(Mesh);
+	}
+
+	// 加载武器动画资源
+	UAnimMontage* Montage = LoadObject<UAnimMontage>(
+		nullptr,
+		TEXT("/Game/SoulLikeDemo/Anim/AM_Attack_Sword.AM_Attack_Sword")
+		);
+	if (Montage)
+	{
+		AttackMontage = Montage;
+	}
+
 }
 
 FDamageData AWeaponBase::GetDamageData_Implementation() const
@@ -184,7 +206,6 @@ void AWeaponBase::ApplyDamageToOverlappingActors()
 
 				OwningCharacter->CombatComponent->HandleDamage(DamageEventData);
 			}
-			
 		}
 	}
 }

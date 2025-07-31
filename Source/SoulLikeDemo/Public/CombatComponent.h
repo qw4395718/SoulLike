@@ -25,6 +25,9 @@ public:
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Init")
 		virtual void InitializeComponent() override;
+	// 调试初始化
+	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Init")
+		virtual void Initialize();
 	//提供给外部初始化武器背包
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponInventoryManage")
 		void InitWeaponInventory(TArray<AWeaponBase*> arrWeaponInventory);

@@ -13,7 +13,7 @@
 /**
  * 
  */
-UCLASS(Abstract, Blueprintable)
+UCLASS(Blueprintable)
 class SOULLIKEDEMO_API AWeaponBase : public AActor
 {
 	GENERATED_BODY()
@@ -30,7 +30,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	// 初始化武器（绑定到角色）
+	// 调试初始化,简易流程
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		virtual void Initialize();
 
@@ -68,15 +68,18 @@ protected:
 		void PlayAttackMontage(FName MontageSectionName);
 
 	//重叠开始
+	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 			bool bFromSweep, const FHitResult& SweepResult);
 	
 	//重叠结束
+	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
 	// 处理重叠actor
+	UFUNCTION()
 	void ApplyDamageToOverlappingActors();
 
 

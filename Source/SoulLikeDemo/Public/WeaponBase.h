@@ -134,4 +134,7 @@ protected:
 	// 命中actor数组
 	UPROPERTY()
 	TArray<AActor*> OverlappingActors;
+	// 已应用伤害actor集
+	UPROPERTY()
+	TSet<AActor*> AlreadyHitActors;
 };

@@ -57,21 +57,21 @@ void UCombatComponent::Initialize()
 {
 	if (EquippedWeapon == nullptr)
 	{
-		EquippedWeapon = NewObject<AWeaponBase>(this, TEXT("EquippedWeapon"));
+		EquippedWeapon = GetWorld()->SpawnActor<AWeaponBase>(
+		AWeaponBase::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator
+		);
 	}
 
 	//将武器绑定到指定虚拟骨骼
-	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("VB RHS_ik_hand_gun")))
+	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("VB RHS_ik_hand_gun")) && 
+	EquippedWeapon)
 	{
 		EquippedWeapon->AttachToComponent(
 			CharacterOwner->GetMesh(),
-			FAttachmentTransformRules::SnapToTargetIncludingScale, // 保持相对变换
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // 保持相对变换
 			TEXT("VB RHS_ik_hand_gun") // Socket 名称
 		);
-
-		EquippedWeapon->StaticWeaponMesh->SetVisibility(true);
-		EquippedWeapon->StaticWeaponMesh->SetHiddenInGame(false);
-
+		EquippedWeapon->OwningCharacter = CharacterOwner;
 	}
 
 }

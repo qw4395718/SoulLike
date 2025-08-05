@@ -68,13 +68,13 @@ void AWeaponBase::Initialize()
 	EnableComboContinue = false;
 
 	// 资源初始化
-	UStaticMesh* Mesh = LoadObject<UStaticMesh>(
+	USkeletalMesh* Mesh = LoadObject<USkeletalMesh>(
 		nullptr, // Outer对象（通常为null或GetTransientPackage）
-		TEXT("/Game/EssentialSwordShieldAnimations/Mannequin/Character/Mesh/Sword.Sword") // 资源路径
+		TEXT("/Game/InfinityBladeWeapons/Weapons/Blade/Swords/Blade_BlackKnight/SK_Blade_BlackKnight.SK_Blade_BlackKnight") // 资源路径
 		);
 	if (Mesh)
 	{
-		StaticWeaponMesh->SetStaticMesh(Mesh);
+		SkeletalWeaponMesh->SetSkeletalMesh(Mesh);
 	}
 
 	// 加载武器动画资源
@@ -153,6 +153,8 @@ void AWeaponBase::EnableAttackCollisonCheck()
 	GetWorld()->GetTimerManager().SetTimer(DamageTimerHandle, this,
 		&AWeaponBase::ApplyDamageToOverlappingActors,
 		DamageInterval, true);
+	// 重置已命中目标记录
+	AlreadyHitActors.Reset();
 }
 
 void AWeaponBase::DisableAttackCollisonCheck()
@@ -165,6 +167,8 @@ void AWeaponBase::DisableAttackCollisonCheck()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(DamageTimerHandle);
 	}
+	// 清空已名字目标记录
+	AlreadyHitActors.Reset();
 }
 
 void AWeaponBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -193,7 +197,7 @@ void AWeaponBase::ApplyDamageToOverlappingActors()
 		{
 			// 检查是否是特定类
 			ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Actor);
-			if (Enemy && OwningCharacter != Enemy)
+			if (Enemy && OwningCharacter != Enemy && !AlreadyHitActors.Contains(Enemy))
 			{
 				// 处理敌人命中逻辑
 				FDamageEventData DamageEventData;
@@ -205,6 +209,7 @@ void AWeaponBase::ApplyDamageToOverlappingActors()
 				DamageEventData.DamageCauser = Enemy;
 
 				OwningCharacter->CombatComponent->HandleDamage(DamageEventData);
+				AlreadyHitActors.Add(Enemy);
 			}
 		}
 	}

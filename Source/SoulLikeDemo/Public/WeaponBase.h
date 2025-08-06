@@ -58,6 +58,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void DisableAttackCollisonCheck();
 
+	// 外部调用-用以开启弹反功能
+	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Parry")
+		void ActivateParryWindow(float Duration);
+
+	// 外部调用-用以关闭弹反功能
+	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Parry")
+		void DeactivateParryWindow();
+
+	// 外部调用-获取当前是否处于弹反窗口激活状态
+	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Parry")
+		bool IsParryWindowActive();
+
 	void SetComboContinueState(bool Enable);
 
 	void SetJumpSection_NS(USoulLike_JumpSection_NS* NS);
@@ -67,20 +79,35 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 		void PlayAttackMontage(FName MontageSectionName);
 
-	//重叠开始
+	// 攻击重叠开始
 	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	void OnAttackOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 			bool bFromSweep, const FHitResult& SweepResult);
 	
-	//重叠结束
+	// 攻击重叠结束
 	UFUNCTION()
-	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	void OnAttackOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	// 弹反重叠开始
+	UFUNCTION()
+		void OnParryOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+			bool bFromSweep, const FHitResult& SweepResult);
+
+	// 弹反重叠结束
+	UFUNCTION()
+		void OnParryOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
-	// 处理重叠actor
+	// 处理攻击重叠actor
 	UFUNCTION()
 	void ApplyDamageToOverlappingActors();
+
+	// 处理弹反重叠actor
+	UFUNCTION()
+		void ApplyParryToOverlappingActors();
 
 
 public:
@@ -128,13 +155,30 @@ public:
 	
 protected:
 	// 伤害定时器handle
-	FTimerHandle DamageTimerHandle;
-	// 定时器间隔
-	float DamageInterval = 0.1f;
-	// 命中actor数组
 	UPROPERTY()
-	TArray<AActor*> OverlappingActors;
+	FTimerHandle DamageTimerHandle;
+
+	// 定时器间隔
+	UPROPERTY()
+	float DamageInterval = 0.1f;
+
+	// 伤害碰撞命中actor数组
+	UPROPERTY()
+	TArray<AActor*> AttackOverlappingActors;
+
+	// 弹反碰撞命中actor数组,仅需找到第一个成功即可清空
+	UPROPERTY()
+	TArray<AActor*> ParryOverlappingActors;
+
 	// 已应用伤害actor集
 	UPROPERTY()
 	TSet<AActor*> AlreadyHitActors;
+
+	// 弹反窗口是否激活
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
+		bool bIsParryWindowActive;
+
+	// 弹反定时器handle
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
+		FTimerHandle ParryWindowTimer;
 };

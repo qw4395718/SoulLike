@@ -171,6 +171,16 @@ void UCombatComponent::HandleDamage(const FDamageEventData& DamageEvent)
 	}
 }
 
+void UCombatComponent::HandleParry()
+{
+	//检查当前武器是否处于弹反窗口
+	if (EquippedWeapon && EquippedWeapon->IsParryWindowActive())
+	{	
+		// 被弹反成功,角色中断所有动画进入到待处决模式
+		UE_LOG(LogTemp, Display, TEXT("Player Parryed"));
+	}
+}
+
 void UCombatComponent::SetupPlayerInput(UInputComponent* PlayerInputComponent)
 {
 	//PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &UCombatComponent::StartAttack);

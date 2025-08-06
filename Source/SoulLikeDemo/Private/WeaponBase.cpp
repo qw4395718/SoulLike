@@ -51,10 +51,6 @@ void AWeaponBase::BeginPlay()
 	{
 		OwningCharacter = Cast<ASoulLikeCharacter>(GetOwner());
 	}
-
-	// 根据配置数据初始化碰撞盒大小和配置
-	CollisonBox->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::OnOverlapBegin);
-	CollisonBox->OnComponentEndOverlap.AddDynamic(this, &AWeaponBase::OnOverlapEnd);
 }
 
 void AWeaponBase::Initialize()
@@ -66,6 +62,7 @@ void AWeaponBase::Initialize()
 	WeaponData.WeaponCollisonBoxWidth = 5.0f;
 	WeaponData.WeaponCollisonBoxHeight = 5.0f;
 	EnableComboContinue = false;
+	bIsParryWindowActive = false;
 
 	// 资源初始化
 	USkeletalMesh* Mesh = LoadObject<USkeletalMesh>(
@@ -144,6 +141,9 @@ float AWeaponBase::GetStaminaCost(EAttackType AttackType)
 
 void AWeaponBase::EnableAttackCollisonCheck()
 {
+	// 根据配置数据初始化碰撞盒大小和配置
+	CollisonBox->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::OnAttackOverlapBegin);
+	CollisonBox->OnComponentEndOverlap.AddDynamic(this, &AWeaponBase::OnAttackOverlapEnd);
 	// 设置碰撞
 	CollisonBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisonBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
@@ -159,6 +159,9 @@ void AWeaponBase::EnableAttackCollisonCheck()
 
 void AWeaponBase::DisableAttackCollisonCheck()
 {
+	// 根据配置数据初始化碰撞盒大小和配置
+	CollisonBox->OnComponentBeginOverlap.RemoveDynamic(this, &AWeaponBase::OnAttackOverlapBegin);
+	CollisonBox->OnComponentEndOverlap.RemoveDynamic(this, &AWeaponBase::OnAttackOverlapEnd);
 	// 关闭碰撞检测
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisonBox->SetGenerateOverlapEvents(false);
@@ -171,27 +174,74 @@ void AWeaponBase::DisableAttackCollisonCheck()
 	AlreadyHitActors.Reset();
 }
 
-void AWeaponBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AWeaponBase::ActivateParryWindow(float Duration)
+{
+	// 根据配置数据初始化碰撞盒大小和配置
+	CollisonBox->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::OnParryOverlapBegin);
+	CollisonBox->OnComponentEndOverlap.AddDynamic(this, &AWeaponBase::OnParryOverlapEnd);
+	bIsParryWindowActive = true;
+
+	// 设置定时器自动关闭弹反窗口,当弹反成功时需要通过定时器关闭
+	GetWorld()->GetTimerManager().SetTimer(
+		ParryWindowTimer,
+		this,
+		&AWeaponBase::DeactivateParryWindow,
+		Duration,
+		false
+	);
+}
+
+void AWeaponBase::DeactivateParryWindow()
+{
+	CollisonBox->OnComponentBeginOverlap.RemoveDynamic(this, &AWeaponBase::OnParryOverlapBegin);
+	CollisonBox->OnComponentEndOverlap.RemoveDynamic(this, &AWeaponBase::OnParryOverlapEnd);
+	bIsParryWindowActive = false;
+}
+
+bool AWeaponBase::IsParryWindowActive()
+{
+	return bIsParryWindowActive;
+}
+
+void AWeaponBase::OnAttackOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
 	if (OtherActor && OtherActor != this)
 	{
-		OverlappingActors.AddUnique(OtherActor);
+		AttackOverlappingActors.AddUnique(OtherActor);
 	}
 
 }
 
-void AWeaponBase::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AWeaponBase::OnAttackOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (OtherActor)
 	{
-		OverlappingActors.Remove(OtherActor);
+		AttackOverlappingActors.Remove(OtherActor);
+	}
+}
+
+void AWeaponBase::OnParryOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+	if (OtherActor && OtherActor != this)
+	{
+		ParryOverlappingActors.AddUnique(OtherActor);
+	}
+
+}
+
+void AWeaponBase::OnParryOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor)
+	{
+		ParryOverlappingActors.Remove(OtherActor);
 	}
 }
 
 void AWeaponBase::ApplyDamageToOverlappingActors()
 {
-	for (AActor* Actor : OverlappingActors)
+	for (AActor* Actor : AttackOverlappingActors)
 	{
 		if (Actor)
 		{
@@ -210,6 +260,22 @@ void AWeaponBase::ApplyDamageToOverlappingActors()
 
 				OwningCharacter->CombatComponent->HandleDamage(DamageEventData);
 				AlreadyHitActors.Add(Enemy);
+			}
+		}
+	}
+}
+
+void AWeaponBase::ApplyParryToOverlappingActors()
+{
+	for (AActor* Actor : ParryOverlappingActors)
+	{
+		if (Actor)
+		{
+			// 检查是否是特定类
+			ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Actor);
+			if (Enemy && OwningCharacter != Enemy)
+			{
+				OwningCharacter->CombatComponent->HandleParry();
 			}
 		}
 	}

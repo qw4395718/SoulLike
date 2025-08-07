@@ -108,6 +108,20 @@ void AWeaponBase::PerformAttack()
 
 }
 
+void AWeaponBase::PerformCombatSkill()
+{
+	// 根据通知来确定播放的montage片段
+	if (AttackSection_NS != nullptr && EnableComboContinue == true)
+	{
+
+		PlayAttackMontage(AttackSection_NS->JumpSectionName);
+	}
+	else
+	{
+		PlayAttackMontage(FName(""));
+	}
+}
+
 void AWeaponBase::PlayAttackMontage(FName MontageSectionName)
 {
 	// 检测是否有效
@@ -124,9 +138,24 @@ void AWeaponBase::PlayAttackMontage(FName MontageSectionName)
 	{
 		AnimInstance->Montage_Play(AttackMontage);
 	}
+}
 
-	
-	
+void AWeaponBase::PlayCombatSkillMontage(FName MontageSectionName)
+{
+	// 检测是否有效
+	if (OwningCharacter == nullptr || OwningCharacter->GetMesh()->GetAnimInstance() == nullptr)
+		return;
+
+	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	if (AnimInstance->Montage_IsActive(CombatSkillMontage) &&
+		MontageSectionName != FName(""))
+	{
+		AnimInstance->Montage_JumpToSection(MontageSectionName);
+	}
+	else
+	{
+		AnimInstance->Montage_Play(CombatSkillMontage);
+	}
 }
 
 void AWeaponBase::OnWeaponHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

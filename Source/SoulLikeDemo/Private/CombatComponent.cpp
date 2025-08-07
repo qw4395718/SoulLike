@@ -112,6 +112,11 @@ void UCombatComponent::PerformAttack()
 	StartAttack();
 }
 
+void UCombatComponent::PerformCombatSkill()
+{
+	StartCombatSkill();
+}
+
 void UCombatComponent::SwitchToWeapon(int32 Index)
 {
 
@@ -196,6 +201,16 @@ void UCombatComponent::StartAttack()
 	}
 }
 
+
+void UCombatComponent::StartCombatSkill()
+{
+	if (EquippedWeapon /*&& CanAttack()*/) {
+		EquippedWeapon->PerformCombatSkill();
+
+		// 类魂特性：消耗耐力
+		//CharacterOwner->ConsumeStamina(EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
+	}
+}
 
 void UCombatComponent::InitWeaponInventory(TArray<AWeaponBase*> arrWeaponInventory)
 {

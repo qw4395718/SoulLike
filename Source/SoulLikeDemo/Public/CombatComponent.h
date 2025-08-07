@@ -49,6 +49,9 @@ public:
 	// 执行攻击
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponOperation")
 		void PerformAttack();
+	// 执行战技
+	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponOperation")
+		void PerformCombatSkill();
 	// 实现IDamageable接口
 	// 外部通过调用接口来触发伤害事件,再由伤害事件分发器发送到各个执行函数处
 	virtual void ReceiveDamage_Implementation(const FDamageEventData& DamageEvent) override;
@@ -75,10 +78,13 @@ public:
 protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void SetupPlayerInput(UInputComponent* PlayerInputComponent);
+		void SetupPlayerInput(UInputComponent* PlayerInputComponent);
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void StartAttack();
+		void StartAttack();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void StartCombatSkill();
 
 	// 抗性数据（C++计算）
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")

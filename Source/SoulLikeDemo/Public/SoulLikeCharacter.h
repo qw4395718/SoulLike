@@ -28,6 +28,10 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformAttack();
 
+	// 战技
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PerformCombatSkill();
+
 protected:
 	/************************************************************************/
 	/*                               继承实现                                       */

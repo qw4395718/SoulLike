@@ -21,6 +21,11 @@ void ASoulLikeCharacter::PerformAttack()
 	CombatComponent->PerformAttack();
 }
 
+void ASoulLikeCharacter::PerformCombatSkill()
+{
+	CombatComponent->PerformCombatSkill();
+}
+
 // Called when the game starts or when spawned
 void ASoulLikeCharacter::BeginPlay()
 {
@@ -45,6 +50,7 @@ void ASoulLikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ASoulLikeCharacter::PerformAttack);
+	PlayerInputComponent->BindAction("CombatSkill", IE_Pressed, this, &ASoulLikeCharacter::PerformCombatSkill);
 
 }
 

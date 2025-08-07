@@ -41,6 +41,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 		void PerformAttack();
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void PerformCombatSkill();
+
 	// 碰撞检测回调
 	UFUNCTION()
 		virtual void OnWeaponHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -78,6 +81,10 @@ protected:
 	// 武器动作接口
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 		void PlayAttackMontage(FName MontageSectionName);
+
+	// 武器战技动作接口
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+		void PlayCombatSkillMontage(FName MontageSectionName);
 
 	// 攻击重叠开始
 	UFUNCTION()
@@ -137,9 +144,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 		FWeaponStats WeaponData;
 
-	// 动画资源
+	// 动画资源-攻击
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* AttackMontage;
+
+	// 动画资源-战技
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+		UAnimMontage* CombatSkillMontage;
 
 	// 动画状态通知引用
 	UPROPERTY(VisibleAnywhere, Category = "Animation")

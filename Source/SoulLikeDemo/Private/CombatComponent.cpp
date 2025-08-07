@@ -65,13 +65,13 @@ void UCombatComponent::Initialize()
 	}
 
 	//将武器绑定到指定虚拟骨骼
-	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("VB LHS_ik_hand_gun")) && 
+	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("ik_hand_l")) && 
 		LH_EquippedWeapon)
 	{
 		LH_EquippedWeapon->AttachToComponent(
 			CharacterOwner->GetMesh(),
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // 保持相对变换
-			TEXT("VB LHS_ik_hand_gun") // Socket 名称
+			TEXT("ik_hand_l") // Socket 名称
 		);
 		LH_EquippedWeapon->OwningCharacter = CharacterOwner;
 	}
@@ -85,13 +85,13 @@ void UCombatComponent::Initialize()
 	}
 
 	//将武器绑定到指定虚拟骨骼
-	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("VB RHS_ik_hand_gun")) &&
+	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("ik_hand_r")) &&
 		RH_EquippedWeapon)
 	{
 		RH_EquippedWeapon->AttachToComponent(
 			CharacterOwner->GetMesh(),
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // 保持相对变换
-			TEXT("VB RHS_ik_hand_gun") // Socket 名称
+			TEXT("ik_hand_r") // Socket 名称
 		);
 		RH_EquippedWeapon->OwningCharacter = CharacterOwner;
 	}
@@ -203,7 +203,7 @@ void UCombatComponent::HandleParry()
 	//检查当前武器是否处于弹反窗口
 	if (RH_EquippedWeapon && RH_EquippedWeapon->IsParryWindowActive())
 	{	
-		// 被弹反成功,角色中断所有动画进入到待处决模式
+		// 被弹反成功,角色中断所有蒙太奇进入到待处决模式
 		UE_LOG(LogTemp, Display, TEXT("Player Parryed"));
 	}
 }
@@ -215,6 +215,7 @@ void UCombatComponent::SetupPlayerInput(UInputComponent* PlayerInputComponent)
 
 void UCombatComponent::StartAttack()
 {
+	// 进行一次球形检测,判断面前是否有敌人,根据敌人的当前状态(待处决)以及敌人的朝向和距离(可背刺)确定播放的蒙太奇动画
 	if (RH_EquippedWeapon /*&& CanAttack()*/) {
 		RH_EquippedWeapon->PerformAttack();
 

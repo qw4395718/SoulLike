@@ -44,6 +44,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 		void PerformCombatSkill();
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void PerformBackstab();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void PerformExecute();
+
 	// 碰撞检测回调
 	UFUNCTION()
 		virtual void OnWeaponHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -192,6 +198,10 @@ protected:
 	// 已应用伤害actor集
 	UPROPERTY()
 	TSet<AActor*> AlreadyHitActors;
+
+	// 已应用伤害actor集
+	UPROPERTY()
+		TSet<AActor*> AlreadyParryActors;
 
 	// 弹反窗口是否激活
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")

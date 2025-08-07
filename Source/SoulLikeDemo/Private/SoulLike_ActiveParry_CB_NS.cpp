@@ -14,11 +14,11 @@ void USoulLike_ActiveParry_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, 
 		ASoulLikeCharacter* Character = Cast<ASoulLikeCharacter>(MeshComp->GetOwner());
 		if (Character && Character->CombatComponent && bIsLHActive)
 		{
-			Character->CombatComponent->LH_EquippedWeapon->ActivateParryWindow(TotalDuration);
+			Character->CombatComponent->LH_EquippedWeapon->EnableParryCollisonCheck();
 		}
 		if (Character && Character->CombatComponent && bIsRHActive)
 		{
-			Character->CombatComponent->RH_EquippedWeapon->ActivateParryWindow(TotalDuration);
+			Character->CombatComponent->RH_EquippedWeapon->EnableParryCollisonCheck();
 		}
 	}
 }
@@ -31,11 +31,11 @@ void USoulLike_ActiveParry_CB_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UA
 		ASoulLikeCharacter* Character = Cast<ASoulLikeCharacter>(MeshComp->GetOwner());
 		if (Character && Character->CombatComponent && bIsLHActive)
 		{
-			Character->CombatComponent->LH_EquippedWeapon->DeactivateParryWindow();
+			Character->CombatComponent->LH_EquippedWeapon->DisableParryCollisonCheck();
 		}
 		if (Character && Character->CombatComponent && bIsRHActive)
 		{
-			Character->CombatComponent->RH_EquippedWeapon->DeactivateParryWindow();
+			Character->CombatComponent->RH_EquippedWeapon->DisableParryCollisonCheck();
 		}
 	}
 }

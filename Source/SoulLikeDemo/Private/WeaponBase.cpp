@@ -105,6 +105,7 @@ FDamageData AWeaponBase::GetDamageData_Implementation() const
 
 void AWeaponBase::PerformAttack()
 {
+	// 根据当前播放状态进行判断是否允许切换
 	// 根据通知来确定播放的montage片段
 	if (AttackSection_NS != nullptr && EnableComboContinue == true)
 	{
@@ -130,6 +131,16 @@ void AWeaponBase::PerformCombatSkill()
 	{
 		PlayCombatSkillMontage(FName(""));
 	}
+}
+
+void AWeaponBase::PerformBackstab()
+{
+	
+}
+
+void AWeaponBase::PerformExecute()
+{
+
 }
 
 void AWeaponBase::PlayAttackMontage(FName MontageSectionName)
@@ -228,7 +239,8 @@ void AWeaponBase::EnableParryCollisonCheck()
 		&AWeaponBase::ApplyParryToOverlappingActors,
 		ParryInterval, true);
 	// 重置已命中目标记录
-	AlreadyHitActors.Reset();
+	AlreadyParryActors.Reset();
+	UE_LOG(LogTemp, Display, TEXT("EnableParryCollisonCheck"));
 }
 
 void AWeaponBase::DisableParryCollisonCheck()
@@ -245,7 +257,8 @@ void AWeaponBase::DisableParryCollisonCheck()
 		GetWorld()->GetTimerManager().ClearTimer(ParryWindowTimer);
 	}
 	// 清空已名字目标记录
-	AlreadyHitActors.Reset();
+	AlreadyParryActors.Reset();
+	UE_LOG(LogTemp, Display, TEXT("DisableParryCollisonCheck"));
 }
 
 void AWeaponBase::ActivateParryWindow(float Duration)
@@ -329,7 +342,7 @@ void AWeaponBase::ApplyDamageToOverlappingActors()
 				DamageEventData.AttackType = EDamageType::SLASH;
 				DamageEventData.DamageCauser = Enemy;
 
-				OwningCharacter->CombatComponent->HandleDamage(DamageEventData);
+				Enemy->CombatComponent->HandleDamage(DamageEventData);
 				AlreadyHitActors.Add(Enemy);
 			}
 		}
@@ -344,9 +357,10 @@ void AWeaponBase::ApplyParryToOverlappingActors()
 		{
 			// 检查是否是特定类
 			ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Actor);
-			if (Enemy && OwningCharacter != Enemy)
+			if (Enemy && OwningCharacter != Enemy && !AlreadyParryActors.Contains(Enemy))
 			{
-				OwningCharacter->CombatComponent->HandleParry();
+				Enemy->CombatComponent->HandleParry();
+				AlreadyParryActors.Add(Enemy);
 			}
 		}
 	}

@@ -17,4 +17,10 @@ class SOULLIKEDEMO_API USoulLike_ActiveCollisionBox_NS : public UAnimNotifyState
 public:
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+
+public:
+	UPROPERTY(EditAnywhere)
+		bool bIsLHActive;
+	UPROPERTY(EditAnywhere)
+		bool bIsRHActive;
 };

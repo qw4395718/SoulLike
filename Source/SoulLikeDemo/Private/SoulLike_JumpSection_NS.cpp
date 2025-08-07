@@ -12,10 +12,15 @@ void USoulLike_JumpSection_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAn
 	{
 		// 假设角色持有武器，并通过接口控制碰撞
 		ASoulLikeCharacter* Character = Cast<ASoulLikeCharacter>(MeshComp->GetOwner());
-		if (Character && Character->CombatComponent && Character->CombatComponent->EquippedWeapon)
+		if (Character && Character->CombatComponent && Character->CombatComponent->LH_EquippedWeapon && bIsLHActive)
 		{
-			Character->CombatComponent->EquippedWeapon->SetComboContinueState(true);
-			Character->CombatComponent->EquippedWeapon->SetJumpSection_NS(this);
+			Character->CombatComponent->LH_EquippedWeapon->SetComboContinueState(true);
+			Character->CombatComponent->LH_EquippedWeapon->SetJumpSection_NS(this);
+		}
+		if (Character && Character->CombatComponent && Character->CombatComponent->RH_EquippedWeapon && bIsRHActive)
+		{
+			Character->CombatComponent->RH_EquippedWeapon->SetComboContinueState(true);
+			Character->CombatComponent->RH_EquippedWeapon->SetJumpSection_NS(this);
 		}
 	}
 }
@@ -26,9 +31,13 @@ void USoulLike_JumpSection_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnim
 	{
 		// 假设角色持有武器，并通过接口控制碰撞
 		ASoulLikeCharacter* Character = Cast<ASoulLikeCharacter>(MeshComp->GetOwner());
-		if (Character && Character->CombatComponent && Character->CombatComponent->EquippedWeapon)
+		if (Character && Character->CombatComponent && Character->CombatComponent->LH_EquippedWeapon && bIsLHActive)
 		{
-			Character->CombatComponent->EquippedWeapon->SetComboContinueState(false);
+			Character->CombatComponent->LH_EquippedWeapon->SetComboContinueState(false);
+		}
+		if (Character && Character->CombatComponent && Character->CombatComponent->RH_EquippedWeapon && bIsRHActive)
+		{
+			Character->CombatComponent->RH_EquippedWeapon->SetComboContinueState(false);
 		}
 	}
 }

@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "SoulLike_JumpSection_NS.generated.h"
+#include "SL_ActiveParryWindow_NS.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API USoulLike_JumpSection_NS : public UAnimNotifyState
+class SOULLIKEDEMO_API USL_ActiveParryWindow_NS : public UAnimNotifyState
 {
 	GENERATED_BODY()
 
@@ -18,13 +18,15 @@ public:
 
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+	
+protected:
+	// 弹反成功时的额外帧数（用于容错）
+	UPROPERTY(EditAnywhere, Category = "Parry Settings")
+		float SuccessWindowExtension = 0.05f; // 额外5帧@60FPS
 
 public:
-
 	UPROPERTY(EditAnywhere)
-	FName JumpSectionName;
+		bool bIsLHActive;
 	UPROPERTY(EditAnywhere)
-	bool bIsLHActive;
-	UPROPERTY(EditAnywhere)
-	bool bIsRHActive;
+		bool bIsRHActive;
 };

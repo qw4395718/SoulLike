@@ -53,19 +53,27 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		virtual float GetStaminaCost(EAttackType AttackType);
 
-	// 外部调用-用以开启碰撞盒检测
+	// 外部调用-用以开启攻击碰撞盒检测
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void EnableAttackCollisonCheck();
 
-	// 外部调用-用以关闭碰撞盒检测
+	// 外部调用-用以关闭攻击碰撞盒检测
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void DisableAttackCollisonCheck();
 
-	// 外部调用-用以开启弹反功能
+	// 外部调用-用以开启弹反碰撞盒检测
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+		void EnableParryCollisonCheck();
+
+	// 外部调用-用以关闭攻击碰撞盒检测
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+		void DisableParryCollisonCheck();
+
+	// 外部调用-用以激活弹反窗口
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Parry")
 		void ActivateParryWindow(float Duration);
 
-	// 外部调用-用以关闭弹反功能
+	// 外部调用-用以关闭弹反窗口
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Parry")
 		void DeactivateParryWindow();
 
@@ -192,4 +200,8 @@ protected:
 	// 弹反定时器handle
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
 		FTimerHandle ParryWindowTimer;
+
+	// 定时器间隔
+	UPROPERTY()
+		float ParryInterval = 0.1f;
 };

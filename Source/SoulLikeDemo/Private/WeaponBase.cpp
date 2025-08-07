@@ -75,13 +75,23 @@ void AWeaponBase::Initialize()
 	}
 
 	// 加载武器动画资源
-	UAnimMontage* Montage = LoadObject<UAnimMontage>(
+	UAnimMontage* SwordMontage = LoadObject<UAnimMontage>(
 		nullptr,
 		TEXT("/Game/SoulLikeDemo/Anim/AM_Attack_Sword.AM_Attack_Sword")
 		);
-	if (Montage)
+	if (SwordMontage)
 	{
-		AttackMontage = Montage;
+		AttackMontage = SwordMontage;
+	}
+
+	// 临时测试添加盾牌战技动画
+	UAnimMontage* SheildMontage = LoadObject<UAnimMontage>(
+		nullptr,
+		TEXT("/Game/SoulLikeDemo/Anim/AM_CombatSkill_Sheild.AM_CombatSkill_Sheild")
+		);
+	if (SheildMontage)
+	{
+		CombatSkillMontage = SheildMontage;
 	}
 
 }
@@ -114,11 +124,11 @@ void AWeaponBase::PerformCombatSkill()
 	if (AttackSection_NS != nullptr && EnableComboContinue == true)
 	{
 
-		PlayAttackMontage(AttackSection_NS->JumpSectionName);
+		PlayCombatSkillMontage(AttackSection_NS->JumpSectionName);
 	}
 	else
 	{
-		PlayAttackMontage(FName(""));
+		PlayCombatSkillMontage(FName(""));
 	}
 }
 
@@ -203,11 +213,45 @@ void AWeaponBase::DisableAttackCollisonCheck()
 	AlreadyHitActors.Reset();
 }
 
-void AWeaponBase::ActivateParryWindow(float Duration)
+void AWeaponBase::EnableParryCollisonCheck()
 {
 	// 根据配置数据初始化碰撞盒大小和配置
 	CollisonBox->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::OnParryOverlapBegin);
 	CollisonBox->OnComponentEndOverlap.AddDynamic(this, &AWeaponBase::OnParryOverlapEnd);
+	// 设置碰撞
+	CollisonBox->SetCollisionResponseToAllChannels(ECR_Ignore);
+	CollisonBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	CollisonBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CollisonBox->SetGenerateOverlapEvents(true);
+	// 开启定时器
+	GetWorld()->GetTimerManager().SetTimer(ParryWindowTimer, this,
+		&AWeaponBase::ApplyParryToOverlappingActors,
+		ParryInterval, true);
+	// 重置已命中目标记录
+	AlreadyHitActors.Reset();
+}
+
+void AWeaponBase::DisableParryCollisonCheck()
+{
+	// 根据配置数据初始化碰撞盒大小和配置
+	CollisonBox->OnComponentBeginOverlap.RemoveDynamic(this, &AWeaponBase::OnParryOverlapBegin);
+	CollisonBox->OnComponentEndOverlap.RemoveDynamic(this, &AWeaponBase::OnParryOverlapEnd);
+	// 关闭碰撞检测
+	CollisonBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CollisonBox->SetGenerateOverlapEvents(false);
+	// 关闭定时器
+	if (ParryWindowTimer.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(ParryWindowTimer);
+	}
+	// 清空已名字目标记录
+	AlreadyHitActors.Reset();
+}
+
+void AWeaponBase::ActivateParryWindow(float Duration)
+{
+	// 根据配置数据初始化碰撞盒大小和配置
+
 	bIsParryWindowActive = true;
 
 	// 设置定时器自动关闭弹反窗口,当弹反成功时需要通过定时器关闭
@@ -222,8 +266,6 @@ void AWeaponBase::ActivateParryWindow(float Duration)
 
 void AWeaponBase::DeactivateParryWindow()
 {
-	CollisonBox->OnComponentBeginOverlap.RemoveDynamic(this, &AWeaponBase::OnParryOverlapBegin);
-	CollisonBox->OnComponentEndOverlap.RemoveDynamic(this, &AWeaponBase::OnParryOverlapEnd);
 	bIsParryWindowActive = false;
 }
 

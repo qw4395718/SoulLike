@@ -16,7 +16,8 @@ UCombatComponent::UCombatComponent()
 	/************************************************************************/
 	/*                              组件初始化                                        */
 	/************************************************************************/
-	EquippedWeapon = nullptr;
+	LH_EquippedWeapon = nullptr;
+	RH_EquippedWeapon = nullptr;
 	// ...
 	// 创建事件分发器
 	DamageDispatcher = nullptr;
@@ -55,23 +56,44 @@ void UCombatComponent::InitializeComponent()
 
 void UCombatComponent::Initialize()
 {
-	if (EquippedWeapon == nullptr)
+	// 初始化左手武器
+	if (LH_EquippedWeapon == nullptr)
 	{
-		EquippedWeapon = GetWorld()->SpawnActor<AWeaponBase>(
+		LH_EquippedWeapon = GetWorld()->SpawnActor<AWeaponBase>(
 		AWeaponBase::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator
 		);
 	}
 
 	//将武器绑定到指定虚拟骨骼
-	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("VB RHS_ik_hand_gun")) && 
-	EquippedWeapon)
+	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("VB LHS_ik_hand_gun")) && 
+		LH_EquippedWeapon)
 	{
-		EquippedWeapon->AttachToComponent(
+		LH_EquippedWeapon->AttachToComponent(
+			CharacterOwner->GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // 保持相对变换
+			TEXT("VB LHS_ik_hand_gun") // Socket 名称
+		);
+		LH_EquippedWeapon->OwningCharacter = CharacterOwner;
+	}
+
+	// 初始化右手武器
+	if (RH_EquippedWeapon == nullptr)
+	{
+		RH_EquippedWeapon = GetWorld()->SpawnActor<AWeaponBase>(
+			AWeaponBase::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator
+			);
+	}
+
+	//将武器绑定到指定虚拟骨骼
+	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("VB RHS_ik_hand_gun")) &&
+		RH_EquippedWeapon)
+	{
+		RH_EquippedWeapon->AttachToComponent(
 			CharacterOwner->GetMesh(),
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // 保持相对变换
 			TEXT("VB RHS_ik_hand_gun") // Socket 名称
 		);
-		EquippedWeapon->OwningCharacter = CharacterOwner;
+		RH_EquippedWeapon->OwningCharacter = CharacterOwner;
 	}
 
 }
@@ -179,7 +201,7 @@ void UCombatComponent::HandleDamage(const FDamageEventData& DamageEvent)
 void UCombatComponent::HandleParry()
 {
 	//检查当前武器是否处于弹反窗口
-	if (EquippedWeapon && EquippedWeapon->IsParryWindowActive())
+	if (RH_EquippedWeapon && RH_EquippedWeapon->IsParryWindowActive())
 	{	
 		// 被弹反成功,角色中断所有动画进入到待处决模式
 		UE_LOG(LogTemp, Display, TEXT("Player Parryed"));
@@ -193,8 +215,8 @@ void UCombatComponent::SetupPlayerInput(UInputComponent* PlayerInputComponent)
 
 void UCombatComponent::StartAttack()
 {
-	if (EquippedWeapon /*&& CanAttack()*/) {
-		EquippedWeapon->PerformAttack();
+	if (RH_EquippedWeapon /*&& CanAttack()*/) {
+		RH_EquippedWeapon->PerformAttack();
 
 		// 类魂特性：消耗耐力
 		//CharacterOwner->ConsumeStamina(EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
@@ -204,8 +226,8 @@ void UCombatComponent::StartAttack()
 
 void UCombatComponent::StartCombatSkill()
 {
-	if (EquippedWeapon /*&& CanAttack()*/) {
-		EquippedWeapon->PerformCombatSkill();
+	if (LH_EquippedWeapon /*&& CanAttack()*/) {
+		LH_EquippedWeapon->PerformCombatSkill();
 
 		// 类魂特性：消耗耐力
 		//CharacterOwner->ConsumeStamina(EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));

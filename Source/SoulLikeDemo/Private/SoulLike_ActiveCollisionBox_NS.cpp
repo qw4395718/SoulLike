@@ -12,9 +12,13 @@ void USoulLike_ActiveCollisionBox_NS::NotifyBegin(USkeletalMeshComponent* MeshCo
 	{
 		// 假设角色持有武器，并通过接口控制碰撞
 		ASoulLikeCharacter* Character = Cast<ASoulLikeCharacter>(MeshComp->GetOwner());
-		if (Character && Character->CombatComponent && Character->CombatComponent->EquippedWeapon)
+		if (Character && Character->CombatComponent && Character->CombatComponent->LH_EquippedWeapon && bIsLHActive)
 		{
-			Character->CombatComponent->EquippedWeapon->EnableAttackCollisonCheck();
+			Character->CombatComponent->LH_EquippedWeapon->EnableAttackCollisonCheck();
+		}
+		if (Character && Character->CombatComponent && Character->CombatComponent->RH_EquippedWeapon && bIsRHActive)
+		{
+			Character->CombatComponent->RH_EquippedWeapon->EnableAttackCollisonCheck();
 		}
 	}
 }
@@ -25,9 +29,13 @@ void USoulLike_ActiveCollisionBox_NS::NotifyEnd(USkeletalMeshComponent* MeshComp
 	{
 		// 假设角色持有武器，并通过接口控制碰撞
 		ASoulLikeCharacter* Character = Cast<ASoulLikeCharacter>(MeshComp->GetOwner());
-		if (Character && Character->CombatComponent && Character->CombatComponent->EquippedWeapon)
+		if (Character && Character->CombatComponent && Character->CombatComponent->LH_EquippedWeapon && bIsLHActive)
 		{
-			Character->CombatComponent->EquippedWeapon->DisableAttackCollisonCheck();
+			Character->CombatComponent->LH_EquippedWeapon->DisableAttackCollisonCheck();
+		}
+		if (Character && Character->CombatComponent && Character->CombatComponent->RH_EquippedWeapon && bIsRHActive)
+		{
+			Character->CombatComponent->RH_EquippedWeapon->DisableAttackCollisonCheck();
 		}
 	}
 }

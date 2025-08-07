@@ -96,10 +96,13 @@ protected:
 		UDamageEventDispatcher* DamageDispatcher;
 
 public:
-
-	// 当前装备武器
+	// 当前右手装备武器
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-		AWeaponBase* EquippedWeapon;
+		AWeaponBase* LH_EquippedWeapon;
+
+	// 当前右手装备武器
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+		AWeaponBase* RH_EquippedWeapon;
 
 	// 武器库存
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")

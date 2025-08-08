@@ -25,12 +25,27 @@ protected:
 	/************************************************************************/
 	/*                                内部调用                                      */
 	/************************************************************************/
+	// 左键响应
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformAttack();
 
-	// 战技
+	// 左Ctrl响应
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformCombatSkill();
+
+	// 白盒初始化
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void Initialize();
+
+public:
+	/************************************************************************/
+	/*                                外部调用                                      */
+	/************************************************************************/
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PlayBackStabbedMontage();
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PlayExecutionedMontage();
 
 protected:
 	/************************************************************************/
@@ -50,4 +65,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UCombatComponent* CombatComponent;
 
+	// 动画资源-待处决
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+		UAnimMontage* ExecutionedMontage;
+
+	// 动画资源-被被刺
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+		UAnimMontage* BackStabbedMontage;
 };

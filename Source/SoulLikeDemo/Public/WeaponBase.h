@@ -166,6 +166,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* CombatSkillMontage;
 
+	// 动画资源-处决
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+		UAnimMontage* ExecutionMontage;
+
+	// 动画资源-被刺
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+		UAnimMontage* BackStabbMontage;
+
 	// 动画状态通知引用
 	UPROPERTY(VisibleAnywhere, Category = "Animation")
 		USoulLike_JumpSection_NS* AttackSection_NS;

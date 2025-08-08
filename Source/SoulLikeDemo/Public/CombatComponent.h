@@ -73,7 +73,7 @@ public:
 
 	// 弹反行为应用(内部判定是否有效及后续行为)
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-		void HandleParry();
+		void HandleParry(ASoulLikeCharacter* enmy);
 
 protected:
 

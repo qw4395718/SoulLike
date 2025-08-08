@@ -198,13 +198,22 @@ void UCombatComponent::HandleDamage(const FDamageEventData& DamageEvent)
 	}
 }
 
-void UCombatComponent::HandleParry()
+void UCombatComponent::HandleParry(ASoulLikeCharacter* enmy)
 {
 	//检查当前武器是否处于弹反窗口
 	if (RH_EquippedWeapon && RH_EquippedWeapon->IsParryWindowActive())
 	{	
 		// 被弹反成功,角色中断所有蒙太奇进入到待处决模式
 		UE_LOG(LogTemp, Display, TEXT("Player Parryed"));
+
+		// 省去其他步骤直接进入处决状态测试流程
+		if (enmy && CharacterOwner)
+		{
+			enmy->CombatComponent->RH_EquippedWeapon->PerformExecute();
+			CharacterOwner->PlayExecutionedMontage();
+		}
+		
+
 	}
 }
 

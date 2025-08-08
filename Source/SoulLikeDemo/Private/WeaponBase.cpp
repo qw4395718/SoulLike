@@ -75,25 +75,44 @@ void AWeaponBase::Initialize()
 	}
 
 	// 加载武器动画资源
-	UAnimMontage* SwordMontage = LoadObject<UAnimMontage>(
+	UAnimMontage* Montage = LoadObject<UAnimMontage>(
 		nullptr,
 		TEXT("/Game/SoulLikeDemo/Anim/AM_Attack_Sword.AM_Attack_Sword")
 		);
-	if (SwordMontage)
+	if (Montage)
 	{
-		AttackMontage = SwordMontage;
+		AttackMontage = Montage;
 	}
 
 	// 临时测试添加盾牌战技动画
-	UAnimMontage* SheildMontage = LoadObject<UAnimMontage>(
+	Montage = LoadObject<UAnimMontage>(
 		nullptr,
 		TEXT("/Game/SoulLikeDemo/Anim/AM_CombatSkill_Sheild.AM_CombatSkill_Sheild")
 		);
-	if (SheildMontage)
+	if (Montage)
 	{
-		CombatSkillMontage = SheildMontage;
+		CombatSkillMontage = Montage;
 	}
 
+	// 临时测试添加背刺动画
+	Montage = LoadObject<UAnimMontage>(
+		nullptr,
+		TEXT("/Game/SoulLikeDemo/Anim/AM_BackStab_Sword.AM_BackStab_Sword")
+		);
+	if (Montage)
+	{
+		BackStabbMontage = Montage;
+	}
+
+	// 临时测试添加处决动画
+	Montage = LoadObject<UAnimMontage>(
+		nullptr,
+		TEXT("/Game/SoulLikeDemo/Anim/AM_Execute_Sword.AM_Execute_Sword")
+		);
+	if (Montage)
+	{
+		ExecutionMontage = Montage;
+	}
 }
 
 FDamageData AWeaponBase::GetDamageData_Implementation() const
@@ -135,12 +154,22 @@ void AWeaponBase::PerformCombatSkill()
 
 void AWeaponBase::PerformBackstab()
 {
-	
+	// 直接播放蒙太奇动画，后续补充状态判断
+	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_Play(BackStabbMontage);
+	}
 }
 
 void AWeaponBase::PerformExecute()
 {
-
+	// 直接播放蒙太奇动画，后续补充状态判断
+	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_Play(ExecutionMontage);
+	}
 }
 
 void AWeaponBase::PlayAttackMontage(FName MontageSectionName)
@@ -359,7 +388,7 @@ void AWeaponBase::ApplyParryToOverlappingActors()
 			ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Actor);
 			if (Enemy && OwningCharacter != Enemy && !AlreadyParryActors.Contains(Enemy))
 			{
-				Enemy->CombatComponent->HandleParry();
+				Enemy->CombatComponent->HandleParry(OwningCharacter);
 				AlreadyParryActors.Add(Enemy);
 			}
 		}

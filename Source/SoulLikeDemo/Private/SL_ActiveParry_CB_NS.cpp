@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SoulLike_ActiveParry_CB_NS.h"
+#include "SL_ActiveParry_CB_NS.h"
 #include "SoulLikeCharacter.h"
 #include "CombatComponent.h"
 #include "WeaponBase.h"
 
-void USoulLike_ActiveParry_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
+void USL_ActiveParry_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{
@@ -23,7 +23,7 @@ void USoulLike_ActiveParry_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, 
 	}
 }
 
-void USoulLike_ActiveParry_CB_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
+void USL_ActiveParry_CB_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{

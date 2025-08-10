@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "SoulLike_JumpSection_NS.generated.h"
+#include "SL_BackStabbing_CA_NS.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API USoulLike_JumpSection_NS : public UAnimNotifyState
+class SOULLIKEDEMO_API USL_BackStabbing_CA_NS : public UAnimNotifyState
 {
 	GENERATED_BODY()
 
@@ -19,12 +19,4 @@ public:
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 
-public:
-
-	UPROPERTY(EditAnywhere)
-	FName JumpSectionName;
-	UPROPERTY(EditAnywhere)
-	bool bIsLHActive;
-	UPROPERTY(EditAnywhere)
-	bool bIsRHActive;
 };

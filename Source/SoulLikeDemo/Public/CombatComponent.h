@@ -73,22 +73,57 @@ public:
 
 	// 弹反行为应用(内部判定是否有效及后续行为)
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-		void HandleParry(ASoulLikeCharacter* enmy);
+		void HandleParry();
+
+	// 当前体力是否可以执行动作
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		bool CanAction();
+
+	// 消耗体力
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void ChangeAP(float CostNum);
+
+	// 开启体力恢复
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void ReviveAP();
 
 protected:
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-		void SetupPlayerInput(UInputComponent* PlayerInputComponent);
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-		void StartAttack();
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-		void StartCombatSkill();
 
 	// 抗性数据（C++计算）
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 		TMap<EDamageType, float> DamageResistances;
+
+	// 角色属性-HP
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
+		float HealthPoint;
+
+	// 角色属性-AP
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
+		float ActionPoint;
+
+	// 角色属性-HP
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
+		float HealthPointMaxValue;
+
+	// 角色属性-AP
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
+		float ActionPointMaxValue;
+
+	// 体力恢复定时器handle
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
+		FTimerHandle ReviveActionPointHandle;
+
+	// 体力恢复定时器间隔
+	UPROPERTY()
+		float TriggerReviveAPTimerInterval = 0.1f;
+
+	// 体力恢复定时器开启间隔
+	UPROPERTY()
+	float EnableReviveAPTimerInterval = 1.0f;
+
+	// 单次触发恢复量
+	UPROPERTY()
+		float APReviveValue = 1.0f;
 
 protected:
 	//伤害事件分发器
@@ -112,12 +147,4 @@ public:
 	UPROPERTY()
 		ASoulLikeCharacter* CharacterOwner;
 
-	// 角色属性-HP
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
-		float HealthPoint;
-
-	// 角色属性-AP
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
-		float ActionPoint;
-		
 };

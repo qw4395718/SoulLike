@@ -4,6 +4,7 @@
 #include "SoulLikeCharacter.h"
 #include "CombatComponent.h"
 #include "WeaponBase.h"
+#include <GameFramework/CharacterMovementComponent.h>
 
 // Sets default values
 ASoulLikeCharacter::ASoulLikeCharacter()
@@ -13,6 +14,11 @@ ASoulLikeCharacter::ASoulLikeCharacter()
 	
 	// 初始化组件
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	// 初始化变量
+	bIsReadyForExecution = false;
+	bIsExecuting = false;
+	bIsBackStabbing = false;
+	bIsAlive = true;
 	// 白盒初始化
 	Initialize();
 	
@@ -20,12 +26,24 @@ ASoulLikeCharacter::ASoulLikeCharacter()
 
 void ASoulLikeCharacter::PerformAttack()
 {
-	CombatComponent->PerformAttack();
+	if (bIsReadyForExecution == false &&
+		bIsExecuting == false &&
+		bIsBackStabbing == false &&
+		bIsAlive == true)
+	{
+		CombatComponent->PerformAttack();
+	}
 }
 
 void ASoulLikeCharacter::PerformCombatSkill()
 {
-	CombatComponent->PerformCombatSkill();
+	if (bIsReadyForExecution == false &&
+		bIsExecuting == false &&
+		bIsBackStabbing == false &&
+		bIsAlive == true)
+	{
+		CombatComponent->PerformCombatSkill();
+	}
 }
 
 // Called when the game starts or when spawned
@@ -89,12 +107,55 @@ void ASoulLikeCharacter::PlayBackStabbedMontage()
 	}
 }
 
-void ASoulLikeCharacter::PlayExecutionedMontage()
+void ASoulLikeCharacter::PlayExecutionedMontage(FName MontageSectionName)
 {
 	// 直接播放蒙太奇动画，后续补充状态判断
 	UAnimInstance* AnimInstance = this->GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
-		AnimInstance->Montage_Play(ExecutionedMontage);
+		if (AnimInstance->Montage_IsActive(ExecutionedMontage) &&
+			MontageSectionName != FName(""))
+		{
+			AnimInstance->Montage_JumpToSection(MontageSectionName);
+		}
+		else 
+		{
+			AnimInstance->Montage_Play(ExecutionedMontage);
+		}
+		
 	}
 }
+
+void ASoulLikeCharacter::PerformExecuted(FName MontageSectionName)
+{
+	PlayExecutionedMontage(MontageSectionName);
+}
+
+void ASoulLikeCharacter::PerformBackStabbed()
+{
+	PlayBackStabbedMontage();
+}
+
+void ASoulLikeCharacter::SetWaitExecutionState(bool IsWaitExecution)
+{
+	bIsReadyForExecution = IsWaitExecution;
+}
+void ASoulLikeCharacter::SetExecutingState(bool IsExecuting)
+{
+	bIsExecuting = IsExecuting;
+}
+
+void ASoulLikeCharacter::SetBackStabbingState(bool IsBackStabbing)
+{
+	bIsBackStabbing = IsBackStabbing;
+}
+
+
+void ASoulLikeCharacter::MoveToLocationAndRotation(FVector LocationPosition,FRotator Rotaion)
+{
+	this->GetCharacterMovement()->SetMovementMode(MOVE_None);
+	this->SetActorLocationAndRotation(LocationPosition, Rotaion, false, nullptr, ETeleportType::TeleportPhysics);
+	// 恢复移动（如果是）
+	this->GetCharacterMovement()->SetMovementMode(MOVE_Walking); // 恢复行走模式
+}
+

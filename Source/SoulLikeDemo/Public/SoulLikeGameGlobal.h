@@ -19,3 +19,14 @@ enum class EAttackType :uint8
 };
 
 
+// 角色配置-背刺距离限制
+const INT BackstabDistanceThreshold = 150;
+
+// 角色配置-背刺角度限制
+const INT BackstabAngleThreshold = 30;
+
+// 角色配置-处决距离限制
+const INT ExecuteDistanceThreshold = 150;
+
+// 特殊攻击(背刺,处决)检测半径
+const INT DetectionRadius = 150;

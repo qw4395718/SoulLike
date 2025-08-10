@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "SoulLike_ActiveParry_CB_NS.generated.h"
+#include "SL_ActiveParry_CB_NS.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API USoulLike_ActiveParry_CB_NS : public UAnimNotifyState
+class SOULLIKEDEMO_API USL_ActiveParry_CB_NS : public UAnimNotifyState
 {
 	GENERATED_BODY()
 public:

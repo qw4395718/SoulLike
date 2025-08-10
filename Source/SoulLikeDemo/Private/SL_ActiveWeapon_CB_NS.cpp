@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SoulLike_JumpSection_NS.h"
+#include "SL_ActiveWeapon_CB_NS.h"
 #include "SoulLikeCharacter.h"
 #include "CombatComponent.h"
 #include "WeaponBase.h"
 
-void USoulLike_JumpSection_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
+void USL_ActiveWeapon_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{
@@ -14,18 +14,16 @@ void USoulLike_JumpSection_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAn
 		ASoulLikeCharacter* Character = Cast<ASoulLikeCharacter>(MeshComp->GetOwner());
 		if (Character && Character->CombatComponent && Character->CombatComponent->LH_EquippedWeapon && bIsLHActive)
 		{
-			Character->CombatComponent->LH_EquippedWeapon->SetComboContinueState(true);
-			Character->CombatComponent->LH_EquippedWeapon->SetJumpSection_NS(this);
+			Character->CombatComponent->LH_EquippedWeapon->EnableAttackCollisonCheck();
 		}
 		if (Character && Character->CombatComponent && Character->CombatComponent->RH_EquippedWeapon && bIsRHActive)
 		{
-			Character->CombatComponent->RH_EquippedWeapon->SetComboContinueState(true);
-			Character->CombatComponent->RH_EquippedWeapon->SetJumpSection_NS(this);
+			Character->CombatComponent->RH_EquippedWeapon->EnableAttackCollisonCheck();
 		}
 	}
 }
 
-void USoulLike_JumpSection_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
+void USL_ActiveWeapon_CB_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{
@@ -33,11 +31,11 @@ void USoulLike_JumpSection_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnim
 		ASoulLikeCharacter* Character = Cast<ASoulLikeCharacter>(MeshComp->GetOwner());
 		if (Character && Character->CombatComponent && Character->CombatComponent->LH_EquippedWeapon && bIsLHActive)
 		{
-			Character->CombatComponent->LH_EquippedWeapon->SetComboContinueState(false);
+			Character->CombatComponent->LH_EquippedWeapon->DisableAttackCollisonCheck();
 		}
 		if (Character && Character->CombatComponent && Character->CombatComponent->RH_EquippedWeapon && bIsRHActive)
 		{
-			Character->CombatComponent->RH_EquippedWeapon->SetComboContinueState(false);
+			Character->CombatComponent->RH_EquippedWeapon->DisableAttackCollisonCheck();
 		}
 	}
 }

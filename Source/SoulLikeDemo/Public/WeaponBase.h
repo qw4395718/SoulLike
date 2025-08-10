@@ -7,7 +7,7 @@
 #include "SoulLikeGameGlobal.h"
 #include "SoulLikeCharacter.h"
 #include "Components/BoxComponent.h"
-#include "SoulLike_JumpSection_NS.h"
+#include "SL_Attack_JumpSection_NS.h"
 #include "WeaponBase.generated.h"
 
 /**
@@ -89,7 +89,7 @@ public:
 
 	void SetComboContinueState(bool Enable);
 
-	void SetJumpSection_NS(USoulLike_JumpSection_NS* NS);
+	void SetJumpSection_NS(USL_Attack_JumpSection_NS* NS);
 
 protected:
 	// 武器动作接口
@@ -176,7 +176,7 @@ public:
 
 	// 动画状态通知引用
 	UPROPERTY(VisibleAnywhere, Category = "Animation")
-		USoulLike_JumpSection_NS* AttackSection_NS;
+		USL_Attack_JumpSection_NS* AttackSection_NS;
 
 	// 是否可以连击
 	UPROPERTY(VisibleAnywhere, Category = "Animation")
@@ -222,4 +222,8 @@ protected:
 	// 定时器间隔
 	UPROPERTY()
 		float ParryInterval = 0.1f;
+
+	// AP消耗参数
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WeaponSettings")
+		TMap<EAttackType,float> APCostMap;
 };

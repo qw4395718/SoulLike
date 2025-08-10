@@ -63,6 +63,11 @@ void AWeaponBase::Initialize()
 	WeaponData.WeaponCollisonBoxHeight = 5.0f;
 	EnableComboContinue = false;
 	bIsParryWindowActive = false;
+	APCostMap.Reset();
+	APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_1,-20.0f});
+	APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_2, -20.0f});
+	APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_3, -20.0f});
+	APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Skill_Combo_Phase_1, -40.0f});
 
 	// 资源初始化
 	USkeletalMesh* Mesh = LoadObject<USkeletalMesh>(
@@ -215,7 +220,7 @@ void AWeaponBase::OnWeaponHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
 
 float AWeaponBase::GetStaminaCost(EAttackType AttackType)
 {
-	return 0.0f;
+	return (*APCostMap.Find(AttackType));
 }
 
 void AWeaponBase::EnableAttackCollisonCheck()
@@ -388,7 +393,7 @@ void AWeaponBase::ApplyParryToOverlappingActors()
 			ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Actor);
 			if (Enemy && OwningCharacter != Enemy && !AlreadyParryActors.Contains(Enemy))
 			{
-				Enemy->CombatComponent->HandleParry(OwningCharacter);
+				Enemy->CombatComponent->HandleParry();
 				AlreadyParryActors.Add(Enemy);
 			}
 		}
@@ -400,7 +405,7 @@ void AWeaponBase::SetComboContinueState(bool Enable)
 	EnableComboContinue = Enable;
 }
 
-void AWeaponBase::SetJumpSection_NS(USoulLike_JumpSection_NS* NS)
+void AWeaponBase::SetJumpSection_NS(USL_Attack_JumpSection_NS* NS)
 {
 	if(NS != nullptr)
 		AttackSection_NS = NS;

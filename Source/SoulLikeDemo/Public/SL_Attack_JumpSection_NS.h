@@ -1,0 +1,30 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Animation/AnimNotifies/AnimNotifyState.h"
+#include "SL_Attack_JumpSection_NS.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class SOULLIKEDEMO_API USL_Attack_JumpSection_NS : public UAnimNotifyState
+{
+	GENERATED_BODY()
+
+public:
+
+	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
+	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+
+public:
+
+	UPROPERTY(EditAnywhere)
+	FName JumpSectionName;
+	UPROPERTY(EditAnywhere)
+	bool bIsLHActive;
+	UPROPERTY(EditAnywhere)
+	bool bIsRHActive;
+};

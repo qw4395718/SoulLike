@@ -24,7 +24,7 @@ UWeaponParryComponent::UWeaponParryComponent()
 	/*                              变量初始化                                        */
 	/************************************************************************/
 	OnwerWeapon = nullptr;
-	OnwerCharacter = nullptr;
+	OnwerActor = nullptr;
 	ParrtInterval = 0.1f;
 	ParryTimerHandle.Invalidate();
 	CollsionOverlappingActors.Reset();
@@ -33,10 +33,10 @@ UWeaponParryComponent::UWeaponParryComponent()
 
 void UWeaponParryComponent::InitalizeWeaponComponent(AActor* Onwer, FVector CBSize)
 {
-	if (Onwer != nullptr && Cast<ACharacter>(Onwer->GetOwner()))
+	if (Onwer != nullptr && Onwer->GetOwner() != nullptr)
 	{
 		OnwerWeapon = Onwer;
-		OnwerCharacter = Cast<ACharacter>(Onwer->GetOwner());
+		OnwerActor = Onwer->GetOwner();
 	}
 	else
 	{
@@ -82,7 +82,7 @@ void UWeaponParryComponent::DisableCollisionBoxCheck()
 
 void UWeaponParryComponent::OnCollisionOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OnwerCharacter && OtherActor != OnwerCharacter)
+	if (OtherActor && OnwerActor && OtherActor != OnwerActor)
 	{
 		CollsionOverlappingActors.AddUnique(OtherActor);
 	}
@@ -102,7 +102,7 @@ void UWeaponParryComponent::ApplyParryToOverlappingActors()
 	{
 		if (Actor)
 		{
-			if (Actor && OnwerWeapon && OnwerWeapon->GetOwner() != Actor && !AlreadyParryActors.Contains(Actor))
+			if (Actor && OnwerWeapon && OnwerActor != Actor && !AlreadyParryActors.Contains(Actor))
 			{
 				// 调用武器类的弹反结算逻辑
 

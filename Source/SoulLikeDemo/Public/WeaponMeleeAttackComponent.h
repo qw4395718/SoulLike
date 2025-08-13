@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "WeaponBase.h"
+#include "Components/BoxComponent.h"
 #include "WeaponMeleeAttackComponent.generated.h"
 
 class AWeaponBase;
@@ -70,7 +70,7 @@ protected:
 
 	// 持有者(角色类)引用
 	UPROPERTY()
-		ACharacter* OnwerCharacter;
+		AActor* OnwerActor;
 
 	// 碰撞盒尺寸
 	UPROPERTY()

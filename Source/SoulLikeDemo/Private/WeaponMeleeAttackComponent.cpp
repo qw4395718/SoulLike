@@ -24,6 +24,7 @@ UWeaponMeleeAttackComponent::UWeaponMeleeAttackComponent()
 	/*                              变量初始化                                        */
 	/************************************************************************/
 	OnwerWeapon = nullptr;
+	OnwerActor = nullptr;
 	DamageInterval = 0.1f;
 	bActiveParryWindow = false;
 	DamageTimerHandle.Invalidate();
@@ -34,10 +35,10 @@ UWeaponMeleeAttackComponent::UWeaponMeleeAttackComponent()
 
 void UWeaponMeleeAttackComponent::InitalizeWeaponComponent(AActor* Onwer, FVector CBSize)
 {
-	if (Onwer != nullptr && Cast<ACharacter>(Onwer->GetOwner()))
+	if (Onwer != nullptr && Onwer->GetOwner() != nullptr)
 	{
 		OnwerWeapon = Onwer;
-		OnwerCharacter = Cast<ACharacter>(Onwer->GetOwner());
+		OnwerActor = Onwer->GetOwner();
 	}
 	else
 	{
@@ -83,7 +84,7 @@ void UWeaponMeleeAttackComponent::DisableCollisionBoxCheck()
 
 void UWeaponMeleeAttackComponent::OnAttackOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OnwerCharacter && OtherActor != OnwerCharacter)
+	if (OtherActor && OnwerActor && OtherActor != OnwerActor)
 	{
 		AttackOverlappingActors.AddUnique(OtherActor);
 	}
@@ -103,7 +104,7 @@ void UWeaponMeleeAttackComponent::ApplyDamageToOverlappingActors()
 	{
 		if (Actor)
 		{
-			if (Actor && OnwerWeapon && OnwerWeapon->GetOwner() != Actor && !AlreadyHitActors.Contains(Actor))
+			if (Actor && OnwerActor && OnwerActor != Actor && !AlreadyHitActors.Contains(Actor))
 			{
 				// 调用武器类的伤害结算逻辑
 

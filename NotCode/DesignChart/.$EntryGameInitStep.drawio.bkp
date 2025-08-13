@@ -1,0 +1,71 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.0.4 Chrome/138.0.7204.97 Electron/37.2.1 Safari/537.36" version="28.0.4">
+  <diagram name="第 1 页" id="tlT7YEgfhs-j2RICOq1v">
+    <mxGraphModel dx="1678" dy="989" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="W7--wRuqDqQN01JG7rrJ-6" target="W7--wRuqDqQN01JG7rrJ-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-12" value="无初始数据" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="W7--wRuqDqQN01JG7rrJ-9">
+          <mxGeometry x="-0.51" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="W7--wRuqDqQN01JG7rrJ-6" target="W7--wRuqDqQN01JG7rrJ-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-13" value="有初始数据" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="W7--wRuqDqQN01JG7rrJ-11">
+          <mxGeometry x="-0.4" y="-4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="W7--wRuqDqQN01JG7rrJ-8" target="W7--wRuqDqQN01JG7rrJ-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-8" value="创建新角色数据" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="180" y="370" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="W7--wRuqDqQN01JG7rrJ-10" target="W7--wRuqDqQN01JG7rrJ-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-10" value="加载存档数据/请求服务器数据" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="490" y="370" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="W7--wRuqDqQN01JG7rrJ-15" target="W7--wRuqDqQN01JG7rrJ-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-15" value="加载地图场景资源" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="340" y="480" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-22" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="W7--wRuqDqQN01JG7rrJ-18" target="W7--wRuqDqQN01JG7rrJ-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-18" value="根据已有角色数据,生成角色以及其相关组件&lt;div&gt;根据配置信息从配置表中获取更为详细的初始化信息进行初始化&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(102, 255, 102);&quot;&gt;eg:存档中仅提供了武器ID和武器所在Slot,其余类似武器模型，武器特效，武器动画这类信息，均在配置表中。当角色初始化或者装备变更时，读取配置信息，完成资源加载和初始化。&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;rounded=0;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="280" y="570" width="240" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-21" value="玩家操作角色" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="340" y="730" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-23" value="进入游戏初始化流程" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="65" y="10" width="670" height="820" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="W7--wRuqDqQN01JG7rrJ-23" source="W7--wRuqDqQN01JG7rrJ-1" target="W7--wRuqDqQN01JG7rrJ-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-1" value="进入游戏" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="W7--wRuqDqQN01JG7rrJ-23">
+          <mxGeometry x="275" y="50" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-2" value="检测是否有存档/服务器是否有数据" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="W7--wRuqDqQN01JG7rrJ-23">
+          <mxGeometry x="275" y="130" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-6" value="有无初始数据" style="rhombus;whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="W7--wRuqDqQN01JG7rrJ-23">
+          <mxGeometry x="275" y="210" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="W7--wRuqDqQN01JG7rrJ-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="W7--wRuqDqQN01JG7rrJ-23" source="W7--wRuqDqQN01JG7rrJ-2" target="W7--wRuqDqQN01JG7rrJ-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

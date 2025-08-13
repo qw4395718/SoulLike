@@ -5,18 +5,18 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "WeaponBase.h"
-#include "WeaponMeleeAttackComponent.generated.h"
+#include "WeaponParryComponent.generated.h"
 
 class AWeaponBase;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SOULLIKEDEMO_API UWeaponMeleeAttackComponent : public USceneComponent
+class SOULLIKEDEMO_API UWeaponParryComponent : public USceneComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UWeaponMeleeAttackComponent();
+	UWeaponParryComponent();
 
 	/************************************************************************/
 	/*外部调用                                                                     */
@@ -30,33 +30,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WeaponComponent")
 		void DisableCollisionBoxCheck();
 
-	UFUNCTION(BlueprintCallable, Category = "WeaponComponent")
-		void EnableParryWindowCheck(float Duration);
-
-	UFUNCTION(BlueprintCallable, Category = "WeaponComponent")
-		void DisableParryWindowCheck();
-
-	UFUNCTION(BlueprintCallable, Category = "WeaponComponent")
-		bool IsActiveParryWindow();
-
 protected:
 	/************************************************************************/
 	/*内部调用                                                                     */
 	/************************************************************************/
-	// 攻击重叠开始
+	// 碰撞重叠开始
 	UFUNCTION()
-		void OnAttackOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		void OnCollisionOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 			bool bFromSweep, const FHitResult& SweepResult);
 
-	// 攻击重叠结束
+	// 碰撞重叠结束
 	UFUNCTION()
-		void OnAttackOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		void OnCollisionOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	// 处理攻击重叠actor
+	// 处理碰撞重叠actor
 	UFUNCTION()
-		void ApplyDamageToOverlappingActors();
+		void ApplyParryToOverlappingActors();
 
 
 protected:
@@ -77,31 +68,23 @@ protected:
 		FVector CollisionBoxSize;
 
 	// 碰撞盒-规则多边形
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY()
 		UBoxComponent* CollisonBox;
-
-	// 是否激活弹反窗口
-	UPROPERTY()
-		bool bActiveParryWindow;
-
-	// 伤害定时器handle
-	UPROPERTY()
-		FTimerHandle DamageTimerHandle;
 
 	// 弹反定时器handle
 	UPROPERTY()
-		FTimerHandle ParryWindowTimer;
+		FTimerHandle ParryTimerHandle;
 
 	// 定时器间隔
 	UPROPERTY()
-		float DamageInterval;
+		float ParrtInterval;
 
-	// 伤害碰撞命中actor数组
+	// 碰撞命中actor数组
 	UPROPERTY()
-		TArray<AActor*> AttackOverlappingActors;
+		TArray<AActor*> CollsionOverlappingActors;
 
-	// 已应用伤害actor集
+	// 已应用弹反actor集
 	UPROPERTY()
-		TSet<AActor*> AlreadyHitActors;
+		TSet<AActor*> AlreadyParryActors;
 
 };

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "SoulLikeGameGlobal.h"
+#include "WeaponDefinition.h"
 #include "SoulLikeCharacter.h"
 #include "Components/BoxComponent.h"
 #include "WeaponDefinition.h"
@@ -26,12 +27,24 @@ public:
 	/*外部调用                                                                     */
 	/************************************************************************/
 	// 初始化武器信息
-	UPROPERTY()
-		InitWeaponInfo(FWeaponDefinition* pWeaponInfo);
+	UFUNCTION()
+		void InitWeaponInfo(const FWeaponDefinition& WeaponInfo);
 	
 	// 更新武器状态
-	UPROPERTY()
-		UpdateWeaponEquipState(EWeaponEquipState CurrentState);
+	UFUNCTION()
+		void UpdateWeaponEquipState(EWeaponEquipState CurrentState);
+
+	// 鼠标左键响应
+	UFUNCTION()
+		void LeftMouseCallEvent();
+
+	// 鼠标右键响应
+	UFUNCTION()
+		void RightMouseCallEvent();
+
+	// Ctrl键响应
+	UFUNCTION()
+		void CtrlMouseCallEvent();
 
 
 protected:
@@ -44,6 +57,26 @@ protected:
 	/************************************************************************/
 	/*内部调用                                                                     */
 	/************************************************************************/
+	// 异步加载武器网格体
+	void LoadWeaponMeshAsync(FString WeaponMeshName);
+
+	// 当武器网格体加载完成时
+	void OnLoadedWeaponMesh();
+
+	// 异步加载武器动画蓝图
+	void LoadWeaponAnimInstanceAsync(FString WeapinAnimName);
+
+	// 当武器网格体加载完成时
+	void OnLoadedWeaponAnimInstance();
+
+	// 加载武器模组
+	bool LoadWeaponComponents(const TMap<EWeaponComponentType, bool>& pWeaponComponentInfo);
+
+	// 处决检测
+	bool CanExecute(AActor* MasterActor,float AllowedExecuteDistance, float AllowdBackStabRange);
+
+	// 背刺检测
+	bool CanBackStab(AActor* MasterActor,float AllowedBackStabDistance,float AllowdBackStabRange);
 
 
 protected:
@@ -59,7 +92,7 @@ protected:
 		uint32 WeaponID;
 
 	// 异步加载骨骼网格体模型
-		TSoftObjectPtr<USkeletalMesh> Mesh;
+		TSoftObjectPtr<USkeletalMesh> SoftMeshReference;
 
 	// 武器骨骼网格体组件
 	UPROPERTY()
@@ -71,13 +104,13 @@ protected:
 
 	// 武器动画蓝图
 	UPROPERTY()
-		TSoftClassPtr<UAnimInstance> WeaponAnimInstance;
+		TSoftClassPtr<UAnimInstance> SoftWeaponAnimInstanceReference;
 
 	// 武器模组(请注意武器模组与武器动画蓝图是直接关联的)
 	UPROPERTY()
 		TMap<EWeaponComponentType, USceneComponent*> WeaponComponentMap;
 
-	// 武器模组加载情况
+	// 武器模组实际加载情况
 	UPROPERTY()
 		TMap<EWeaponComponentType, bool> WeaponLoadComponentInfoMap;
 

@@ -23,6 +23,23 @@ enum class EAttackType :uint8
 	Special_BackStab
 };
 
+UENUM(BlueprintType)
+enum class EWeaponComponentType :uint8
+{
+	MeleeAttack,
+	Parry,
+	Execute,
+	BackStab
+};
+
+UENUM(BlueprintType)
+enum class EWeaponEquipState :uint8
+{
+	No_Equip,
+	LH_Equip,
+	RH_Equip
+};
+
 //USTRUCT(BlueprintType)
 //struct FWeaponDefinition {
 //

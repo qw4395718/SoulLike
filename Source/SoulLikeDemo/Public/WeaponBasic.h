@@ -7,7 +7,7 @@
 #include "SoulLikeGameGlobal.h"
 #include "SoulLikeCharacter.h"
 #include "Components/BoxComponent.h"
-#include "SL_Attack_JumpSection_NS.h"
+#include "WeaponDefinition.h"
 #include "WeaponBasic.generated.h"
 
 /**
@@ -25,6 +25,13 @@ public:
 	/************************************************************************/
 	/*外部调用                                                                     */
 	/************************************************************************/
+	// 初始化武器信息
+	UPROPERTY()
+		InitWeaponInfo(FWeaponDefinition* pWeaponInfo);
+	
+	// 更新武器状态
+	UPROPERTY()
+		UpdateWeaponEquipState(EWeaponEquipState CurrentState);
 
 
 protected:
@@ -45,20 +52,36 @@ protected:
 	/************************************************************************/
 	// 拥有者
 	UPROPERTY()
-	AActor* OwnerActor;
+		AActor* OwnerActor;
 
 	// 武器ID
 	UPROPERTY()
-	uint32 WeaponID;
+		uint32 WeaponID;
 
-	// 武器骨骼网格体
+	// 异步加载骨骼网格体模型
+		TSoftObjectPtr<USkeletalMesh> Mesh;
+
+	// 武器骨骼网格体组件
 	UPROPERTY()
-	USkeletalMeshComponent* SkeletalWeaponMesh;
+		USkeletalMeshComponent* SkeletalWeaponMesh;
 
 	// 碰撞盒子尺寸
 	UPROPERTY()
 		FVector CollisionBoxSize;
 
 	// 武器动画蓝图
+	UPROPERTY()
+		TSoftClassPtr<UAnimInstance> WeaponAnimInstance;
 
+	// 武器模组(请注意武器模组与武器动画蓝图是直接关联的)
+	UPROPERTY()
+		TMap<EWeaponComponentType, USceneComponent*> WeaponComponentMap;
+
+	// 武器模组加载情况
+	UPROPERTY()
+		TMap<EWeaponComponentType, bool> WeaponLoadComponentInfoMap;
+
+	// 武器装备槽位情况
+	UPROPERTY()
+		EWeaponEquipState WeaponEquipInfo;
 };

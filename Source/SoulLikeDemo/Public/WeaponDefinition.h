@@ -9,12 +9,10 @@ struct FWeaponDefinition
 
 	// 唯一标识
 	int32 WeaponID;
-	// 异步加载模型
-	TSoftObjectPtr<USkeletalMesh> Mesh;
-	// 动画蓝图
-	TSoftClassPtr<UAnimInstance> AnimClass;
-	// 动态组件
-	TArray<TSubclassOf<UActorComponent>> Components;
+	// 模型名
+	FName Mesh;
+	// 动画蓝图名
+	FName AnimClass;
 	// 各段攻击的伤害
 	TMap<EAttackType, float> BaseDamageMap;
 	// 各段攻击消耗的体力
@@ -43,6 +41,15 @@ struct FWeaponDefinition
 	/************************************************************************/
 	// 技能模组
 	bool bNeedLoadSkillComponent;
+
+	/************************************************************************/
+	/*                        特殊模组(可装载多个)                    */
+	/************************************************************************/
+	// 处决模组
+	bool bNeedLoadExecuteComponent;
+
+	// 处决模组
+	bool bNeedLoadBackStabComponent;
 
 	// ...其他通用参数
 };

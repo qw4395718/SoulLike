@@ -5,6 +5,8 @@
 #include "CombatComponent.h"
 #include "WeaponBase.h"
 #include <GameFramework/CharacterMovementComponent.h>
+#include <Engine/DataTable.h>
+#include "Table/WeaponTableInfo.h"
 
 // Sets default values
 ASoulLikeCharacter::ASoulLikeCharacter()
@@ -21,7 +23,8 @@ ASoulLikeCharacter::ASoulLikeCharacter()
 	bIsAlive = true;
 	// °×ºÐ³õÊ¼»¯
 	Initialize();
-	
+	//FString WeaponTablePath = TEXT("/Game/Data/Table/SL_Weapon_Info.SL_Weapon_Info");
+	//ReadTableTest(WeaponTablePath);
 }
 
 void ASoulLikeCharacter::PerformAttack()
@@ -123,6 +126,21 @@ void ASoulLikeCharacter::PlayExecutionedMontage(FName MontageSectionName)
 			AnimInstance->Montage_Play(ExecutionedMontage);
 		}
 		
+	}
+}
+
+void ASoulLikeCharacter::ReadTableTest(const FString TablePath)
+{
+	// 
+	UDataTable* MyDataTable = LoadObject<UDataTable>(nullptr, *TablePath);
+
+	if (MyDataTable)
+	{
+		for (FName RowName : MyDataTable->GetRowNames())
+		{
+			FWeaponTableInfo* RowData = MyDataTable->FindRow<FWeaponTableInfo>(RowName, TEXT("WeaponID"));
+			UE_LOG(LogTemp, Display, TEXT("%d"), RowData->WeaponID);
+		}
 	}
 }
 

@@ -51,20 +51,21 @@ protected:
 	/************************************************************************/
 	/*                               继承实现                                       */
 	/************************************************************************/
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	/************************************************************************/
 	/*内部调用                                                                     */
 	/************************************************************************/
 	// 异步加载武器网格体
-	void LoadWeaponMeshAsync(FString WeaponMeshName);
+	void LoadWeaponMeshAsync(const FString WeaponMeshName);
 
 	// 当武器网格体加载完成时
 	void OnLoadedWeaponMesh();
 
+	// 异步加载武器蒙太奇动画(供给角色类使用)
+	void LoadWeaponMentageAsync(const FString MentagePath);
+
 	// 异步加载武器动画蓝图
-	void LoadWeaponAnimInstanceAsync(FString WeapinAnimName);
+	void LoadWeaponAnimInstanceAsync(const FString WeapinAnimName);
 
 	// 当武器网格体加载完成时
 	void OnLoadedWeaponAnimInstance();
@@ -102,9 +103,13 @@ protected:
 	UPROPERTY()
 		FVector CollisionBoxSize;
 
+	// 武器蒙太奇动画异步加载ptr
+	UPROPERTY()
+		TSoftClassPtr<UAnimMontage> SoftMentageRefrence;
+
 	// 武器动画蓝图
 	UPROPERTY()
-		TSoftClassPtr<UAnimInstance> SoftWeaponAnimInstanceReference;
+		TSoftClassPtr<UClass> SoftWeaponAnimInstanceReference;
 
 	// 武器模组(请注意武器模组与武器动画蓝图是直接关联的)
 	UPROPERTY()

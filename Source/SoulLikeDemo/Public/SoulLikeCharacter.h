@@ -43,6 +43,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PlayExecutionedMontage(FName MontageSectionName);
 
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void ReadTableTest(const FString TablePath);
+
 public:
 	/************************************************************************/
 	/*                                外部调用                                      */

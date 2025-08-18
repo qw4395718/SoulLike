@@ -6,7 +6,7 @@
 #include "WeaponBase.h"
 #include <GameFramework/CharacterMovementComponent.h>
 #include <Engine/DataTable.h>
-#include "Table/WeaponTableInfo.h"
+#include "WeaponTableInfo.h"
 
 // Sets default values
 ASoulLikeCharacter::ASoulLikeCharacter()

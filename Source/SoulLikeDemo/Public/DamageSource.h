@@ -1,0 +1,32 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "UObject/Interface.h"
+#include "DamageSource.generated.h"
+
+// This class does not need to be modified.
+UINTERFACE(MinimalAPI, Blueprintable)
+class UDamageSource : public UInterface
+{
+	GENERATED_BODY()
+};
+
+/**
+ * 
+ */
+class SOULLIKEDEMO_API IDamageSource
+{
+	GENERATED_BODY()
+
+	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
+public:
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		virtual float GetBaseDamage() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		virtual AActor* GetDamageInstigator() const;
+	
+};

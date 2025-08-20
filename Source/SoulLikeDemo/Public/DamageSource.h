@@ -7,7 +7,7 @@
 #include "DamageSource.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI, Blueprintable)
+UINTERFACE(MinimalAPI, BlueprintType, meta = (CannotImplementInterfaceInBlueprint))
 class UDamageSource : public UInterface
 {
 	GENERATED_BODY()
@@ -23,10 +23,10 @@ class SOULLIKEDEMO_API IDamageSource
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-		virtual float GetBaseDamage() const;
+	UFUNCTION(BlueprintCallable, Category = "DamageSource")
+		virtual float GetBaseDamage() = 0;
 
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-		virtual AActor* GetDamageInstigator() const;
+	UFUNCTION(BlueprintCallable, Category = "DamageSource")
+		virtual AActor* GetDamageInstigator() = 0;
 	
 };

@@ -1,6 +1,6 @@
 <map version="1.0.1">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
-<node CREATED="1752149864430" ID="ID_428405782" MODIFIED="1752149958147" TEXT="&#x4f53;&#x529b;&#x7cfb;&#x7edf;">
+<node CREATED="1752149864430" ID="ID_428405782" MODIFIED="1755706083038" TEXT="StaminaComponent">
 <node CREATED="1752149974155" ID="ID_486280336" MODIFIED="1752149982679" POSITION="right" TEXT="&#x89d2;&#x8272;&#x84dd;&#x56fe;">
 <node CREATED="1752149982681" ID="ID_535565947" MODIFIED="1752149988416" TEXT="&#x53d8;&#x91cf;">
 <node CREATED="1752150057738" ID="ID_946811578" MODIFIED="1752150340869" TEXT="&#x73a9;&#x5bb6;&#x5f53;&#x524d;&#x4f53;&#x529b;&#x503c;"/>
@@ -26,8 +26,7 @@
       -&gt;&#21463;&#21040;&#29305;&#27530;&#25915;&#20987;&#20307;&#21147;&#28165;&#31354;-&gt;&#36827;&#20837;&#34987;&#22788;&#20915;&#27169;&#24335;
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 <node CREATED="1752149989553" ID="ID_1219851441" MODIFIED="1752149993419" TEXT="&#x51fd;&#x6570;">

@@ -19,4 +19,46 @@ public:
 	// Sets default values for this component's properties
 	USL_HealthComponent();
 
+public:
+	/************************************************************************/
+	/*                                    外部调用                                  */
+	/************************************************************************/
+	UFUNCTION()
+	bool IsAlive();
+
+	UFUNCTION()
+	float GetCurrentHealthValue();
+
+	UFUNCTION()
+	float GetMaxHealthValue();
+
+	UFUNCTION()
+	void ReduceCurrentHealth(float ReduceValue);
+
+	UFUNCTION()
+	void ReviveCurrentHealth(float ReviveValue);
+
+protected:
+
+	/************************************************************************/
+	/*                                    内部调用                                  */
+	/************************************************************************/
+
+
+	UFUNCTION()
+	void OnHealthEqualZero();
+
+
+
+protected:
+	
+	UPROPERTY()
+	float CurrentHealthValue;
+
+	UPROPERTY()
+	float MaxHealthValue;
+
+	UPROPERTY()
+	bool bIsAlive;
+
 };

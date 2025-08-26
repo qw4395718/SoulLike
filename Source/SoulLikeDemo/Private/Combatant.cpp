@@ -10,12 +10,3 @@ void ICombatant::TakeDamage(float Damage, FDamageEvent const& DamageEvent, ACont
 	return;
 }
 
-float ICombatant::GetCurrentHealth()
-{
-	return 0.0f;
-}
-
-bool ICombatant::IsAlive()
-{
-	return false;
-}

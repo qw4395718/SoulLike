@@ -26,9 +26,4 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) =0;
 
-	UFUNCTION(BlueprintCallable)
-		virtual float GetCurrentHealth() = 0;
-
-	UFUNCTION(BlueprintCallable)
-		virtual bool IsAlive() = 0;
 };

@@ -155,28 +155,28 @@ bool UCombatComponent::CheckPerfectParry(float PlayerInputTime,float EnemyAttack
 void UCombatComponent::ProcessAttackHit(AActor* HitActor, const FHitResult& HitResult) {
 	if (!HitActor) return;
 
-	// 检查是否可伤害
-	if (IDamageable* Damageable = Cast<IDamageable>(HitActor)) {
-		if (Damageable->CanReceiveDamage()) {
-			// 创建伤害事件
-			FDamageEventData DamageEvent;
-			DamageEvent.BaseDamage = 10;
-			DamageEvent.HitLocation = HitResult.Location;
-			DamageEvent.bIsCriticalHit = false;
-			DamageEvent.DamageCauser = GetOwner();
+	//// 检查是否可伤害
+	//if (IDamageable* Damageable = Cast<IDamageable>(HitActor)) {
+	//	if (Damageable->CanReceiveDamage()) {
+	//		// 创建伤害事件
+	//		FDamageEventData DamageEvent;
+	//		DamageEvent.BaseDamage = 10;
+	//		DamageEvent.HitLocation = HitResult.Location;
+	//		DamageEvent.bIsCriticalHit = false;
+	//		DamageEvent.DamageCauser = GetOwner();
 
-			// 类魂特性：武器类型影响
-			/*if (CurrentWeapon) {
-				DamageEvent.AttackType = CurrentWeapon->GetAttackType();
-			}*/
+	//		// 类魂特性：武器类型影响
+	//		/*if (CurrentWeapon) {
+	//			DamageEvent.AttackType = CurrentWeapon->GetAttackType();
+	//		}*/
 
-			// 触发伤害事件
-			Damageable->ReceiveDamage(DamageEvent);
+	//		// 触发伤害事件
+	//		Damageable->ReceiveDamage(DamageEvent);
 
-			// 命中反馈
-			//PlayHitEffect(DamageEvent.HitLocation);
-		}
-	}
+	//		// 命中反馈
+	//		//PlayHitEffect(DamageEvent.HitLocation);
+	//	}
+	//}
 }
 
 void UCombatComponent::HandleDamage(const FDamageEventData& DamageEvent)
@@ -393,17 +393,4 @@ void UCombatComponent::InitWeaponInventory(TArray<AWeaponBase*> arrWeaponInvento
 void UCombatComponent::WeaponInventoryChange(int32 Weaponindex, AWeaponBase* NewWeapon)
 {
 
-}
-
-void UCombatComponent::ReceiveDamage_Implementation(const FDamageEventData& DamageEvent)
-{
-	if (CanReceiveDamage()) {
-		//广播给所有FOnDamageSignature
-		DamageDispatcher->BroadcastDamageEvent(DamageEvent);
-	}
-}
-
-bool UCombatComponent::CanReceiveDamage_Implementation() const
-{//判定当前状态能否受到伤害
-	return true;
 }

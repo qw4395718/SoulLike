@@ -5,14 +5,14 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "SoulLikeGameGlobal.h"
-#include "Damageable.h"
+#include "DamageEventDispatcher.h"
 #include "CombatComponent.generated.h"
 
 class AWeaponBase;
 class ASoulLikeCharacter;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SOULLIKEDEMO_API UCombatComponent : public UActorComponent, public IDamageable
+class SOULLIKEDEMO_API UCombatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -52,10 +52,7 @@ public:
 	// 执行战技
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponOperation")
 		void PerformCombatSkill();
-	// 实现IDamageable接口
-	// 外部通过调用接口来触发伤害事件,再由伤害事件分发器发送到各个执行函数处
-	virtual void ReceiveDamage_Implementation(const FDamageEventData& DamageEvent) override;
-	virtual bool CanReceiveDamage_Implementation() const override;
+
 
 	/************************************************************************/
 	/* 内部调用                                                                     */

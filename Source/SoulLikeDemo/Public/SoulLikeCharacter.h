@@ -6,7 +6,6 @@
 #include "GameFramework/Character.h"
 #include "SoulLikeGameGlobal.h"
 #include "DamageEventDispatcher.h"
-#include "Damageable.h"
 #include "SoulLikeCharacter.generated.h"
 
 class UCombatComponent;

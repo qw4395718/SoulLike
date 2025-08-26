@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "Combatant.generated.h"
+#include "CharacterInfo_IF.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, BlueprintType,meta = (CannotImplementInterfaceInBlueprint))
-class UCombatant : public UInterface
+class UCharacterInfo_IF : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,7 +16,7 @@ class UCombatant : public UInterface
 /**
  * 
  */
-class SOULLIKEDEMO_API ICombatant
+class SOULLIKEDEMO_API ICharacterInfo_IF
 {
 	GENERATED_BODY()
 
@@ -24,6 +24,9 @@ class SOULLIKEDEMO_API ICombatant
 public:
 	
 	UFUNCTION(BlueprintCallable)
-		virtual void TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) =0;
+		virtual bool IsWaitingExecute() = 0;
+
+	UFUNCTION(BlueprintCallable)
+		virtual bool IsKeepingDefence() = 0;
 
 };

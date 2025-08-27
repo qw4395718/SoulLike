@@ -24,41 +24,41 @@ public:
 	/*                                    外部调用                                  */
 	/************************************************************************/
 	UFUNCTION()
-	bool IsAlive();
+		void InitHealthInfo();
 
 	UFUNCTION()
-	float GetCurrentHealthValue();
+		bool IsAlive();
 
 	UFUNCTION()
-	float GetMaxHealthValue();
+		float GetCurrentHealthValue();
 
 	UFUNCTION()
-	void ReduceCurrentHealth(float ReduceValue);
+		float GetMaxHealthValue();
 
 	UFUNCTION()
-	void ReviveCurrentHealth(float ReviveValue);
+		void ReduceCurrentHealth(float ReduceValue);
+
+	UFUNCTION()
+		void ReviveCurrentHealth(float ReviveValue);
 
 protected:
 
 	/************************************************************************/
 	/*                                    内部调用                                  */
 	/************************************************************************/
-
-
 	UFUNCTION()
-	void OnHealthEqualZero();
-
+		void OnHealthEqualZero();
 
 
 protected:
 	
 	UPROPERTY()
-	float CurrentHealthValue;
+		float CurrentHealthValue;
 
 	UPROPERTY()
-	float MaxHealthValue;
+		float MaxHealthValue;
 
 	UPROPERTY()
-	bool bIsAlive;
+		bool bIsAlive;
 
 };

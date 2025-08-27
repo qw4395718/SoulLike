@@ -24,6 +24,9 @@ public:
 	/*                                    外部调用                                  */
 	/************************************************************************/
 	UFUNCTION()
+		void InitStaminaInfo();
+
+	UFUNCTION()
 		bool GetIsStaminaZero();
 
 	UFUNCTION()
@@ -44,7 +47,7 @@ protected:
 		void OnStaminaValueZero();
 
 	UFUNCTION()
-		void ReviveStaminaValue(float ReviveValue);
+		void ReviveStaminaValue();
 
 protected:
 	
@@ -57,8 +60,17 @@ protected:
 	UPROPERTY()
 		bool IsStaminaZero;
 
+	// 从损失精力->精力恢复的状态切换时间
 	UPROPERTY()
-		float StaminaReviveTimeBlock;
+		float StaminaReviveBlock;
+
+	// 从力竭状态->精力恢复的状态切换时间
+	UPROPERTY()
+		float StaminaZeroReviveBlock;
+
+	// 精力恢复定时器tick间隔
+	UPROPERTY()
+		float StaminaReviveTimerBlock;
 
 	UPROPERTY()
 		float StaminaReviveSingleValue;
@@ -66,6 +78,4 @@ protected:
 	UPROPERTY()
 		FTimerHandle StaminaReviveTimerHandle;
 
-	UPROPERTY()
-		FTimerHandle StaminaReviveEnableTimerHandle;
 };

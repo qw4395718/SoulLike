@@ -6,6 +6,16 @@
 USL_HealthComponent::USL_HealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+	// 默认初始化
+	CurrentHealthValue = 100.0f;
+	MaxHealthValue = 100.0f;
+
+}
+
+void USL_HealthComponent::InitHealthInfo()
+{
+	// 外部提供信息初始化
 }
 
 bool USL_HealthComponent::IsAlive()

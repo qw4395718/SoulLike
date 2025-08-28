@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "SoulLikeGameGlobal.h"
+#include "Stamina_IF.h"
 #include "SL_StaminaComponent.generated.h"
 
 class AWeaponBase;
 class ASoulLikeCharacter;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SOULLIKEDEMO_API USL_StaminaComponent : public UActorComponent
+class SOULLIKEDEMO_API USL_StaminaComponent : public UActorComponent ,public IStamina_IF
 {
 	GENERATED_BODY()
 
@@ -20,34 +21,44 @@ public:
 	USL_StaminaComponent();
 
 public:
+
+	/************************************************************************/
+	/*                                    接口实现                                  */
+	/************************************************************************/
+
+	UFUNCTION()
+		void ReduceStamina(float ReduceValue) override;
+
+	UFUNCTION()
+		void ReviveStamina(float ReviveValue) override;
+
+	UFUNCTION()
+		bool GetIsStaminaZero() override;
+
+	UFUNCTION()
+		float GetCurrentStaminaValue() override;
+
+	UFUNCTION()
+		float GetMaxStaminaValue() override;
+
 	/************************************************************************/
 	/*                                    外部调用                                  */
 	/************************************************************************/
+
 	UFUNCTION()
 		void InitStaminaInfo();
-
-	UFUNCTION()
-		bool GetIsStaminaZero();
-
-	UFUNCTION()
-		float GetCurrentStaminaValue();
-
-	UFUNCTION()
-		float GetMaxStaminaValue();
 
 protected:
 
 	/************************************************************************/
 	/*                                    内部调用                                  */
 	/************************************************************************/
-	UFUNCTION()
-		void ReduceStaminaValue(float ReduceValue);
 
 	UFUNCTION()
 		void OnStaminaValueZero();
 
 	UFUNCTION()
-		void ReviveStaminaValue();
+		void ReviveStaminaValueByTime();
 
 protected:
 	

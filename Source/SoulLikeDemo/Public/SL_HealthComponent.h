@@ -5,13 +5,12 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "SoulLikeGameGlobal.h"
+#include "Health_IF.h"
 #include "SL_HealthComponent.generated.h"
 
-class AWeaponBase;
-class ASoulLikeCharacter;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SOULLIKEDEMO_API USL_HealthComponent : public UActorComponent
+class SOULLIKEDEMO_API USL_HealthComponent : public UActorComponent ,public IHealth_IF
 {
 	GENERATED_BODY()
 
@@ -20,26 +19,32 @@ public:
 	USL_HealthComponent();
 
 public:
+
+	/************************************************************************/
+	/*                                    接口实现                                  */
+	/************************************************************************/
+	UFUNCTION()
+		bool IsAlive() override;
+
+	UFUNCTION()
+		float GetCurrentHealthValue() override;
+
+	UFUNCTION()
+		float GetMaxHealthValue() override;
+
+	UFUNCTION()
+		void ReduceCurrentHealth(float ReduceValue) override;
+
+	UFUNCTION()
+		void ReviveCurrentHealth(float ReviveValue) override;
+
 	/************************************************************************/
 	/*                                    外部调用                                  */
 	/************************************************************************/
 	UFUNCTION()
 		void InitHealthInfo();
 
-	UFUNCTION()
-		bool IsAlive();
 
-	UFUNCTION()
-		float GetCurrentHealthValue();
-
-	UFUNCTION()
-		float GetMaxHealthValue();
-
-	UFUNCTION()
-		void ReduceCurrentHealth(float ReduceValue);
-
-	UFUNCTION()
-		void ReviveCurrentHealth(float ReviveValue);
 
 protected:
 

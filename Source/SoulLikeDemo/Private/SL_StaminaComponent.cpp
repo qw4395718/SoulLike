@@ -40,7 +40,7 @@ float USL_StaminaComponent::GetMaxStaminaValue()
 	return MaxStaminaValue;
 }
 
-void USL_StaminaComponent::ReduceStaminaValue(float ReduceValue)
+void USL_StaminaComponent::ReduceStamina(float ReduceValue)
 {
 	if (CurrentStaminaValue - ReduceValue < 0)
 	{
@@ -63,7 +63,7 @@ void USL_StaminaComponent::ReduceStaminaValue(float ReduceValue)
 		GetWorld()->GetTimerManager().SetTimer(
 			StaminaReviveTimerHandle,
 			this,
-			&USL_StaminaComponent::ReviveStaminaValue,
+			&USL_StaminaComponent::ReviveStaminaValueByTime,
 			StaminaReviveTimerBlock,
 			true,
 			StaminaZeroReviveBlock);
@@ -74,7 +74,7 @@ void USL_StaminaComponent::ReduceStaminaValue(float ReduceValue)
 		GetWorld()->GetTimerManager().SetTimer(
 			StaminaReviveTimerHandle,
 			this,
-			&USL_StaminaComponent::ReviveStaminaValue,
+			&USL_StaminaComponent::ReviveStaminaValueByTime,
 			StaminaReviveTimerBlock,
 			true,
 			StaminaReviveBlock);
@@ -85,12 +85,27 @@ void USL_StaminaComponent::ReduceStaminaValue(float ReduceValue)
 
 }
 
+void USL_StaminaComponent::ReviveStamina(float ReviveValue)
+{
+	// 外界恢复
+	if (CurrentStaminaValue + ReviveValue > MaxStaminaValue)
+	{
+		CurrentStaminaValue = MaxStaminaValue;
+		// 清理体力随时间恢复的定时器
+		if (StaminaReviveTimerHandle.IsValid())
+		{
+			// 若已启动则关闭定时器
+			GetWorld()->GetTimerManager().ClearTimer(StaminaReviveTimerHandle);
+		}
+	}
+}
+
 void USL_StaminaComponent::OnStaminaValueZero()
 {
 	
 }
 
-void USL_StaminaComponent::ReviveStaminaValue()
+void USL_StaminaComponent::ReviveStaminaValueByTime()
 {
 	if (CurrentStaminaValue + StaminaReviveSingleValue > MaxStaminaValue)
 	{

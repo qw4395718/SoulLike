@@ -24,9 +24,11 @@ class SOULLIKEDEMO_API ICharacterInfo_IF
 public:
 	
 	UFUNCTION(BlueprintCallable)
-		virtual bool IsWaitingExecute() = 0;
+		virtual bool CanExecute() = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual bool IsKeepingDefence() = 0;
+		virtual bool CanBackStabs() = 0;
+
+	
 
 };

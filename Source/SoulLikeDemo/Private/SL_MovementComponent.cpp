@@ -2,13 +2,15 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 
 USL_MovementComponent::USL_MovementComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-bool USL_MovementComponent::InitMovemenetInfo()
+void USL_MovementComponent::InitMovemenetInfo()
 {
 	// 由外部信息进行初始化
 
@@ -32,7 +34,7 @@ void USL_MovementComponent::ExeRoll()
 bool USL_MovementComponent::CanExeRoll()
 {
 	// 检查蒙太奇是否已加载成功
-
+	return false;
 }
 
 void USL_MovementComponent::LoadMovementMentageAsync(const FString MentagePath)

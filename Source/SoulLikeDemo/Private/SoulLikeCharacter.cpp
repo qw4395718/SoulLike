@@ -20,19 +20,28 @@ ASoulLikeCharacter::ASoulLikeCharacter()
 	bIsReadyForExecution = false;
 	bIsExecuting = false;
 	bIsBackStabbing = false;
-	bIsAlive = true;
 	// °×ºÐ³õÊ¼»¯
 	Initialize();
 	//FString WeaponTablePath = TEXT("/Game/Data/Table/SL_Weapon_Info.SL_Weapon_Info");
 	//ReadTableTest(WeaponTablePath);
 }
 
+bool ASoulLikeCharacter::CanExecute()
+{
+	return bIsReadyForExecution;
+}
+
+bool ASoulLikeCharacter::CanBackStabs()
+{
+	return CanBackStab;
+}
+
 void ASoulLikeCharacter::PerformAttack()
 {
 	if (bIsReadyForExecution == false &&
 		bIsExecuting == false &&
-		bIsBackStabbing == false &&
-		bIsAlive == true)
+		bIsBackStabbing == false 
+		)
 	{
 		CombatComponent->PerformAttack();
 	}
@@ -42,8 +51,8 @@ void ASoulLikeCharacter::PerformCombatSkill()
 {
 	if (bIsReadyForExecution == false &&
 		bIsExecuting == false &&
-		bIsBackStabbing == false &&
-		bIsAlive == true)
+		bIsBackStabbing == false 
+		)
 	{
 		CombatComponent->PerformCombatSkill();
 	}

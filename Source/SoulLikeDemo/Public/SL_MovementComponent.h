@@ -22,7 +22,7 @@ public:
 /*                                    外部调用                                  */
 /************************************************************************/
 	UFUNCTION()
-		bool InitMovemenetInfo();
+		void InitMovemenetInfo();
 
 	UFUNCTION()
 		void ExeRoll();

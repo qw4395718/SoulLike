@@ -22,10 +22,19 @@ class SOULLIKEDEMO_API IStamina_IF
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	UFUNCTION(BlueprintCallable)
+
+	UFUNCTION()
 		virtual void ReduceStamina(float ReduceValue) = 0;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 		virtual void ReviveStamina(float ReviveValue) = 0;
 
+	UFUNCTION()
+		virtual bool GetIsStaminaZero() = 0;
+
+	UFUNCTION()
+		virtual float GetCurrentStaminaValue() = 0;
+
+	UFUNCTION()
+		virtual float GetMaxStaminaValue() = 0;
 };

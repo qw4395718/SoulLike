@@ -332,10 +332,11 @@ void UCombatComponent::PerformAttack()
 	for (const FHitResult& Hit : OutHits)
 	{
 		ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Hit.GetActor());
-		if (Enemy && Enemy->IsAlive()) // 确保是敌人且存活
+
+		if (Enemy /*&& Enemy->IsAlive()*/) // 确保是敌人且存活
 		{
 			// 检查敌人是否处于可处决状态
-			if (Enemy->IsReadyForExecution())
+			if (Enemy->CanExecute())
 			{
 				RH_EquippedWeapon->PerformExecute();
 				// 将敌人瞬移到角色面前指定位置

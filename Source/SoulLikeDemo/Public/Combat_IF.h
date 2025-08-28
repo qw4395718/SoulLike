@@ -26,4 +26,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) =0;
 
+	UFUNCTION(BlueprintCallable)
+		virtual void PerformExecuted(FName WeaponName) = 0;
+
+	UFUNCTION(BlueprintCallable)
+		virtual void PerformBackStabbed() = 0;
 };

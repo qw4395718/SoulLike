@@ -33,9 +33,9 @@ public:
 		virtual float GetMaxHealthValue() = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual void ReduceHealth(float ReduceValue) = 0;
+		virtual void ReduceCurrentHealth(float ReduceValue) = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual void ReviveHealth(float ReviveValue) = 0;
+		virtual void ReviveCurrentHealth(float ReviveValue) = 0;
 
 };

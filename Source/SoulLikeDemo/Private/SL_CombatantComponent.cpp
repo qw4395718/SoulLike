@@ -10,3 +10,9 @@ USL_CombatantComponent::USL_CombatantComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
+
+void USL_CombatantComponent::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+
+}
+

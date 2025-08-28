@@ -6,19 +6,54 @@
 #include "GameFramework/Character.h"
 #include "SoulLikeGameGlobal.h"
 #include "DamageEventDispatcher.h"
+#include "CharacterInfo_IF.h"
 #include "SoulLikeCharacter.generated.h"
 
 class UCombatComponent;
 class UDamageEventDispatcher;
 
 UCLASS()
-class SOULLIKEDEMO_API ASoulLikeCharacter : public ACharacter 
+class SOULLIKEDEMO_API ASoulLikeCharacter : public ACharacter, public ICharacterInfo_IF
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
 	ASoulLikeCharacter();
+public:
+	/************************************************************************/
+	/*                                接口实现                                      */
+	/************************************************************************/
+	UFUNCTION(BlueprintCallable)
+		bool CanExecute() override;
+
+	UFUNCTION(BlueprintCallable)
+		bool CanBackStabs() override;
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PerformExecuted(FName MontageSectionName) override;
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PerformBackStabbed() override;
+
+public:
+	/************************************************************************/
+	/*                                外部调用                                      */
+	/************************************************************************/
+
+
+	UFUNCTION(BlueprintCallable, Category = "SetState")
+		void SetWaitExecutionState(bool bIsWaitExecution);
+
+	UFUNCTION(BlueprintCallable, Category = "SetState")
+		void SetExecutingState(bool bIsExecuting);
+
+	UFUNCTION(BlueprintCallable, Category = "SetState")
+		void SetBackStabbingState(bool bIsBackStabbing);
+
+	UFUNCTION(BlueprintCallable, Category = "SetState")
+		void MoveToLocationAndRotation(FVector LocationPosition, FRotator Rotaion);
+
 
 protected:
 	/************************************************************************/
@@ -44,34 +79,6 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void ReadTableTest(const FString TablePath);
-
-public:
-	/************************************************************************/
-	/*                                外部调用                                      */
-	/************************************************************************/
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformExecuted(FName MontageSectionName);
-
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformBackStabbed();
-	
-	UFUNCTION(BlueprintCallable, Category = "GetState")
-		bool IsAlive() const { return bIsAlive; }
-
-	UFUNCTION(BlueprintCallable, Category = "GetState")
-		bool IsReadyForExecution() const { return bIsReadyForExecution; }
-
-	UFUNCTION(BlueprintCallable, Category = "SetState")
-		void SetWaitExecutionState(bool bIsWaitExecution);
-
-	UFUNCTION(BlueprintCallable, Category = "SetState")
-		void SetExecutingState(bool bIsExecuting);
-
-	UFUNCTION(BlueprintCallable, Category = "SetState")
-		void SetBackStabbingState(bool bIsBackStabbing);
-
-	UFUNCTION(BlueprintCallable, Category = "SetState")
-		void MoveToLocationAndRotation(FVector LocationPosition, FRotator Rotaion);
 protected:
 	/************************************************************************/
 	/*                               继承实现                                       */
@@ -100,20 +107,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* BackStabbedMontage;
 
+
+
 	// 角色状态-是否处于待处决状态
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterState")
-		bool bIsReadyForExecution = false;
+		bool CanBackStab;
 
 	// 角色状态-是否处于正在处决状态(无敌,不被打断)
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterState")
-		bool bIsExecuting = false;
+		bool bIsExecuting;
 
 	// 角色状态-是否处于正在处决状态(无敌,不被打断)
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterState")
-		bool bIsBackStabbing = false;
-
-	// 角色状态-是否存活
-	UPROPERTY(EditDefaultsOnly, Category = "CharacterState")
-		bool bIsAlive = false;
+		bool bIsBackStabbing;
 	
 };

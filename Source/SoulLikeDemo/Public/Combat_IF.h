@@ -27,8 +27,23 @@ public:
 		virtual void TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) =0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual void PerformExecuted(FName WeaponName) = 0;
+		virtual int GetCurrentCombatState() = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual void PerformBackStabbed() = 0;
+		virtual int GetTeamID() = 0;
+
+	UFUNCTION(BlueprintCallable)
+		virtual void OnAttackEventCall() = 0;
+
+	UFUNCTION(BlueprintCallable)
+		virtual bool CanExecute() = 0;
+
+	UFUNCTION(BlueprintCallable)
+		virtual bool CanBackStabs() = 0;
+
+	UFUNCTION(BlueprintCallable)
+		virtual bool PerformExecuted(FName WeaponName) = 0;
+
+	UFUNCTION(BlueprintCallable)
+		virtual bool PerformBackStabbed() = 0;
 };

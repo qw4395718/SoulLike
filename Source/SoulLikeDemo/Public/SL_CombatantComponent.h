@@ -21,12 +21,70 @@ public:
 	/************************************************************************/
 	/*                              接口实现                                        */
 	/************************************************************************/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 		void TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-	UFUNCTION(BlueprintCallable)
-		void PerformExecuted(FName WeaponName)override;
+	UFUNCTION()
+		int GetCurrentCombatState() override;
 
-	UFUNCTION(BlueprintCallable)
-		void PerformBackStabbed() override;
+	UFUNCTION()
+		int GetTeamID() override;
+
+	UFUNCTION()
+		void OnAttackEventCall() override;
+
+	UFUNCTION()
+		bool CanExecute() override;
+
+	UFUNCTION()
+		bool CanBackStabs() override;
+
+	UFUNCTION()
+		bool PerformExecuted(FName WeaponName) override;
+
+	UFUNCTION()
+		bool PerformBackStabbed() override;
+
+public:
+	/************************************************************************/
+	/*                              外部调用                                        */
+	/************************************************************************/
+	// 外部初始化
+	UFUNCTION()
+		void InitCombatComponentInfo();
+
+protected:
+	/************************************************************************/
+	/*                              内部调用                                        */
+	/************************************************************************/
+	// 异步加载蒙太奇动画
+	void LoadActorMentageAsync(const FString MentagePath);
+
+protected:
+	/************************************************************************/
+	/*                              内部变量                                        */
+	/************************************************************************/
+	// 所属阵营
+	UPROPERTY()
+		int TeamID;
+
+	// 是否待处决
+	UPROPERTY()
+		bool bWaitingForExecuted;
+
+	// 是否可背刺
+	UPROPERTY()
+		bool bAllowedBackStabsed;
+
+	// 处决蒙太奇动画资产(后续可以归并到动画组件中，统一管理)
+	UPROPERTY()
+		bool bAllowedBackStabsed;
+	
+	// 背刺蒙太奇动画资产(后续可以归并到动画组件中，统一管理)
+	UPROPERTY()
+		bool bAllowedBackStabsed;
+
+	// Actor蒙太奇动画异步加载ptr
+	UPROPERTY()
+		TSoftClassPtr<UAnimMontage> SoftMentageRefrence;
 };

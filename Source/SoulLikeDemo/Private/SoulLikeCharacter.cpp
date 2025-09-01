@@ -11,34 +11,13 @@
 // Sets default values
 ASoulLikeCharacter::ASoulLikeCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	
-	// 初始化组件
-	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
-	// 初始化变量
-	bIsReadyForExecution = false;
-	bIsExecuting = false;
-	bIsBackStabbing = false;
-	// 白盒初始化
-	Initialize();
-	//FString WeaponTablePath = TEXT("/Game/Data/Table/SL_Weapon_Info.SL_Weapon_Info");
-	//ReadTableTest(WeaponTablePath);
+
 }
 
-bool ASoulLikeCharacter::CanExecute()
-{
-	return bIsReadyForExecution;
-}
-
-bool ASoulLikeCharacter::CanBackStabs()
-{
-	return CanBackStab;
-}
 
 void ASoulLikeCharacter::PerformAttack()
 {
-	if (bIsReadyForExecution == false &&
+	if (
 		bIsExecuting == false &&
 		bIsBackStabbing == false 
 		)
@@ -49,7 +28,7 @@ void ASoulLikeCharacter::PerformAttack()
 
 void ASoulLikeCharacter::PerformCombatSkill()
 {
-	if (bIsReadyForExecution == false &&
+	if (
 		bIsExecuting == false &&
 		bIsBackStabbing == false 
 		)
@@ -153,29 +132,6 @@ void ASoulLikeCharacter::ReadTableTest(const FString TablePath)
 	}
 }
 
-void ASoulLikeCharacter::PerformExecuted(FName MontageSectionName)
-{
-	PlayExecutionedMontage(MontageSectionName);
-}
-
-void ASoulLikeCharacter::PerformBackStabbed()
-{
-	PlayBackStabbedMontage();
-}
-
-void ASoulLikeCharacter::SetWaitExecutionState(bool IsWaitExecution)
-{
-	bIsReadyForExecution = IsWaitExecution;
-}
-void ASoulLikeCharacter::SetExecutingState(bool IsExecuting)
-{
-	bIsExecuting = IsExecuting;
-}
-
-void ASoulLikeCharacter::SetBackStabbingState(bool IsBackStabbing)
-{
-	bIsBackStabbing = IsBackStabbing;
-}
 
 
 void ASoulLikeCharacter::MoveToLocationAndRotation(FVector LocationPosition,FRotator Rotaion)

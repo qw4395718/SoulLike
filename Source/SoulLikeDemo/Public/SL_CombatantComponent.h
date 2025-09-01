@@ -43,7 +43,7 @@ public:
 		bool PerformExecuted(FName WeaponName) override;
 
 	UFUNCTION()
-		bool PerformBackStabbed() override;
+		bool PerformBackStabbed(FName WeaponName) override;
 
 public:
 	/************************************************************************/
@@ -78,13 +78,11 @@ protected:
 
 	// 处决蒙太奇动画资产(后续可以归并到动画组件中，统一管理)
 	UPROPERTY()
-		bool bAllowedBackStabsed;
+		TSoftObjectPtr<UAnimMontage> SoftExecuteMentageRefrence;
 	
 	// 背刺蒙太奇动画资产(后续可以归并到动画组件中，统一管理)
 	UPROPERTY()
-		bool bAllowedBackStabsed;
+		TSoftObjectPtr<UAnimMontage> SoftBackStabsMentageRefrence;
 
-	// Actor蒙太奇动画异步加载ptr
-	UPROPERTY()
-		TSoftClassPtr<UAnimMontage> SoftMentageRefrence;
+	
 };

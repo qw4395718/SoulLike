@@ -45,5 +45,5 @@ public:
 		virtual bool PerformExecuted(FName WeaponName) = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual bool PerformBackStabbed() = 0;
+		virtual bool PerformBackStabbed(FName WeaponName) = 0;
 };

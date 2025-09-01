@@ -7,6 +7,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include <Engine/StreamableManager.h>
 #include <Engine/AssetManager.h>
+#include "GameFramework/Character.h"
 
 USL_CombatantComponent::USL_CombatantComponent()
 {
@@ -45,37 +46,67 @@ bool USL_CombatantComponent::CanBackStabs()
 
 bool USL_CombatantComponent::PerformExecuted(FName WeaponName)
 {
-	if (bWaitingForExecuted)
-	{
-		// 检查蒙太奇中是否有指定武器名字的蒙太奇动画，若无则执行默认处决动画
+	// 检查持有者是否有效
+	AActor* OwnActor = GetOwner();
+	if (OwnActor == nullptr) { return false; }
 
-		UAnimInstance* AnimInstance = GetOwner()->GetMesh()->GetAnimInstance();
-		if (AnimInstance)
+	ACharacter* OwnCharacter = Cast<ACharacter>(GetOwner());
+	if (bWaitingForExecuted && OwnCharacter)
+	{
+		// 检查资源是否已经加载
+		if (UAnimMontage* LoadedMontage = SoftExecuteMentageRefrence.Get())
 		{
-			AnimInstance->Montage_Play(SoftMentageRefrence->Get());
+			// 资源已成功加载
+			if (UAnimInstance* AnimInstance = OwnCharacter->GetMesh()->GetAnimInstance())
+			{
+				if (LoadedMontage->IsValidSectionName(WeaponName))
+				{
+					AnimInstance->Montage_JumpToSection(WeaponName);
+				}
+				else
+				{
+					AnimInstance->Montage_Play(LoadedMontage);
+				}
+				return true;
+			}
 		}
-		return true;
 	}
-	else
-	{
-		return false;
-	}
-
+	return false;
 }
 
-bool USL_CombatantComponent::PerformBackStabbed()
+bool USL_CombatantComponent::PerformBackStabbed(FName WeaponName)
 {
-	if (bAllowedBackStabsed)
-	{
-		// 检查是否有蒙太奇动画是否完成异步加载，若未完成则执行同步加载
+	// 检查持有者是否有效
+	AActor* OwnActor = GetOwner();
+	if(OwnActor == nullptr){return false;}
 
-
-		return true;
-	}
-	else
+	ACharacter* OwnCharacter = Cast<ACharacter>(OwnActor);
+	if (bWaitingForExecuted && OwnCharacter)
 	{
-		return false;
+		// 检查资源是否已经加载
+		if (UAnimMontage* LoadedMontage = SoftBackStabsMentageRefrence.Get())
+		{
+			// 资源已成功加载
+			if (UAnimInstance* AnimInstance = OwnCharacter->GetMesh()->GetAnimInstance())
+			{
+				if (LoadedMontage->IsValidSectionName(WeaponName))
+				{
+					AnimInstance->Montage_JumpToSection(WeaponName);
+				}
+				else
+				{
+					AnimInstance->Montage_Play(LoadedMontage);
+				}
+				return true;
+			}
+		}
+		else
+		{
+			// 如果未加载成功
+
+		}
 	}
+	return false;
 }
 
 void USL_CombatantComponent::InitCombatComponentInfo()
@@ -91,9 +122,9 @@ void USL_CombatantComponent::LoadActorMentageAsync(const FString MentagePath)
 	if (MentagePath == "") { return; }
 	// 资源异步加载
 	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-	SoftMentageRefrence = FSoftObjectPath(*MentagePath);
+	SoftExecuteMentageRefrence = FSoftObjectPath(*MentagePath);
 	Streamable.RequestAsyncLoad(
-		SoftMentageRefrence.ToSoftObjectPath()
+		SoftExecuteMentageRefrence.ToSoftObjectPath()
 	);
 }
 

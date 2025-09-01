@@ -13,7 +13,7 @@ class UCombatComponent;
 class UDamageEventDispatcher;
 
 UCLASS()
-class SOULLIKEDEMO_API ASoulLikeCharacter : public ACharacter, public ICharacterInfo_IF
+class SOULLIKEDEMO_API ASoulLikeCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -25,16 +25,16 @@ public:
 	/*                                接口实现                                      */
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable)
-		bool CanExecute() override;
+		bool CanExecute();
 
 	UFUNCTION(BlueprintCallable)
-		bool CanBackStabs() override;
+		bool CanBackStabs();
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformExecuted(FName MontageSectionName) override;
+		void PerformExecuted(FName MontageSectionName);
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformBackStabbed() override;
+		void PerformBackStabbed();
 
 public:
 	/************************************************************************/

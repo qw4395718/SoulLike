@@ -36,15 +36,15 @@ public:
 
 	// 鼠标左键响应
 	UFUNCTION()
-		void LeftMouseCallEvent();
+		void PerformAttack();
 
 	// 鼠标右键响应
 	UFUNCTION()
-		void RightMouseCallEvent();
+		void PerformDefence();
 
 	// Ctrl键响应
 	UFUNCTION()
-		void CtrlMouseCallEvent();
+		void PerformComboSkill();
 
 
 protected:

@@ -43,7 +43,7 @@ bool USL_MovementComponent::CanExeRoll()
 void USL_MovementComponent::LoadMovementMentage(const FString MentagePath)
 {
 	if (MentagePath == "") { return; }
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DodgeMontageFinder(*DodgeMontage);
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DodgeMontageFinder(*MentagePath);
 	if (DodgeMontageFinder.Succeeded())
 	{
 		DodgeMontage = DodgeMontageFinder.Object;

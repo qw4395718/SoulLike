@@ -11,11 +11,21 @@ ASL_CharacterBase::ASL_CharacterBase()
 
 }
 
+void ASL_CharacterBase::BeginPlay()
+{
+
+}
+
+void ASL_CharacterBase::Tick(float DeltaTime)
+{
+
+}
+
 void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ASL_CharacterBase::PerformAttack);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ASL_CharacterBase::PerformLeftMouse);
 	PlayerInputComponent->BindAction("CombatSkill", IE_Pressed, this, &ASL_CharacterBase::PerformCombatSkill);
 
 }
@@ -31,6 +41,11 @@ void ASL_CharacterBase::PerformRightMouse()
 }
 
 void ASL_CharacterBase::PerformCombatSkill()
+{
+
+}
+
+void ASL_CharacterBase::InitializeCharacter()
 {
 
 }

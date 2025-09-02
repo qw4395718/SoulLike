@@ -6,6 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "SoulLikeGameGlobal.h"
 #include "Combat_IF.h"
+#include "Templates/SharedPointer.h"
+#include "Engine/StreamableManager.h"
+#include "UObject/NameTypes.h"
 #include "SL_CombatantComponent.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -40,16 +43,20 @@ public:
 		bool CanBackStabs() override;
 
 	UFUNCTION()
-		bool PerformAttack() override;
+		void PerformAttack() override;
 
 	UFUNCTION()
-		bool PerformDefence() override;
+		void PerformDefence() override;
 
 	UFUNCTION()
-		bool PerformExecuted(FName MetageSectionName) override;
+		void PerformExecuted(FName MetageSectionName) override;
 
 	UFUNCTION()
-		bool PerformBackStabbed(FName MetageSectionName) override;
+		void PerformBackStabbed(FName MetageSectionName) override;
+
+	UFUNCTION()
+		void MoveToLocationAndRotation(FVector LocationPosition, FRotator Rotaion) override;
+
 
 public:
 	/************************************************************************/
@@ -95,8 +102,8 @@ protected:
 		FName NeedPlayMetageSectionName;
 	
 	// 管理处决动画加载的句柄
-	UPROPERTY()
-		TSharedPtr<FStreamableHandle> MontageStreamableHandle;
+	//UPROPERTY()
+	//	TSharedPtr<FStreamableHandle> MontageStreamableHandle;
 
 	// 处决蒙太奇动画资产(后续可以归并到动画组件中，统一管理)
 	UPROPERTY()

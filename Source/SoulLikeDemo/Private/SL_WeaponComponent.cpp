@@ -62,17 +62,17 @@ void ASL_WeaponComponent::UpdateWeaponEquipState(EWeaponEquipState CurrentState)
 	WeaponEquipInfo = CurrentState;
 }
 
-void ASL_WeaponComponent::LeftMouseCallEvent()
+void ASL_WeaponComponent::PerformAttack()
 {
 	
 }
 
-void ASL_WeaponComponent::RightMouseCallEvent()
+void ASL_WeaponComponent::PerformDefence()
 {
 
 }
 
-void ASL_WeaponComponent::CtrlMouseCallEvent()
+void ASL_WeaponComponent::PerformComboSkill()
 {
 
 }

@@ -21,35 +21,15 @@ public:
 	// Sets default values for this character's properties
 	ASoulLikeCharacter();
 public:
-	/************************************************************************/
-	/*                                接口实现                                      */
-	/************************************************************************/
-	UFUNCTION(BlueprintCallable)
-		bool CanExecute();
-
-	UFUNCTION(BlueprintCallable)
-		bool CanBackStabs();
-
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformExecuted(FName MontageSectionName);
-
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformBackStabbed();
 
 public:
 	/************************************************************************/
 	/*                                外部调用                                      */
 	/************************************************************************/
 
-
-	UFUNCTION(BlueprintCallable, Category = "SetState")
-		void SetWaitExecutionState(bool bIsWaitExecution);
-
 	UFUNCTION(BlueprintCallable, Category = "SetState")
 		void SetExecutingState(bool bIsExecuting);
 
-	UFUNCTION(BlueprintCallable, Category = "SetState")
-		void SetBackStabbingState(bool bIsBackStabbing);
 
 	UFUNCTION(BlueprintCallable, Category = "SetState")
 		void MoveToLocationAndRotation(FVector LocationPosition, FRotator Rotaion);

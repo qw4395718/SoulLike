@@ -134,6 +134,11 @@ void ASoulLikeCharacter::ReadTableTest(const FString TablePath)
 
 
 
+void ASoulLikeCharacter::SetExecutingState(bool fese)
+{
+
+}
+
 void ASoulLikeCharacter::MoveToLocationAndRotation(FVector LocationPosition,FRotator Rotaion)
 {
 	this->GetCharacterMovement()->SetMovementMode(MOVE_None);

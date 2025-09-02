@@ -10,6 +10,8 @@
 #include "GameFramework/Character.h"
 #include <Delegates/DelegateSignatureImpl.inl>
 #include "Health_IF.h"
+#include "Stamina_IF.h"
+#include <GameFramework/CharacterMovementComponent.h>
 
 USL_CombatantComponent::USL_CombatantComponent()
 {
@@ -51,18 +53,28 @@ bool USL_CombatantComponent::CanBackStabs()
 	return bAllowedBackStabsed;
 }
 
-bool USL_CombatantComponent::PerformAttack()
+void USL_CombatantComponent::PerformAttack()
 {
-	if (ActorOwner == nullptr) return;
+	if (GetOwner() == nullptr) return;
+
+	IStamina_IF* StaminaTarget = Cast<IStamina_IF>(GetOwner());
+	// 检查是否处于精疲力竭状态
+	if (StaminaTarget)
+	{
+		if (StaminaTarget->GetIsStaminaZero() == true)
+		{
+			return;
+		}
+	}
 
 	// 获取角色位置和前方向量
-	FVector CharacterLocation = ActorOwner->GetActorLocation();
-	FVector CharacterForward = ActorOwner->GetActorForwardVector();
-	FRotator CharacterRotator = ActorOwner->GetActorRotation();
+	FVector CharacterLocation = GetOwner()->GetActorLocation();
+	FVector CharacterForward = GetOwner()->GetActorForwardVector();
+	FRotator CharacterRotator = GetOwner()->GetActorRotation();
 
 	// 设置球形检测参数
 	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(CharacterOwner); // 忽略自己
+	ActorsToIgnore.Add(ActorOwner); // 忽略自己
 
 	TArray<FHitResult> OutHits;
 	bool bHit = UKismetSystemLibrary::SphereTraceMulti(
@@ -81,35 +93,40 @@ bool USL_CombatantComponent::PerformAttack()
 	if (!bHit || OutHits.Num() == 0)
 	{
 		// 若无符合的特殊攻击则进行普通攻击
-		// 检查体力是否足够
-		if ()
-		{
-			RH_EquippedWeapon->PerformAttack();
-			// 类魂特性：消耗耐力
-			ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
-
-		}
+		// 消耗体力
+		StaminaTarget->ReduceStamina(20.0f);
+	
 		return;
 	}
 
 	// 遍历所有检测到的敌人
 	for (const FHitResult& Hit : OutHits)
 	{
-		ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Hit.GetActor());
-
-		if (Enemy /*&& Enemy->IsAlive()*/) // 确保是敌人且存活
+		AActor* Enemy = Cast<AActor>(Hit.GetActor());
+		
+		if (Enemy) // 确保是敌人且存活
 		{
-			// 检查敌人是否处于可处决状态
-			if (Enemy->CanExecute())
+			IHealth_IF* HealthTarget = Cast<IHealth_IF>(Enemy);
+			ICombat_IF* CombatTarget = Cast<ICombat_IF>(Enemy);
+
+			// 检查是否存活
+			if (HealthTarget == nullptr ||  
+			HealthTarget->IsAlive() == false)
 			{
-				RH_EquippedWeapon->PerformExecute();
+				return;
+			}
+
+			// 检查敌人是否处于可处决状态
+			if (CombatTarget && CombatTarget->CanExecute())
+			{
+				//RH_EquippedWeapon->PerformExecute();
 				// 将敌人瞬移到角色面前指定位置
 				FRotator NewRotator = CharacterRotator.Add(0, 180, 0);
 				NewRotator.Normalize();
-				Enemy->MoveToLocationAndRotation(
-					CharacterLocation + CharacterForward * 100.0f,
-					NewRotator);
-				Enemy->PerformExecuted(FName("Executed_Sword"));
+				/*	Enemy->MoveToLocationAndRotation(
+						CharacterLocation + CharacterForward * 100.0f,
+						NewRotator);*/
+				CombatTarget->PerformExecuted(FName("Executed_Sword"));
 				return;
 			}
 
@@ -129,36 +146,36 @@ bool USL_CombatantComponent::PerformAttack()
 			// 检查是否满足背刺条件
 			if (DistanceToEnemy <= BackstabDistanceThreshold && Angle <= BackstabAngleThreshold)
 			{
-				RH_EquippedWeapon->PerformBackstab();
-				Enemy->MoveToLocationAndRotation(
-					CharacterLocation + CharacterForward * 100.0f,
-					FRotator(CharacterRotator.Pitch, CharacterRotator.Yaw, CharacterRotator.Roll));
-				Enemy->PerformBackStabbed();
+				/*	RH_EquippedWeapon->PerformBackstab();
+					Enemy->MoveToLocationAndRotation(
+						CharacterLocation + CharacterForward * 100.0f,
+						FRotator(CharacterRotator.Pitch, CharacterRotator.Yaw, CharacterRotator.Roll));
+					Enemy->PerformBackStabbed();*/
 				return;
 			}
 		}
 	}
 
-	// 若无符合的特殊攻击则进行普通攻击
-	if (CanAction())
-	{
-		RH_EquippedWeapon->PerformAttack();
-		// 类魂特性：消耗耐力
-		ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
+	//// 若无符合的特殊攻击则进行普通攻击
+	//if (CanAction())
+	//{
+	//	RH_EquippedWeapon->PerformAttack();
+	//	// 类魂特性：消耗耐力
+	//	ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
 
-	}
+	//}
 	
-	return true;
+	return ;
 }
 
-bool USL_CombatantComponent::PerformDefence()
+void USL_CombatantComponent::PerformDefence()
 {
 	
 	
-	return true;
+	return;
 }
 
-bool USL_CombatantComponent::PerformExecuted(FName MetageSectionName)
+void USL_CombatantComponent::PerformExecuted(FName MetageSectionName)
 {
 	AActor* OwnActor = GetOwner();
 	if (OwnActor == nullptr) { return; }
@@ -169,7 +186,7 @@ bool USL_CombatantComponent::PerformExecuted(FName MetageSectionName)
 	}
 }
 
-bool USL_CombatantComponent::PerformBackStabbed(FName MetageSectionName)
+void USL_CombatantComponent::PerformBackStabbed(FName MetageSectionName)
 {
 	AActor* OwnActor = GetOwner();
 	if (OwnActor == nullptr) { return; }
@@ -177,6 +194,28 @@ bool USL_CombatantComponent::PerformBackStabbed(FName MetageSectionName)
 	if (bAllowedBackStabsed && OwnCharacter)
 	{
 		PlaySoftMentage(MetageSectionName);
+	}
+}
+
+void USL_CombatantComponent::MoveToLocationAndRotation(FVector LocationPosition, FRotator Rotaion)
+{
+	AActor* OwnActor = GetOwner();
+	if (OwnActor)
+	{
+		if (ACharacter* OwnCharacter = Cast<ACharacter>(OwnActor))
+		{
+			OwnCharacter->GetCharacterMovement()->SetMovementMode(MOVE_None);
+			OwnCharacter->SetActorLocationAndRotation(LocationPosition, Rotaion, false, nullptr, ETeleportType::TeleportPhysics);
+			// 恢复移动（如果是）
+			OwnCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking); // 恢复行走模式
+
+		}
+		else
+		{
+			OwnActor->SetActorLocationAndRotation(LocationPosition, Rotaion, false, nullptr, ETeleportType::TeleportPhysics);
+
+		}
+
 	}
 }
 
@@ -221,12 +260,12 @@ void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)
 	FStreamableManager& Streamable = UAssetManager::Get().GetStreamableManager();
 	FStreamableDelegate Delegate = FStreamableDelegate::CreateUObject(this, &USL_CombatantComponent::OnActorMentageLoaded, SoftMentageRefrence.ToSoftObjectPath());
 
-	// 可选的：设置加载优先级和参数
-	MontageStreamableHandle = Streamable.RequestAsyncLoad(
-		SoftMentageRefrence.ToSoftObjectPath(),
-		Delegate
-		//, FStreamableManager::DefaultAsyncLoadPriority, false
-	);
+	//// 可选的：设置加载优先级和参数
+	//MontageStreamableHandle = Streamable.RequestAsyncLoad(
+	//	SoftMentageRefrence.ToSoftObjectPath(),
+	//	Delegate
+	//	//, FStreamableManager::DefaultAsyncLoadPriority, false
+	//);
 
 	// 此时，你可以在这里更新UI，比如显示一个“加载中”的提示
 	UE_LOG(LogTemp, Log, TEXT("Started async loading montage..."));
@@ -235,39 +274,39 @@ void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)
 void USL_CombatantComponent::OnActorMentageLoaded(FSoftObjectPath  LoadedPath)
 {
 	// 3.1 通过句柄检查（推荐）
-	if (MontageStreamableHandle.IsValid() && MontageStreamableHandle->HasLoadCompleted())
-	{
-		// 从软引用中获取已经加载完成的资源对象
-		UAnimMontage* LoadedMontage = SoftMentageRefrence.Get();
-		// 3.2 再次检查获取到的对象是否有效
-		if (LoadedMontage)
-		{
-			// 4. 资源加载成功，使用它！
-			PlaySoftMentage(NeedPlayMetageSectionName);
-			UE_LOG(LogTemp, Log, TEXT("Montage loaded and played successfully!"));
-		}
-		else
-		{
-			// 理论上不应该走到这里，除非资源加载后又被强制卸载了
-			UE_LOG(LogTemp, Error, TEXT("Montage failed to load: Get() returned nullptr after successful load."));
-		}
+	//if (MontageStreamableHandle.IsValid() && MontageStreamableHandle->HasLoadCompleted())
+	//{
+	//	// 从软引用中获取已经加载完成的资源对象
+	//	UAnimMontage* LoadedMontage = SoftMentageRefrence.Get();
+	//	// 3.2 再次检查获取到的对象是否有效
+	//	if (LoadedMontage)
+	//	{
+	//		// 4. 资源加载成功，使用它！
+	//		PlaySoftMentage(NeedPlayMetageSectionName);
+	//		UE_LOG(LogTemp, Log, TEXT("Montage loaded and played successfully!"));
+	//	}
+	//	else
+	//	{
+	//		// 理论上不应该走到这里，除非资源加载后又被强制卸载了
+	//		UE_LOG(LogTemp, Error, TEXT("Montage failed to load: Get() returned nullptr after successful load."));
+	//	}
 
-		// 释放句柄引用。注意：这不会卸载资源，因为MySkeletalMeshComponent现在持有对它的强引用（PlayAnimMontage内部会设置）
-		MontageStreamableHandle->ReleaseHandle();
-		MontageStreamableHandle.Reset();
-	}
-	else
-	{
-		// 5. 处理加载失败的情况
-		UE_LOG(LogTemp, Error, TEXT("Failed to load montage at path: %s"), *LoadedPath.ToString());
-		// 这里可以给玩家一个反馈，比如播放一个默认动画或显示错误信息
+	//	// 释放句柄引用。注意：这不会卸载资源，因为MySkeletalMeshComponent现在持有对它的强引用（PlayAnimMontage内部会设置）
+	//	MontageStreamableHandle->ReleaseHandle();
+	//	MontageStreamableHandle.Reset();
+	//}
+	//else
+	//{
+	//	// 5. 处理加载失败的情况
+	//	UE_LOG(LogTemp, Error, TEXT("Failed to load montage at path: %s"), *LoadedPath.ToString());
+	//	// 这里可以给玩家一个反馈，比如播放一个默认动画或显示错误信息
 
-		// 确保清理句柄
-		if (MontageStreamableHandle.IsValid())
-		{
-			MontageStreamableHandle->ReleaseHandle();
-			MontageStreamableHandle.Reset();
-		}
-	}
+	//	// 确保清理句柄
+	//	if (MontageStreamableHandle.IsValid())
+	//	{
+	//		MontageStreamableHandle->ReleaseHandle();
+	//		MontageStreamableHandle.Reset();
+	//	}
+	//}
 }
 

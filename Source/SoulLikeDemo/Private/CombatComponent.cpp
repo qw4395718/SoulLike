@@ -201,16 +201,16 @@ void UCombatComponent::HandleDamage(const FDamageEventData& DamageEvent)
 
 void UCombatComponent::HandleParry()
 {
-	//检查当前武器是否处于弹反窗口
-	if (RH_EquippedWeapon && RH_EquippedWeapon->IsParryWindowActive())
-	{	
-		UE_LOG(LogTemp, Display, TEXT("Player Parryed"));
-		// 被弹反成功,角色中断所有蒙太奇进入到待处决模式
-		if (CharacterOwner)
-		{
-			CharacterOwner->PerformExecuted(FName(""));
-		}
-	}
+	////检查当前武器是否处于弹反窗口
+	//if (RH_EquippedWeapon && RH_EquippedWeapon->IsParryWindowActive())
+	//{	
+	//	UE_LOG(LogTemp, Display, TEXT("Player Parryed"));
+	//	// 被弹反成功,角色中断所有蒙太奇进入到待处决模式
+	//	if (CharacterOwner)
+	//	{
+	//		CharacterOwner->PerformExecuted(FName(""));
+	//	}
+	//}
 }
 
 bool UCombatComponent::CanAction()
@@ -287,103 +287,103 @@ void UCombatComponent::ReviveAP()
 
 void UCombatComponent::PerformAttack()
 {
-	// 根据当前条件确定战斗组件执行
-	// 进行一次球形检测,判断面前是否有敌人,根据敌人的当前状态(待处决)以及敌人的朝向和距离(可背刺)确定播放的蒙太奇动画
-	if(CharacterOwner == nullptr || RH_EquippedWeapon == nullptr) return;
-	
-	// 获取角色位置和前方向量
-	FVector CharacterLocation = CharacterOwner->GetActorLocation();
-	FVector CharacterForward = CharacterOwner->GetActorForwardVector();
-	FRotator CharacterRotator = CharacterOwner->GetActorRotation();
+	//// 根据当前条件确定战斗组件执行
+	//// 进行一次球形检测,判断面前是否有敌人,根据敌人的当前状态(待处决)以及敌人的朝向和距离(可背刺)确定播放的蒙太奇动画
+	//if(CharacterOwner == nullptr || RH_EquippedWeapon == nullptr) return;
+	//
+	//// 获取角色位置和前方向量
+	//FVector CharacterLocation = CharacterOwner->GetActorLocation();
+	//FVector CharacterForward = CharacterOwner->GetActorForwardVector();
+	//FRotator CharacterRotator = CharacterOwner->GetActorRotation();
 
-	// 设置球形检测参数
-	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(CharacterOwner); // 忽略自己
+	//// 设置球形检测参数
+	//TArray<AActor*> ActorsToIgnore;
+	//ActorsToIgnore.Add(CharacterOwner); // 忽略自己
 
-	TArray<FHitResult> OutHits;
-	bool bHit = UKismetSystemLibrary::SphereTraceMulti(
-		GetWorld(),
-		CharacterLocation,
-		CharacterLocation,
-		DetectionRadius,
-		UEngineTypes::ConvertToTraceType(ECC_Pawn), // 检测pawn类型
-		false, // 不检测复杂碰撞
-		ActorsToIgnore,
-		EDrawDebugTrace::ForDuration, // 调试时显示，发布时可改为None
-		OutHits,
-		true
-	);
+	//TArray<FHitResult> OutHits;
+	//bool bHit = UKismetSystemLibrary::SphereTraceMulti(
+	//	GetWorld(),
+	//	CharacterLocation,
+	//	CharacterLocation,
+	//	DetectionRadius,
+	//	UEngineTypes::ConvertToTraceType(ECC_Pawn), // 检测pawn类型
+	//	false, // 不检测复杂碰撞
+	//	ActorsToIgnore,
+	//	EDrawDebugTrace::ForDuration, // 调试时显示，发布时可改为None
+	//	OutHits,
+	//	true
+	//);
 
-	if (!bHit || OutHits.Num() == 0)
-	{
-		// 若无符合的特殊攻击则进行普通攻击
-		// 检查体力是否足够
-		if (CanAction())
-		{
-			RH_EquippedWeapon->PerformAttack();
-			// 类魂特性：消耗耐力
-			ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
+	//if (!bHit || OutHits.Num() == 0)
+	//{
+	//	// 若无符合的特殊攻击则进行普通攻击
+	//	// 检查体力是否足够
+	//	if (CanAction())
+	//	{
+	//		RH_EquippedWeapon->PerformAttack();
+	//		// 类魂特性：消耗耐力
+	//		ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
 
-		}
-		return;
-	}
+	//	}
+	//	return;
+	//}
 
-	// 遍历所有检测到的敌人
-	for (const FHitResult& Hit : OutHits)
-	{
-		ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Hit.GetActor());
+	//// 遍历所有检测到的敌人
+	//for (const FHitResult& Hit : OutHits)
+	//{
+	//	ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Hit.GetActor());
 
-		if (Enemy /*&& Enemy->IsAlive()*/) // 确保是敌人且存活
-		{
-			// 检查敌人是否处于可处决状态
-			if (Enemy->CanExecute())
-			{
-				RH_EquippedWeapon->PerformExecute();
-				// 将敌人瞬移到角色面前指定位置
-				FRotator NewRotator = CharacterRotator.Add(0,180,0);
-				NewRotator.Normalize();
-				Enemy->MoveToLocationAndRotation(
-				CharacterLocation + CharacterForward * 100.0f,
-				NewRotator);
-				Enemy->PerformExecuted(FName("Executed_Sword"));
-				return;
-			}
+	//	if (Enemy /*&& Enemy->IsAlive()*/) // 确保是敌人且存活
+	//	{
+	//		// 检查敌人是否处于可处决状态
+	//		if (Enemy->CanExecute())
+	//		{
+	//			RH_EquippedWeapon->PerformExecute();
+	//			// 将敌人瞬移到角色面前指定位置
+	//			FRotator NewRotator = CharacterRotator.Add(0,180,0);
+	//			NewRotator.Normalize();
+	//			Enemy->MoveToLocationAndRotation(
+	//			CharacterLocation + CharacterForward * 100.0f,
+	//			NewRotator);
+	//			Enemy->PerformExecuted(FName("Executed_Sword"));
+	//			return;
+	//		}
 
-			// 计算敌人位置和方向
-			FVector EnemyLocation = Enemy->GetActorLocation();
-			FVector EnemyForward = Enemy->GetActorForwardVector();
+	//		// 计算敌人位置和方向
+	//		FVector EnemyLocation = Enemy->GetActorLocation();
+	//		FVector EnemyForward = Enemy->GetActorForwardVector();
 
-			// 计算玩家到敌人的向量
-			FVector ToEnemy = EnemyLocation - CharacterLocation;
-			float DistanceToEnemy = ToEnemy.Size();
-			ToEnemy.Normalize();
+	//		// 计算玩家到敌人的向量
+	//		FVector ToEnemy = EnemyLocation - CharacterLocation;
+	//		float DistanceToEnemy = ToEnemy.Size();
+	//		ToEnemy.Normalize();
 
-			// 计算敌人后方角度
-			float DotProduct = FVector::DotProduct(EnemyForward, ToEnemy);
-			float Angle = FMath::RadiansToDegrees(FMath::Acos(DotProduct));
+	//		// 计算敌人后方角度
+	//		float DotProduct = FVector::DotProduct(EnemyForward, ToEnemy);
+	//		float Angle = FMath::RadiansToDegrees(FMath::Acos(DotProduct));
 
-			// 检查是否满足背刺条件
-			if (DistanceToEnemy <= BackstabDistanceThreshold && Angle <= BackstabAngleThreshold)
-			{
-				RH_EquippedWeapon->PerformBackstab();
-				Enemy->MoveToLocationAndRotation(
-					CharacterLocation + CharacterForward * 100.0f,
-					FRotator(CharacterRotator.Pitch, CharacterRotator.Yaw, CharacterRotator.Roll));
-				Enemy->PerformBackStabbed();
-				return;
-			}
-		}
-	}
+	//		// 检查是否满足背刺条件
+	//		if (DistanceToEnemy <= BackstabDistanceThreshold && Angle <= BackstabAngleThreshold)
+	//		{
+	//			RH_EquippedWeapon->PerformBackstab();
+	//			Enemy->MoveToLocationAndRotation(
+	//				CharacterLocation + CharacterForward * 100.0f,
+	//				FRotator(CharacterRotator.Pitch, CharacterRotator.Yaw, CharacterRotator.Roll));
+	//			Enemy->PerformBackStabbed();
+	//			return;
+	//		}
+	//	}
+	//}
 
-	// 若无符合的特殊攻击则进行普通攻击
-	if (CanAction())
-	{
-		RH_EquippedWeapon->PerformAttack();
-		// 类魂特性：消耗耐力
-		ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
+	//// 若无符合的特殊攻击则进行普通攻击
+	//if (CanAction())
+	//{
+	//	RH_EquippedWeapon->PerformAttack();
+	//	// 类魂特性：消耗耐力
+	//	ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
 
-	}
-	return;
+	//}
+	//return;
 }
 
 void UCombatComponent::InitWeaponInventory(TArray<AWeaponBase*> arrWeaponInventory)

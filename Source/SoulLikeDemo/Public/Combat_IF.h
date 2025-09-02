@@ -42,14 +42,17 @@ public:
 		virtual bool CanBackStabs() = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual bool PerformAttack() = 0;
+		virtual void PerformAttack() = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual bool PerformDefence() = 0;
+		virtual void PerformDefence() = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual bool PerformExecuted(FName MentageSectionName) = 0;
+		virtual void PerformExecuted(FName MentageSectionName) = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual bool PerformBackStabbed(FName MentageSectionName) = 0;
+		virtual void PerformBackStabbed(FName MentageSectionName) = 0;
+
+	UFUNCTION(BlueprintCallable)
+		virtual void MoveToLocationAndRotation(FVector LocationPosition, FRotator Rotaion) = 0;
 };

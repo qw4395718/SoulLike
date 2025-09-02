@@ -22,6 +22,11 @@ bool USL_CharacterStateComponent::CanBackStabs()
 	return bCanBackStab;
 }
 
+void USL_CharacterStateComponent::InitCharacterStateInfo()
+{
+
+}
+
 void USL_CharacterStateComponent::SetIsReadyForExecution(bool bReady)
 {
 	bIsReadyForExecution = bReady;

@@ -40,10 +40,16 @@ public:
 		bool CanBackStabs() override;
 
 	UFUNCTION()
-		bool PerformExecuted(FName WeaponName) override;
+		bool PerformAttack() override;
 
 	UFUNCTION()
-		bool PerformBackStabbed(FName WeaponName) override;
+		bool PerformDefence() override;
+
+	UFUNCTION()
+		bool PerformExecuted(FName MetageSectionName) override;
+
+	UFUNCTION()
+		bool PerformBackStabbed(FName MetageSectionName) override;
 
 public:
 	/************************************************************************/
@@ -57,8 +63,14 @@ protected:
 	/************************************************************************/
 	/*                              内部调用                                        */
 	/************************************************************************/
+	// 播放蒙太奇动画
+	void PlaySoftMentage(FName MetageSectionName);
+
 	// 异步加载蒙太奇动画
-	void LoadActorMentageAsync(const FString MentagePath);
+	void LoadActorMentageAsync(const FString MentagePath,UPARAM(ref) TSoftObjectPtr<UAnimMontage>& SoftMentageRefrence);
+
+	// 当指定蒙太奇动画加载完成时
+	void OnActorMentageLoaded(FSoftObjectPath  LoadedPath);
 
 protected:
 	/************************************************************************/
@@ -76,13 +88,22 @@ protected:
 	UPROPERTY()
 		bool bAllowedBackStabsed;
 
+	UPROPERTY()
+		FString SoftMentagePath;
+
+	UPROPERTY()
+		FName NeedPlayMetageSectionName;
+	
+	// 管理处决动画加载的句柄
+	UPROPERTY()
+		TSharedPtr<FStreamableHandle> MontageStreamableHandle;
+
 	// 处决蒙太奇动画资产(后续可以归并到动画组件中，统一管理)
 	UPROPERTY()
-		TSoftObjectPtr<UAnimMontage> SoftExecuteMentageRefrence;
-	
-	// 背刺蒙太奇动画资产(后续可以归并到动画组件中，统一管理)
-	UPROPERTY()
-		TSoftObjectPtr<UAnimMontage> SoftBackStabsMentageRefrence;
+		TSoftObjectPtr<UAnimMontage> SoftMentageRefrence;
 
+	// 组件引用
+	UPROPERTY()
+		AActor* ActorOwner;
 	
 };

@@ -10,3 +10,27 @@ ASL_CharacterBase::ASL_CharacterBase()
 	PrimaryActorTick.bCanEverTick = true;
 
 }
+
+void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ASL_CharacterBase::PerformAttack);
+	PlayerInputComponent->BindAction("CombatSkill", IE_Pressed, this, &ASL_CharacterBase::PerformCombatSkill);
+
+}
+
+void ASL_CharacterBase::PerformLeftMouse()
+{
+
+}
+
+void ASL_CharacterBase::PerformRightMouse()
+{
+
+}
+
+void ASL_CharacterBase::PerformCombatSkill()
+{
+
+}

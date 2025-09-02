@@ -37,11 +37,14 @@ protected:
 		bool CanExeRoll();
 
 	UFUNCTION()
-		void LoadMovementMentageAsync(const FString MentagePath);
+		void LoadMovementMentage(const FString MentagePath);
 
 protected:
-	// 特殊蒙太奇动画异步加载ptr
+	// 翻滚蒙太奇
 	UPROPERTY()
-		TSoftClassPtr<UAnimMontage> SoftMentageRefrence;
+		UAnimMontage* DodgeMontage;
 
+	// 是否可以跳跃
+	UPROPERTY()
+		bool CanRoll;
 };

@@ -42,8 +42,14 @@ public:
 		virtual bool CanBackStabs() = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual bool PerformExecuted(FName WeaponName) = 0;
+		virtual bool PerformAttack() = 0;
 
 	UFUNCTION(BlueprintCallable)
-		virtual bool PerformBackStabbed(FName WeaponName) = 0;
+		virtual bool PerformDefence() = 0;
+
+	UFUNCTION(BlueprintCallable)
+		virtual bool PerformExecuted(FName MentageSectionName) = 0;
+
+	UFUNCTION(BlueprintCallable)
+		virtual bool PerformBackStabbed(FName MentageSectionName) = 0;
 };

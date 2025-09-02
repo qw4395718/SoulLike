@@ -4,6 +4,9 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include <UObject/UObjectGlobals.h>
+#include <UObject/ConstructorHelpers.h>
+#include <GameFramework/Character.h>
 
 USL_MovementComponent::USL_MovementComponent()
 {
@@ -18,32 +21,31 @@ void USL_MovementComponent::InitMovemenetInfo()
 
 void USL_MovementComponent::ExeRoll()
 {
-	// 检查资源是否加载
-	if (CanExeRoll() == true)
+	// 获取拥有者的信息
+	AActor* OwnActor = GetOwner();
+	if (OwnActor == nullptr) { return; }
+	ACharacter* OwnCharacter = Cast<ACharacter>(OwnActor);
+	if (OwnCharacter && CanExeRoll() == true)
 	{
-
+		UAnimInstance* AnimInstance = OwnCharacter->GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(DodgeMontage);
+		}
 	}
-	else
-	{
-		// 进行同步加载
-	}
-	// 执行翻滚
-
 }
 
 bool USL_MovementComponent::CanExeRoll()
 {
-	// 检查蒙太奇是否已加载成功
-	return false;
+	return CanRoll;
 }
 
-void USL_MovementComponent::LoadMovementMentageAsync(const FString MentagePath)
+void USL_MovementComponent::LoadMovementMentage(const FString MentagePath)
 {
 	if (MentagePath == "") { return; }
-	// 资源异步加载
-	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-	SoftMentageRefrence = FSoftObjectPath(*MentagePath);
-	Streamable.RequestAsyncLoad(
-		SoftMentageRefrence.ToSoftObjectPath()
-	);
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DodgeMontageFinder(*DodgeMontage);
+	if (DodgeMontageFinder.Succeeded())
+	{
+		DodgeMontage = DodgeMontageFinder.Object;
+	}
 }

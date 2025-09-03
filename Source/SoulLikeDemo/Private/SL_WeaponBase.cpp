@@ -1,4 +1,4 @@
-#include "SL_WeaponComponent.h"
+#include "SL_WeaponBase.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -9,7 +9,7 @@
 #include "WeaponMeleeAttackComponent.h"
 #include "WeaponParryComponent.h"
 
-ASL_WeaponComponent::ASL_WeaponComponent()
+ASL_WeaponBase::ASL_WeaponBase()
 {
 	//是否开启tick
 	PrimaryActorTick.bCanEverTick = false;
@@ -39,7 +39,7 @@ ASL_WeaponComponent::ASL_WeaponComponent()
 	WeaponEquipInfo = EWeaponEquipState::No_Equip;
 }
 
-void ASL_WeaponComponent::InitWeaponInfo(const FWeaponDefinition& WeaponInfo)
+void ASL_WeaponBase::InitWeaponInfo(const FWeaponDefinition& WeaponInfo)
 {
 	if(WeaponInfo.WeaponID == 0){return;}
 	// 变量赋值
@@ -57,27 +57,27 @@ void ASL_WeaponComponent::InitWeaponInfo(const FWeaponDefinition& WeaponInfo)
 
 }
 
-void ASL_WeaponComponent::UpdateWeaponEquipState(EWeaponEquipState CurrentState)
+void ASL_WeaponBase::UpdateWeaponEquipState(EWeaponEquipState CurrentState)
 {
 	WeaponEquipInfo = CurrentState;
 }
 
-void ASL_WeaponComponent::PerformAttack()
+void ASL_WeaponBase::PerformAttack()
 {
 	
 }
 
-void ASL_WeaponComponent::PerformDefence()
+void ASL_WeaponBase::PerformDefence()
 {
 
 }
 
-void ASL_WeaponComponent::PerformComboSkill()
+void ASL_WeaponBase::PerformComboSkill()
 {
 
 }
 
-void ASL_WeaponComponent::LoadWeaponMeshAsync(const FString WeaponMeshName)
+void ASL_WeaponBase::LoadWeaponMeshAsync(const FString WeaponMeshName)
 {
 	if (WeaponMeshName == "") { return; }
 	// 资源异步加载
@@ -85,18 +85,18 @@ void ASL_WeaponComponent::LoadWeaponMeshAsync(const FString WeaponMeshName)
 	SoftMeshReference = TSoftObjectPtr<USkeletalMesh>(FSoftObjectPath(*WeaponMeshName));
 	Streamable.RequestAsyncLoad(
 		SoftMeshReference.ToSoftObjectPath(),
-		FStreamableDelegate::CreateUObject(this, &ASL_WeaponComponent::OnLoadedWeaponMesh)
+		FStreamableDelegate::CreateUObject(this, &ASL_WeaponBase::OnLoadedWeaponMesh)
 	);
 }
 
-void ASL_WeaponComponent::OnLoadedWeaponMesh()
+void ASL_WeaponBase::OnLoadedWeaponMesh()
 {
 	if (USkeletalMesh* Mesh = SoftMeshReference.Get()) {
 		SkeletalWeaponMesh->SetSkeletalMesh(Mesh);
 	}
 }
 
-void ASL_WeaponComponent::LoadWeaponMentageAsync(const FString MentagePath)
+void ASL_WeaponBase::LoadWeaponMentageAsync(const FString MentagePath)
 {
 	if (MentagePath == ""){return;}
 	// 资源异步加载
@@ -108,7 +108,7 @@ void ASL_WeaponComponent::LoadWeaponMentageAsync(const FString MentagePath)
 	
 }
 
-void ASL_WeaponComponent::LoadWeaponAnimInstanceAsync(const FString WeapinAnimName)
+void ASL_WeaponBase::LoadWeaponAnimInstanceAsync(const FString WeapinAnimName)
 {
 	if (WeapinAnimName == "") { return; }
 	// 资源异步加载
@@ -117,11 +117,11 @@ void ASL_WeaponComponent::LoadWeaponAnimInstanceAsync(const FString WeapinAnimNa
 	SoftWeaponAnimInstanceReference = AnimPathStr;
 	Streamable.RequestAsyncLoad(
 		SoftWeaponAnimInstanceReference.ToSoftObjectPath(),
-		FStreamableDelegate::CreateUObject(this, &ASL_WeaponComponent::OnLoadedWeaponAnimInstance)
+		FStreamableDelegate::CreateUObject(this, &ASL_WeaponBase::OnLoadedWeaponAnimInstance)
 	);
 }
 
-void ASL_WeaponComponent::OnLoadedWeaponAnimInstance()
+void ASL_WeaponBase::OnLoadedWeaponAnimInstance()
 {
 	if (SoftWeaponAnimInstanceReference.Get() != nullptr)
 	{
@@ -129,7 +129,7 @@ void ASL_WeaponComponent::OnLoadedWeaponAnimInstance()
 	}
 }
 
-bool ASL_WeaponComponent::LoadWeaponComponents(const TMap<EWeaponComponentType, bool>& pWeaponComponentInfo)
+bool ASL_WeaponBase::LoadWeaponComponents(const TMap<EWeaponComponentType, bool>& pWeaponComponentInfo)
 {
 	// 根据map信息创建各个模组,并将创建的实际情况更新至WeaponLoadComponentInfoMap
 	WeaponLoadComponentInfoMap.Reset();
@@ -195,13 +195,13 @@ bool ASL_WeaponComponent::LoadWeaponComponents(const TMap<EWeaponComponentType, 
 	return false;
 }
 
-bool ASL_WeaponComponent::CanExecute(AActor* MasterActor, float AllowedExecuteDistance, float AllowdBackStabRange)
+bool ASL_WeaponBase::CanExecute(AActor* MasterActor, float AllowedExecuteDistance, float AllowdBackStabRange)
 {
 	// 完成距离,角度,是否装载组件进行判断
 	return false;
 }
 
-bool ASL_WeaponComponent::CanBackStab(AActor* MasterActor, float AllowedBackStabDistance, float AllowdBackStabRange)
+bool ASL_WeaponBase::CanBackStab(AActor* MasterActor, float AllowedBackStabDistance, float AllowdBackStabRange)
 {
 	// 完成距离,角度,是否装载组件进行判断
 	return false;

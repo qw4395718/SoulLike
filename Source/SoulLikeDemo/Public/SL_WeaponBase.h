@@ -9,19 +9,19 @@
 #include "SoulLikeCharacter.h"
 #include "Components/BoxComponent.h"
 #include "WeaponDefinition.h"
-#include "SL_WeaponComponent.generated.h"
+#include "SL_WeaponBase.generated.h"
 
 /**
  * 
  */
 UCLASS(Blueprintable)
-class SOULLIKEDEMO_API ASL_WeaponComponent : public AActor
+class SOULLIKEDEMO_API ASL_WeaponBase : public AActor
 {
 	GENERATED_BODY()
 
 public:
 
-	ASL_WeaponComponent();
+	ASL_WeaponBase();
 
 	/************************************************************************/
 	/*外部调用                                                                     */

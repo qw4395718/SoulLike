@@ -7,8 +7,10 @@ struct FWeaponDefinition
 {
 	GENERATED_BODY()
 
-	// 唯一标识
+	// 武器ID
 	int32 WeaponID;
+	// 唯一标识
+	int32 WeaponUniqueID;
 	// 模型名
 	FString Mesh;
 	// 动画蓝图名

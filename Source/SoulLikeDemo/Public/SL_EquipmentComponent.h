@@ -5,9 +5,10 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "SoulLikeGameGlobal.h"
-#include "Equipment_IF.h"
 #include "WeaponBase.h"
 #include "SL_EquipmentComponent.generated.h"
+
+const EQUIPMENT_SLOT_NUM 5;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -48,13 +49,19 @@ public:
 		void UseDownSlotItemEvent();
 
 	UFUNCTION()
-		void SwitchEquipmentEvent(int handtype);
+		void SwitchEquipmentEvent(EArrowKeyType ArrowType);
 
 	UFUNCTION()
-		void AddEquipemntInfo(int handtype,int SlotIndex,FWeaponDefinition WeaponInfo);
+		void AddEquipemntInfo(EArrowKeyType ArrowType,int SlotIndex, FWeaponData* WeaponInfo);
 
 	UFUNCTION()
-		void RemoveEquipemntInfo(int WeaponUniqueID);
+		void RemoveEquipemntInfo(EArrowKeyType ArrowType, int SlotIndex);
+
+	UFUNCTION()
+		void AddCostItemInfo(EArrowKeyType ArrowType, int SlotIndex, int ItemID);
+
+	UFUNCTION()
+		void RemoveCostItemInfo(EArrowKeyType ArrowType, int SlotIndex);
 
 protected:
 	/************************************************************************/
@@ -66,7 +73,7 @@ protected:
 
 	// 根据武器信息进行初始化
 	UFUNCTION()
-		void InitCurrentWeapon(FWeaponDefinition WeaponInfo);
+		void InitCurrentWeapon(FWeaponData WeaponInfo);
 
 	UFUNCTION()
 		void LeftHandWeaponAttack();
@@ -90,9 +97,13 @@ protected:
 	/************************************************************************/
 	/*                                  变量                                    */
 	/************************************************************************/
+	// 当前四个装备槽的当前Index
+	UPROPERTY()
+	TMap<EArrowKeyType,int> CurrentEquipmentIndex;
+
 	// 左手装备信息数组
 	UPROPERTY()
-		TArray<FWeaponDefinition> LeftHandEquipmentInfoList; 
+		FWeaponData* LeftHandEquipmentInfoList[EQUIPMENT_SLOT_NUM];
 
 	// 当前左手武器
 	UPROPERTY()
@@ -100,7 +111,7 @@ protected:
 
 	// 右手装备信息数组
 	UPROPERTY()
-		TArray<FWeaponDefinition> RightHandEquipmentInfoList;
+		FWeaponData* RightHandEquipmentInfoList[EQUIPMENT_SLOT_NUM];
 
 	// 当前左手武器
 	UPROPERTY()
@@ -108,7 +119,7 @@ protected:
 
 	// 上方装备道具信息
 	UPROPERTY()
-		TArray<int> UpItemList;
+		int UpItemList[EQUIPMENT_SLOT_NUM];
 
 	// 当前上方装备道具
 	UPROPERTY()
@@ -116,7 +127,7 @@ protected:
 
 	// 下方装备道具信息
 	UPROPERTY()
-		TArray<int> DownItemList;
+		int DownItemList[EQUIPMENT_SLOT_NUM];
 	
 	// 当前下方装备道具
 	UPROPERTY()

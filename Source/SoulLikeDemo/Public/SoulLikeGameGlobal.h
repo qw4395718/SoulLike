@@ -40,6 +40,16 @@ enum class EWeaponEquipState :uint8
 	RH_Equip
 };
 
+UENUM(BlueprintType)
+enum class EArrowKeyType :uint8
+{
+	Up_ArrowKey,
+	Down_ArrowKey,
+	Left_ArrowKey,
+	Right_ArrowKey
+};
+
+
 //USTRUCT(BlueprintType)
 //struct FWeaponDefinition {
 //

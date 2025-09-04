@@ -1,9 +1,9 @@
 #pragma once
 #include "SoulLikeGameGlobal.h"
-#include "WeaponDefinition.generated.h"
+#include "WeaponData.generated.h"
 
 USTRUCT(BlueprintType)
-struct FWeaponDefinition
+struct FWeaponData
 {
 	GENERATED_BODY()
 
@@ -60,3 +60,4 @@ struct FWeaponDefinition
 
 	// ...其他通用参数
 };
+

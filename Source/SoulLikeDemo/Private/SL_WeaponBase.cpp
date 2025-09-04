@@ -39,7 +39,7 @@ ASL_WeaponBase::ASL_WeaponBase()
 	WeaponEquipInfo = EWeaponEquipState::No_Equip;
 }
 
-void ASL_WeaponBase::InitWeaponInfo(const FWeaponDefinition& WeaponInfo)
+void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo)
 {
 	if(WeaponInfo.WeaponID == 0){return;}
 	// ±‰¡ø∏≥÷µ

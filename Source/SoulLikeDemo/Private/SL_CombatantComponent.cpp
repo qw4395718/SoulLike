@@ -12,6 +12,9 @@
 #include "Health_IF.h"
 #include "Stamina_IF.h"
 #include <GameFramework/CharacterMovementComponent.h>
+#include "StateCalculate_IF.h"
+#include "BehavioralResponse_IF.h"
+#include "WeaponBehavior_IF.h"
 
 USL_CombatantComponent::USL_CombatantComponent()
 {
@@ -21,9 +24,15 @@ USL_CombatantComponent::USL_CombatantComponent()
 void USL_CombatantComponent::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// 直接使用生命接口,后续属性组件完成时，先由组件进行计算后再发给生命组件
+	float CalculateDamage = Damage;
+	if (IStateCalculate_IF* StateCalculateTarge = Cast<IStateCalculate_IF>(GetOwner()))
+	{
+		CalculateDamage = StateCalculateTarge->DamageReceivedCalculate(Damage);
+	}
+
 	if(IHealth_IF* HealthTarget = Cast<IHealth_IF>(GetOwner()))
 	{
-		HealthTarget->ReduceCurrentHealth(Damage);
+		HealthTarget->ReduceCurrentHealth(CalculateDamage);
 		OnAttackEventCall();
 	}
 }
@@ -43,6 +52,11 @@ void USL_CombatantComponent::OnAttackEventCall()
 	// 通知其他组件响应伤害事件
 }
 
+void USL_CombatantComponent::SetCanExecuteState(bool bCanExecuted)
+{
+	bWaitingForExecuted = bCanExecuted;
+}
+
 bool USL_CombatantComponent::CanExecute()
 {
 	return bWaitingForExecuted;
@@ -55,9 +69,17 @@ bool USL_CombatantComponent::CanBackStabs()
 
 void USL_CombatantComponent::PerformAttack()
 {
-	if (GetOwner() == nullptr) return;
+	float StaminaCostValue = 20.0f;
 
-	IStamina_IF* StaminaTarget = Cast<IStamina_IF>(GetOwner());
+	if (GetOwner() == nullptr) {return;}
+
+	AActor* My = Cast<AActor>(GetOwner());
+	if (My == nullptr) { return; }
+
+	IWeaponBehavior_IF* MyWeaponBehavior = Cast<IWeaponBehavior_IF>(My);
+	if(MyWeaponBehavior == nullptr){return;}
+
+	IStamina_IF* StaminaTarget = Cast<IStamina_IF>(My);
 	// 检查是否处于精疲力竭状态
 	if (StaminaTarget)
 	{
@@ -81,7 +103,7 @@ void USL_CombatantComponent::PerformAttack()
 		GetWorld(),
 		CharacterLocation,
 		CharacterLocation,
-		DetectionRadius,
+		DETECTION_RADIUS,
 		UEngineTypes::ConvertToTraceType(ECC_Pawn), // 检测pawn类型
 		false, // 不检测复杂碰撞
 		ActorsToIgnore,
@@ -94,7 +116,12 @@ void USL_CombatantComponent::PerformAttack()
 	{
 		// 若无符合的特殊攻击则进行普通攻击
 		// 消耗体力
-		StaminaTarget->ReduceStamina(20.0f);
+		IStateCalculate_IF* StateCalculateTarget = Cast<IStateCalculate_IF>(GetOwner());
+		if (StateCalculateTarget)
+		{
+			StaminaCostValue = StateCalculateTarget->StaminaCostCalculate(StaminaCostValue);
+		}
+		StaminaTarget->ReduceStamina(StaminaCostValue);
 	
 		return;
 	}
@@ -103,30 +130,33 @@ void USL_CombatantComponent::PerformAttack()
 	for (const FHitResult& Hit : OutHits)
 	{
 		AActor* Enemy = Cast<AActor>(Hit.GetActor());
-		
-		if (Enemy) // 确保是敌人且存活
+	
+		if (Enemy) 
 		{
-			IHealth_IF* HealthTarget = Cast<IHealth_IF>(Enemy);
-			ICombat_IF* CombatTarget = Cast<ICombat_IF>(Enemy);
-
-			// 检查是否存活
-			if (HealthTarget == nullptr ||  
-			HealthTarget->IsAlive() == false)
+			IHealth_IF* EnemyHealthTarget = Cast<IHealth_IF>(Enemy);
+			ICombat_IF* EnemyCombatTarget = Cast<ICombat_IF>(Enemy);
+		
+			// 是否可以进行下一步
+			if (EnemyHealthTarget == nullptr ||
+				EnemyCombatTarget == nullptr ||
+				EnemyHealthTarget->IsAlive() == false)
 			{
-				return;
+				continue;
 			}
 
 			// 检查敌人是否处于可处决状态
-			if (CombatTarget && CombatTarget->CanExecute())
+			if (EnemyCombatTarget->CanExecute())
 			{
 				//RH_EquippedWeapon->PerformExecute();
 				// 将敌人瞬移到角色面前指定位置
 				FRotator NewRotator = CharacterRotator.Add(0, 180, 0);
 				NewRotator.Normalize();
-				/*	Enemy->MoveToLocationAndRotation(
-						CharacterLocation + CharacterForward * 100.0f,
-						NewRotator);*/
-				CombatTarget->PerformExecuted(FName("Executed_Sword"));
+				EnemyCombatTarget->MoveToLocationAndRotation(
+					CharacterLocation + CharacterForward * 100.0f,
+					NewRotator);
+				EnemyCombatTarget->PerformExecuted(FName("Executed_Sword"));
+				// 我方的武器接口
+				MyWeaponBehavior->ExecuteBehaviorResponse(My);
 				return;
 			}
 
@@ -144,33 +174,41 @@ void USL_CombatantComponent::PerformAttack()
 			float Angle = FMath::RadiansToDegrees(FMath::Acos(DotProduct));
 
 			// 检查是否满足背刺条件
-			if (DistanceToEnemy <= BackstabDistanceThreshold && Angle <= BackstabAngleThreshold)
+			if (DistanceToEnemy <= BACKSTAB_DISTANCE_THRESHOLD && Angle <= BACKSTAB_ANGLE_THRESHOLD)
 			{
-				/*	RH_EquippedWeapon->PerformBackstab();
-					Enemy->MoveToLocationAndRotation(
-						CharacterLocation + CharacterForward * 100.0f,
-						FRotator(CharacterRotator.Pitch, CharacterRotator.Yaw, CharacterRotator.Roll));
-					Enemy->PerformBackStabbed();*/
+				EnemyCombatTarget->MoveToLocationAndRotation(
+					CharacterLocation + CharacterForward * 100.0f,
+					FRotator(CharacterRotator.Pitch, CharacterRotator.Yaw, CharacterRotator.Roll));
+				EnemyCombatTarget->PerformBackStabbed("BackStabed_Sword");
+				// 我方的武器接口
+				MyWeaponBehavior->BackStabBehaviorResponse(My);
 				return;
 			}
 		}
 	}
 
-	//// 若无符合的特殊攻击则进行普通攻击
-	//if (CanAction())
-	//{
-	//	RH_EquippedWeapon->PerformAttack();
-	//	// 类魂特性：消耗耐力
-	//	ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
-
-	//}
-	
+	// 若无符合的特殊攻击则进行普通攻击
+	MyWeaponBehavior->AttackBehaviorResponse(My);
+	IStateCalculate_IF* StateCalculateTarget = Cast<IStateCalculate_IF>(My);
+	if (StateCalculateTarget)
+	{
+		StaminaCostValue = StateCalculateTarget->StaminaCostCalculate(StaminaCostValue);
+	}
+	StaminaTarget->ReduceStamina(StaminaCostValue);
 	return ;
 }
 
 void USL_CombatantComponent::PerformDefence()
 {
-	
+	if (GetOwner() == nullptr) { return; }
+
+	AActor* My = Cast<AActor>(GetOwner());
+	if (My == nullptr) { return; }
+
+	IWeaponBehavior_IF* MyWeaponBehavior = Cast<IWeaponBehavior_IF>(My);
+	if (MyWeaponBehavior == nullptr) { return; }
+
+	MyWeaponBehavior->DefenceBehaviorResponse(My);
 	
 	return;
 }
@@ -245,9 +283,14 @@ void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)
 		if (OwnCharacter)
 		{
 			UAnimInstance* AnimInstance = OwnCharacter->GetMesh()->GetAnimInstance();
-			if (AnimInstance != nullptr && LoadedMontage->IsValidSectionName(MetageSectionName))
+			if (AnimInstance == nullptr){return;}
+			if(LoadedMontage->IsValidSectionName(MetageSectionName))
 			{
-				AnimInstance->Montage_JumpToSection(MetageSectionName);
+				AnimInstance->Montage_JumpToSection(MetageSectionName, LoadedMontage);
+			}
+			else
+			{
+				AnimInstance->Montage_Play(LoadedMontage);
 			}
 		}
 		return;

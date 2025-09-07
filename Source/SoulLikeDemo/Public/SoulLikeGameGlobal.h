@@ -1,4 +1,34 @@
 #pragma once
+
+
+// 角色配置-背刺距离限制
+const INT BACKSTAB_DISTANCE_THRESHOLD = 150;
+
+// 角色配置-背刺角度限制
+const INT BACKSTAB_ANGLE_THRESHOLD = 30;
+
+// 角色配置-处决距离限制
+const INT EXECUTE_DISTANCE_THRESHOLD = 150;
+
+// 特殊攻击(背刺,处决)检测半径
+const INT DETECTION_RADIUS = 150;
+
+// 装备栏单栏的槽位数量
+const INT EQUIPMENT_SINGLE_CAPACITY = 4;
+
+// 仓库分栏类型数量
+const INT INVENTORYTYPE_NUM = 12;
+
+// 仓库单栏类型容纳数量
+const INT INVENTORY_SINGLE_CAPACITY = 100;
+
+// 减伤最大上限
+const float REDUCE_DAMAGE_PERCENTAGE = 0.9f
+
+// 体力消耗最小下限
+const float REDUCE_STAMINACOST_PERCENTAGE = 0.5f
+
+
 //伤害类型
 UENUM(BlueprintType)
 enum class EDamageType :uint8
@@ -43,66 +73,90 @@ enum class EWeaponEquipState :uint8
 UENUM(BlueprintType)
 enum class EArrowKeyType :uint8
 {
-	Up_ArrowKey,
-	Down_ArrowKey,
-	Left_ArrowKey,
-	Right_ArrowKey
+	ARROWKEY_None,
+	ARROWKEY_Up,
+	ARROWKEY_Down,
+	ARROWKEY_Left,
+	ARROWKEY_Right,
+	ARROWKEY_Max
+};
+
+// 武器模组类别
+UENUM(BlueprintType)
+enum class EWeaponModeTyoe :uint8
+{
+	WEAPONMODE_None,
+	WEAPONMODE_Attack,
+	WEAPONMODE_Defence,
+	WEAPONMODE_ComboSkill,
+	WEAPONMODE_BackStab,
+	WEAPONMODE_Execute,
+	WEAPONMODE_Max
+};
+
+// 武器技能模组类别
+UENUM(BlueprintType)
+enum class EWeaponCombaoSkillType :uint8
+{
+	COMBAOSKILL_None,
+	COMBAOSKILL_Attack,
+	COMBAOSKILL_Parry,
+	COMBAOSKILL_AddBuff,
+	COMBAOSKILL_Max
+};
+
+// 装备栏类别
+UENUM(BlueprintType)
+enum class EEquipmentSlotType :uint8
+{
+	EQUIPMENT_None,
+	EQUIPMENT_Item_Up,
+	EQUIPMENT_Item_Down,
+	EQUIPMENT_Weapon_Left,
+	EQUIPMENT_Weapon_Right,
+	EQUIPMENT_Max
+};
+
+// 仓库分栏类别
+UENUM(BlueprintType)
+enum class EInventoryCompartmentType :uint8
+{
+	INVENTORYTYPE_None,
+	INVENTORYTYPE_Weapon,
+	INVENTORYTYPE_Helmet,
+	INVENTORYTYPE_Armor,
+	INVENTORYTYPE_Glove,
+	INVENTORYTYPE_Pant,
+	INVENTORYTYPE_Boot,
+	INVENTORYTYPE_Ammunition,
+	INVENTORYTYPE_Badge,
+	INVENTORYTYPE_EquippableItem,
+	INVENTORYTYPE_NoEquippableItem,
+	INVENTORYTYPE_ComboSkillItem,
+	INVENTORYTYPE_MagicBook,
+	INVENTORYTYPE_Max,
+};
+
+// UI页面类别
+UENUM()
+enum class EUIWidgetType :uint32
+{
+	EWIDGET_None,
+	EWIDGET_Bonfire,
+	EWIDGET_Max
+};
+
+// 武器蒙太奇类别
+UENUM()
+enum class EWeaponMontageType :uint8
+{
+	EWeaponMontag_None,
+	EWeaponMontag_Attack,
+	EWeaponMontag_Defence,
+	EWeaponMontag_ComboSkill,
+	EWeaponMontag_Execute,
+	EWeaponMontag_BackStab,
+	EWeaponMontag_Max
 };
 
 
-//USTRUCT(BlueprintType)
-//struct FWeaponDefinition {
-//
-//	GENERATED_BODY()
-//		// 唯一标识
-//		int32 WeaponID;
-//	// 异步加载模型
-//	TSoftObjectPtr<USkeletalMesh> Mesh;
-//	// 动画蓝图
-//	TSoftClassPtr<UAnimInstance> AnimClass;
-//	// 动态组件
-//	TArray<TSubclassOf<UActorComponent>> Components;
-//	// 各段攻击的伤害
-//	TMap<EAttackType, float> BaseDamageMap;
-//	// 各段攻击消耗的体力
-//	TMap<EAttackType, float> APCostMap;
-//	// 各段攻击消耗的蓝量
-//	TMap<EAttackType, float> MPCostMap;
-//	// 武器碰撞盒大小
-//	FVector WeaponCollisionBoxSize;
-//	/************************************************************************/
-//	/*                               近战模组(最多只能装在一个)                                       */
-//	/************************************************************************/
-//	// 近战攻击模组
-//	bool bNeedLoadMeleeAttackComponent;
-//	// 投射物攻击模组
-//	bool bNeedLoadProjectileComponent;
-//
-//	/************************************************************************/
-//	/*                               近战模组(最多只能装在一个)                                       */
-//	/************************************************************************/
-//	// 防御模组
-//	bool bNeedLoadDefenceComponent;
-//
-//	/************************************************************************/
-//	/*                               技能模组(最多只能装在一个)                                       */
-//	/************************************************************************/
-//	// 技能模组
-//	bool bNeedLoadSkillComponent;
-//
-//
-//	// ...其他通用参数
-//};
-
-
-// 角色配置-背刺距离限制
-const INT BackstabDistanceThreshold = 150;
-
-// 角色配置-背刺角度限制
-const INT BackstabAngleThreshold = 30;
-
-// 角色配置-处决距离限制
-const INT ExecuteDistanceThreshold = 150;
-
-// 特殊攻击(背刺,处决)检测半径
-const INT DetectionRadius = 150;

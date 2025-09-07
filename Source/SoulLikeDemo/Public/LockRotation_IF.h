@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "Interaction_IF.generated.h"
+#include "LockRotation_IF.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, BlueprintType,meta = (CannotImplementInterfaceInBlueprint))
-class UInteraction_IF : public UInterface
+class ULockRotation_IF : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,22 +16,18 @@ class UInteraction_IF : public UInterface
 /**
  * 
  */
-class SOULLIKEDEMO_API IInteraction_IF
+class SOULLIKEDEMO_API ILockRotation_IF
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	
-	UFUNCTION(BlueprintCallable)
-		virtual bool CanInteraction() =0;
+	// 是否可以被锁视角
+	UFUNCTION()
+		virtual bool IsCanLockRotation() = 0;
 
-	UFUNCTION(BlueprintCallable)
-		virtual FString GetInteractionString() = 0;
-
-	UFUNCTION(BlueprintCallable)
-		virtual bool ExeInteract() = 0;
-
-	UFUNCTION(BlueprintCallable)
-		virtual int GetInteractionUIWidgetIndex() = 0;
+	// 提供用于锁定的目标点位置和旋转
+	UFUNCTION()
+		virtual void GetLockRotationLocation(FVector& vLocationInWorld) = 0;
 };

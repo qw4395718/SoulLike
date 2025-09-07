@@ -8,7 +8,7 @@ struct FWeaponData
 	GENERATED_BODY()
 
 	// 武器ID
-	int32 WeaponID;
+	int32 WeaponID = 0;
 	// 唯一标识
 	int32 WeaponUniqueID;
 	// 模型名

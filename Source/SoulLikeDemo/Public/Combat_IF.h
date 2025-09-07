@@ -36,6 +36,9 @@ public:
 		virtual void OnAttackEventCall() = 0;
 
 	UFUNCTION(BlueprintCallable)
+		virtual void SetCanExecuteState(bool bCanExecuted) = 0;
+
+	UFUNCTION(BlueprintCallable)
 		virtual bool CanExecute() = 0;
 
 	UFUNCTION(BlueprintCallable)

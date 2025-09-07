@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "Interaction_IF.generated.h"
+#include "StateCalculate_IF.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, BlueprintType,meta = (CannotImplementInterfaceInBlueprint))
-class UInteraction_IF : public UInterface
+class UStateCalculate_IF : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,22 +16,23 @@ class UInteraction_IF : public UInterface
 /**
  * 
  */
-class SOULLIKEDEMO_API IInteraction_IF
+class SOULLIKEDEMO_API IStateCalculate_IF
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	
-	UFUNCTION(BlueprintCallable)
-		virtual bool CanInteraction() =0;
 
-	UFUNCTION(BlueprintCallable)
-		virtual FString GetInteractionString() = 0;
+	// 造成伤害量结算
+	UFUNCTION()
+		virtual float DamageDealtCalculate(float Damage) = 0;
 
-	UFUNCTION(BlueprintCallable)
-		virtual bool ExeInteract() = 0;
+	// 受成伤害量结算
+	UFUNCTION()
+		virtual float DamageReceivedCalculate(float Damage) = 0;
 
-	UFUNCTION(BlueprintCallable)
-		virtual int GetInteractionUIWidgetIndex() = 0;
+	// 消耗体力量结算
+	UFUNCTION()
+		virtual float StaminaCostCalculate(float StaminaCost) = 0;
+
 };

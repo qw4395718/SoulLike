@@ -305,7 +305,7 @@ void UCombatComponent::PerformAttack()
 	//	GetWorld(),
 	//	CharacterLocation,
 	//	CharacterLocation,
-	//	DetectionRadius,
+	//	DETECTION_RADIUS,
 	//	UEngineTypes::ConvertToTraceType(ECC_Pawn), // 检测pawn类型
 	//	false, // 不检测复杂碰撞
 	//	ActorsToIgnore,
@@ -363,7 +363,7 @@ void UCombatComponent::PerformAttack()
 	//		float Angle = FMath::RadiansToDegrees(FMath::Acos(DotProduct));
 
 	//		// 检查是否满足背刺条件
-	//		if (DistanceToEnemy <= BackstabDistanceThreshold && Angle <= BackstabAngleThreshold)
+	//		if (DistanceToEnemy <= BACKSTAB_DISTANCE_THRESHOLD && Angle <= BACKSTAB_ANGLE_THRESHOLD)
 	//		{
 	//			RH_EquippedWeapon->PerformBackstab();
 	//			Enemy->MoveToLocationAndRotation(

@@ -39,12 +39,34 @@ ASL_WeaponBase::ASL_WeaponBase()
 	WeaponEquipInfo = EWeaponEquipState::No_Equip;
 }
 
+void ASL_WeaponBase::Attack(AActor* OwnerActor)
+{
+	PlayWeaponMentage(OwnerActor,EWeaponMontageType::EWeaponMontag_Attack,TEXT(""));
+}
+
+void ASL_WeaponBase::Defence(AActor* OwnerActor)
+{
+	PlayWeaponMentage(OwnerActor, EWeaponMontageType::EWeaponMontag_Defence, TEXT(""));
+}
+
+void ASL_WeaponBase::ComboSkill(AActor* OwnerActor)
+{
+	PlayWeaponMentage(OwnerActor, EWeaponMontageType::EWeaponMontag_ComboSkill, TEXT(""));
+}
+
+void ASL_WeaponBase::Execute(AActor* OwnerActor)
+{
+	PlayWeaponMentage(OwnerActor, EWeaponMontageType::EWeaponMontag_Execute, TEXT(""));
+}
+
+void ASL_WeaponBase::BackStab(AActor* OwnerActor)
+{
+	PlayWeaponMentage(OwnerActor, EWeaponMontageType::EWeaponMontag_BackStab, TEXT(""));
+}
+
 void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo)
 {
-	if(WeaponInfo.WeaponID == 0){return;}
-	// 变量赋值
-	OwnerActor = GetOwner();
-	WeaponID = WeaponInfo.WeaponID;
+	if(OnwerActor == nullptr){return;}
 	// 加载武器模型
 	LoadWeaponMeshAsync(WeaponInfo.Mesh);
 	CollisionBoxSize = WeaponInfo.WeaponCollisionBoxSize;
@@ -54,7 +76,17 @@ void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo)
 	LoadWeaponMentageAsync(WeaponInfo.MentageName);
 	// 加载武器模组
 	LoadWeaponComponents(WeaponInfo.NeedLoadComponentInfoMap);
+}
 
+void ASL_WeaponBase::ActiveWeapon()
+{
+	// 可视
+
+}
+
+void ASL_WeaponBase::InActiveWeapon()
+{
+	// 不可视
 }
 
 void ASL_WeaponBase::UpdateWeaponEquipState(EWeaponEquipState CurrentState)
@@ -62,19 +94,14 @@ void ASL_WeaponBase::UpdateWeaponEquipState(EWeaponEquipState CurrentState)
 	WeaponEquipInfo = CurrentState;
 }
 
-void ASL_WeaponBase::PerformAttack()
+bool ASL_WeaponBase::IsLoadExecuteMod()
 {
-	
+	return WeaponLoadComponentInfoMap.Find(EWeaponComponentType::Execute);
 }
 
-void ASL_WeaponBase::PerformDefence()
+bool ASL_WeaponBase::IsLoadBackStabMod()
 {
-
-}
-
-void ASL_WeaponBase::PerformComboSkill()
-{
-
+	return WeaponLoadComponentInfoMap.Find(EWeaponComponentType::BackStab);
 }
 
 void ASL_WeaponBase::LoadWeaponMeshAsync(const FString WeaponMeshName)
@@ -96,16 +123,25 @@ void ASL_WeaponBase::OnLoadedWeaponMesh()
 	}
 }
 
-void ASL_WeaponBase::LoadWeaponMentageAsync(const FString MentagePath)
+void ASL_WeaponBase::LoadWeaponMentageAsync(EWeaponMontageType MentageType, const FString MentagePath)
 {
-	if (MentagePath == ""){return;}
+	if (MentagePath == "") { return; }
 	// 资源异步加载
-	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+	/*FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
 	SoftMentageRefrence = FSoftObjectPath(*MentagePath);
 	Streamable.RequestAsyncLoad(
 		SoftMentageRefrence.ToSoftObjectPath()
-	);
-	
+	);*/
+	// 资源同步加载
+	UAnimMontage* Montage = LoadObject<UAnimMontage>(
+		nullptr,
+		*MentagePath
+		);
+	if (Montage)
+	{
+		WeaponMentageMap.FindRef(MentageType) = Montage;
+	}
+
 }
 
 void ASL_WeaponBase::LoadWeaponAnimInstanceAsync(const FString WeapinAnimName)
@@ -195,14 +231,25 @@ bool ASL_WeaponBase::LoadWeaponComponents(const TMap<EWeaponComponentType, bool>
 	return false;
 }
 
-bool ASL_WeaponBase::CanExecute(AActor* MasterActor, float AllowedExecuteDistance, float AllowdBackStabRange)
+void ASL_WeaponBase::PlayWeaponMentage(AActor* OwnerActor, EWeaponMontageType MentageType, FName MentageSectionName)
 {
-	// 完成距离,角度,是否装载组件进行判断
-	return false;
-}
+	if (OwnerActor == nullptr){return;}
 
-bool ASL_WeaponBase::CanBackStab(AActor* MasterActor, float AllowedBackStabDistance, float AllowdBackStabRange)
-{
-	// 完成距离,角度,是否装载组件进行判断
-	return false;
+	ACharacter* OwningCharacter = Cast<ACharacter>(OwnerActor);
+	if (OwningCharacter == nullptr || OwningCharacter->GetMesh()->GetAnimInstance() == nullptr)
+	{
+		UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+		UAnimMontage* NeedPlayMentage = WeaponMentageMap.FindRef(MentageType);
+		if(NeedPlayMentage == nullptr || AnimInstance == nullptr){return;}
+
+		if (AnimInstance->Montage_IsActive(NeedPlayMentage) &&
+			MentageSectionName != FName(""))
+		{
+			AnimInstance->Montage_JumpToSection(MentageSectionName);
+		}
+		else
+		{
+			AnimInstance->Montage_Play(NeedPlayMentage);
+		}
+	}
 }

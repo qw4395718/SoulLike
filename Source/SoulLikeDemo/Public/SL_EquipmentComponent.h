@@ -12,7 +12,7 @@ const EQUIPMENT_SLOT_NUM 5;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SOULLIKEDEMO_API USL_EquipmentComponent : public UActorComponent
+class SOULLIKEDEMO_API USL_EquipmentComponent : public UActorComponent,public IWeaponBehavior_IF
 {
 	GENERATED_BODY()
 
@@ -22,25 +22,34 @@ public:
 
 public:
 	/************************************************************************/
-	/*                                接口继承                                      */
+	/*                                接口实现                                      */
 	/************************************************************************/
+	// 攻击行为响应
+	UFUNCTION()
+		void AttackBehaviorResponse(AActor* OwnerActor) override;
 
+	// 防御行为响应
+	UFUNCTION()
+		void DefenceBehaviorResponse(AActor* OwnerActor) override;
+
+	// 技能行为响应
+	UFUNCTION()
+		void ComboSkillBehaviorResponse(AActor* OwnerActor) override;
+
+	// 处决行为响应
+	UFUNCTION()
+		void ExecuteBehaviorResponse(AActor* OwnerActor) override;
+
+	// 背刺行为响应
+	UFUNCTION()
+		void BackStabBehaviorResponse(AActor* OwnerActor) override;
 
 public:
 	/************************************************************************/
 	/*                                 外部调用                                     */
 	/************************************************************************/
 	UFUNCTION()
-		void InitEquipment();
-
-	UFUNCTION()
-		void LeftMouseEvent();
-
-	UFUNCTION()
-		void RightMouseEvent();
-
-	UFUNCTION()
-		void CtrlKeyEvent();
+		void InitEquipmentComponent(const TArray<FWeaponData*> WeaponList,const TArray<int> ItemList);
 
 	UFUNCTION()
 		void UseUpSlotItemEvent();
@@ -52,46 +61,19 @@ public:
 		void SwitchEquipmentEvent(EArrowKeyType ArrowType);
 
 	UFUNCTION()
-		void AddEquipemntInfo(EArrowKeyType ArrowType,int SlotIndex, FWeaponData* WeaponInfo);
+		void SetEquipemntInfo(EArrowKeyType ArrowType,int SlotIndex, FWeaponData* WeaponInfo);
 
 	UFUNCTION()
-		void RemoveEquipemntInfo(EArrowKeyType ArrowType, int SlotIndex);
+		void SetCostItemInfo(EArrowKeyType ArrowType, int SlotIndex, int ItemID);
 
 	UFUNCTION()
-		void AddCostItemInfo(EArrowKeyType ArrowType, int SlotIndex, int ItemID);
-
-	UFUNCTION()
-		void RemoveCostItemInfo(EArrowKeyType ArrowType, int SlotIndex);
+		void CleanCostItemInfo(EArrowKeyType ArrowType, int SlotIndex);
 
 protected:
 	/************************************************************************/
 	/*                                  内部调用                                    */
 	/************************************************************************/
-	// 切换武器时需要将当前武器摧毁,回收资源
-	UFUNCTION()
-		void DestroyWeaponClass(ASL_WeaponBase* DestroyWeapon);
 
-	// 根据武器信息进行初始化
-	UFUNCTION()
-		void InitCurrentWeapon(FWeaponData WeaponInfo);
-
-	UFUNCTION()
-		void LeftHandWeaponAttack();
-
-	UFUNCTION()
-		void LeftHandWeaponDefence();
-
-	UFUNCTION()
-		void LeftHandWeaponComboSkill();
-
-	UFUNCTION()
-		void RightHandWeaponAttack();
-
-	UFUNCTION()
-		void RightHandWeaponDefence();
-
-	UFUNCTION()
-		void RightHandWeaponComboSkill();
 
 protected:
 	/************************************************************************/
@@ -103,19 +85,19 @@ protected:
 
 	// 左手装备信息数组
 	UPROPERTY()
-		FWeaponData* LeftHandEquipmentInfoList[EQUIPMENT_SLOT_NUM];
+		ASL_WeaponBase* LeftHandEquipmentInfoList[EQUIPMENT_SLOT_NUM];
 
 	// 当前左手武器
 	UPROPERTY()
-		ASL_WeaponBase* pCurrentLeftHandWeapon;
+		ASL_WeaponBase* CurrentLeftHandWeapon;
 
 	// 右手装备信息数组
 	UPROPERTY()
-		FWeaponData* RightHandEquipmentInfoList[EQUIPMENT_SLOT_NUM];
+		ASL_WeaponBase* RightHandEquipmentInfoList[EQUIPMENT_SLOT_NUM];
 
 	// 当前左手武器
 	UPROPERTY()
-		ASL_WeaponBase* pCurrentRightHandWeapon;
+		ASL_WeaponBase* CurrentRightHandWeapon;
 
 	// 上方装备道具信息
 	UPROPERTY()
@@ -123,7 +105,7 @@ protected:
 
 	// 当前上方装备道具
 	UPROPERTY()
-		int iCurrentUpSlotItemID;
+		int CurrentUpSlotItemID;
 
 	// 下方装备道具信息
 	UPROPERTY()
@@ -131,5 +113,5 @@ protected:
 	
 	// 当前下方装备道具
 	UPROPERTY()
-		int iCurrentDownSlotItemID;
+		int CurrentDownSlotItemID;
 };

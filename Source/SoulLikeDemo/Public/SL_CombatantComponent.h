@@ -37,6 +37,9 @@ public:
 		void OnAttackEventCall() override;
 
 	UFUNCTION()
+		void SetCanExecuteState(bool bCanExecuted) override;
+
+	UFUNCTION()
 		bool CanExecute() override;
 
 	UFUNCTION()

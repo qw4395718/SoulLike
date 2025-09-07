@@ -8,7 +8,8 @@
 #include "WeaponDefinition.h"
 #include "SoulLikeCharacter.h"
 #include "Components/BoxComponent.h"
-#include "WeaponDefinition.h"
+#include "WeaponBehavior_IF.h"
+#include "WeaponData.h"
 #include "SL_WeaponBase.generated.h"
 
 /**
@@ -22,31 +23,56 @@ class SOULLIKEDEMO_API ASL_WeaponBase : public AActor
 public:
 
 	ASL_WeaponBase();
+public:
+	/************************************************************************/
+	/*                               接口实现                                       */
+	/************************************************************************/
+	// 攻击行为响应
+	UFUNCTION()
+		void Attack(AActor* OwnerActor);
+
+	// 防御行为响应
+	UFUNCTION()
+		void Defence(AActor* OwnerActor);
+
+	// 技能行为响应
+	UFUNCTION()
+		void ComboSkill(AActor* OwnerActor);
+
+	// 处决行为响应
+	UFUNCTION()
+		void Execute(AActor* OwnerActor);
+
+	// 背刺行为响应
+	UFUNCTION()
+		void BackStab(AActor* OwnerActor);
 
 	/************************************************************************/
 	/*外部调用                                                                     */
 	/************************************************************************/
 	// 初始化武器信息
 	UFUNCTION()
-		void InitWeaponInfo(const FWeaponDefinition& WeaponInfo);
+		void InitWeaponInfo(const FWeaponData& WeaponInfo);
+
+	// 激活该武器
+	UFUNCTION()
+		void ActiveWeapon();
+
+	// 静默该武器
+	UFUNCTION()
+		void InActiveWeapon();
 	
 	// 更新武器状态
 	UFUNCTION()
 		void UpdateWeaponEquipState(EWeaponEquipState CurrentState);
 
-	// 鼠标左键响应
+	// 该武器是否配置了处决模组
 	UFUNCTION()
-		void PerformAttack();
+		bool IsLoadExecuteMod();
 
-	// 鼠标右键响应
+	// 该武器是否配置了背刺模组
 	UFUNCTION()
-		void PerformDefence();
-
-	// Ctrl键响应
-	UFUNCTION()
-		void PerformComboSkill();
-
-
+		bool IsLoadBackStabMod();
 protected:
 	/************************************************************************/
 	/*                               继承实现                                       */
@@ -62,7 +88,7 @@ protected:
 	void OnLoadedWeaponMesh();
 
 	// 异步加载武器蒙太奇动画(供给角色类使用)
-	void LoadWeaponMentageAsync(const FString MentagePath);
+	void LoadWeaponMentageAsync(EWeaponMontageType MentageType,const FString MentagePath);
 
 	// 异步加载武器动画蓝图
 	void LoadWeaponAnimInstanceAsync(const FString WeapinAnimName);
@@ -71,15 +97,10 @@ protected:
 	void OnLoadedWeaponAnimInstance();
 
 	// 加载武器模组
-	bool LoadWeaponComponents(const TMap<EWeaponComponentType, bool>& pWeaponComponentInfo);
+	bool LoadWeaponComponents(const TMap<EWeaponComponentType, bool>& WeaponComponentInfo);
 
-	// 处决检测
-	bool CanExecute(AActor* MasterActor,float AllowedExecuteDistance, float AllowdBackStabRange);
-
-	// 背刺检测
-	bool CanBackStab(AActor* MasterActor,float AllowedBackStabDistance,float AllowdBackStabRange);
-
-
+	// 播放武器蒙太奇
+	void PlayWeaponMentage(AActor* OwnerActor,EWeaponMontageType MentageType,FName MentageSectionName);
 protected:
 	/************************************************************************/
 	/*内部变量                                                                     */
@@ -105,7 +126,7 @@ protected:
 
 	// 武器蒙太奇动画异步加载ptr
 	UPROPERTY()
-		TSoftClassPtr<UAnimMontage> SoftMentageRefrence;
+		TMap<EWeaponMontageType, UAnimMontage*> WeaponMentageMap;
 
 	// 武器动画蓝图
 	UPROPERTY()

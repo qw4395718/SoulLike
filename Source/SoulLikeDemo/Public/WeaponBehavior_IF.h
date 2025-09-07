@@ -26,22 +26,22 @@ public:
 
 	// 攻击行为响应
 	UFUNCTION()
-		virtual float AttackBehaviorResponse(AActor* OwnerActor) = 0;
+		virtual void AttackBehaviorResponse(AActor* OwnerActor) = 0;
 
 	// 防御行为响应
 	UFUNCTION()
-		virtual float DefenceBehaviorResponse(AActor* OwnerActor) = 0;
+		virtual void DefenceBehaviorResponse(AActor* OwnerActor) = 0;
 
 	// 技能行为响应
 	UFUNCTION()
-		virtual float ComboSkillBehaviorResponse(AActor* OwnerActor) = 0;
+		virtual void ComboSkillBehaviorResponse(AActor* OwnerActor) = 0;
 
 	// 处决行为响应
 	UFUNCTION()
-		virtual float ExecuteBehaviorResponse(AActor* OwnerActor) = 0;
+		virtual void ExecuteBehaviorResponse(AActor* OwnerActor) = 0;
 
 	// 背刺行为响应
 	UFUNCTION()
-		virtual float BackStabBehaviorResponse(AActor* OwnerActor) = 0;
+		virtual void BackStabBehaviorResponse(AActor* OwnerActor) = 0;
 
 };

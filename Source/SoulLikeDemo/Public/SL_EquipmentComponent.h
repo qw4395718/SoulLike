@@ -6,9 +6,13 @@
 #include "Components/ActorComponent.h"
 #include "SoulLikeGameGlobal.h"
 #include "WeaponBase.h"
+#include "WeaponData.h"
+#include "WeaponBehavior_IF.h"
+#include "Containers/Map.h"
+#include "SL_WeaponBase.h"
 #include "SL_EquipmentComponent.generated.h"
 
-const EQUIPMENT_SLOT_NUM 5;
+const INT EQUIPMENT_SLOT_NUM  = 5;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -49,7 +53,7 @@ public:
 	/*                                 外部调用                                     */
 	/************************************************************************/
 	UFUNCTION()
-		void InitEquipmentComponent(const TArray<FWeaponData*> WeaponList,const TArray<int> ItemList);
+		void InitEquipmentComponent(const TArray<FWeaponData> WeaponList,const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex);
 
 	UFUNCTION()
 		void UseUpSlotItemEvent();
@@ -61,7 +65,7 @@ public:
 		void SwitchEquipmentEvent(EArrowKeyType ArrowType);
 
 	UFUNCTION()
-		void SetEquipemntInfo(EArrowKeyType ArrowType,int SlotIndex, FWeaponData* WeaponInfo);
+		void SetEquipemntInfo(EArrowKeyType ArrowType,int SlotIndex, FWeaponData& WeaponInfo);
 
 	UFUNCTION()
 		void SetCostItemInfo(EArrowKeyType ArrowType, int SlotIndex, int ItemID);
@@ -81,7 +85,7 @@ protected:
 	/************************************************************************/
 	// 当前四个装备槽的当前Index
 	UPROPERTY()
-	TMap<EArrowKeyType,int> CurrentEquipmentIndex;
+		TMap<EArrowKeyType,int> CurrentEquipmentIndex;
 
 	// 左手装备信息数组
 	UPROPERTY()

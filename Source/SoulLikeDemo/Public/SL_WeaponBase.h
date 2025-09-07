@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "SoulLikeGameGlobal.h"
-#include "WeaponDefinition.h"
 #include "SoulLikeCharacter.h"
 #include "Components/BoxComponent.h"
 #include "WeaponBehavior_IF.h"
@@ -105,9 +104,6 @@ protected:
 	/************************************************************************/
 	/*内部变量                                                                     */
 	/************************************************************************/
-	// 拥有者
-	UPROPERTY()
-		AActor* OwnerActor;
 
 	// 武器ID
 	UPROPERTY()

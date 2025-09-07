@@ -28,11 +28,9 @@ ASL_WeaponBase::ASL_WeaponBase()
 	/************************************************************************/
 	/*                              变量初始化                                        */
 	/************************************************************************/
-	OwnerActor = nullptr;
 	WeaponID = 0;
 	SoftMeshReference = nullptr;
 	CollisionBoxSize = FVector(0.0f,0.0f,0.0f);
-	SoftMentageRefrence = nullptr;
 	SoftWeaponAnimInstanceReference = nullptr;
 	WeaponComponentMap.Reset();
 	WeaponLoadComponentInfoMap.Reset();
@@ -66,14 +64,13 @@ void ASL_WeaponBase::BackStab(AActor* OwnerActor)
 
 void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo)
 {
-	if(OnwerActor == nullptr){return;}
 	// 加载武器模型
 	LoadWeaponMeshAsync(WeaponInfo.Mesh);
 	CollisionBoxSize = WeaponInfo.WeaponCollisionBoxSize;
 	// 加载武器动作蓝图
 	LoadWeaponAnimInstanceAsync(WeaponInfo.AnimClass);
 	// 加载武器蒙太奇
-	LoadWeaponMentageAsync(WeaponInfo.MentageName);
+	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_Attack,WeaponInfo.MentageName);
 	// 加载武器模组
 	LoadWeaponComponents(WeaponInfo.NeedLoadComponentInfoMap);
 }
@@ -96,12 +93,12 @@ void ASL_WeaponBase::UpdateWeaponEquipState(EWeaponEquipState CurrentState)
 
 bool ASL_WeaponBase::IsLoadExecuteMod()
 {
-	return WeaponLoadComponentInfoMap.Find(EWeaponComponentType::Execute);
+	return  bool(*WeaponLoadComponentInfoMap.Find(EWeaponComponentType::Execute));
 }
 
 bool ASL_WeaponBase::IsLoadBackStabMod()
 {
-	return WeaponLoadComponentInfoMap.Find(EWeaponComponentType::BackStab);
+	return bool(*WeaponLoadComponentInfoMap.Find(EWeaponComponentType::BackStab));
 }
 
 void ASL_WeaponBase::LoadWeaponMeshAsync(const FString WeaponMeshName)
@@ -139,7 +136,7 @@ void ASL_WeaponBase::LoadWeaponMentageAsync(EWeaponMontageType MentageType, cons
 		);
 	if (Montage)
 	{
-		WeaponMentageMap.FindRef(MentageType) = Montage;
+		WeaponMentageMap.FindOrAdd(MentageType) = Montage;
 	}
 
 }

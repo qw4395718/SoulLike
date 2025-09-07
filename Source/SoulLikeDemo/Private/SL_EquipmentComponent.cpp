@@ -2,91 +2,134 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "SL_WeaponBase.h"
 
 USL_EquipmentComponent::USL_EquipmentComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
+	// 默认初始化
 	CurrentLeftHandWeapon = nullptr;
 	CurrentRightHandWeapon = nullptr;
+	CurrentUpSlotItemID = 0;
+	CurrentDownSlotItemID = 0;
+	CurrentEquipmentIndex.Add(EArrowKeyType::ARROWKEY_Up, 0);
+	CurrentEquipmentIndex.Add(EArrowKeyType::ARROWKEY_Down, 0);
+	CurrentEquipmentIndex.Add(EArrowKeyType::ARROWKEY_Left, 0);
+	CurrentEquipmentIndex.Add(EArrowKeyType::ARROWKEY_Right, 0);
+	for (int i = 0; i < EQUIPMENT_SLOT_NUM; i++)
+	{
+		LeftHandEquipmentInfoList[i] = nullptr;
+		RightHandEquipmentInfoList[i] = nullptr;
+		UpItemList[i] = 0;
+		DownItemList[i] = 0;
+	}
 }
 
 void USL_EquipmentComponent::AttackBehaviorResponse(AActor* OwnerActor)
 {
+	RETURN_IF_FALSE(OwnerActor);
+	RETURN_IF_FALSE(CurrentRightHandWeapon);
+	//检查是否有右手武器
+	CurrentRightHandWeapon->Attack(OwnerActor);
+	
+}
+
+void USL_EquipmentComponent::DefenceBehaviorResponse(AActor* OwnerActor)
+{
+	 //判定是否有左手武器
+	RETURN_IF_FALSE(OwnerActor);
+	RETURN_IF_FALSE(CurrentLeftHandWeapon);
+	CurrentLeftHandWeapon->Defence(OwnerActor);
+
+}
+
+void USL_EquipmentComponent::ComboSkillBehaviorResponse(AActor* OwnerActor)
+{
+	RETURN_IF_FALSE(OwnerActor);
+	CurrentRightHandWeapon->ComboSkill(OwnerActor);
+}
+
+void USL_EquipmentComponent::ExecuteBehaviorResponse(AActor* OwnerActor)
+{
+	RETURN_IF_FALSE(OwnerActor);
 	// 检查是否有右手武器
-	if (CurrentRightHandWeapon != nullptr)
+	if (CurrentRightHandWeapon->IsLoadExecuteMod())
+	{
+		CurrentRightHandWeapon->Execute(OwnerActor);
+	}
+	else
 	{
 		CurrentRightHandWeapon->Attack(OwnerActor);
 	}
 }
 
-void USL_EquipmentComponent::DefenceBehaviorResponse(AActor* OwnerActor)
-{
-	// 判定是否有左手武器
-	if (CurrentLeftHandWeapon != nullptr)
-	{
-		CurrentLeftHandWeapon->Defence(OwnerActor);
-	}
-}
-
-void USL_EquipmentComponent::ComboSkillBehaviorResponse(AActor* OwnerActor)
-{
-	// 检查是否有右手武器
-	if (CurrentRightHandWeapon != nullptr)
-	{
-		CurrentRightHandWeapon->ComboSkill(OwnerActor);
-	}
-	else if (CurrentLeftHandWeapon != nullptr)
-	{
-		CurrentLeftHandWeapon->ComboSkill(OwnerActor);
-	}
-	else
-	{
-		// 双手都未持有武器
-	}
-}
-
-void USL_EquipmentComponent::ExecuteBehaviorResponse(AActor* OwnerActor)
-{
-	// 检查是否有右手武器
-	if (CurrentRightHandWeapon == nullptr){return;}
-	if (CurrentRightHandWeapon.IsLoadExecuteMod())
-	{
-		CurrentRightHandWeapon.Execute(OwnerActor);
-	}
-	else
-	{
-		CurrentRightHandWeapon.Attack(OwnerActor);
-	}
-}
-
 void USL_EquipmentComponent::BackStabBehaviorResponse(AActor* OwnerActor)
 {
+	RETURN_IF_FALSE(OwnerActor);
 	// 检查是否有右手武器
-	if (CurrentRightHandWeapon == nullptr) { return; }
-	if(CurrentRightHandWeapon.IsLoadBackStabMod())
+	if(CurrentRightHandWeapon->IsLoadBackStabMod())
 	{
-		CurrentRightHandWeapon.BackStab(OwnerActor);
+		CurrentRightHandWeapon->BackStab(OwnerActor);
 	}
 	else
 	{
-		CurrentRightHandWeapon.Attack(OwnerActor);
+		CurrentRightHandWeapon->Attack(OwnerActor);
 	}
 }
 
 
-void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData*> WeaponList, const TArray<int> ItemList)
+void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData> WeaponList, const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex)
 {
 	// 检测武器数组与Item数组是否符合要求
-	check(WeaponList.Num() == EQUIPMENT_SLOT_NUM && ItemList.Num() == EQUIPMENT_SLOT_NUM)
+	check(WeaponList.Num() == EQUIPMENT_SLOT_NUM*2 && ItemList.Num() == EQUIPMENT_SLOT_NUM*2)
 	// 执行武器数组初始化
-	for (int i = 0; i < EQUIPMENT_SLOT_NUM; i++)
+	for (int i = 0; i < EQUIPMENT_SLOT_NUM*2; i++)
 	{
-		ASL_WeaponBase* NewWeapon = NewObject<ASL_WeaponBase>(this);
-		NewWeapon->InitWeaponInfo(*WeaponList[i]);
+		ASL_WeaponBase* NewWeapon = GetWorld()->SpawnActor<ASL_WeaponBase>(ASL_WeaponBase::StaticClass(),FTransform());
+		NewWeapon->InitWeaponInfo(WeaponList[i]);
 		NewWeapon->InActiveWeapon();
+		if (i < EQUIPMENT_SLOT_NUM)
+		{
+			LeftHandEquipmentInfoList[i] = NewWeapon;
+		}
+		else
+		{
+			RightHandEquipmentInfoList[i] = NewWeapon;
+		}
+		
 	}
-	
+	// 执行道具数组初始化
+	for (int i = 0; i < EQUIPMENT_SLOT_NUM *2; i++)
+	{
+		if (i < EQUIPMENT_SLOT_NUM)
+		{
+			UpItemList[i] = ItemList[i];
+		}
+		else
+		{
+			DownItemList[i] = ItemList[i];
+		}
+	}
+	// 记录当前激活槽位索引(深拷贝)
+	CurrentEquipmentIndex = ActiveSlotIndex;
+	// 根据记录所用激活武器
+	if (int* LeftHandIndex = CurrentEquipmentIndex.Find(EArrowKeyType::ARROWKEY_Left))
+	{
+		if (*LeftHandIndex >= 0 && *LeftHandIndex < EQUIPMENT_SLOT_NUM)
+		{
+			CurrentLeftHandWeapon = LeftHandEquipmentInfoList[*LeftHandIndex];
+			CurrentLeftHandWeapon->ActiveWeapon();
+		}
+	}
+	if (int* RightHandIndex = CurrentEquipmentIndex.Find(EArrowKeyType::ARROWKEY_Right))
+	{
+		if (*RightHandIndex >= 0 && *RightHandIndex < EQUIPMENT_SLOT_NUM)
+		{
+			CurrentRightHandWeapon = RightHandEquipmentInfoList[*RightHandIndex];
+			CurrentRightHandWeapon->ActiveWeapon();
+		}
+	}
 }
 
 void USL_EquipmentComponent::UseUpSlotItemEvent()
@@ -102,41 +145,37 @@ void USL_EquipmentComponent::UseDownSlotItemEvent()
 void USL_EquipmentComponent::SwitchEquipmentEvent(EArrowKeyType ArrowType)
 {
 	if (CurrentEquipmentIndex.Find(ArrowType) == nullptr ||
-		CurrentEquipmentIndex.Find(ArrowType) >= EQUIPMENT_SLOT_NUM)
+		*(CurrentEquipmentIndex.Find(ArrowType)) >= EQUIPMENT_SLOT_NUM)
 		{return;}
 	
-	CurrentEquipmentIndex.FindRef(ArrowType) = (CurrentEquipmentIndex.Find(ArrowType)++) % EQUIPMENT_SLOT_NUM;
+	*CurrentEquipmentIndex.Find(ArrowType) = ((*CurrentEquipmentIndex.Find(ArrowType))++) % EQUIPMENT_SLOT_NUM;
 
 	switch (ArrowType)
 	{
 	case EArrowKeyType::ARROWKEY_Up:
 	{
-		CurrentUpSlotItemID = UpItemList[CurrentEquipmentIndex.Find(ArrowType)];
+		CurrentUpSlotItemID = UpItemList[*CurrentEquipmentIndex.Find(ArrowType)];
 	}
 	break;
 	case EArrowKeyType::ARROWKEY_Down:
 	{
-		CurrentDownSlotItemID = UpItemList[CurrentEquipmentIndex.Find(ArrowType)];
+		CurrentDownSlotItemID = UpItemList[*CurrentEquipmentIndex.Find(ArrowType)];
 	}
 	break;
 	case EArrowKeyType::ARROWKEY_Left:
 	{
-		check(CurrentLeftHandWeapon != nullptr);
 		// 设置当前左手武器静默状态
 		CurrentLeftHandWeapon->InActiveWeapon();
-		CurrentLeftHandWeapon = LeftHandEquipmentInfoList[CurrentEquipmentIndex.Find(ArrowType)];
-		check(CurrentLeftHandWeapon != nullptr);
+		CurrentLeftHandWeapon = LeftHandEquipmentInfoList[*CurrentEquipmentIndex.Find(ArrowType)];
 		CurrentLeftHandWeapon->ActiveWeapon();
 
 	}
 	break;
 	case EArrowKeyType::ARROWKEY_Right:
 	{
-		check(CurrentRightHandWeapon != nullptr);
 		// 设置当前左手武器静默状态
 		CurrentRightHandWeapon->InActiveWeapon();
-		CurrentRightHandWeapon = RightHandEquipmentInfoList[CurrentEquipmentIndex.Find(ArrowType)];
-		check(CurrentRightHandWeapon != nullptr);
+		CurrentRightHandWeapon = RightHandEquipmentInfoList[*CurrentEquipmentIndex.Find(ArrowType)];
 		CurrentRightHandWeapon->ActiveWeapon();
 	}
 	break;
@@ -145,12 +184,12 @@ void USL_EquipmentComponent::SwitchEquipmentEvent(EArrowKeyType ArrowType)
 	}
 }
 
-void USL_EquipmentComponent::SetEquipemntInfo(EArrowKeyType ArrowType, int SlotIndex, FWeaponData* WeaponInfo)
+void USL_EquipmentComponent::SetEquipemntInfo(EArrowKeyType ArrowType, int SlotIndex, FWeaponData& WeaponInfo)
 {
 	if(SlotIndex < 0 || SlotIndex >= EQUIPMENT_SLOT_NUM){return;}
 	// 根据EArrowKeyType区别上下装备槽
 	ASL_WeaponBase* NewWeapon = NewObject<ASL_WeaponBase>(this);
-	NewWeapon->InitWeaponInfo(*WeaponInfo);
+	NewWeapon->InitWeaponInfo(WeaponInfo);
 	if (ArrowType == EArrowKeyType::ARROWKEY_Left)
 	{
 		LeftHandEquipmentInfoList[SlotIndex] = NewWeapon;

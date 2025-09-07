@@ -1,5 +1,5 @@
 #pragma once
-
+#include "SL_Macros.h"
 
 // 角色配置-背刺距离限制
 const INT BACKSTAB_DISTANCE_THRESHOLD = 150;
@@ -23,10 +23,10 @@ const INT INVENTORYTYPE_NUM = 12;
 const INT INVENTORY_SINGLE_CAPACITY = 100;
 
 // 减伤最大上限
-const float REDUCE_DAMAGE_PERCENTAGE = 0.9f
+const float REDUCE_DAMAGE_PERCENTAGE = 0.9f;
 
 // 体力消耗最小下限
-const float REDUCE_STAMINACOST_PERCENTAGE = 0.5f
+const float REDUCE_STAMINACOST_PERCENTAGE = 0.5f;
 
 
 //伤害类型
@@ -159,4 +159,10 @@ enum class EWeaponMontageType :uint8
 	EWeaponMontag_Max
 };
 
+// 槽位信息
+struct FInventorySlot
+{
+	EInventoryCompartmentType SlotType;
+	int SlotIndex;
+};
 

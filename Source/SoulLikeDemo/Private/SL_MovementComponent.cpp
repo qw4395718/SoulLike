@@ -16,7 +16,7 @@ USL_MovementComponent::USL_MovementComponent()
 void USL_MovementComponent::InitMovemenetInfo()
 {
 	// 由外部信息进行初始化
-
+	LoadMovementMentage("");
 }
 
 void USL_MovementComponent::ExeRoll()

@@ -22,13 +22,13 @@ float USL_StateComponent::DamageDealtCalculate(float Damage)
 float USL_StateComponent::DamageReceivedCalculate(float Damage)
 {
 	float CalculateValue = 0.0f;
-	CalculateValue = Damage*(DamageReducePercentage > REDUCE_DAMAGE_PERCENTAGE:1 - fDamageReducePercentage?1 - REDUCE_DAMAGE_PERCENTAGE);
+	CalculateValue = Damage*(DamageReducePercentage > REDUCE_DAMAGE_PERCENTAGE?1 - DamageReducePercentage:1 - REDUCE_DAMAGE_PERCENTAGE);
 	return CalculateValue;
 }
 
 float USL_StateComponent::StaminaCostCalculate(float StaminaCost)
 {
 	float CalculateValue = 0.0f;
-	CalculateValue = StaminaCost * (StaminaCostReducePercentage > REDUCE_STAMINACOST_PERCENTAGE:StaminaCostReducePercentage ? REDUCE_STAMINACOST_PERCENTAGE);
+	CalculateValue = StaminaCost * (StaminaCostReducePercentage > REDUCE_STAMINACOST_PERCENTAGE?StaminaCostReducePercentage : REDUCE_STAMINACOST_PERCENTAGE);
 	return CalculateValue;
 }

@@ -13,7 +13,7 @@ ASL_CharacterBase::ASL_CharacterBase()
 
 void ASL_CharacterBase::BeginPlay()
 {
-
+	
 }
 
 void ASL_CharacterBase::Tick(float DeltaTime)
@@ -25,27 +25,71 @@ void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ASL_CharacterBase::PerformLeftMouse);
-	PlayerInputComponent->BindAction("CombatSkill", IE_Pressed, this, &ASL_CharacterBase::PerformCombatSkill);
-
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ASL_CharacterBase::PerformAttack);
+	PlayerInputComponent->BindAction("Defence", IE_Pressed, this, &ASL_CharacterBase::PerformDefence);
+	PlayerInputComponent->BindAction("ComboSkill", IE_Pressed, this, &ASL_CharacterBase::PerformComboSkill);
+	PlayerInputComponent->BindAction("LockRotation", IE_Pressed, this, &ASL_CharacterBase::PerformLockRotation);
+	PlayerInputComponent->BindAction("Roll", IE_Pressed, this, &ASL_CharacterBase::PerformRoll);
+	PlayerInputComponent->BindAction("SwitchEquipmentUp", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentUp);
+	PlayerInputComponent->BindAction("SwitchEquipmentDown", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentDown);
+	PlayerInputComponent->BindAction("EquipmentLeft", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentLeft);
+	PlayerInputComponent->BindAction("EquipmentRight", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentRight);
 }
 
-void ASL_CharacterBase::PerformLeftMouse()
+
+
+void ASL_CharacterBase::PerformAttack()
+{
+	
+}
+
+void ASL_CharacterBase::PerformDefence()
 {
 
 }
 
-void ASL_CharacterBase::PerformRightMouse()
+void ASL_CharacterBase::PerformComboSkill()
 {
 
 }
 
-void ASL_CharacterBase::PerformCombatSkill()
+void ASL_CharacterBase::PerformLockRotation()
+{
+
+}
+
+void ASL_CharacterBase::PerformRoll()
+{
+
+}
+
+void ASL_CharacterBase::PerformSwitchEquipmentUp()
+{
+
+}
+
+void ASL_CharacterBase::PerformSwitchEquipmentDown()
+{
+
+}
+
+void ASL_CharacterBase::PerformSwitchEquipmentLeft()
+{
+
+}
+
+void ASL_CharacterBase::PerformSwitchEquipmentRight()
 {
 
 }
 
 void ASL_CharacterBase::InitializeCharacter()
 {
+	//ÄâÔìÊý¾Ý
+	InitPartmentComponent();
+}
 
+void ASL_CharacterBase::InitPartmentComponent()
+{
+	
 }

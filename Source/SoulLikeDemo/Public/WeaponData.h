@@ -15,8 +15,14 @@ struct FWeaponData
 	FString Mesh;
 	// 动画蓝图名
 	FString AnimClass;
-	// 蒙太奇名
-	FString MentageName;
+	// 攻击动画蒙太奇名
+	FString AttackMentageName;
+	// 技能动画蒙太奇名
+	FString ComboSkillMentageName;
+	// 处决动画蒙太奇名
+	FString ExecuteMentageName;
+	// 背刺动画蒙太奇名
+	FString BackStabMentageName;
 	// 各段攻击的伤害
 	TMap<EAttackType, float> BaseDamageMap;
 	// 各段攻击消耗的体力

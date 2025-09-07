@@ -69,8 +69,15 @@ void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo)
 	CollisionBoxSize = WeaponInfo.WeaponCollisionBoxSize;
 	// ¼ÓÔØÎäÆ÷¶¯×÷À¶Í¼
 	LoadWeaponAnimInstanceAsync(WeaponInfo.AnimClass);
+
 	// ¼ÓÔØÎäÆ÷ÃÉÌ«Ææ
-	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_Attack,WeaponInfo.MentageName);
+	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_Attack,WeaponInfo.AttackMentageName);
+	// ¼ÓÔØÎäÆ÷ÃÉÌ«Ææ
+	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_ComboSkill, WeaponInfo.ComboSkillMentageName);
+	// ¼ÓÔØÎäÆ÷ÃÉÌ«Ææ
+	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_Execute, WeaponInfo.ExecuteMentageName);
+	// ¼ÓÔØÎäÆ÷ÃÉÌ«Ææ
+	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_BackStab, WeaponInfo.BackStabMentageName);
 	// ¼ÓÔØÎäÆ÷Ä£×é
 	LoadWeaponComponents(WeaponInfo.NeedLoadComponentInfoMap);
 }

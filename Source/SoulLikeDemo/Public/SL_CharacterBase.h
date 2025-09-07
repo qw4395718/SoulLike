@@ -37,15 +37,40 @@ protected:
 	/************************************************************************/
 	// 左键响应
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformLeftMouse();
+		void PerformAttack();
 
 	// 右键响应
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformRightMouse();
+		void PerformDefence();
 
 	// 左Ctrl响应
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformCombatSkill();
+		void PerformComboSkill();
+
+	// 锁定响应
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PerformLockRotation();
+
+	// 翻滚响应
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PerformRoll();
+
+	// 切换上方道具栏响应
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PerformSwitchEquipmentUp();
+
+	// 切换上方道具栏响应
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PerformSwitchEquipmentDown();
+
+	// 切换左方武器栏响应
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PerformSwitchEquipmentLeft();
+
+	// 切换右方武器栏响应
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void PerformSwitchEquipmentRight();
+
 
 public:
 	/************************************************************************/
@@ -54,5 +79,16 @@ public:
 	// 白盒初始化
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitializeCharacter();
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void InitPartmentComponent();
+
+protected:
+	/************************************************************************/
+	/*                                变量                                      */
+	/************************************************************************/
+	// 角色组件Map
+	//UPROPERTY()
+	//	TMap<>
 
 };

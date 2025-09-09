@@ -19,10 +19,11 @@ USL_StaminaComponent::USL_StaminaComponent()
 	StaminaReviveSingleValue = 20.0f;
 }
 
-void USL_StaminaComponent::InitStaminaInfo()
+void USL_StaminaComponent::InitStaminaInfo(float MaxStaminaSetiingsValue)
 {
 	// 外部提供信息初始化
-
+	MaxStaminaValue = MaxStaminaSetiingsValue;
+	CurrentStaminaValue = MaxStaminaSetiingsValue;
 }
 
 bool USL_StaminaComponent::GetIsStaminaZero()

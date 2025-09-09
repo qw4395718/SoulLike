@@ -13,6 +13,8 @@ struct FWeaponData
 	int32 WeaponUniqueID;
 	// 模型名
 	FString Mesh;
+	// 绑定的插槽名
+	FString SocketName;
 	// 动画蓝图名
 	FString AnimClass;
 	// 攻击动画蒙太奇名

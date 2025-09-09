@@ -37,6 +37,9 @@ public:
 	UFUNCTION()
 		void InitInventoryEquippableItemInfo(TArray<int> EquippableItemList);
 
+	UFUNCTION()
+		void GetEquipmentInfoList(TArray<FWeaponData> & EquipmentInfoList);
+
 
 protected:
 	/************************************************************************/
@@ -44,7 +47,7 @@ protected:
 	/************************************************************************/
 	
 	//ÄâÔìÊý¾Ý
-	void UnitTest();
+	void UnitTest(const TArray<int> WeaponList);
 
 protected:
 	/************************************************************************/

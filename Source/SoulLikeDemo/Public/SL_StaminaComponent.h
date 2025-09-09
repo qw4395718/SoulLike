@@ -46,7 +46,7 @@ public:
 	/************************************************************************/
 
 	UFUNCTION()
-		void InitStaminaInfo();
+		void InitStaminaInfo(float MaxStaminaSetiingsValue);
 
 protected:
 

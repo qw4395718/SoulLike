@@ -53,7 +53,7 @@ public:
 	/*                                 外部调用                                     */
 	/************************************************************************/
 	UFUNCTION()
-		void InitEquipmentComponent(const TArray<FWeaponData> WeaponList,const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex);
+		void InitEquipmentComponent(const TArray<FWeaponData> WeaponList,const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex ,AActor* OwnerActor);
 
 	UFUNCTION()
 		void UseUpSlotItemEvent();
@@ -118,4 +118,8 @@ protected:
 	// 当前下方装备道具
 	UPROPERTY()
 		int CurrentDownSlotItemID;
+
+	// 持有者信息
+	UPROPERTY()
+		AActor* Owning;
 };

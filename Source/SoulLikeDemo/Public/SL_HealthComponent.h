@@ -42,7 +42,7 @@ public:
 	/*                                    外部调用                                  */
 	/************************************************************************/
 	UFUNCTION()
-		void InitHealthInfo();
+		void InitHealthInfo(float MaxHealthSettings);
 
 
 

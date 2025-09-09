@@ -19,6 +19,15 @@
 USL_CombatantComponent::USL_CombatantComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+	// 默认初始化
+	TeamID = 0;
+	bWaitingForExecuted = false;
+	bAllowedBackStabsed = false;
+	SoftMentagePath = "";
+	NeedPlayMetageSectionName = FName("");
+	SoftMentageRefrence = nullptr;
+	ActorOwner = nullptr;
 }
 
 void USL_CombatantComponent::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -257,11 +266,12 @@ void USL_CombatantComponent::MoveToLocationAndRotation(FVector LocationPosition,
 	}
 }
 
-void USL_CombatantComponent::InitCombatComponentInfo()
+void USL_CombatantComponent::InitCombatComponentInfo(AActor* OwnerActor, FString OwnerMentagePath, int OwnerTeamID, bool OwnerCanBackStab)
 {
-	// 一堆信息
-	SoftMentagePath = "";
-	SoftMentageRefrence = TSoftObjectPtr<UAnimMontage>(FSoftObjectPath(*SoftMentagePath));
+	ActorOwner = OwnerActor;
+	SoftMentageRefrence = TSoftObjectPtr<UAnimMontage>(FSoftObjectPath(*OwnerMentagePath));
+	TeamID = OwnerTeamID;
+	bAllowedBackStabsed = OwnerCanBackStab;
 }
 
 void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)

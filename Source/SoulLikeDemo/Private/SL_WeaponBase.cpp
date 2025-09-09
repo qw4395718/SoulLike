@@ -62,8 +62,11 @@ void ASL_WeaponBase::BackStab(AActor* OwnerActor)
 	PlayWeaponMentage(OwnerActor, EWeaponMontageType::EWeaponMontag_BackStab, TEXT(""));
 }
 
-void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo)
+void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo,AActor* OwnerActor)
 {
+	// 初始化持有者信息和插槽信息
+	Owning = OwnerActor;
+	WeaponOnwerSocketName = WeaponInfo.SocketName;
 	// 加载武器模型
 	LoadWeaponMeshAsync(WeaponInfo.Mesh);
 	CollisionBoxSize = WeaponInfo.WeaponCollisionBoxSize;
@@ -71,7 +74,7 @@ void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo)
 	LoadWeaponAnimInstanceAsync(WeaponInfo.AnimClass);
 
 	// 加载武器蒙太奇
-	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_Attack,WeaponInfo.AttackMentageName);
+	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_Attack, WeaponInfo.AttackMentageName);
 	// 加载武器蒙太奇
 	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_ComboSkill, WeaponInfo.ComboSkillMentageName);
 	// 加载武器蒙太奇
@@ -124,6 +127,21 @@ void ASL_WeaponBase::OnLoadedWeaponMesh()
 {
 	if (USkeletalMesh* Mesh = SoftMeshReference.Get()) {
 		SkeletalWeaponMesh->SetSkeletalMesh(Mesh);
+	}
+	if (Owning != nullptr && WeaponOnwerSocketName != "")
+	{
+		if (ACharacter* CharacterOwner = Cast<ACharacter>(Owning))
+		{
+			//将武器绑定到指定虚拟骨骼
+			if (CharacterOwner->GetMesh()->DoesSocketExist(FName(*WeaponOnwerSocketName)))
+			{
+				this->AttachToComponent(
+					CharacterOwner->GetMesh(),
+					FAttachmentTransformRules::SnapToTargetNotIncludingScale, // 保持相对变换
+					FName(*WeaponOnwerSocketName) // Socket 名称
+				);
+			}
+		}
 	}
 }
 
@@ -192,7 +210,7 @@ bool ASL_WeaponBase::LoadWeaponComponents(const TMap<EWeaponComponentType, bool>
 			else
 			{
 				NewComponent.Key = Pair.Key;
-				NewComponent.Value = true;
+				NewComponent.Value = false;
 			}
 		}
 		else if(Pair.Key == EWeaponComponentType::Parry)

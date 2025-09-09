@@ -42,8 +42,7 @@ void ASoulLikeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 绑定自身伤害处理
-	CombatComponent->InitializeComponent();
+
 }
 
 // Called every frame

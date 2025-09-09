@@ -51,7 +51,8 @@ public:
 	/************************************************************************/
 	// 初始化武器信息
 	UFUNCTION()
-		void InitWeaponInfo(const FWeaponData& WeaponInfo);
+		void InitWeaponInfo(const FWeaponData& WeaponInfo,AActor* OwnerActor);
+
 
 	// 激活该武器
 	UFUNCTION()
@@ -139,4 +140,12 @@ protected:
 	// 武器装备槽位情况
 	UPROPERTY()
 		EWeaponEquipState WeaponEquipInfo;
+
+	// 武器持有者
+	UPROPERTY()
+		AActor* Owning;
+
+	// 武器绑定插槽名
+	UPROPERTY()
+		FString WeaponOnwerSocketName;
 };

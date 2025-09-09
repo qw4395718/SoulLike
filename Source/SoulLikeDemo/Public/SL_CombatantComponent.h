@@ -67,7 +67,7 @@ public:
 	/************************************************************************/
 	// 外部初始化
 	UFUNCTION()
-		void InitCombatComponentInfo();
+		void InitCombatComponentInfo(AActor* OwnerActor,FString OwnerMentagePath,int OwnerTeamID,bool OwnerCanBackStab);
 
 protected:
 	/************************************************************************/
@@ -103,10 +103,6 @@ protected:
 
 	UPROPERTY()
 		FName NeedPlayMetageSectionName;
-	
-	// 管理处决动画加载的句柄
-	//UPROPERTY()
-	//	TSharedPtr<FStreamableHandle> MontageStreamableHandle;
 
 	// 处决蒙太奇动画资产(后续可以归并到动画组件中，统一管理)
 	UPROPERTY()

@@ -4,8 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "SL_CombatantComponent.h"
+#include "SL_EquipmentComponent.h"
+#include "SL_HealthComponent.h"
+#include "SL_InventoryComponent.h"
+#include "SL_StaminaComponent.h"
+#include "SL_StateComponent.h"
+#include "SL_MovementComponent.h"
 #include "SL_CharacterBase.generated.h"
 
+// 声明一个自定义日志类别
+DECLARE_LOG_CATEGORY_EXTERN(SL_CharacterBase, Log, All);
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter 
@@ -87,8 +96,27 @@ protected:
 	/************************************************************************/
 	/*                                变量                                      */
 	/************************************************************************/
-	// 角色组件Map
-	//UPROPERTY()
-	//	TMap<>
+	// 先不设计组件管理器，直接创建组件使用
+	// 战斗组件
+	UPROPERTY()
+		USL_CombatantComponent* CombatCmp;
+
+	UPROPERTY()
+		USL_EquipmentComponent* EquipmentCmp;
+
+	UPROPERTY()
+		USL_HealthComponent* HealthCmp;
+
+	UPROPERTY()
+		USL_InventoryComponent* InventoryCmp;
+
+	UPROPERTY()
+		USL_StaminaComponent* StaminaCmp;
+
+	UPROPERTY()
+		USL_StateComponent* StateCmp;
+
+	UPROPERTY()
+		USL_MovementComponent* MovementCmp;
 
 };

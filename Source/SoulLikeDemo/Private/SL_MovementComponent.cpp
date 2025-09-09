@@ -11,12 +11,15 @@
 USL_MovementComponent::USL_MovementComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	CanRoll = false;
+	DodgeMontage = nullptr;
 }
 
-void USL_MovementComponent::InitMovemenetInfo()
+void USL_MovementComponent::InitMovemenetInfo(bool hasRollAbility, FString RollMentagePath)
 {
 	// 由外部信息进行初始化
-	LoadMovementMentage("");
+	CanRoll = hasRollAbility;
+	LoadMovementMentage(RollMentagePath);
 }
 
 void USL_MovementComponent::ExeRoll()

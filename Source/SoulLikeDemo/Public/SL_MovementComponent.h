@@ -22,7 +22,7 @@ public:
 /*                                    外部调用                                  */
 /************************************************************************/
 	UFUNCTION()
-		void InitMovemenetInfo();
+		void InitMovemenetInfo(bool hasRollAbility,FString RollMentagePath);
 
 	UFUNCTION()
 		void ExeRoll();

@@ -79,15 +79,17 @@ void USL_EquipmentComponent::BackStabBehaviorResponse(AActor* OwnerActor)
 }
 
 
-void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData> WeaponList, const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex)
+void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData> WeaponList, const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex,AActor* OwnerActor)
 {
 	// 检测武器数组与Item数组是否符合要求
-	check(WeaponList.Num() == EQUIPMENT_SLOT_NUM*2 && ItemList.Num() == EQUIPMENT_SLOT_NUM*2)
+	check(WeaponList.Num() == EQUIPMENT_SLOT_NUM*2 && ItemList.Num() == EQUIPMENT_SLOT_NUM*2 && OwnerActor != nullptr)
+	// 持有者信息初始化
+	Owning = OwnerActor;
 	// 执行武器数组初始化
 	for (int i = 0; i < EQUIPMENT_SLOT_NUM*2; i++)
 	{
 		ASL_WeaponBase* NewWeapon = GetWorld()->SpawnActor<ASL_WeaponBase>(ASL_WeaponBase::StaticClass(),FTransform());
-		NewWeapon->InitWeaponInfo(WeaponList[i]);
+		NewWeapon->InitWeaponInfo(WeaponList[i], OwnerActor);
 		NewWeapon->InActiveWeapon();
 		if (i < EQUIPMENT_SLOT_NUM)
 		{
@@ -189,7 +191,7 @@ void USL_EquipmentComponent::SetEquipemntInfo(EArrowKeyType ArrowType, int SlotI
 	if(SlotIndex < 0 || SlotIndex >= EQUIPMENT_SLOT_NUM){return;}
 	// 根据EArrowKeyType区别上下装备槽
 	ASL_WeaponBase* NewWeapon = NewObject<ASL_WeaponBase>(this);
-	NewWeapon->InitWeaponInfo(WeaponInfo);
+	NewWeapon->InitWeaponInfo(WeaponInfo,Owning);
 	if (ArrowType == EArrowKeyType::ARROWKEY_Left)
 	{
 		LeftHandEquipmentInfoList[SlotIndex] = NewWeapon;

@@ -10,12 +10,15 @@ USL_HealthComponent::USL_HealthComponent()
 	// 默认初始化
 	CurrentHealthValue = 100.0f;
 	MaxHealthValue = 100.0f;
-
+	bIsAlive = true;
 }
 
-void USL_HealthComponent::InitHealthInfo()
+void USL_HealthComponent::InitHealthInfo(float MaxHealthSettings)
 {
 	// 外部提供信息初始化
+	MaxHealthValue = MaxHealthSettings;
+	CurrentHealthValue = MaxHealthSettings;
+	bIsAlive = true;
 }
 
 bool USL_HealthComponent::IsAlive()

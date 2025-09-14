@@ -57,11 +57,28 @@ void USL_InventoryComponent::UnitTest(const TArray<int> WeaponList)
 		UnitTestData.WeaponCollisionBoxSize.X = 100.0f;
 		UnitTestData.WeaponCollisionBoxSize.Y = 5.0f;
 		UnitTestData.WeaponCollisionBoxSize.Z = 5.0f;
-		UnitTestData.APCostMap.Reset();
-		UnitTestData.APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_1, -20.0f});
-		UnitTestData.APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_2, -20.0f});
-		UnitTestData.APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_3, -20.0f});
-		UnitTestData.APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Skill_Combo_Phase_1, -40.0f});
+		// 武器数据信息
+		FAbilityCostInfo AbilityCostInfo;
+		AbilityCostInfo.HealthCost = 20.0f;
+		AbilityCostInfo.StaminaCost = 20.0f;
+		AbilityCostInfo.MagicCost = 20.0f;
+		FComboCoordinatorInfo ComboCoordinatorInfo;
+		ComboCoordinatorInfo.BaseDamage = 20.0f;
+		ComboCoordinatorInfo.ComboMaxNum = 3;
+		ComboCoordinatorInfo.CurrentComboNum = 0;
+		ComboCoordinatorInfo.CanContinueCombo = false;
+		for (int i = 0; i <= ComboCoordinatorInfo.ComboMaxNum; i++)
+		{
+			ComboCoordinatorInfo.ComboDamageMultiplier.Add(i+1);
+			ComboCoordinatorInfo.ComboStateCostMultiplier.Add(i, AbilityCostInfo);
+		}
+		UnitTestData.ComboCoordinatorInfoMap.Reset();
+		UnitTestData.ComboCoordinatorInfoMap.Add(EWeaponModeTyoe::WEAPONMODE_Attack, ComboCoordinatorInfo);
+		UnitTestData.ComboCoordinatorInfoMap.Add(EWeaponModeTyoe::WEAPONMODE_Defence, ComboCoordinatorInfo);
+		UnitTestData.ComboCoordinatorInfoMap.Add(EWeaponModeTyoe::WEAPONMODE_ComboSkill, ComboCoordinatorInfo);
+		UnitTestData.ComboCoordinatorInfoMap.Add(EWeaponModeTyoe::WEAPONMODE_BackStab, ComboCoordinatorInfo);
+		UnitTestData.ComboCoordinatorInfoMap.Add(EWeaponModeTyoe::WEAPONMODE_Execute, ComboCoordinatorInfo);
+
 		UnitTestData.NeedLoadComponentInfoMap.Add(EWeaponComponentType::MeleeAttack, true);
 		UnitTestData.NeedLoadComponentInfoMap.Add(EWeaponComponentType::Parry, true);
 		UnitTestData.NeedLoadComponentInfoMap.Add(EWeaponComponentType::Execute, true);

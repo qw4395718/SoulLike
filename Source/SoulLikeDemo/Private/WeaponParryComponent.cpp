@@ -6,6 +6,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
+#include "SoulLikeGameGlobal.h"
 
 UWeaponParryComponent::UWeaponParryComponent()
 {
@@ -37,16 +38,19 @@ void UWeaponParryComponent::InitalizeWeaponComponent(AActor* Onwer, FVector CBSi
 	{
 		OnwerWeapon = Onwer;
 		OnwerActor = Onwer->GetOwner();
+		CollisionBoxSize = CBSize;
+		CollisonBox->SetBoxExtent(CollisionBoxSize);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Display, TEXT("InitalizeWeaponComponent Fail"));
 	}
-	CollisionBoxSize = CBSize;
+	
 }
 
 void UWeaponParryComponent::EnableCollisionBoxCheck()
 {
+	RETURN_IF_FALSE(CollisonBox);
 	// 根据配置数据初始化碰撞盒大小和配置
 	CollisonBox->OnComponentBeginOverlap.AddDynamic(this, &UWeaponParryComponent::OnCollisionOverlapBegin);
 	CollisonBox->OnComponentEndOverlap.AddDynamic(this, &UWeaponParryComponent::OnCollisionOverlapEnd);

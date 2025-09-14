@@ -73,6 +73,12 @@ public:
 	UFUNCTION()
 		void CleanCostItemInfo(EArrowKeyType ArrowType, int SlotIndex);
 
+	UFUNCTION()
+		ASL_WeaponBase* GetCurrentLHWeapon();
+
+	UFUNCTION()
+		ASL_WeaponBase* GetCurrentRHWeapon();
+
 protected:
 	/************************************************************************/
 	/*                                  内部调用                                    */
@@ -119,7 +125,7 @@ protected:
 	UPROPERTY()
 		int CurrentDownSlotItemID;
 
-	// 持有者信息
-	UPROPERTY()
-		AActor* Owning;
+	//// 持有者信息
+	//UPROPERTY()
+	//	AActor* Owning;
 };

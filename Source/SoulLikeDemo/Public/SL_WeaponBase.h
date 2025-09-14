@@ -9,13 +9,15 @@
 #include "Components/BoxComponent.h"
 #include "WeaponBehavior_IF.h"
 #include "WeaponData.h"
+#include "WeaponComboCoordinatorComponent.h"
+#include "WeaponAnimNotify_IF.h"
 #include "SL_WeaponBase.generated.h"
 
 /**
  * 
  */
 UCLASS(Blueprintable)
-class SOULLIKEDEMO_API ASL_WeaponBase : public AActor
+class SOULLIKEDEMO_API ASL_WeaponBase : public AActor,public IWeaponAnimNotify_IF
 {
 	GENERATED_BODY()
 
@@ -26,25 +28,9 @@ public:
 	/************************************************************************/
 	/*                               接口实现                                       */
 	/************************************************************************/
-	// 攻击行为响应
+		// 动画(状态)通知响应
 	UFUNCTION()
-		void Attack(AActor* OwnerActor);
-
-	// 防御行为响应
-	UFUNCTION()
-		void Defence(AActor* OwnerActor);
-
-	// 技能行为响应
-	UFUNCTION()
-		void ComboSkill(AActor* OwnerActor);
-
-	// 处决行为响应
-	UFUNCTION()
-		void Execute(AActor* OwnerActor);
-
-	// 背刺行为响应
-	UFUNCTION()
-		void BackStab(AActor* OwnerActor);
+		void WeaponAnimNotifyResponse(int NotifyType) override;
 
 	/************************************************************************/
 	/*外部调用                                                                     */
@@ -73,6 +59,10 @@ public:
 	// 该武器是否配置了背刺模组
 	UFUNCTION()
 		bool IsLoadBackStabMod();
+
+	// 执行武器行为
+	UFUNCTION()
+		bool PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* OwnerActor);
 protected:
 	/************************************************************************/
 	/*                               继承实现                                       */
@@ -88,7 +78,7 @@ protected:
 	void OnLoadedWeaponMesh();
 
 	// 异步加载武器蒙太奇动画(供给角色类使用)
-	void LoadWeaponMentageAsync(EWeaponMontageType MentageType,const FString MentagePath);
+	void LoadWeaponMentageAsync(EWeaponModeTyoe MentageType,const FString MentagePath);
 
 	// 异步加载武器动画蓝图
 	void LoadWeaponAnimInstanceAsync(const FString WeapinAnimName);
@@ -100,7 +90,22 @@ protected:
 	bool LoadWeaponComponents(const TMap<EWeaponComponentType, bool>& WeaponComponentInfo);
 
 	// 播放武器蒙太奇
-	void PlayWeaponMentage(AActor* OwnerActor,EWeaponMontageType MentageType,FName MentageSectionName);
+	void PlayWeaponMentage(AActor* OwnerActor,EWeaponModeTyoe MentageType,FName MentageSectionName);
+
+	// 攻击行为响应
+	void Attack(AActor* OwnerActor);
+
+	// 防御行为响应
+	void Defence(AActor* OwnerActor);
+
+	// 技能行为响应
+	void ComboSkill(AActor* OwnerActor);
+
+	// 处决行为响应
+	void Execute(AActor* OwnerActor);
+
+	// 背刺行为响应
+	void BackStab(AActor* OwnerActor);
 protected:
 	/************************************************************************/
 	/*内部变量                                                                     */
@@ -123,7 +128,7 @@ protected:
 
 	// 武器蒙太奇动画异步加载ptr
 	UPROPERTY()
-		TMap<EWeaponMontageType, UAnimMontage*> WeaponMentageMap;
+		TMap<EWeaponModeTyoe, UAnimMontage*> WeaponMentageMap;
 
 	// 武器动画蓝图
 	UPROPERTY()
@@ -143,9 +148,13 @@ protected:
 
 	// 武器持有者
 	UPROPERTY()
-		AActor* Owning;
+		TWeakObjectPtr<AActor> Owning;
 
 	// 武器绑定插槽名
 	UPROPERTY()
 		FString WeaponOnwerSocketName;
+
+	// 武器中央协调组件
+	UPROPERTY()
+		UWeaponComboCoordinatorComponent* WeaponComboCoordinatorComp;
 };

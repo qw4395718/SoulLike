@@ -63,11 +63,11 @@ void AWeaponBase::Initialize()
 	WeaponData.WeaponCollisonBoxHeight = 5.0f;
 	EnableComboContinue = false;
 	bIsParryWindowActive = false;
-	APCostMap.Reset();
-	APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_1,-20.0f});
-	APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_2, -20.0f});
-	APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_3, -20.0f});
-	APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Skill_Combo_Phase_1, -40.0f});
+	//APCostMap.Reset();
+	//APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_1,-20.0f});
+	//APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_2, -20.0f});
+	//APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_3, -20.0f});
+	//APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Skill_Combo_Phase_1, -40.0f});
 
 	// 资源初始化
 	USkeletalMesh* Mesh = LoadObject<USkeletalMesh>(

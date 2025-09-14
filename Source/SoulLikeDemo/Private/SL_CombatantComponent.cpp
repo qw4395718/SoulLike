@@ -15,6 +15,7 @@
 #include "StateCalculate_IF.h"
 #include "BehavioralResponse_IF.h"
 #include "WeaponBehavior_IF.h"
+#include "CharacterComponent_IF.h"
 
 USL_CombatantComponent::USL_CombatantComponent()
 {
@@ -85,10 +86,13 @@ void USL_CombatantComponent::PerformAttack()
 	AActor* My = Cast<AActor>(GetOwner());
 	if (My == nullptr) { return; }
 
-	IWeaponBehavior_IF* MyWeaponBehavior = Cast<IWeaponBehavior_IF>(My);
+	ICharacterComponent_IF* MyCharacterComponentTarget = Cast<ICharacterComponent_IF>(My);
+	if (MyCharacterComponentTarget == nullptr) { return; }
+
+	IWeaponBehavior_IF* MyWeaponBehavior = Cast<IWeaponBehavior_IF>(MyCharacterComponentTarget->GetEquipmentComponent());
 	if(MyWeaponBehavior == nullptr){return;}
 
-	IStamina_IF* StaminaTarget = Cast<IStamina_IF>(My);
+	IStamina_IF* StaminaTarget = Cast<IStamina_IF>(MyCharacterComponentTarget->GetStaminaComponent());
 	// 检查是否处于精疲力竭状态
 	if (StaminaTarget)
 	{
@@ -142,8 +146,11 @@ void USL_CombatantComponent::PerformAttack()
 	
 		if (Enemy) 
 		{
-			IHealth_IF* EnemyHealthTarget = Cast<IHealth_IF>(Enemy);
-			ICombat_IF* EnemyCombatTarget = Cast<ICombat_IF>(Enemy);
+			ICharacterComponent_IF* EnemyCharacterComponentTarget = Cast<ICharacterComponent_IF>(Enemy);
+			if (EnemyCharacterComponentTarget == nullptr) { continue; }
+
+			IHealth_IF* EnemyHealthTarget = Cast<IHealth_IF>(EnemyCharacterComponentTarget->GetHealthComponent());
+			ICombat_IF* EnemyCombatTarget = Cast<ICombat_IF>(EnemyCharacterComponentTarget->GetCombatantComponent());
 		
 			// 是否可以进行下一步
 			if (EnemyHealthTarget == nullptr ||
@@ -188,7 +195,7 @@ void USL_CombatantComponent::PerformAttack()
 				EnemyCombatTarget->MoveToLocationAndRotation(
 					CharacterLocation + CharacterForward * 100.0f,
 					FRotator(CharacterRotator.Pitch, CharacterRotator.Yaw, CharacterRotator.Roll));
-				EnemyCombatTarget->PerformBackStabbed("BackStabed_Sword");
+				EnemyCombatTarget->PerformBackStabbed("BackStabbed_Sword");
 				// 我方的武器接口
 				MyWeaponBehavior->BackStabBehaviorResponse(My);
 				return;
@@ -269,9 +276,9 @@ void USL_CombatantComponent::MoveToLocationAndRotation(FVector LocationPosition,
 void USL_CombatantComponent::InitCombatComponentInfo(AActor* OwnerActor, FString OwnerMentagePath, int OwnerTeamID, bool OwnerCanBackStab)
 {
 	ActorOwner = OwnerActor;
-	SoftMentageRefrence = TSoftObjectPtr<UAnimMontage>(FSoftObjectPath(*OwnerMentagePath));
 	TeamID = OwnerTeamID;
 	bAllowedBackStabsed = OwnerCanBackStab;
+	LoadActorMentageAsync(OwnerMentagePath);
 }
 
 void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)
@@ -294,13 +301,19 @@ void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)
 		{
 			UAnimInstance* AnimInstance = OwnCharacter->GetMesh()->GetAnimInstance();
 			if (AnimInstance == nullptr){return;}
-			if(LoadedMontage->IsValidSectionName(MetageSectionName))
+			if(AnimInstance->Montage_IsActive(LoadedMontage) &&
+			LoadedMontage->IsValidSectionName(MetageSectionName))
 			{
+				AnimInstance->Montage_JumpToSection(MetageSectionName);
+			}
+			else if(LoadedMontage->IsValidSectionName(MetageSectionName))
+			{
+				AnimInstance->Montage_Play(LoadedMontage);
 				AnimInstance->Montage_JumpToSection(MetageSectionName, LoadedMontage);
 			}
 			else
 			{
-				AnimInstance->Montage_Play(LoadedMontage);
+				// 不展示动画
 			}
 		}
 		return;
@@ -310,8 +323,7 @@ void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)
 	NeedPlayMetageSectionName = MetageSectionName;
 
 	// 2. 如果还未加载，则发起异步加载请求
-	FStreamableManager& Streamable = UAssetManager::Get().GetStreamableManager();
-	FStreamableDelegate Delegate = FStreamableDelegate::CreateUObject(this, &USL_CombatantComponent::OnActorMentageLoaded, SoftMentageRefrence.ToSoftObjectPath());
+	//LoadActorMentageAsync();
 
 	//// 可选的：设置加载优先级和参数
 	//MontageStreamableHandle = Streamable.RequestAsyncLoad(
@@ -324,8 +336,22 @@ void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)
 	UE_LOG(LogTemp, Log, TEXT("Started async loading montage..."));
 }
 
-void USL_CombatantComponent::OnActorMentageLoaded(FSoftObjectPath  LoadedPath)
+void USL_CombatantComponent::LoadActorMentageAsync(const FString MentagePath)
 {
+	if (MentagePath == "") { return; }
+	// 资源异步加载
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+	SoftMentageRefrence = TSoftObjectPtr<UAnimMontage>(FSoftObjectPath(*MentagePath));
+	Streamable.RequestAsyncLoad(
+		SoftMentageRefrence.ToSoftObjectPath(),
+		FStreamableDelegate::CreateUObject(this, &USL_CombatantComponent::OnActorMentageLoaded)
+	);
+}
+
+void USL_CombatantComponent::OnActorMentageLoaded()
+{
+	// 打印信息
+	UE_LOG(LogTemp,Log,TEXT("ZYF_ALS_USL_CombatantComponent::OnActorMentageLoaded()"));
 	// 3.1 通过句柄检查（推荐）
 	//if (MontageStreamableHandle.IsValid() && MontageStreamableHandle->HasLoadCompleted())
 	//{

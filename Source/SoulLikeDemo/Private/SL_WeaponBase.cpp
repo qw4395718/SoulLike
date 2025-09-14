@@ -25,6 +25,9 @@ ASL_WeaponBase::ASL_WeaponBase()
 	SkeletalWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalWeaponMesh->SetupAttachment(RootComponent);
 
+	// 武器中央协调组件
+	WeaponComboCoordinatorComp = CreateDefaultSubobject<UWeaponComboCoordinatorComponent>(TEXT("ComboCoordinator"));
+
 	/************************************************************************/
 	/*                              变量初始化                                        */
 	/************************************************************************/
@@ -37,29 +40,144 @@ ASL_WeaponBase::ASL_WeaponBase()
 	WeaponEquipInfo = EWeaponEquipState::No_Equip;
 }
 
+void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
+{
+	// 参数检查
+	RETURN_IF_TRUE(NotifyType <= int(EWeaponAnimNotifyType::EWeaponAnimNotify_Min) || NotifyType >= int(EWeaponAnimNotifyType::EWeaponAnimNotify_Max));
+	switch (EWeaponAnimNotifyType(NotifyType))
+	{
+	case EWeaponAnimNotifyType::EWeaponAnimNotify_Active_NormalComboWindow:
+	{
+		// 检查组件是否有效
+		if(WeaponComboCoordinatorComp)
+		{
+			WeaponComboCoordinatorComp->ActiveComboWindowInputState(EWeaponModeTyoe::WEAPONMODE_Attack);
+		}
+	}; break;
+	case EWeaponAnimNotifyType::EWeaponAnimNotify_InActive_NormalComboWindow:
+	{
+		// 检查组件是否有效
+		if (WeaponComboCoordinatorComp)
+		{
+			WeaponComboCoordinatorComp->InActiveComboWindowInputState(EWeaponModeTyoe::WEAPONMODE_Attack);
+		}
+	}; break;
+	case EWeaponAnimNotifyType::EWeaponAnimNotify_Active_SkillComboWindow:
+	{
+		// 检查组件是否有效
+		if (WeaponComboCoordinatorComp)
+		{
+			WeaponComboCoordinatorComp->ActiveComboWindowInputState(EWeaponModeTyoe::WEAPONMODE_ComboSkill);
+		}
+	}; break;
+	case EWeaponAnimNotifyType::EWeaponAnimNotify_InActive_SkillComboWindow:
+	{
+		if (WeaponComboCoordinatorComp)
+		{
+			WeaponComboCoordinatorComp->ActiveComboWindowInputState(EWeaponModeTyoe::WEAPONMODE_ComboSkill);
+		}
+	}; break;
+	case EWeaponAnimNotifyType::EWeaponAnimNotify_EnableCollision_Melee:
+	{
+		// 检查组件是否有效
+		if (WeaponComponentMap.Find(EWeaponComponentType::MeleeAttack) != nullptr)
+		{
+			UWeaponMeleeAttackComponent* Comp = Cast<UWeaponMeleeAttackComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::MeleeAttack));
+			if (Comp != nullptr)
+			{
+				Comp->EnableCollisionBoxCheck();
+			}
+		}
+	}; break;
+	case EWeaponAnimNotifyType::EWeaponAnimNotify_DisableCollision_Melee:
+	{
+		// 检查组件是否有效
+		if (WeaponComponentMap.Find(EWeaponComponentType::MeleeAttack) != nullptr)
+		{
+			UWeaponMeleeAttackComponent* Comp = Cast<UWeaponMeleeAttackComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::MeleeAttack));
+			if (Comp != nullptr)
+			{
+				Comp->DisableCollisionBoxCheck();
+			}
+		}
+	}; break;
+	case EWeaponAnimNotifyType::EWeaponAnimNotify_ActiveParryWindow_Melee:
+	{
+		// 检查组件是否有效
+		if (WeaponComponentMap.Find(EWeaponComponentType::MeleeAttack) != nullptr)
+		{
+			UWeaponMeleeAttackComponent* Comp = Cast<UWeaponMeleeAttackComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::MeleeAttack));
+			if (Comp != nullptr)
+			{
+				Comp->EnableParryWindowCheck(0.0f);
+			}
+		}
+	}; break;
+	case EWeaponAnimNotifyType::EWeaponAnimNotify_InActiveParryWindow_Melee:
+	{
+		// 检查组件是否有效
+		if (WeaponComponentMap.Find(EWeaponComponentType::MeleeAttack) != nullptr)
+		{
+			UWeaponMeleeAttackComponent* Comp = Cast<UWeaponMeleeAttackComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::MeleeAttack));
+			if (Comp != nullptr)
+			{
+				Comp->DisableParryWindowCheck();
+			}
+		}
+	}; break;
+	case EWeaponAnimNotifyType::EWeaponAnimNotify_EnableCollision_ComboSkil_Parry:
+	{
+		// 检查组件是否有效
+		if (WeaponComponentMap.Find(EWeaponComponentType::Parry) != nullptr)
+		{
+			UWeaponParryComponent* Comp = Cast<UWeaponParryComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::Parry));
+			if (Comp != nullptr)
+			{
+				Comp->EnableCollisionBoxCheck();
+			}
+		}
+	}; break;
+	case EWeaponAnimNotifyType::EWeaponAnimNotify_DisableCollision_ComboSkil_Parry:
+	{
+		// 检查组件是否有效
+		if (WeaponComponentMap.Find(EWeaponComponentType::Parry) != nullptr)
+		{
+			UWeaponParryComponent* Comp = Cast<UWeaponParryComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::Parry));
+			if (Comp != nullptr)
+			{
+				Comp->DisableCollisionBoxCheck();
+			}
+		}
+	}; break;
+	default:break;
+	}
+}
+
 void ASL_WeaponBase::Attack(AActor* OwnerActor)
 {
-	PlayWeaponMentage(OwnerActor,EWeaponMontageType::EWeaponMontag_Attack,TEXT(""));
+	// 加入连段逻辑
+	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_Attack,TEXT("Default"));
 }
 
 void ASL_WeaponBase::Defence(AActor* OwnerActor)
 {
-	PlayWeaponMentage(OwnerActor, EWeaponMontageType::EWeaponMontag_Defence, TEXT(""));
+	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_Defence, TEXT("Default"));
 }
 
 void ASL_WeaponBase::ComboSkill(AActor* OwnerActor)
 {
-	PlayWeaponMentage(OwnerActor, EWeaponMontageType::EWeaponMontag_ComboSkill, TEXT(""));
+	// 加入连段逻辑
+	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_ComboSkill, TEXT("Default"));
 }
 
 void ASL_WeaponBase::Execute(AActor* OwnerActor)
 {
-	PlayWeaponMentage(OwnerActor, EWeaponMontageType::EWeaponMontag_Execute, TEXT(""));
+	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_Execute, TEXT("Default"));
 }
 
 void ASL_WeaponBase::BackStab(AActor* OwnerActor)
 {
-	PlayWeaponMentage(OwnerActor, EWeaponMontageType::EWeaponMontag_BackStab, TEXT(""));
+	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_BackStab, TEXT("Default"));
 }
 
 void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo,AActor* OwnerActor)
@@ -74,26 +192,30 @@ void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo,AActor* OwnerA
 	LoadWeaponAnimInstanceAsync(WeaponInfo.AnimClass);
 
 	// 加载武器蒙太奇
-	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_Attack, WeaponInfo.AttackMentageName);
+	LoadWeaponMentageAsync(EWeaponModeTyoe::WEAPONMODE_Attack, WeaponInfo.AttackMentageName);
 	// 加载武器蒙太奇
-	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_ComboSkill, WeaponInfo.ComboSkillMentageName);
+	LoadWeaponMentageAsync(EWeaponModeTyoe::WEAPONMODE_ComboSkill, WeaponInfo.ComboSkillMentageName);
 	// 加载武器蒙太奇
-	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_Execute, WeaponInfo.ExecuteMentageName);
+	LoadWeaponMentageAsync(EWeaponModeTyoe::WEAPONMODE_Execute, WeaponInfo.ExecuteMentageName);
 	// 加载武器蒙太奇
-	LoadWeaponMentageAsync(EWeaponMontageType::EWeaponMontag_BackStab, WeaponInfo.BackStabMentageName);
+	LoadWeaponMentageAsync(EWeaponModeTyoe::WEAPONMODE_BackStab, WeaponInfo.BackStabMentageName);
 	// 加载武器模组
 	LoadWeaponComponents(WeaponInfo.NeedLoadComponentInfoMap);
+
+	// 初始化武器中央管理组件
+	WeaponComboCoordinatorComp->InitComboCoordinatorComponet(WeaponInfo.ComboCoordinatorInfoMap);
 }
 
 void ASL_WeaponBase::ActiveWeapon()
 {
 	// 可视
-
+	SetActorHiddenInGame(false);
 }
 
 void ASL_WeaponBase::InActiveWeapon()
 {
 	// 不可视
+	SetActorHiddenInGame(true);
 }
 
 void ASL_WeaponBase::UpdateWeaponEquipState(EWeaponEquipState CurrentState)
@@ -109,6 +231,21 @@ bool ASL_WeaponBase::IsLoadExecuteMod()
 bool ASL_WeaponBase::IsLoadBackStabMod()
 {
 	return bool(*WeaponLoadComponentInfoMap.Find(EWeaponComponentType::BackStab));
+}
+
+bool ASL_WeaponBase::PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* OwnerActor)
+{
+	switch (ActionType)
+	{
+	case EWeaponModeTyoe::WEAPONMODE_Attack: { Attack(OwnerActor); };break;
+	case EWeaponModeTyoe::WEAPONMODE_Defence: { Defence(OwnerActor); } ; break;
+	case EWeaponModeTyoe::WEAPONMODE_ComboSkill: { ComboSkill(OwnerActor); } ; break;
+	case EWeaponModeTyoe::WEAPONMODE_Execute: { Execute(OwnerActor); } ; break;
+	case EWeaponModeTyoe::WEAPONMODE_BackStab: { BackStab(OwnerActor); } ; break;
+		default:break;
+	}
+	return true;
+
 }
 
 void ASL_WeaponBase::LoadWeaponMeshAsync(const FString WeaponMeshName)
@@ -145,7 +282,7 @@ void ASL_WeaponBase::OnLoadedWeaponMesh()
 	}
 }
 
-void ASL_WeaponBase::LoadWeaponMentageAsync(EWeaponMontageType MentageType, const FString MentagePath)
+void ASL_WeaponBase::LoadWeaponMentageAsync(EWeaponModeTyoe MentageType, const FString MentagePath)
 {
 	if (MentagePath == "") { return; }
 	// 资源异步加载
@@ -197,10 +334,10 @@ bool ASL_WeaponBase::LoadWeaponComponents(const TMap<EWeaponComponentType, bool>
 		TPair<EWeaponComponentType, bool> NewComponent;
 		if (Pair.Key == EWeaponComponentType::MeleeAttack)
 		{
-			UWeaponMeleeAttackComponent* MeleeComponent = GetWorld()->SpawnActor<UWeaponMeleeAttackComponent>(
-				UWeaponMeleeAttackComponent::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+			UWeaponMeleeAttackComponent* MeleeComponent = NewObject<UWeaponMeleeAttackComponent>(this,"MeleeCmp");
 			if (MeleeComponent)
 			{
+				MeleeComponent->ReregisterComponent();
 				MeleeComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 				MeleeComponent->InitalizeWeaponComponent(this, CollisionBoxSize);
 				NewComponent.Key = Pair.Key;
@@ -233,15 +370,15 @@ bool ASL_WeaponBase::LoadWeaponComponents(const TMap<EWeaponComponentType, bool>
 		}
 		else if (Pair.Key == EWeaponComponentType::Execute)
 		{
-			// 待后续补充
+			// 目前处决模组无需单独组件
 			NewComponent.Key = Pair.Key;
-			NewComponent.Value = false;
+			NewComponent.Value = true;
 		}
 		else if (Pair.Key == EWeaponComponentType::BackStab)
 		{
-			// 待后续补充
+			// 目前处决模组无需单独组件
 			NewComponent.Key = Pair.Key;
-			NewComponent.Value = false;
+			NewComponent.Value = true;
 		}
 		else
 		{continue; }
@@ -253,25 +390,34 @@ bool ASL_WeaponBase::LoadWeaponComponents(const TMap<EWeaponComponentType, bool>
 	return false;
 }
 
-void ASL_WeaponBase::PlayWeaponMentage(AActor* OwnerActor, EWeaponMontageType MentageType, FName MentageSectionName)
+void ASL_WeaponBase::PlayWeaponMentage(AActor* OwnerActor, EWeaponModeTyoe MentageType, FName MentageSectionName)
 {
 	if (OwnerActor == nullptr){return;}
 
 	ACharacter* OwningCharacter = Cast<ACharacter>(OwnerActor);
-	if (OwningCharacter == nullptr || OwningCharacter->GetMesh()->GetAnimInstance() == nullptr)
+	if (OwningCharacter != nullptr && OwningCharacter->GetMesh()->GetAnimInstance() != nullptr)
 	{
 		UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
 		UAnimMontage* NeedPlayMentage = WeaponMentageMap.FindRef(MentageType);
 		if(NeedPlayMentage == nullptr || AnimInstance == nullptr){return;}
 
 		if (AnimInstance->Montage_IsActive(NeedPlayMentage) &&
-			MentageSectionName != FName(""))
+			NeedPlayMentage->IsValidSectionName(MentageSectionName))
 		{
 			AnimInstance->Montage_JumpToSection(MentageSectionName);
 		}
-		else
+		else if (NeedPlayMentage->IsValidSectionName(MentageSectionName))
 		{
 			AnimInstance->Montage_Play(NeedPlayMentage);
+			AnimInstance->Montage_JumpToSection(MentageSectionName, NeedPlayMentage);
+		}
+		else
+		{
+			// 不展示动画
+			if (MentageType == EWeaponModeTyoe::WEAPONMODE_Attack && MentageSectionName == "Default")
+			{
+				AnimInstance->Montage_Play(NeedPlayMentage);
+			}
 		}
 	}
 }

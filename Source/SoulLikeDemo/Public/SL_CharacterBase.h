@@ -11,13 +11,16 @@
 #include "SL_StaminaComponent.h"
 #include "SL_StateComponent.h"
 #include "SL_MovementComponent.h"
+#include "CharacterComponent_IF.h"
+#include "WeaponAnimNotify_IF.h"
+#include "AnimNotify_IF.h"
 #include "SL_CharacterBase.generated.h"
 
 // 声明一个自定义日志类别
 DECLARE_LOG_CATEGORY_EXTERN(SL_CharacterBase, Log, All);
 
 UCLASS()
-class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter 
+class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,public ICharacterComponent_IF, public IAnimNotify_IF
 {
 	GENERATED_BODY()
 
@@ -39,6 +42,40 @@ protected:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+public:
+	/************************************************************************/
+	/*                               接口实现(ICharacterComponent_IF)                                       */
+	/************************************************************************/
+
+	UFUNCTION()
+		UActorComponent* GetCombatantComponent() override;
+
+	UFUNCTION()
+		UActorComponent* GetEquipmentComponent() override;
+
+	UFUNCTION()
+		UActorComponent* GetHealthComponent() override;
+
+	UFUNCTION()
+		UActorComponent* GetInventoryComponent() override;
+
+	UFUNCTION()
+		UActorComponent* GetSpecialMovementComponent() override;
+
+	UFUNCTION()
+		UActorComponent* GetStaminaComponent() override;
+
+	UFUNCTION()
+		UActorComponent* GetStateComponent() override;
+
+	/************************************************************************/
+	/*                               接口实现(IAnimNotify_IF)                                       */
+	/************************************************************************/
+
+	// 动画(状态)通知响应
+	UFUNCTION()
+		void AnimNotifyResponse(int NotifyType) override;
 
 protected:
 	/************************************************************************/
@@ -80,6 +117,14 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformSwitchEquipmentRight();
 
+	// 角色通知转武器通知(EAnimNotifyType -> EWeaponAnimNotifyType)
+	EWeaponAnimNotifyType TranslteAnimNotifyToWeapon(EAnimNotifyType NotifyType);
+
+	// 根据角色通知确定是哪只手(EAnimNotifyType -> Hand(L/R))
+	int CheckAnimNotifyToHand(EAnimNotifyType NotifyType);
+
+	// 武器动画通知下发
+	void WeaponAnimProcess(int HandType,EWeaponAnimNotifyType NotifyType);
 
 public:
 	/************************************************************************/
@@ -118,5 +163,4 @@ protected:
 
 	UPROPERTY()
 		USL_MovementComponent* MovementCmp;
-
 };

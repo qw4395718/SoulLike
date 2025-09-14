@@ -77,10 +77,10 @@ protected:
 	void PlaySoftMentage(FName MetageSectionName);
 
 	// 异步加载蒙太奇动画
-	void LoadActorMentageAsync(const FString MentagePath,UPARAM(ref) TSoftObjectPtr<UAnimMontage>& SoftMentageRefrence);
+	void LoadActorMentageAsync(const FString MentagePath);
 
 	// 当指定蒙太奇动画加载完成时
-	void OnActorMentageLoaded(FSoftObjectPath  LoadedPath);
+	void OnActorMentageLoaded();
 
 protected:
 	/************************************************************************/

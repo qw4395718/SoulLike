@@ -25,8 +25,8 @@ struct FWeaponData
 	FString ExecuteMentageName;
 	// 背刺动画蒙太奇名
 	FString BackStabMentageName;
-	// 各段攻击的伤害
-	TMap<EAttackType, float> BaseDamageMap;
+	// 武器参数信息
+	TMap<EWeaponModeTyoe, FComboCoordinatorInfo> ComboCoordinatorInfoMap;
 	// 各段攻击消耗的体力
 	TMap<EAttackType, float> APCostMap;
 	// 各段攻击消耗的蓝量

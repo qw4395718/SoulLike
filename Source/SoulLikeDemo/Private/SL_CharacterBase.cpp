@@ -2,6 +2,7 @@
 
 
 #include "SL_CharacterBase.h"
+#include "WeaponAnimNotify_IF.h"
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 
@@ -39,9 +40,54 @@ void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 
 
-void ASL_CharacterBase::PerformAttack()
+UActorComponent* ASL_CharacterBase::GetCombatantComponent()
 {
-	UE_LOG(SL_CharacterBase, Display,TEXT("ASL_CharacterBase::PerformAttack"));
+	return CombatCmp;
+}
+
+UActorComponent* ASL_CharacterBase::GetEquipmentComponent()
+{
+	return EquipmentCmp;
+}
+
+UActorComponent* ASL_CharacterBase::GetHealthComponent()
+{
+	return HealthCmp;
+}
+
+UActorComponent* ASL_CharacterBase::GetInventoryComponent()
+{
+	return InventoryCmp;
+}
+
+UActorComponent* ASL_CharacterBase::GetSpecialMovementComponent()
+{
+	return MovementCmp;
+}
+
+UActorComponent* ASL_CharacterBase::GetStaminaComponent()
+{
+	return StaminaCmp;
+}
+
+UActorComponent* ASL_CharacterBase::GetStateComponent()
+{
+	return StateCmp;
+}
+
+void ASL_CharacterBase::AnimNotifyResponse(int NotifyType)
+{
+	// 参数检查
+	RETURN_IF_TRUE(NotifyType <= int(EAnimNotifyType::EAnimNotify_Min) || NotifyType >= int(EAnimNotifyType::EAnimNotify_Max));
+	WeaponAnimProcess(CheckAnimNotifyToHand(EAnimNotifyType(NotifyType)), TranslteAnimNotifyToWeapon(EAnimNotifyType(NotifyType)));
+}
+
+void ASL_CharacterBase::PerformAttack()
+{	
+	if (CombatCmp)
+	{
+		CombatCmp->PerformAttack();
+	}
 }
 
 void ASL_CharacterBase::PerformDefence()
@@ -85,6 +131,147 @@ void ASL_CharacterBase::PerformSwitchEquipmentRight()
 	UE_LOG(SL_CharacterBase, Display, TEXT("ASL_CharacterBase::PerformSwitchEquipmentRight"));
 }
 
+EWeaponAnimNotifyType ASL_CharacterBase::TranslteAnimNotifyToWeapon(EAnimNotifyType NotifyType)
+{
+	// 参数检查
+	RETURN_VALUE_IF_FALSE(NotifyType <= EAnimNotifyType::EAnimNotify_Min || NotifyType <= EAnimNotifyType::EAnimNotify_Max, EWeaponAnimNotifyType::EWeaponAnimNotify_Min);
+	
+	EWeaponAnimNotifyType WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_Min;
+	
+	switch (EAnimNotifyType(NotifyType))
+	{
+	case EAnimNotifyType::EAnimNotify_LH_Active_NormalComboWindow:
+	case EAnimNotifyType::EAnimNotify_RH_Active_NormalComboWindow:
+	{
+		WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_Active_NormalComboWindow;
+	}; break;
+	
+	case EAnimNotifyType::EAnimNotify_LH_InActive_NormalComboWindow:
+	case EAnimNotifyType::EAnimNotify_RH_InActive_NormalComboWindow:
+	{
+		WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_InActive_NormalComboWindow;
+	}; break;
+
+	case EAnimNotifyType::EAnimNotify_LH_Active_SkillComboWindow:
+	case EAnimNotifyType::EAnimNotify_RH_Active_SkillComboWindow:
+	{
+		WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_Active_SkillComboWindow;
+	}; break;
+
+	case EAnimNotifyType::EAnimNotify_LH_InActive_SkillComboWindow:
+	case EAnimNotifyType::EAnimNotify_RH_InActive_SkillComboWindow:
+	{
+		WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_InActive_SkillComboWindow;
+	}; break;
+
+	case EAnimNotifyType::EAnimNotify_LH_EnableCollision_Melee:
+	case EAnimNotifyType::EAnimNotify_RH_EnableCollision_Melee:
+	{
+		WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_EnableCollision_Melee;
+	}; break;
+
+	case EAnimNotifyType::EAnimNotify_LH_DisableCollision_Melee:
+	case EAnimNotifyType::EAnimNotify_RH_DisableCollision_Melee:
+	{
+		WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_DisableCollision_Melee;
+	}; break;
+
+	case EAnimNotifyType::EAnimNotify_LH_AcitiveParryWindow_Melee:
+	case EAnimNotifyType::EAnimNotify_RH_AcitiveParryWindow_Melee:
+	{
+		WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_ActiveParryWindow_Melee;
+	}; break;
+
+	case EAnimNotifyType::EAnimNotify_LH_InAcitiveParryWindow_Melee:
+	case EAnimNotifyType::EAnimNotify_RH_InAcitiveParryWindow_Melee:
+	{
+		WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_InActiveParryWindow_Melee;
+	}; break;
+
+	case EAnimNotifyType::EAnimNotify_LH_EnableCollision_ComboSkil_Parry:
+	case EAnimNotifyType::EAnimNotify_RH_EnableCollision_ComboSkil_Parry:
+	{
+		WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_EnableCollision_ComboSkil_Parry;
+	}; break;
+
+	case EAnimNotifyType::EAnimNotify_LH_DisableCollision_ComboSkil_Parry:
+	case EAnimNotifyType::EAnimNotify_RH_DisableCollision_ComboSkil_Parry:
+	{
+		WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_DisableCollision_ComboSkil_Parry;
+	}; break;
+
+	default:break;
+	}
+	return WeaponAnimType;
+}
+
+int ASL_CharacterBase::CheckAnimNotifyToHand(EAnimNotifyType NotifyType)
+{
+	// 参数检查
+	RETURN_VALUE_IF_FALSE(NotifyType <= EAnimNotifyType::EAnimNotify_Min || NotifyType <= EAnimNotifyType::EAnimNotify_Max, int(EWeaponAnimNotifyType::EWeaponAnimNotify_Min));
+
+	int HandType = -1;
+
+	switch (EAnimNotifyType(NotifyType))
+	{
+	case EAnimNotifyType::EAnimNotify_LH_Active_NormalComboWindow:
+	case EAnimNotifyType::EAnimNotify_LH_InActive_NormalComboWindow:
+	case EAnimNotifyType::EAnimNotify_LH_Active_SkillComboWindow:
+	case EAnimNotifyType::EAnimNotify_LH_InActive_SkillComboWindow:
+	case EAnimNotifyType::EAnimNotify_LH_EnableCollision_Melee:
+	case EAnimNotifyType::EAnimNotify_LH_DisableCollision_Melee:
+	case EAnimNotifyType::EAnimNotify_LH_AcitiveParryWindow_Melee:
+	case EAnimNotifyType::EAnimNotify_LH_InAcitiveParryWindow_Melee:
+	case EAnimNotifyType::EAnimNotify_LH_EnableCollision_ComboSkil_Parry:
+	case EAnimNotifyType::EAnimNotify_LH_DisableCollision_ComboSkil_Parry:
+	{HandType = 0;}break;
+
+	case EAnimNotifyType::EAnimNotify_RH_Active_NormalComboWindow:
+	case EAnimNotifyType::EAnimNotify_RH_InActive_NormalComboWindow:
+	case EAnimNotifyType::EAnimNotify_RH_Active_SkillComboWindow:
+	case EAnimNotifyType::EAnimNotify_RH_InActive_SkillComboWindow:
+	case EAnimNotifyType::EAnimNotify_RH_EnableCollision_Melee:
+	case EAnimNotifyType::EAnimNotify_RH_DisableCollision_Melee:
+	case EAnimNotifyType::EAnimNotify_RH_AcitiveParryWindow_Melee:
+	case EAnimNotifyType::EAnimNotify_RH_InAcitiveParryWindow_Melee:
+	case EAnimNotifyType::EAnimNotify_RH_EnableCollision_ComboSkil_Parry:
+	case EAnimNotifyType::EAnimNotify_RH_DisableCollision_ComboSkil_Parry:
+	{HandType = 1; }break;
+	default:break;
+	}
+
+	return HandType;
+}
+
+void ASL_CharacterBase::WeaponAnimProcess(int HandType, EWeaponAnimNotifyType WeaponAnimType)
+{
+	// 检查组件是否有效
+	RETURN_IF_TRUE(EquipmentCmp == nullptr);
+	RETURN_IF_TRUE(HandType != 0 && HandType != 1);
+
+	if (HandType == false)
+	{
+		if (EquipmentCmp->GetCurrentLHWeapon())
+		{
+			ASL_WeaponBase* Weapon = EquipmentCmp->GetCurrentLHWeapon();
+			IWeaponAnimNotify_IF* WeaponAnimNotify = Cast<IWeaponAnimNotify_IF>(Weapon);
+			if (WeaponAnimNotify == nullptr) { return; }
+			WeaponAnimNotify->WeaponAnimNotifyResponse(int(WeaponAnimType));
+		}
+	}
+	else
+	{
+		if (EquipmentCmp->GetCurrentRHWeapon())
+		{
+			ASL_WeaponBase* Weapon = EquipmentCmp->GetCurrentLHWeapon();
+			IWeaponAnimNotify_IF* WeaponAnimNotify = Cast<IWeaponAnimNotify_IF>(Weapon);
+			if (WeaponAnimNotify == nullptr) { return; }
+			WeaponAnimNotify->WeaponAnimNotifyResponse(int(WeaponAnimType));
+
+		}
+	}
+}
+
 void ASL_CharacterBase::InitializeCharacter()
 {
 	//拟造数据,初始化组件
@@ -96,7 +283,7 @@ void ASL_CharacterBase::InitPartmentComponent()
 	if (CombatCmp == nullptr && true)
 	{
 		CombatCmp = NewObject<USL_CombatantComponent>(this);
-		CombatCmp->InitCombatComponentInfo(this,"",0,true);
+		CombatCmp->InitCombatComponentInfo(this, TEXT("/Game/SoulLikeDemo/Anim/AM_Character_Hit.AM_Character_Hit") ,0,true);
 	}
 
 	if (EquipmentCmp == nullptr && true)

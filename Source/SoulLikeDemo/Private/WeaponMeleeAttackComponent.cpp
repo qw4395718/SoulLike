@@ -6,6 +6,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
+#include "SoulLikeGameGlobal.h"
 
 UWeaponMeleeAttackComponent::UWeaponMeleeAttackComponent()
 {
@@ -39,17 +40,20 @@ void UWeaponMeleeAttackComponent::InitalizeWeaponComponent(AActor* Onwer, FVecto
 	{
 		OnwerWeapon = Onwer;
 		OnwerActor = Onwer->GetOwner();
+		CollisionBoxSize = CBSize;
+		CollisonBox->SetBoxExtent(FVector(CollisionBoxSize));
 	}
 	else
 	{
 		UE_LOG(LogTemp, Display, TEXT("InitalizeWeaponComponent Fail"));
 	}
-	CollisionBoxSize = CBSize;
+
 }
 
 void UWeaponMeleeAttackComponent::EnableCollisionBoxCheck()
 {
 	// 根据配置数据初始化碰撞盒大小和配置
+	RETURN_IF_FALSE(CollisonBox);
 	CollisonBox->OnComponentBeginOverlap.AddDynamic(this, &UWeaponMeleeAttackComponent::OnAttackOverlapBegin);
 	CollisonBox->OnComponentEndOverlap.AddDynamic(this, &UWeaponMeleeAttackComponent::OnAttackOverlapEnd);
 	// 设置碰撞
@@ -118,20 +122,20 @@ void UWeaponMeleeAttackComponent::EnableParryWindowCheck(float Duration)
 	// 更新标志位
 	bActiveParryWindow = true;
 
-	// 设置定时器自动关闭弹反窗口,当弹反成功时需要通过定时器关闭
-	GetWorld()->GetTimerManager().SetTimer(
-		ParryWindowTimer,
-		this,
-		&UWeaponMeleeAttackComponent::DisableParryWindowCheck,
-		Duration,
-		false
-	);
+//	// 设置定时器自动关闭弹反窗口,当弹反成功时需要通过定时器关闭
+//	GetWorld()->GetTimerManager().SetTimer(
+//		ParryWindowTimer,
+//		this,
+//		&UWeaponMeleeAttackComponent::DisableParryWindowCheck,
+//		Duration,
+//		false
+//	);
 }
 
 void UWeaponMeleeAttackComponent::DisableParryWindowCheck()
 {
 	bActiveParryWindow = false;
-	ParryWindowTimer.Invalidate();
+//	ParryWindowTimer.Invalidate();
 }
 
 bool UWeaponMeleeAttackComponent::IsActiveParryWindow()

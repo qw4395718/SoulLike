@@ -31,7 +31,7 @@ void USL_EquipmentComponent::AttackBehaviorResponse(AActor* OwnerActor)
 	RETURN_IF_FALSE(OwnerActor);
 	RETURN_IF_FALSE(CurrentRightHandWeapon);
 	//检查是否有右手武器
-	CurrentRightHandWeapon->Attack(OwnerActor);
+	CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_Attack, OwnerActor);
 	
 }
 
@@ -40,41 +40,53 @@ void USL_EquipmentComponent::DefenceBehaviorResponse(AActor* OwnerActor)
 	 //判定是否有左手武器
 	RETURN_IF_FALSE(OwnerActor);
 	RETURN_IF_FALSE(CurrentLeftHandWeapon);
-	CurrentLeftHandWeapon->Defence(OwnerActor);
+	CurrentLeftHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_Defence,OwnerActor);
 
 }
 
 void USL_EquipmentComponent::ComboSkillBehaviorResponse(AActor* OwnerActor)
 {
 	RETURN_IF_FALSE(OwnerActor);
-	CurrentRightHandWeapon->ComboSkill(OwnerActor);
+	if (CurrentRightHandWeapon != nullptr)
+	{
+		CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_ComboSkill, OwnerActor);
+	}
+	else if (CurrentLeftHandWeapon != nullptr)
+	{
+		CurrentLeftHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_ComboSkill, OwnerActor);
+	}
+	else
+	{ }
+
 }
 
 void USL_EquipmentComponent::ExecuteBehaviorResponse(AActor* OwnerActor)
 {
 	RETURN_IF_FALSE(OwnerActor);
+	RETURN_IF_FALSE(CurrentRightHandWeapon);
 	// 检查是否有右手武器
 	if (CurrentRightHandWeapon->IsLoadExecuteMod())
 	{
-		CurrentRightHandWeapon->Execute(OwnerActor);
+		CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_Execute,OwnerActor);
 	}
 	else
 	{
-		CurrentRightHandWeapon->Attack(OwnerActor);
+		CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_Attack,OwnerActor);
 	}
 }
 
 void USL_EquipmentComponent::BackStabBehaviorResponse(AActor* OwnerActor)
 {
 	RETURN_IF_FALSE(OwnerActor);
+	RETURN_IF_FALSE(CurrentRightHandWeapon);
 	// 检查是否有右手武器
 	if(CurrentRightHandWeapon->IsLoadBackStabMod())
 	{
-		CurrentRightHandWeapon->BackStab(OwnerActor);
+		CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_BackStab,OwnerActor);
 	}
 	else
 	{
-		CurrentRightHandWeapon->Attack(OwnerActor);
+		CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_Attack,OwnerActor);
 	}
 }
 
@@ -84,7 +96,7 @@ void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData> We
 	// 检测武器数组与Item数组是否符合要求
 	check(WeaponList.Num() == EQUIPMENT_SLOT_NUM*2 && ItemList.Num() == EQUIPMENT_SLOT_NUM*2 && OwnerActor != nullptr)
 	// 持有者信息初始化
-	Owning = OwnerActor;
+	/*Owning = OwnerActor;*/
 	// 执行武器数组初始化
 	for (int i = 0; i < EQUIPMENT_SLOT_NUM*2; i++)
 	{
@@ -97,7 +109,7 @@ void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData> We
 		}
 		else
 		{
-			RightHandEquipmentInfoList[i] = NewWeapon;
+			RightHandEquipmentInfoList[i- EQUIPMENT_SLOT_NUM] = NewWeapon;
 		}
 		
 	}
@@ -191,7 +203,7 @@ void USL_EquipmentComponent::SetEquipemntInfo(EArrowKeyType ArrowType, int SlotI
 	if(SlotIndex < 0 || SlotIndex >= EQUIPMENT_SLOT_NUM){return;}
 	// 根据EArrowKeyType区别上下装备槽
 	ASL_WeaponBase* NewWeapon = NewObject<ASL_WeaponBase>(this);
-	NewWeapon->InitWeaponInfo(WeaponInfo,Owning);
+	NewWeapon->InitWeaponInfo(WeaponInfo,GetOwner());
 	if (ArrowType == EArrowKeyType::ARROWKEY_Left)
 	{
 		LeftHandEquipmentInfoList[SlotIndex] = NewWeapon;
@@ -240,5 +252,15 @@ void USL_EquipmentComponent::CleanCostItemInfo(EArrowKeyType ArrowType, int Slot
 	{
 		// 不正确的调用
 	}
+}
+
+ASL_WeaponBase* USL_EquipmentComponent::GetCurrentLHWeapon()
+{
+	return CurrentLeftHandWeapon;
+}
+
+ASL_WeaponBase* USL_EquipmentComponent::GetCurrentRHWeapon()
+{
+	return CurrentRightHandWeapon;
 }
 

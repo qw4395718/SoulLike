@@ -4,47 +4,42 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "HUD_HealthBar.generated.h"
+#include "SoulLikeGameGlobal.h"
+#include "StatusEffectInfo.h"
+#include "Components/Image.h"
+#include "HUD_StatusIcon.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API UHUD_HealthBar : public UUserWidget
+class SOULLIKEDEMO_API UHUD_StatusIcon : public UUserWidget
 {
 	GENERATED_BODY()
-public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	UFUNCTION()
-		void InitHealthBar(float Min, float Max);
+	
+	UFUNCTION(BlueprintCallable)
+		void InitializeIcon(FStatusEffectInfo EffectInfo);
 
-	UFUNCTION()
-		void ReduceHealthPercent(float ReducePercent);
+	UFUNCTION(BlueprintCallable)
+		void UpdateIcon(float RemainingTime, int32 Stacks);
 
-	UFUNCTION()
-		void ReviveHealthPercent(float RevivePercent);
 
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
 
-
 protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
-	// 当前进度条百分比(0~1)
-	UPROPERTY()
-		float CurrentProgressBarPercent;
+	// Icon图片
+	UPROPERTY(meta = (BindWidget))
+		UImage* IconImage;
 
-	// 血量进度条上限,默认是1
-	UPROPERTY()
-		float ProgressPercentMax;
-
-	// 血量进度条上限,默认是1
-	UPROPERTY()
-		float ProgressPercentMin;
 };
+
+

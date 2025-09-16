@@ -1,17 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "HUD_HealthBar.h"
+#include "HUD_BOSSHealthBar.h"
 #include "SoulLikeGameGlobal.h"
 
-void UHUD_HealthBar::InitHealthBar(float Min, float Max)
+void UHUD_BOSSHealthBar::InitHealthBar(float Min, float Max)
 {
 	ProgressPercentMin = Min;
 	ProgressPercentMax = Max;
 	CurrentProgressBarPercent = ProgressPercentMax;
 }
 
-void UHUD_HealthBar::ReduceHealthPercent(float ReducePercent)
+void UHUD_BOSSHealthBar::ReduceHealthPercent(float ReducePercent)
 {
 	RETURN_IF_TRUE(ReducePercent < ProgressPercentMin || ReducePercent > ProgressPercentMax);
 	if (CurrentProgressBarPercent - ReducePercent < ProgressPercentMin)
@@ -28,7 +28,7 @@ void UHUD_HealthBar::ReduceHealthPercent(float ReducePercent)
 	}
 }
 
-void UHUD_HealthBar::ReviveHealthPercent(float RevivePercent)
+void UHUD_BOSSHealthBar::ReviveHealthPercent(float RevivePercent)
 {
 	RETURN_IF_TRUE(RevivePercent < ProgressPercentMin || RevivePercent > ProgressPercentMax);
 	if (CurrentProgressBarPercent + RevivePercent < ProgressPercentMin)
@@ -44,4 +44,3 @@ void UHUD_HealthBar::ReviveHealthPercent(float RevivePercent)
 		CurrentProgressBarPercent += RevivePercent;
 	}
 }
-

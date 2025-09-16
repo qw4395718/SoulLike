@@ -4,27 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "HUD_HealthBar.generated.h"
+#include "HUD_MagicBar.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API UHUD_HealthBar : public UUserWidget
+class SOULLIKEDEMO_API UHUD_MagicBar : public UUserWidget
 {
 	GENERATED_BODY()
-public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	UFUNCTION()
-		void InitHealthBar(float Min, float Max);
+		UFUNCTION()
+		void InitMagicBar(float Min, float Max);
 
 	UFUNCTION()
-		void ReduceHealthPercent(float ReducePercent);
+		void ReduceMagicPercent(float ReducePercent);
 
 	UFUNCTION()
-		void ReviveHealthPercent(float RevivePercent);
+		void ReviveMagicPercent(float RevivePercent);
 
 protected:
 	/************************************************************************/

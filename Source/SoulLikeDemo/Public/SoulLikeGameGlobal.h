@@ -250,3 +250,14 @@ enum class EWeaponAnimNotifyType :uint32
 
 	EWeaponAnimNotify_Max
 };
+
+/************************************************************************/
+/*                              UMG                                        */
+/************************************************************************/
+
+struct FStatusIconInfo
+{
+	int IconIndex;
+	int32 TotalTime;
+	int32 ElapsedTime;
+};

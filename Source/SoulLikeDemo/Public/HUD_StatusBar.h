@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "SoulLikeGameGlobal.h"
-#include "HUD_PlayerStatusBar.generated.h"
+#include "HUD_StatusBar.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API UHUD_PlayerStatusBar : public UUserWidget
+class SOULLIKEDEMO_API UHUD_StatusBar : public UUserWidget
 {
 	GENERATED_BODY()
 	/************************************************************************/

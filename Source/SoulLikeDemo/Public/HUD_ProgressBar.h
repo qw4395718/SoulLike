@@ -37,14 +37,14 @@ protected:
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// 当前进度条百分比(0~1)
-	UPROPERTY()
+	UPROPERTY(meta = (BindWidget))
 		float CurrentProgressBarPercent;
 
 	// 血量进度条上限,默认是1
-	UPROPERTY()
+	UPROPERTY(meta = (BindWidget))
 		float ProgressPercentMax;
 
 	// 血量进度条上限,默认是1
-	UPROPERTY()
+	UPROPERTY(meta = (BindWidget))
 		float ProgressPercentMin;
 };

@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "SoulLikeGameGlobal.h"
-#include "StatusEffectInfo.h"
 #include "Components/Image.h"
+#include "StatusEffectInfo.h"
 #include "HUD_StatusIcon.generated.h"
 
 /**
@@ -32,13 +32,30 @@ protected:
 	/* 内部调用                                                                     */
 	/************************************************************************/
 
+	void OnLoadedImage();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayFlashingEffect();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpateToBP();
+
 protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// Icon图片
 	UPROPERTY(meta = (BindWidget))
-		UImage* IconImage;
+		UImage* ImageIcon;
+
+	UPROPERTY()
+		TSoftObjectPtr<UImage> SoftImageReference;
+
+	UPROPERTY()
+		bool IsFlashing;
+
+	UPROPERTY()
+		int StatusStacksNum;
 
 };
 

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "SoulLikeGameGlobal.h"
+#include "StatusEffectInfo.h"
 #include "HUD_StatusBar.generated.h"
 
 class UHUD_StatusIcon;
@@ -37,6 +38,9 @@ protected:
 
 	UFUNCTION()
 	void CreateNewStatus(FStatusEffectInfo StatusInfo);
+
+	UFUNCTION()
+		UUserWidget* FindIconIndexWidget(int IconIndex);
 
 protected:
 	/************************************************************************/

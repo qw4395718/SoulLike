@@ -20,12 +20,18 @@ class SOULLIKEDEMO_API UHUD_StatusIcon : public UUserWidget
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 		void InitializeIcon(FStatusEffectInfo EffectInfo);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 		void UpdateIcon(float RemainingTime, int32 Stacks);
 
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void PlayFlashingEffect();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void UpateToBP();
 
 protected:
 	/************************************************************************/
@@ -34,11 +40,7 @@ protected:
 
 	void OnLoadedImage();
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void PlayFlashingEffect();
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void UpateToBP();
 
 protected:
 	/************************************************************************/

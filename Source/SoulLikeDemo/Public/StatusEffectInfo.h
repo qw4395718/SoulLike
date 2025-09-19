@@ -5,8 +5,10 @@
 USTRUCT(BlueprintType)
 struct FStatusEffectInfo
 {
-	GENERATED_BODY()
+	GENERATED_BODY();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int IconIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FString IconPath;

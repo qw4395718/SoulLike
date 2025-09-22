@@ -1,14 +1,17 @@
 #pragma once
+#pragma once
+
+#include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
 #include "StatusEffectInfo.generated.h"
 
 USTRUCT(BlueprintType)
 struct FStatusEffectInfo
 {
-	GENERATED_BODY();
+	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int IconIndex;
+		int IconIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FString IconPath;

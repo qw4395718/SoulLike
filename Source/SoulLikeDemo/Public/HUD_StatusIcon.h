@@ -16,6 +16,7 @@ UCLASS()
 class SOULLIKEDEMO_API UHUD_StatusIcon : public UUserWidget
 {
 	GENERATED_BODY()
+public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
@@ -25,6 +26,9 @@ class SOULLIKEDEMO_API UHUD_StatusIcon : public UUserWidget
 
 	UFUNCTION()
 		void UpdateIcon(float RemainingTime, int32 Stacks);
+
+	UFUNCTION()
+		bool EqualIconIndex(int Index);
 
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -58,6 +62,9 @@ protected:
 
 	UPROPERTY()
 		int StatusStacksNum;
+
+	UPROPERTY()
+		int IconIndex;
 
 };
 

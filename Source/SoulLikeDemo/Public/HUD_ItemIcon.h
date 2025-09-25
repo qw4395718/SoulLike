@@ -7,13 +7,13 @@
 #include "SoulLikeGameGlobal.h"
 #include "Components/Image.h"
 #include "StatusEffectInfo.h"
-#include "HUD_StatusIcon.generated.h"
+#include "HUD_ItemIcon.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API UHUD_StatusIcon : public UUserWidget
+class SOULLIKEDEMO_API UHUD_ItemIcon : public UUserWidget
 {
 	GENERATED_BODY()
 public:

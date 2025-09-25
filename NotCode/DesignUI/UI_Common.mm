@@ -1,6 +1,6 @@
 <map version="1.0.1">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
-<node CREATED="1758094021320" ID="ID_1314471372" MODIFIED="1758535782038" TEXT="UI_Common">
+<node CREATED="1758094021320" ID="ID_1314471372" MODIFIED="1758772352217" TEXT="UI_Common">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -13,7 +13,8 @@
       // &#38500;&#38750;&#26159;&#30001;C++&#31867;&#20013;&#21160;&#24577;&#21019;&#24314;&#30340;UMG
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 <node CREATED="1758100477739" ID="ID_1703328573" MODIFIED="1758100581879" POSITION="right" TEXT="WBP_StatusIcon(BP)">
 <node CREATED="1758092072001" ID="ID_983173559" MODIFIED="1758255141367" TEXT="StatusIcon(C++)">
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_983173559" ENDARROW="Default" ENDINCLINATION="749;0;" ID="Arrow_ID_1732412481" SOURCE="ID_428686959" STARTARROW="None" STARTINCLINATION="749;0;"/>
@@ -48,8 +49,7 @@
       // &#38656;&#35201;&#35843;&#29992;&#29238;&#31867;&#30340;&#25968;&#25454;&#26356;&#26032;&#25509;&#21475;
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 <node CREATED="1758096568166" ID="ID_1710575930" MODIFIED="1758533397927" TEXT="&#x64ad;&#x653e;&#x95ea;&#x70c1;&#x52a8;&#x753b;(BP)"/>
 <node CREATED="1758531950113" ID="ID_1075176076" MODIFIED="1758531991308" TEXT="&#x662f;&#x5426;&#x4e3a;&#x6307;&#x5b9a;&#x56fe;&#x6807;"/>

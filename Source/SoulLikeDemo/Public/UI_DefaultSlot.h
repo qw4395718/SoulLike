@@ -57,23 +57,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void PlayMouseClickEffect();
 
-	// 状态管理
-	UFUNCTION(BlueprintCallable, Category = "Equipment")
-		void SetSlotState(ESlotWidgetState NewState);
-
-	// 蓝图获取槽位动画状态
-	UFUNCTION(BlueprintPure, Category = "Equipment")
-		ESlotWidgetState GetCurrentState() const { return CurrentState; }
-
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
-	// 动画管理
-	void PlayStateAnimation(ESlotWidgetState State);
-
-	// 停止当前所有动画轨道
-	void StopCurrentStateAnimation();
 
 protected:
 	/************************************************************************/
@@ -91,17 +78,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 		UImage* SelectedImage;
 
-	// 当前控件所处动画状态
-	UPROPERTY()
-		ESlotWidgetState CurrentState;
 
-	// 状态动画映射
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation|Config")
-		TMap<ESlotWidgetState, FName> StateAnimationMap;
 
-	// 状态是否维持
-	UPROPERTY()
-		TMap<ESlotWidgetState, bool> StateFlagMap;
 };
 
 

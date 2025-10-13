@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Image.h"
+#include "UI_BaseSlot.h"
 #include "UI_IconSlot.generated.h"
 
 /**
@@ -15,12 +16,9 @@ class SOULLIKEDEMO_API UUI_IconSlot : public UUI_BaseSlot
 {
 	GENERATED_BODY()
 public:
-
-	UUI_IconSlot();
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-
 
 protected:
 	/************************************************************************/

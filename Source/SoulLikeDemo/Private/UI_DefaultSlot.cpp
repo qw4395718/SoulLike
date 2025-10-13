@@ -4,31 +4,18 @@
 #include "UI_DefaultSlot.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
+#include "SL_Macros.h"
 
 
-
-UUI_DefaultSlot::UUI_DefaultSlot()
+void UUI_DefaultSlot::SetNewAcquireImageVisible(bool visible)
 {
-
+	RETURN_IF_TRUE(NewTipImage == nullptr);
+	if (visible && NewTipImage)
+	{
+		NewTipImage->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		NewTipImage->SetVisibility(ESlateVisibility::Visible);
+	}
 }
-
-void UUI_DefaultSlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
-{
-	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
-	PlayMouseEnterEffect();
-}
-
-void UUI_DefaultSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
-{
-	Super::NativeOnMouseLeave(InMouseEvent);
-	PlayMouseLevelEffect();
-}
-
-void UUI_DefaultSlot::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& NativeOnMouseButtonUp)
-{
-	Super::NativeOnMouseButtonUp(InGeometry, NativeOnMouseButtonUp);
-
-	PlayMouseClickEffect();
-}
-
-

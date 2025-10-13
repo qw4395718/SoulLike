@@ -4,4 +4,3 @@
 #include "UI_CoinShowBar.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
-

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include "UI_BaseCoin.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Image.h"
@@ -16,7 +16,6 @@ class SOULLIKEDEMO_API UUI_CoinShowBar : public UUI_BaseCoin
 	GENERATED_BODY()
 public:
 
-	UUI_CoinShowBar();
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/

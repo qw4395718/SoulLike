@@ -4,16 +4,8 @@
 #include "UI_BaseSlot.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
+#include "SL_Macros.h"
 
-UUI_BaseSlot::UUI_BaseSlot()
-{
-	// 默认初始化成员变量
-	ShowImage = nullptr;
-	SoftImageReference = nullptr;
-	PicWidth = 0;
-	PicHeight = 0;
-	StatusStacksNum = 0;
-}
 
 void UUI_BaseSlot::SetLoadImageData(FString ImgPath)
 {

@@ -1,20 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "HUD_StatusIcon.h"
+#include "UI_BaseCoin.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
+#include "SL_Macros.h"
 
-
-UUI_BaseCoin::UUI_BaseCoin()
-{
-	// 默认初始化成员变量
-	ShowImage = nullptr;
-	SoftImageReference = nullptr;
-	PicWidth = 0;
-	PicHeight = 0;
-	DynamicStr = "";
-}
 
 void UUI_BaseCoin::SetLoadImageData(FString ImgPath)
 {
@@ -24,7 +15,7 @@ void UUI_BaseCoin::SetLoadImageData(FString ImgPath)
 	SoftImageReference = TSoftObjectPtr<UImage>(FSoftObjectPath(*ImgPath));
 	Streamable.RequestAsyncLoad(
 		SoftImageReference.ToSoftObjectPath(),
-		FStreamableDelegate::CreateUObject(this, &UUI_BaseSlot::OnLoadedImage)
+		FStreamableDelegate::CreateUObject(this, &UUI_BaseCoin::OnLoadedImage)
 	);
 
 }

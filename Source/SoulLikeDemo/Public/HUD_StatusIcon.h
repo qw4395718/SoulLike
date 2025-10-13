@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
 #include "SoulLikeGameGlobal.h"
 #include "Components/Image.h"
 #include "StatusEffectInfo.h"
+#include "UI_IconSlot.h"
 #include "HUD_StatusIcon.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API UHUD_StatusIcon : public UUserWidget
+class SOULLIKEDEMO_API UHUD_StatusIcon : public UUI_IconSlot
 {
 	GENERATED_BODY()
 public:
@@ -31,7 +31,7 @@ public:
 		bool EqualIconIndex(int Index);
 
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintNativeEvent)
 		void PlayFlashingEffect();
 
 protected:
@@ -39,26 +39,12 @@ protected:
 	/* 内部调用                                                                     */
 	/************************************************************************/
 
-	void OnLoadedImage();
-
-
-
 protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
-	// Icon图片
-	UPROPERTY(meta = (BindWidget))
-		UImage* ImageIcon;
-
-	UPROPERTY()
-		TSoftObjectPtr<UImage> SoftImageReference;
-
 	UPROPERTY()
 		bool IsFlashing;
-
-	UPROPERTY(meta = (BindWidget))
-		int StatusStacksNum;
 
 	UPROPERTY()
 		int IconIndex;

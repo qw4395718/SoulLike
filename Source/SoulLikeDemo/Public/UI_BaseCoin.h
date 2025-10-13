@@ -15,7 +15,6 @@ class SOULLIKEDEMO_API UUI_BaseCoin : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	UUI_BaseCoin();
 
 	/************************************************************************/
 	/* 外部调用                                                                     */

@@ -38,10 +38,7 @@ bool UHUD_StatusIcon::EqualIconIndex(int Index)
 	return (IconIndex == Index && IconIndex != 0);
 }
 
-void UHUD_StatusIcon::OnLoadedImage()
+void UHUD_StatusIcon::PlayFlashingEffect_Implementation()
 {
-	if (SoftImageReference.Get() != nullptr)
-	{
-		ImageIcon = SoftImageReference.Get();
-	}
+
 }

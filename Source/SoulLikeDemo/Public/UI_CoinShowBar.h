@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API UUI_CoinShowBar : public UUI_BaseCoin
+class SOULLIKEDEMO_API UUI_CoinShowBar : public UUserWidget
 {
 	GENERATED_BODY()
 public:

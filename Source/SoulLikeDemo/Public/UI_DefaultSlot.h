@@ -8,18 +8,6 @@
 #include "UI_BaseSlot.h"
 #include "UI_DefaultSlot.generated.h"
 
-// 处理多个状态同时存在的情况
-UENUM(BlueprintType)
-enum class ESlotWidgetState : uint8
-{
-	Normal = 0,
-	Hovered = 1,
-	Selected = 2,
-	Pressed = 3,  // 高优先级
-	Disabled = 4   // 最高优先级
-};
-
-
 /**
  * 
  */

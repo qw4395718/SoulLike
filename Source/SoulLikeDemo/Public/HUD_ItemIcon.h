@@ -7,13 +7,14 @@
 #include "SoulLikeGameGlobal.h"
 #include "Components/Image.h"
 #include "StatusEffectInfo.h"
+#include "UI_DefaultSlot.h"
 #include "HUD_ItemIcon.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API UHUD_ItemIcon : public UUserWidget
+class SOULLIKEDEMO_API UHUD_ItemIcon : public UUI_DefaultSlot
 {
 	GENERATED_BODY()
 public:
@@ -30,35 +31,19 @@ public:
 	UFUNCTION()
 		bool EqualIconIndex(int Index);
 
-
-	UFUNCTION(BlueprintImplementableEvent)
-		void PlayFlashingEffect();
-
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
-
-	void OnLoadedImage();
-
 
 
 protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
-	// Icon图片
-	UPROPERTY(meta = (BindWidget))
-		UImage* ImageIcon;
-
-	UPROPERTY()
-		TSoftObjectPtr<UImage> SoftImageReference;
 
 	UPROPERTY()
 		bool IsFlashing;
-
-	UPROPERTY(meta = (BindWidget))
-		int StatusStacksNum;
 
 	UPROPERTY()
 		int IconIndex;

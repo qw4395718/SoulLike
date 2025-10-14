@@ -4,3 +4,9 @@
 #include "UI_InterActButton.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
+
+UUI_InterActButton::UUI_InterActButton(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
+	:Super(ObjectInitializer)
+{
+
+}

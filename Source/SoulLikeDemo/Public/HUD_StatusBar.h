@@ -17,6 +17,8 @@ UCLASS()
 class SOULLIKEDEMO_API UHUD_StatusBar : public UUserWidget
 {
 	GENERATED_BODY()
+public:
+	UHUD_StatusBar(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/

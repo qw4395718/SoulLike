@@ -14,6 +14,7 @@ class SOULLIKEDEMO_API UHUD_ProgressBar : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	UHUD_ProgressBar(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
@@ -37,14 +38,14 @@ protected:
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// 当前进度条百分比(0~1)
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly,meta = (BindWidget))
 		float CurrentProgressBarPercent;
 
 	// 血量进度条上限,默认是1
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly,meta = (BindWidget))
 		float ProgressPercentMax;
 
 	// 血量进度条上限,默认是1
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly,meta = (BindWidget))
 		float ProgressPercentMin;
 };

@@ -4,6 +4,12 @@
 #include "HUD_StatusBar.h"
 #include "HUD_StatusIcon.h"
 
+UHUD_StatusBar::UHUD_StatusBar(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
+	:Super(ObjectInitializer)
+{
+
+}
+
 void UHUD_StatusBar::AddStatus(FStatusEffectInfo StatusInfo)
 {
 	// 重复的Icon不接受,由上级管控确保传入是新状态

@@ -17,6 +17,7 @@ class SOULLIKEDEMO_API UHUD_StatusIcon : public UUI_IconSlot
 {
 	GENERATED_BODY()
 public:
+	UHUD_StatusIcon();
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/

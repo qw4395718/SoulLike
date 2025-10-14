@@ -5,6 +5,11 @@
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
 
+UHUD_StatusIcon::UHUD_StatusIcon()
+{
+
+}
+
 void UHUD_StatusIcon::InitializeIcon(FStatusEffectInfo EffectInfo)
 {
 	// 异步加载美术资源

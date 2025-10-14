@@ -5,13 +5,21 @@
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
 
-void UHUD_ItemIcon::InitializeIcon(FStatusEffectInfo EffectInfo)
+UHUD_ItemIcon::UHUD_ItemIcon()
+{
+	ItemIndex = 0;
+	ItemName = "";
+	ItemDesc = "";
+}
+
+void UHUD_ItemIcon::SetData(FStatusEffectInfo EffectInfo)
 {
 	// 异步加载美术资源
 	if (EffectInfo.IconPath == "") { return; }
 	// 初始化参数
-	IconIndex = EffectInfo.IconIndex;
-	StatusStacksNum = EffectInfo.Stacks;
+	ItemIndex = EffectInfo.IconIndex;
+	// 设置堆叠数量
+	SetStacksNum(EffectInfo.Stacks);
 
 	// 资源异步加载
 	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
@@ -23,25 +31,20 @@ void UHUD_ItemIcon::InitializeIcon(FStatusEffectInfo EffectInfo)
 
 }
 
-void UHUD_ItemIcon::UpdateIcon(float RemainingTime, int32 Stacks)
+void UHUD_ItemIcon::ClearData()
 {
-	if (RemainingTime <= HUD_STATUSBAR_STATUSICONFLASHING && IsFlashing == false)
-	{
-		// 进入闪烁状态
-		PlayFlashingEffect();
+	ItemIndex = 0;
+	ItemName = "";
+	ItemDesc = "";
+	SetStacksNum(0);
+	if (ShowImage != nullptr)
+	{// 设置不可视
+		ShowImage->SetVisibility(ESlateVisibility::Hidden);
 	}
-	StatusStacksNum = Stacks;
 }
 
 bool UHUD_ItemIcon::EqualIconIndex(int Index)
 {
-	return (IconIndex == Index && IconIndex != 0);
+	return (ItemIndex == Index && ItemIndex != 0);
 }
 
-void UHUD_ItemIcon::OnLoadedImage()
-{
-	if (SoftImageReference.Get() != nullptr)
-	{
-		ImageIcon = SoftImageReference.Get();
-	}
-}

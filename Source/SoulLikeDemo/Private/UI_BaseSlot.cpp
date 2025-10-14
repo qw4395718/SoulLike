@@ -7,6 +7,12 @@
 #include "SL_Macros.h"
 
 
+UUI_BaseSlot::UUI_BaseSlot(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
+	:Super(ObjectInitializer)
+{
+
+}
+
 void UUI_BaseSlot::SetLoadImageData(FString ImgPath)
 {
 	RETURN_IF_TRUE(ImgPath == "");

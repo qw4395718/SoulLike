@@ -15,7 +15,7 @@ class SOULLIKEDEMO_API UUI_CoinShowBar : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-
+	UUI_CoinShowBar(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/

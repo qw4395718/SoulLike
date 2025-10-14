@@ -16,6 +16,7 @@ class SOULLIKEDEMO_API UUI_DefaultSlot : public UUI_BaseSlot
 {
 	GENERATED_BODY()
 public:
+	UUI_DefaultSlot();
 	/************************************************************************/
 	/* ºÃ≥– µœ÷																		*/
 	/************************************************************************/

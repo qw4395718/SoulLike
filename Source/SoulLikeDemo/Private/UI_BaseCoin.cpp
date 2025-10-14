@@ -7,6 +7,12 @@
 #include "SL_Macros.h"
 
 
+UUI_BaseCoin::UUI_BaseCoin(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
+	:Super(ObjectInitializer)
+{
+
+}
+
 void UUI_BaseCoin::SetLoadImageData(FString ImgPath)
 {
 	RETURN_IF_TRUE(ImgPath == "");

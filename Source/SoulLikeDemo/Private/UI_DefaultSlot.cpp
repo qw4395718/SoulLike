@@ -7,6 +7,11 @@
 #include "SL_Macros.h"
 
 
+UUI_DefaultSlot::UUI_DefaultSlot()
+{
+
+}
+
 void UUI_DefaultSlot::SetNewAcquireImageVisible(bool visible)
 {
 	RETURN_IF_TRUE(NewTipImage == nullptr);

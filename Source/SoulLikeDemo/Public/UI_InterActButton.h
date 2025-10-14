@@ -15,7 +15,7 @@ class SOULLIKEDEMO_API UUI_InterActButton : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-
+	UUI_InterActButton(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/

@@ -15,7 +15,7 @@ class SOULLIKEDEMO_API UUI_BaseCoin : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-
+	UUI_BaseCoin(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/

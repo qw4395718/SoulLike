@@ -18,15 +18,16 @@ class SOULLIKEDEMO_API UHUD_ItemIcon : public UUI_DefaultSlot
 {
 	GENERATED_BODY()
 public:
+	UHUD_ItemIcon();
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	
 	UFUNCTION()
-		void InitializeIcon(FStatusEffectInfo EffectInfo);
+		void SetData(FStatusEffectInfo EffectInfo);
 
 	UFUNCTION()
-		void UpdateIcon(float RemainingTime, int32 Stacks);
+		void ClearData();
 
 	UFUNCTION()
 		bool EqualIconIndex(int Index);
@@ -36,17 +37,19 @@ protected:
 	/* 内部调用                                                                     */
 	/************************************************************************/
 
-
 protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
 
-	UPROPERTY()
-		bool IsFlashing;
+	UPROPERTY(meta = (BindWidget))
+		FString ItemName;
+
+	UPROPERTY(meta = (BindWidget))
+		FString ItemDesc;
 
 	UPROPERTY()
-		int IconIndex;
+		int ItemIndex;
 
 };
 

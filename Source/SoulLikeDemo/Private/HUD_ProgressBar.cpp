@@ -4,6 +4,12 @@
 #include "HUD_ProgressBar.h"
 #include "SoulLikeGameGlobal.h"
 
+UHUD_ProgressBar::UHUD_ProgressBar(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
+	:Super(ObjectInitializer)
+{
+
+}
+
 void UHUD_ProgressBar::InitProgressBar(float Min, float Max)
 {
 	ProgressPercentMin = Min;

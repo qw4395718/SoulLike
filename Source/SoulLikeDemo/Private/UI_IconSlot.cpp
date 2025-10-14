@@ -4,3 +4,8 @@
 #include "UI_IconSlot.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
+
+UUI_IconSlot::UUI_IconSlot()
+{
+
+}

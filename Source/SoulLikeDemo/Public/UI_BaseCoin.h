@@ -42,7 +42,7 @@ protected:
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// Icon图片
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UImage* ShowImage;
 
 	UPROPERTY()
@@ -54,7 +54,7 @@ protected:
 	UPROPERTY()
 		int PicHeight;
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		FString DynamicStr;
 
 

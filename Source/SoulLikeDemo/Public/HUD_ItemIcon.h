@@ -42,10 +42,10 @@ protected:
 	/* 内部变量                                                                     */
 	/************************************************************************/
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		FString ItemName;
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		FString ItemDesc;
 
 	UPROPERTY()

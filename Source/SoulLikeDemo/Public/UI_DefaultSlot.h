@@ -38,7 +38,7 @@ protected:
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// 新获取提示图标
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UImage* NewTipImage;
 
 };

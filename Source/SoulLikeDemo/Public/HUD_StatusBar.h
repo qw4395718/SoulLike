@@ -22,27 +22,36 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	UFUNCTION()
-	void AddStatus(FStatusEffectInfo StatusInfo);
+	UFUNCTION(BlueprintCallable, Category = "Status Bar")
+		void InitializeStatusBar(UHorizontalBox* InStatusIconsContainer);
 
-	UFUNCTION()
-	void RemoveStatus(int IconIndex);
 
-	UFUNCTION()
-	void UpdateStatus(FStatusEffectInfo StatusInfo);
+	UFUNCTION(BlueprintCallable, Category = "Status Bar")
+		void AddStatus(FStatusEffectInfo StatusInfo);
+
+	UFUNCTION(BlueprintCallable, Category = "Status Bar")
+		void RemoveStatus(int IconIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "Status Bar")
+		void UpdateStatus(FStatusEffectInfo StatusInfo);
+
+	// 为蓝图暴露的动画事件
+	UFUNCTION(BlueprintImplementableEvent, Category = "Status Bar")
+		void OnStatusIconAdded(UUserWidget* StatusIconWidget);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Status Bar")
+		void OnStatusIconRemoved(UUserWidget* StatusIconWidget);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Status Bar")
+		void OnStatusIconUpdated(UUserWidget* StatusIconWidget);
 
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
-	UFUNCTION()
-	bool IsStausExist(int IconIndex);
 
 	UFUNCTION()
-	void CreateNewStatus(FStatusEffectInfo StatusInfo);
-
-	UFUNCTION()
-		UUserWidget* FindIconIndexWidget(int IconIndex);
+		void CreateNewStatus(FStatusEffectInfo StatusInfo);
 
 protected:
 	/************************************************************************/
@@ -51,8 +60,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 		TSubclassOf<UHUD_StatusIcon> StatusIconWidgetClass;
 
+	// 控件引用
+	UPROPERTY()
+		UHorizontalBox* StatusIconsContainer;
+
 	// 图标管理器
 	UPROPERTY()
-		TArray<UUserWidget*> StatusManager;
+		TMap<int, UUserWidget*> ActiveStatusIcons;
 
 };

@@ -22,13 +22,13 @@ public:
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Status Icon")
 		void InitializeIcon(FStatusEffectInfo EffectInfo);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Status Icon")
 		void UpdateIcon(float RemainingTime, int32 Stacks);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Status Icon")
 		bool EqualIconIndex(int Index);
 
 

@@ -18,8 +18,7 @@ void UHUD_StatusBar::InitializeStatusBar(UHorizontalBox* InStatusIconsContainer)
 void UHUD_StatusBar::AddStatus(FStatusEffectInfo StatusInfo)
 {
 	// 重复的Icon不接受,由上级管控确保传入是新状态
-	if (!StatusIconsContainer || ActiveStatusIcons.Contains(StatusInfo.IconIndex))
-		return;
+	RETURN_IF_TRUE(StatusIconsContainer == nullptr || ActiveStatusIcons.Contains(StatusInfo.IconIndex))
 
 	CreateNewStatus(StatusInfo);
 }

@@ -7,47 +7,28 @@
 UHUD_ProgressBar::UHUD_ProgressBar(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
-
+	// Ä¬ÈÏÖµ
+	ProgressPercentMin = 0;
+	ProgressPercentMax = 100;
+	CurrentProgressBarPercent = 100;
 }
 
-void UHUD_ProgressBar::InitProgressBar(float Min, float Max)
+void UHUD_ProgressBar::UpdateProgressBar(float Min, float Max,float Current)
 {
 	ProgressPercentMin = Min;
 	ProgressPercentMax = Max;
-	CurrentProgressBarPercent = ProgressPercentMax;
-}
-
-void UHUD_ProgressBar::ReduceProgressBarPercent(float ReducePercent)
-{
-	RETURN_IF_TRUE(ReducePercent < ProgressPercentMin || ReducePercent > ProgressPercentMax);
-	if (CurrentProgressBarPercent - ReducePercent < ProgressPercentMin)
+	if (Current > Max)
 	{
-		CurrentProgressBarPercent = ProgressPercentMin;
+		CurrentProgressBarPercent = Max;
 	}
-	else if (CurrentProgressBarPercent - ReducePercent > ProgressPercentMin)
+	else if (Current < Min)
 	{
-		CurrentProgressBarPercent = ProgressPercentMax;
+		CurrentProgressBarPercent = Min;
 	}
 	else
 	{
-		CurrentProgressBarPercent -= ReducePercent;
+		CurrentProgressBarPercent = Current;
 	}
-}
-
-void UHUD_ProgressBar::ReviveProgressBarPercent(float RevivePercent)
-{
-	RETURN_IF_TRUE(RevivePercent < ProgressPercentMin || RevivePercent > ProgressPercentMax);
-	if (CurrentProgressBarPercent + RevivePercent < ProgressPercentMin)
-	{
-		CurrentProgressBarPercent = ProgressPercentMin;
-	}
-	else if (CurrentProgressBarPercent + RevivePercent > ProgressPercentMin)
-	{
-		CurrentProgressBarPercent = ProgressPercentMax;
-	}
-	else
-	{
-		CurrentProgressBarPercent += RevivePercent;
-	}
+	
 }
 

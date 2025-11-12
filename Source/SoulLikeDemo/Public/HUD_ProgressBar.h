@@ -19,13 +19,7 @@ public:
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	UFUNCTION()
-		void InitProgressBar(float Min, float Max);
-
-	UFUNCTION()
-		void ReduceProgressBarPercent(float ReducePercent);
-
-	UFUNCTION()
-		void ReviveProgressBarPercent(float RevivePercent);
+		void UpdateProgressBar(float Min, float Max, float Current);
 
 protected:
 	/************************************************************************/

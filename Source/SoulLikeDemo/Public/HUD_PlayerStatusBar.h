@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Blueprint/UserWidget.h"
 #include "SoulLikeGameGlobal.h"
 #include "HUD_PlayerStatusBar.generated.h"
 
@@ -30,8 +31,23 @@ public:
 			UHUD_StatusBar* PlayerSB
 			);
 
+	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
+		void UpdateProgressInfo(
+		float HealthMax,
+		float CurrnetHealth,
+		float StaminaMax,
+		float CurrentStamina,
+		float MagicMax,
+		float CurrentMagic);
 
+	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
+		void AddPlayerStatus(TArray<FStatusEffectInfo> AddStatus);
 
+	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
+		void UpdatePlayerStatus(TArray<FStatusEffectInfo> UpdateStatus);
+
+	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
+		void RemovePlayerStatus(TArray<FStatusEffectInfo> RemoveStatus);
 
 protected:
 	/************************************************************************/

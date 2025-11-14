@@ -1,6 +1,10 @@
 #pragma once
 #include "SL_Macros.h"
 
+/************************************************************************/
+/*                              Const                                         */
+/************************************************************************/
+
 // 角色配置-背刺距离限制
 const INT BACKSTAB_DISTANCE_THRESHOLD = 150;
 
@@ -31,6 +35,9 @@ const float REDUCE_STAMINACOST_PERCENTAGE = 0.5f;
 // 状态图标闪烁时间(ms)
 const INT HUD_STATUSBAR_STATUSICONFLASHING = 2000;
 
+/************************************************************************/
+/*                              Enum                                         */
+/************************************************************************/
 
 //伤害类型
 UENUM(BlueprintType)
@@ -149,12 +156,7 @@ enum class EUIWidgetType :uint32
 	EWIDGET_Max
 };
 
-// 槽位信息
-struct FInventorySlot
-{
-	EInventoryCompartmentType SlotType;
-	int SlotIndex;
-};
+
 
 // 武器行为消耗资源类别
 UENUM()
@@ -167,35 +169,7 @@ enum class EWeaponActionCostType :uint8
 	EWeaponAction_Max
 };
 
-// 连段消耗资源倍率
-struct FAbilityCostInfo
-{
-	float HealthCost = 0;
-	float StaminaCost = 0;
-	float MagicCost = 0;
-};
 
-// 连段控制信息
-struct FComboCoordinatorInfo
-{
-	// 武器基础伤害
-	float BaseDamage;
-
-	// 连段对应的伤害倍率
-	TArray<float> ComboDamageMultiplier;
-
-	// 连招最高上限
-	int ComboMaxNum;
-
-	// 当前连段
-	int CurrentComboNum;
-
-	// 当前连段窗口是否激活
-	bool CanContinueCombo;
-
-	// 对应连段的资源消耗(对应角色的基础属性,例如体力,血量,蓝量)
-	TMap<int, FAbilityCostInfo> ComboStateCostMultiplier;
-};
 
 // 动画通知种类
 UENUM()
@@ -254,9 +228,63 @@ enum class EWeaponAnimNotifyType :uint32
 	EWeaponAnimNotify_Max
 };
 
+UENUM(BlueprintType)
+enum class EHUDEquipmentSlotType :uint8
+{
+	EHUDEquipmentSlotType_None,
+	EHUDEquipmentSlotType_Up,
+	EHUDEquipmentSlotType_UpSecond,
+	EHUDEquipmentSlotType_UpThird,
+	EHUDEquipmentSlotType_UpFourth,
+	EHUDEquipmentSlotType_Down,
+	EHUDEquipmentSlotType_DownSecond,
+	EHUDEquipmentSlotType_DownThird,
+	EHUDEquipmentSlotType_DownFourth,
+	EHUDEquipmentSlotType_Left,
+	EHUDEquipmentSlotType_Right,
+	EHUDEquipmentSlotType_Max,
+};
+
 /************************************************************************/
-/*                              UMG                                        */
+/*                              Struct                                         */
 /************************************************************************/
+
+// 槽位信息
+struct FInventorySlot
+{
+	EInventoryCompartmentType SlotType;
+	int SlotIndex;
+};
+
+// 连段消耗资源倍率
+struct FAbilityCostInfo
+{
+	float HealthCost = 0;
+	float StaminaCost = 0;
+	float MagicCost = 0;
+};
+
+// 连段控制信息
+struct FComboCoordinatorInfo
+{
+	// 武器基础伤害
+	float BaseDamage;
+
+	// 连段对应的伤害倍率
+	TArray<float> ComboDamageMultiplier;
+
+	// 连招最高上限
+	int ComboMaxNum;
+
+	// 当前连段
+	int CurrentComboNum;
+
+	// 当前连段窗口是否激活
+	bool CanContinueCombo;
+
+	// 对应连段的资源消耗(对应角色的基础属性,例如体力,血量,蓝量)
+	TMap<int, FAbilityCostInfo> ComboStateCostMultiplier;
+};
 
 struct FStatusIconInfo
 {
@@ -264,3 +292,4 @@ struct FStatusIconInfo
 	int32 TotalTime;
 	int32 ElapsedTime;
 };
+

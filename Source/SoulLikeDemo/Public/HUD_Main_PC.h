@@ -5,45 +5,43 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "SoulLikeGameGlobal.h"
-#include "StatusEffectInfo.h"
-#include "HUD_BossStatusBar.generated.h"
+#include "HUD_Main_PC.generated.h"
 
-class UHUD_ProgressBar;
-class UHUD_StatusBar;
+class UHUD_PlayerStatusBar;
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API UHUD_BossStatusBar : public UUserWidget
+class SOULLIKEDEMO_API UHUD_Main_PC : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	UHUD_BossStatusBar(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UHUD_Main_PC(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	
-	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void InitializeBossStatusBar(
-			UHUD_ProgressBar* HealthPB,
-			UHUD_StatusBar* BossSB
-			);
+	UFUNCTION(BlueprintCallable, Category = "Main PC")
+		void InitializeMainHUD_PC(UHUD_PlayerStatusBar* StatusBar);
 
-	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
+	UFUNCTION(BlueprintCallable, Category = "Main PC")
 		void UpdateProgressInfo(
-		float HealthMax,
-		float CurrnetHealth);
+			float HealthMax,
+			float CurrnetHealth,
+			float StaminaMax,
+			float CurrentStamina,
+			float MagicMax,
+			float CurrentMagic);
 
-	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void AddBossStatus(TArray<FStatusEffectInfo> AddStatus);
+	UFUNCTION(BlueprintCallable, Category = "Main PC")
+		void AddPlayerStatus(TArray<FStatusEffectInfo> AddStatus);
 
-	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void UpdateBossStatus(TArray<FStatusEffectInfo> UpdateStatus);
+	UFUNCTION(BlueprintCallable, Category = "Main PC")
+		void UpdatePlayerStatus(TArray<FStatusEffectInfo> UpdateStatus);
 
-	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void RemoveBossStatus(TArray<FStatusEffectInfo> RemoveStatus);
-
+	UFUNCTION(BlueprintCallable, Category = "Main PC")
+		void RemovePlayerStatus(TArray<FStatusEffectInfo> RemoveStatus);
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
@@ -53,13 +51,9 @@ protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
-	// 控件引用
+	// 控件引用-暴露给外部
 	UPROPERTY()
-		UHUD_ProgressBar* HealthProgressBar;
-
-
-	UPROPERTY()
-		UHUD_StatusBar* BossStatusBar;
+		UHUD_PlayerStatusBar* PlayerStatusBar;
 
 };
 

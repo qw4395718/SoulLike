@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "HUD_ProgressBar.generated.h"
 
+class UProgressBar;
+
 /**
  * 
  */
@@ -21,6 +23,9 @@ public:
 	UFUNCTION()
 		void UpdateProgressBar(float Min, float Max, float Current);
 
+	UFUNCTION(BlueprintCallable, Category = "ProgressBar")
+		void InitializeProgressBar(UProgressBar* ProgressBarRefence);
+
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
@@ -31,6 +36,10 @@ protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
+	// 控件引用
+	UPROPERTY()
+		UProgressBar* ProgressBar;
+
 	// 当前进度条百分比(0~1)
 	UPROPERTY(BlueprintReadOnly,meta = (BindWidget))
 		float CurrentProgressBarPercent;

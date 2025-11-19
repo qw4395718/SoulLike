@@ -13,47 +13,13 @@ UHUD_EquipmentBar::UHUD_EquipmentBar(const FObjectInitializer& ObjectInitializer
 
 }
 
-void UHUD_EquipmentBar::InitializeBossStatusBar(
-	UHUD_ProgressBar* HealthPB,
-	UHUD_StatusBar* BossSB
-	)
+void UHUD_EquipmentBar::InitializeEquipmentBar(UHUD_ItemIcon* UpEquipment, UHUD_ItemIcon* DownEquipment, UHUD_ItemIcon* LeftEquipment, UHUD_ItemIcon* RightEquipment, UHUD_ItemIcon* UpSecondEquipment, UHUD_ItemIcon* UpThirdEquipment, UHUD_ItemIcon* UpFourthEquipment, UHUD_ItemIcon* DownSecondEquipment, UHUD_ItemIcon* DownThirdEquipment, UHUD_ItemIcon* DownFourthEquipment)
 {
-	RETURN_IF_TRUE(HealthPB == nullptr || BossSB == nullptr  )
 
-	// 记录界面组件
-	HealthProgressBar = HealthPB;
-	BossStatusBar = BossSB;
 }
 
-void UHUD_EquipmentBar::UpdateProgressInfo(float HealthMax, float CurrnetHealth)
+void UHUD_EquipmentBar::UpdateTargetSlot()
 {
-	RETURN_IF_TRUE(HealthProgressBar == nullptr);
-	HealthProgressBar->UpdateProgressBar(0, HealthMax, CurrnetHealth);
+
 }
 
-void UHUD_EquipmentBar::AddBossStatus(TArray<FStatusEffectInfo> AddStatus)
-{
-	RETURN_IF_TRUE(BossStatusBar == nullptr);
-	for(FStatusEffectInfo Info : AddStatus)
-	{
-		BossStatusBar->AddStatus(Info);
-	}
-}
-
-void UHUD_EquipmentBar::UpdateBossStatus(TArray<FStatusEffectInfo> UpdateStatus)
-{
-	RETURN_IF_TRUE(BossStatusBar == nullptr);
-	for(FStatusEffectInfo Info : UpdateStatus)
-	{
-		BossStatusBar->UpdateStatus(Info);
-	}
-}
-
-void UHUD_EquipmentBar::RemoveBossStatus(TArray<FStatusEffectInfo> RemoveStatus)
-{
-	RETURN_IF_TRUE(BossStatusBar == nullptr);
-	for(FStatusEffectInfo Info : RemoveStatus)
-	{
-		BossStatusBar->RemoveStatus(Info.IconIndex);
-	}
-}

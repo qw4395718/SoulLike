@@ -32,9 +32,6 @@ const float REDUCE_DAMAGE_PERCENTAGE = 0.9f;
 // 体力消耗最小下限
 const float REDUCE_STAMINACOST_PERCENTAGE = 0.5f;
 
-// 状态图标闪烁时间(ms)
-const INT HUD_STATUSBAR_STATUSICONFLASHING = 2000;
-
 /************************************************************************/
 /*                              Enum                                         */
 /************************************************************************/
@@ -235,11 +232,9 @@ enum class EHUDEquipmentSlotType :uint8
 	EHUDEquipmentSlotType_Up,
 	EHUDEquipmentSlotType_UpSecond,
 	EHUDEquipmentSlotType_UpThird,
-	EHUDEquipmentSlotType_UpFourth,
 	EHUDEquipmentSlotType_Down,
 	EHUDEquipmentSlotType_DownSecond,
 	EHUDEquipmentSlotType_DownThird,
-	EHUDEquipmentSlotType_DownFourth,
 	EHUDEquipmentSlotType_Left,
 	EHUDEquipmentSlotType_Right,
 	EHUDEquipmentSlotType_Max,

@@ -14,7 +14,7 @@ struct FStatusEffectInfo
 		int IconIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString IconPath;
+		UTexture2D* Icon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float Duration;

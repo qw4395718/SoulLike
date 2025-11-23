@@ -21,10 +21,7 @@ public:
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	UFUNCTION()
-		void UpdateProgressBar(float Min, float Max, float Current);
-
-	UFUNCTION(BlueprintCallable, Category = "ProgressBar")
-		void InitializeProgressBar(UProgressBar* ProgressBarRefence);
+		void UpdateProgressBar(float min, float max, float current);
 
 protected:
 	/************************************************************************/
@@ -37,18 +34,18 @@ protected:
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// 控件引用
-	UPROPERTY()
-		UProgressBar* ProgressBar;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UProgressBar* m_progressBar;
 
 	// 当前进度条百分比(0~1)
-	UPROPERTY(BlueprintReadOnly,meta = (BindWidget))
-		float CurrentProgressBarPercent;
+	UPROPERTY()
+		float m_currentProgressBarPercent;
 
 	// 血量进度条上限,默认是1
-	UPROPERTY(BlueprintReadOnly,meta = (BindWidget))
-		float ProgressPercentMax;
+	UPROPERTY()
+		float m_progressPercentMax;
 
-	// 血量进度条上限,默认是1
-	UPROPERTY(BlueprintReadOnly,meta = (BindWidget))
-		float ProgressPercentMin;
+	// 血量进度条下限,默认是0
+	UPROPERTY()
+		float m_progressPercentMin;
 };

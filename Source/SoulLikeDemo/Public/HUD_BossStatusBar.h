@@ -26,23 +26,21 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
 		void InitializeBossStatusBar(
-			UHUD_ProgressBar* HealthPB,
-			UHUD_StatusBar* BossSB
+			UHUD_StatusBar* bossSB
 			);
 
 	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
 		void UpdateProgressInfo(
-		float HealthMax,
-		float CurrnetHealth);
+		float currnetHealthPercent);
 
 	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void AddBossStatus(TArray<FStatusEffectInfo> AddStatus);
+		void AddBossStatus(TArray<FStatusEffectInfo> addStatusArr);
 
 	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void UpdateBossStatus(TArray<FStatusEffectInfo> UpdateStatus);
+		void UpdateBossStatus(TArray<FStatusEffectInfo> updateStatusArr);
 
 	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void RemoveBossStatus(TArray<FStatusEffectInfo> RemoveStatus);
+		void RemoveBossStatus(TArray<FStatusEffectInfo> removeStatusArr);
 
 protected:
 	/************************************************************************/
@@ -54,12 +52,12 @@ protected:
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// 控件引用
-	UPROPERTY()
-		UHUD_ProgressBar* HealthProgressBar;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UHUD_ProgressBar* m_healthProgressBar;
 
 
 	UPROPERTY()
-		UHUD_StatusBar* BossStatusBar;
+		UHUD_StatusBar* m_bossStatusBar;
 
 };
 

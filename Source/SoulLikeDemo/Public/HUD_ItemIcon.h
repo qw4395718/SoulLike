@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "SoulLikeGameGlobal.h"
-#include "Components/Image.h"
 #include "StatusEffectInfo.h"
 #include "UI_DefaultSlot.h"
 #include "HUD_ItemIcon.generated.h"
@@ -13,24 +12,28 @@
 /**
  * 
  */
+class UTextBlock;
+
 UCLASS()
 class SOULLIKEDEMO_API UHUD_ItemIcon : public UUI_DefaultSlot
 {
 	GENERATED_BODY()
 public:
 	UHUD_ItemIcon();
+
+	/************************************************************************/
+	/* 继承实现																		*/
+	/************************************************************************/
+
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	
 	UFUNCTION()
-		void SetData(FStatusEffectInfo EffectInfo);
+		void SetData(FStatusEffectInfo effectInfo);
 
 	UFUNCTION()
 		void ClearData();
-
-	UFUNCTION()
-		bool EqualIconIndex(int Index);
 
 protected:
 	/************************************************************************/
@@ -41,16 +44,6 @@ protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		FString ItemName;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		FString ItemDesc;
-
-	UPROPERTY()
-		int ItemIndex;
-
 };
 
 

@@ -24,20 +24,20 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "EquipmentBarBar")
 		void InitializeEquipmentBar(
-			UHUD_ItemIcon* UpEquipment,
-			UHUD_ItemIcon* DownEquipment,
-			UHUD_ItemIcon* LeftEquipment,
-			UHUD_ItemIcon* RightEquipment,
-			UHUD_ItemIcon* UpSecondEquipment,
-			UHUD_ItemIcon* UpThirdEquipment,
-			UHUD_ItemIcon* UpFourthEquipment,
-			UHUD_ItemIcon* DownSecondEquipment,
-			UHUD_ItemIcon* DownThirdEquipment,
-			UHUD_ItemIcon* DownFourthEquipment
+			UHUD_ItemIcon* upEquipment,
+			UHUD_ItemIcon* downEquipment,
+			UHUD_ItemIcon* leftEquipment,
+			UHUD_ItemIcon* rightEquipment,
+			UHUD_ItemIcon* upSecondEquipment,
+			UHUD_ItemIcon* upThirdEquipment,
+			UHUD_ItemIcon* upFourthEquipment,
+			UHUD_ItemIcon* downSecondEquipment,
+			UHUD_ItemIcon* downThirdEquipment,
+			UHUD_ItemIcon* downFourthEquipment
 			);
 
 	UFUNCTION(BlueprintCallable, Category = "EquipmentBarBar")
-		void UpdateTargetSlot();
+		void UpdateTargetSlot(int type,FStatusEffectInfo status);
 
 
 protected:

@@ -9,33 +9,27 @@ UHUD_ProgressBar::UHUD_ProgressBar(const FObjectInitializer& ObjectInitializer /
 	:Super(ObjectInitializer)
 {
 	// Ä¬ÈÏÖµ
-	ProgressPercentMin = 0;
-	ProgressPercentMax = 100;
-	CurrentProgressBarPercent = 1;
+	m_progressPercentMin = 0.0f;
+	m_progressPercentMax = 1.0f;
+	m_currentProgressBarPercent = 1.0f;
 }
 
-void UHUD_ProgressBar::UpdateProgressBar(float Min, float Max,float Current)
+void UHUD_ProgressBar::UpdateProgressBar(float min, float max,float current)
 {
-	ProgressPercentMin = Min;
-	ProgressPercentMax = Max;
-	if (Current > Max)
+	m_progressPercentMin = min;
+	m_progressPercentMax = max;
+	if (current > max)
 	{
-		CurrentProgressBarPercent = 1.0f;
+		m_currentProgressBarPercent = m_progressPercentMax;
 	}
-	else if (Current < Min)
+	else if (current < min)
 	{
-		CurrentProgressBarPercent = 0.0f;
+		m_currentProgressBarPercent = m_progressPercentMin;
 	}
 	else
 	{
-		CurrentProgressBarPercent = float(Current)/ Max;
+		m_currentProgressBarPercent = float(current)/ m_progressPercentMax;
 	}
-	
-}
-
-void UHUD_ProgressBar::InitializeProgressBar(UProgressBar* ProgressBarRefence)
-{
-	RETURN_IF_TRUE(ProgressBarRefence == nullptr);
-	ProgressBar = ProgressBarRefence;
+	m_progressBar->SetPercent(m_currentProgressBarPercent);
 }
 

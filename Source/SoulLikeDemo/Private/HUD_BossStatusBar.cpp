@@ -13,47 +13,42 @@ UHUD_BossStatusBar::UHUD_BossStatusBar(const FObjectInitializer& ObjectInitializ
 
 }
 
-void UHUD_BossStatusBar::InitializeBossStatusBar(
-	UHUD_ProgressBar* HealthPB,
-	UHUD_StatusBar* BossSB
-	)
+void UHUD_BossStatusBar::InitializeBossStatusBar(UHUD_StatusBar* bossSB)
 {
-	RETURN_IF_TRUE(HealthPB == nullptr || BossSB == nullptr  )
-
+	RETURN_IF_TRUE(bossSB == nullptr)
 	// 记录界面组件
-	HealthProgressBar = HealthPB;
-	BossStatusBar = BossSB;
+	m_bossStatusBar = bossSB;
 }
 
-void UHUD_BossStatusBar::UpdateProgressInfo(float HealthMax, float CurrnetHealth)
+void UHUD_BossStatusBar::UpdateProgressInfo(float currnetHealthPercent)
 {
-	RETURN_IF_TRUE(HealthProgressBar == nullptr);
-	HealthProgressBar->UpdateProgressBar(0, HealthMax, CurrnetHealth);
+	RETURN_IF_TRUE(m_healthProgressBar == nullptr);
+	m_healthProgressBar->UpdateProgressBar(0, 1, currnetHealthPercent);
 }
 
-void UHUD_BossStatusBar::AddBossStatus(TArray<FStatusEffectInfo> AddStatus)
+void UHUD_BossStatusBar::AddBossStatus(TArray<FStatusEffectInfo> addStatusArr)
 {
-	RETURN_IF_TRUE(BossStatusBar == nullptr);
-	for(FStatusEffectInfo Info : AddStatus)
+	RETURN_IF_TRUE(m_bossStatusBar == nullptr);
+	for(FStatusEffectInfo Info : addStatusArr)
 	{
-		BossStatusBar->AddStatus(Info);
+		m_bossStatusBar->AddStatus(Info);
 	}
 }
 
-void UHUD_BossStatusBar::UpdateBossStatus(TArray<FStatusEffectInfo> UpdateStatus)
+void UHUD_BossStatusBar::UpdateBossStatus(TArray<FStatusEffectInfo> updateStatusArr)
 {
-	RETURN_IF_TRUE(BossStatusBar == nullptr);
-	for(FStatusEffectInfo Info : UpdateStatus)
+	RETURN_IF_TRUE(m_bossStatusBar == nullptr);
+	for(FStatusEffectInfo Info : updateStatusArr)
 	{
-		BossStatusBar->UpdateStatus(Info);
+		m_bossStatusBar->UpdateStatus(Info);
 	}
 }
 
-void UHUD_BossStatusBar::RemoveBossStatus(TArray<FStatusEffectInfo> RemoveStatus)
+void UHUD_BossStatusBar::RemoveBossStatus(TArray<FStatusEffectInfo> removeStatusArr)
 {
-	RETURN_IF_TRUE(BossStatusBar == nullptr);
-	for(FStatusEffectInfo Info : RemoveStatus)
+	RETURN_IF_TRUE(m_bossStatusBar == nullptr);
+	for(FStatusEffectInfo Info : removeStatusArr)
 	{
-		BossStatusBar->RemoveStatus(Info.IconIndex);
+		m_bossStatusBar->RemoveStatus(Info.IconIndex);
 	}
 }

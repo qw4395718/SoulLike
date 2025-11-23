@@ -8,7 +8,7 @@
 #include "StatusEffectInfo.h"
 #include "HUD_StatusBar.generated.h"
 
-class UHUD_StatusIcon;
+class UUI_IconSlot;
 
 /**
  * 
@@ -23,27 +23,23 @@ public:
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable, Category = "Status Bar")
-		void InitializeStatusBar(UHorizontalBox* InStatusIconsContainer);
-
-
-	UFUNCTION(BlueprintCallable, Category = "Status Bar")
-		void AddStatus(FStatusEffectInfo StatusInfo);
+		void AddStatus(FStatusEffectInfo statusInfo);
 
 	UFUNCTION(BlueprintCallable, Category = "Status Bar")
-		void RemoveStatus(int IconIndex);
+		void RemoveStatus(int iconIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Status Bar")
-		void UpdateStatus(FStatusEffectInfo StatusInfo);
+		void UpdateStatus(FStatusEffectInfo statusInfo);
 
 	// 为蓝图暴露的动画事件
 	UFUNCTION(BlueprintImplementableEvent, Category = "Status Bar")
-		void OnStatusIconAdded(UUserWidget* StatusIconWidget);
+		void OnStatusIconAdded(UUserWidget* statusIconWidget);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Status Bar")
-		void OnStatusIconRemoved(UUserWidget* StatusIconWidget);
+		void OnStatusIconRemoved(UUserWidget* statusIconWidget);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Status Bar")
-		void OnStatusIconUpdated(UUserWidget* StatusIconWidget);
+		void OnStatusIconUpdated(UUserWidget* statusIconWidget);
 
 protected:
 	/************************************************************************/
@@ -51,21 +47,21 @@ protected:
 	/************************************************************************/
 
 	UFUNCTION()
-		void CreateNewStatus(FStatusEffectInfo StatusInfo);
+		void CreateNewStatus(FStatusEffectInfo statusInfo);
 
 protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
-		TSubclassOf<UHUD_StatusIcon> StatusIconWidgetClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatusBar")
+		TSubclassOf<UUI_IconSlot> m_statusIconWidgetClass;
 
 	// 控件引用
-	UPROPERTY()
-		UHorizontalBox* StatusIconsContainer;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		class UHorizontalBox* m_statusIconsContainer;
 
 	// 图标管理器
 	UPROPERTY()
-		TMap<int, UUserWidget*> ActiveStatusIcons;
+		TMap<int, UUserWidget*> m_activeStatusIcons;
 
 };

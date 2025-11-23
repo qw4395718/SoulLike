@@ -5,6 +5,8 @@
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
 #include "SL_Macros.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
 
 
 UUI_BaseCoin::UUI_BaseCoin(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -13,36 +15,18 @@ UUI_BaseCoin::UUI_BaseCoin(const FObjectInitializer& ObjectInitializer /*= FObje
 
 }
 
-void UUI_BaseCoin::SetLoadImageData(FString ImgPath)
+void UUI_BaseCoin::InitializeUIComp()
 {
-	RETURN_IF_TRUE(ImgPath == "");
-		// 资源异步加载
-	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-	SoftImageReference = TSoftObjectPtr<UImage>(FSoftObjectPath(*ImgPath));
-	Streamable.RequestAsyncLoad(
-		SoftImageReference.ToSoftObjectPath(),
-		FStreamableDelegate::CreateUObject(this, &UUI_BaseCoin::OnLoadedImage)
-	);
-
 }
 
-void UUI_BaseCoin::SetPicSize(int Width, int Height)
+void UUI_BaseCoin::SetImageBrush(UTexture2D* showImage)
 {
-	RETURN_IF_TRUE(Width <= 0 || Height <= 0);
-	PicWidth = Width;
-	PicHeight = Height;
+	RETURN_IF_TRUE(m_showImage == nullptr || showImage == nullptr);
+	m_showImage->SetBrushFromTexture(showImage,true);
 }
 
 void UUI_BaseCoin::SetDynamicStr(FString Str)
 {
-	DynamicStr = Str;
-}
-
-void UUI_BaseCoin::OnLoadedImage()
-{
-	// 资源使用
-	if (SoftImageReference.Get() != nullptr)
-	{
-		ShowImage = SoftImageReference.Get();
-	}
+	RETURN_IF_TRUE(m_dynamicStr == nullptr);
+	m_dynamicStr->SetText(FText::FromString(Str));
 }

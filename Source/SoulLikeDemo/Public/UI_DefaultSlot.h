@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Image.h"
 #include "UI_BaseSlot.h"
 #include "UI_DefaultSlot.generated.h"
 
@@ -20,7 +19,6 @@ public:
 	/************************************************************************/
 	/* 继承实现																		*/
 	/************************************************************************/
-
 
 	/************************************************************************/
 	/* 外部调用                                                                     */
@@ -39,7 +37,7 @@ protected:
 	/************************************************************************/
 	// 新获取提示图标
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UImage* NewTipImage;
+		class UImage* m_newTipImage;
 
 };
 

@@ -5,6 +5,7 @@
 #include "SoulLikeGameGlobal.h"
 #include "HUD_ProgressBar.h"
 #include "HUD_StatusBar.h"
+#include "HUD_ItemIcon.h"
 
 
 UHUD_EquipmentBar::UHUD_EquipmentBar(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -13,13 +14,24 @@ UHUD_EquipmentBar::UHUD_EquipmentBar(const FObjectInitializer& ObjectInitializer
 
 }
 
-void UHUD_EquipmentBar::InitializeEquipmentBar(UHUD_ItemIcon* UpEquipment, UHUD_ItemIcon* DownEquipment, UHUD_ItemIcon* LeftEquipment, UHUD_ItemIcon* RightEquipment, UHUD_ItemIcon* UpSecondEquipment, UHUD_ItemIcon* UpThirdEquipment, UHUD_ItemIcon* UpFourthEquipment, UHUD_ItemIcon* DownSecondEquipment, UHUD_ItemIcon* DownThirdEquipment, UHUD_ItemIcon* DownFourthEquipment)
+void UHUD_EquipmentBar::InitializeEquipmentBar(UHUD_ItemIcon* upEquipment, UHUD_ItemIcon* downEquipment, UHUD_ItemIcon* leftEquipment, UHUD_ItemIcon* rightEquipment, UHUD_ItemIcon* upSecondEquipment, UHUD_ItemIcon* upThirdEquipment, UHUD_ItemIcon* upFourthEquipment, UHUD_ItemIcon* downSecondEquipment, UHUD_ItemIcon* downThirdEquipment, UHUD_ItemIcon* downFourthEquipment)
 {
+	RETURN_IF_TRUE(upEquipment == nullptr || downEquipment == nullptr || leftEquipment == nullptr || rightEquipment == nullptr || upSecondEquipment == nullptr || upThirdEquipment == nullptr || upFourthEquipment == nullptr || downSecondEquipment == nullptr || downThirdEquipment == nullptr || downFourthEquipment == nullptr);
+	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Up, upEquipment);
+	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_UpSecond, upSecondEquipment);
+	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_UpThird, upThirdEquipment);
+	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Down, downEquipment);
+	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_DownSecond, downSecondEquipment);
+	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_DownThird, downThirdEquipment);
+	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Left, leftEquipment);
+	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Right, rightEquipment);
 
 }
 
-void UHUD_EquipmentBar::UpdateTargetSlot()
+void UHUD_EquipmentBar::UpdateTargetSlot(int type, FStatusEffectInfo status)
 {
-
+	RETURN_IF_TRUE(type >= int(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Max) || type <= int(EHUDEquipmentSlotType::EHUDEquipmentSlotType_None));
+	UHUD_ItemIcon* targetSlot = EquipmentSotMap.FindRef(EHUDEquipmentSlotType(type));
+	targetSlot->SetData(status);
 }
 

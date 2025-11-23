@@ -21,27 +21,21 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	
-	UFUNCTION(BlueprintCallable, Category = "Main PC")
-		void InitializeMainHUD_PC(UHUD_PlayerStatusBar* StatusBar);
 
 	UFUNCTION(BlueprintCallable, Category = "Main PC")
 		void UpdateProgressInfo(
-			float HealthMax,
-			float CurrnetHealth,
-			float StaminaMax,
-			float CurrentStamina,
-			float MagicMax,
-			float CurrentMagic);
+			float currnetHealth,
+			float currentStamina,
+			float currentMagic);
 
 	UFUNCTION(BlueprintCallable, Category = "Main PC")
-		void AddPlayerStatus(TArray<FStatusEffectInfo> AddStatus);
+		void AddPlayerStatus(TArray<FStatusEffectInfo> addStatusArr);
 
 	UFUNCTION(BlueprintCallable, Category = "Main PC")
-		void UpdatePlayerStatus(TArray<FStatusEffectInfo> UpdateStatus);
+		void UpdatePlayerStatus(TArray<FStatusEffectInfo> updateStatusArr);
 
 	UFUNCTION(BlueprintCallable, Category = "Main PC")
-		void RemovePlayerStatus(TArray<FStatusEffectInfo> RemoveStatus);
+		void RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr);
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
@@ -52,8 +46,8 @@ protected:
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// 控件引用-暴露给外部
-	UPROPERTY()
-		UHUD_PlayerStatusBar* PlayerStatusBar;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UHUD_PlayerStatusBar* m_playerStatusBar;
 
 };
 

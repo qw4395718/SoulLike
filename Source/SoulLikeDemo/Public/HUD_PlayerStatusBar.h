@@ -9,7 +9,7 @@
 
 class UHUD_ProgressBar;
 class UHUD_StatusBar;
-
+class UTextBlock;
 /**
  * 
  */
@@ -22,32 +22,21 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	
-	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
-		void InitializePlayerStatusBar(
-			UHUD_ProgressBar* HealthPB,
-			UHUD_ProgressBar* StaminPB,
-			UHUD_ProgressBar* MagicPB,
-			UHUD_StatusBar* PlayerSB
-			);
 
 	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
 		void UpdateProgressInfo(
-		float HealthMax,
-		float CurrnetHealth,
-		float StaminaMax,
-		float CurrentStamina,
-		float MagicMax,
-		float CurrentMagic);
+		float currnetHealth,
+		float currentStamina,
+		float currentMagic);
 
 	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
-		void AddPlayerStatus(TArray<FStatusEffectInfo> AddStatus);
+		void AddPlayerStatus(TArray<FStatusEffectInfo> addStatusArr);
 
 	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
-		void UpdatePlayerStatus(TArray<FStatusEffectInfo> UpdateStatus);
+		void UpdatePlayerStatus(TArray<FStatusEffectInfo> updateStatusArr);
 
 	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
-		void RemovePlayerStatus(TArray<FStatusEffectInfo> RemoveStatus);
+		void RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr);
 
 protected:
 	/************************************************************************/
@@ -59,17 +48,26 @@ protected:
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// 控件引用
-	UPROPERTY()
-		UHUD_ProgressBar* HealthProgressBar;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UHUD_ProgressBar* m_healthProgressBar;
 
-	UPROPERTY()
-		UHUD_ProgressBar* StaminProgressBar;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UHUD_ProgressBar* m_staminProgressBar;
 
-	UPROPERTY()
-		UHUD_ProgressBar* MagicProgressBar;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UHUD_ProgressBar* m_magicProgressBar;
 
-	UPROPERTY()
-		UHUD_StatusBar* PlayerStatusBar;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UHUD_StatusBar* m_playerStatusBar;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UTextBlock* m_healthText;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UTextBlock* m_staminText;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UTextBlock* m_magicText;
 
 };
 

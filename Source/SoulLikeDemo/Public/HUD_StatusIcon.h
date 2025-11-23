@@ -18,37 +18,7 @@ class SOULLIKEDEMO_API UHUD_StatusIcon : public UUI_IconSlot
 	GENERATED_BODY()
 public:
 	UHUD_StatusIcon();
-	/************************************************************************/
-	/* 外部调用                                                                     */
-	/************************************************************************/
-	
-	UFUNCTION(BlueprintCallable, Category = "Status Icon")
-		void InitializeIcon(FStatusEffectInfo EffectInfo);
 
-	UFUNCTION(BlueprintCallable, Category = "Status Icon")
-		void UpdateIcon(float RemainingTime, int32 Stacks);
-
-	UFUNCTION(BlueprintCallable, Category = "Status Icon")
-		bool EqualIconIndex(int Index);
-
-
-	UFUNCTION(BlueprintNativeEvent)
-		void PlayFlashingEffect();
-
-protected:
-	/************************************************************************/
-	/* 内部调用                                                                     */
-	/************************************************************************/
-
-protected:
-	/************************************************************************/
-	/* 内部变量                                                                     */
-	/************************************************************************/
-	UPROPERTY()
-		bool IsFlashing;
-
-	UPROPERTY()
-		int IconIndex;
 
 };
 

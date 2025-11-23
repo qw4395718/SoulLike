@@ -13,53 +13,37 @@ UHUD_PlayerStatusBar::UHUD_PlayerStatusBar(const FObjectInitializer& ObjectIniti
 
 }
 
-void UHUD_PlayerStatusBar::InitializePlayerStatusBar(
-	UHUD_ProgressBar* HealthPB,
-	UHUD_ProgressBar* StaminPB,
-	UHUD_ProgressBar* MagicPB,
-	UHUD_StatusBar* PlayerSB
-	)
+void UHUD_PlayerStatusBar::UpdateProgressInfo(float currnetHealth, float currentStamina, float currentMagic)
 {
-	RETURN_IF_TRUE(HealthPB == nullptr || StaminPB == nullptr || MagicPB == nullptr || PlayerSB == nullptr  )
-
-	// 记录界面组件
-	HealthProgressBar = HealthPB;
-	StaminProgressBar = StaminPB;
-	MagicProgressBar = MagicPB;
-	PlayerStatusBar = PlayerSB;
+	RETURN_IF_TRUE(m_healthProgressBar == nullptr || m_staminProgressBar == nullptr || m_magicProgressBar == nullptr);
+	m_healthProgressBar->UpdateProgressBar(0, 1, currnetHealth);
+	m_staminProgressBar->UpdateProgressBar(0, 1, currentStamina);
+	m_magicProgressBar->UpdateProgressBar(0, 1, currentMagic);
 }
 
-void UHUD_PlayerStatusBar::UpdateProgressInfo(float HealthMax, float CurrnetHealth, float StaminaMax, float CurrentStamina, float MagicMax, float CurrentMagic)
+void UHUD_PlayerStatusBar::AddPlayerStatus(TArray<FStatusEffectInfo> addStatusArr)
 {
-	RETURN_IF_TRUE(HealthProgressBar == nullptr || StaminProgressBar == nullptr || MagicProgressBar == nullptr);
-	HealthProgressBar->UpdateProgressBar(0, HealthMax, CurrnetHealth);
-	StaminProgressBar->UpdateProgressBar(0, StaminaMax, CurrentStamina);
-	MagicProgressBar->UpdateProgressBar(0, MagicMax, CurrentMagic);
-}
-
-void UHUD_PlayerStatusBar::AddPlayerStatus(TArray<FStatusEffectInfo> AddStatus)
-{
-	RETURN_IF_TRUE(PlayerStatusBar == nullptr);
-	for(FStatusEffectInfo Info : AddStatus)
+	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
+	for(FStatusEffectInfo info : addStatusArr)
 	{
-		PlayerStatusBar->AddStatus(Info);
+		m_playerStatusBar->AddStatus(info);
 	}
 }
 
-void UHUD_PlayerStatusBar::UpdatePlayerStatus(TArray<FStatusEffectInfo> UpdateStatus)
+void UHUD_PlayerStatusBar::UpdatePlayerStatus(TArray<FStatusEffectInfo> updateStatusArr)
 {
-	RETURN_IF_TRUE(PlayerStatusBar == nullptr);
-	for(FStatusEffectInfo Info : UpdateStatus)
+	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
+	for(FStatusEffectInfo info : updateStatusArr)
 	{
-		PlayerStatusBar->UpdateStatus(Info);
+		m_playerStatusBar->UpdateStatus(info);
 	}
 }
 
-void UHUD_PlayerStatusBar::RemovePlayerStatus(TArray<FStatusEffectInfo> RemoveStatus)
+void UHUD_PlayerStatusBar::RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr)
 {
-	RETURN_IF_TRUE(PlayerStatusBar == nullptr);
-	for(FStatusEffectInfo Info : RemoveStatus)
+	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
+	for(FStatusEffectInfo info : removeStatusArr)
 	{
-		PlayerStatusBar->RemoveStatus(Info.IconIndex);
+		m_playerStatusBar->RemoveStatus(info.IconIndex);
 	}
 }

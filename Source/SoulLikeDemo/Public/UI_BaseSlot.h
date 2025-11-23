@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Image.h"
 #include "UI_BaseSlot.generated.h"
 
 /**
@@ -19,14 +18,11 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	UFUNCTION()
-		void SetLoadImageData(FString ImgPath);
+	UFUNCTION(BlueprintCallable, Category = "Base Coin")
+		void SetImageBrush(UTexture2D* icon);
 
 	UFUNCTION()
-		void SetPicSize(int Width,int Height);
-
-	UFUNCTION()
-		void SetStacksNum(int Num);
+		void SetStacksNum(int num);
 
 
 protected:
@@ -34,27 +30,16 @@ protected:
 	/* 内部调用                                                                     */
 	/************************************************************************/
 
-	void OnLoadedImage();
-
 protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// Icon图片
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UImage* ShowImage;
-
-	UPROPERTY()
-		TSoftObjectPtr<UImage> SoftImageReference;
-
-	UPROPERTY()
-		int PicWidth;
-
-	UPROPERTY()
-		int PicHeight;
+		class UImage* m_showImage;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		int StatusStacksNum;
+		class UTextBlock* m_stackNum;
 
 };
 

@@ -12,32 +12,26 @@ UHUD_Main_PC::UHUD_Main_PC(const FObjectInitializer& ObjectInitializer /*= FObje
 
 }
 
-void UHUD_Main_PC::InitializeMainHUD_PC(UHUD_PlayerStatusBar* StatusBar)
+void UHUD_Main_PC::UpdateProgressInfo(float currnetHealth, float currentStamina, float currentMagic)
 {
-	RETURN_IF_TRUE(StatusBar == nullptr);
-	PlayerStatusBar = StatusBar;
+	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
+	m_playerStatusBar->UpdateProgressInfo(currnetHealth, currentStamina, currentMagic);
 }
 
-void UHUD_Main_PC::UpdateProgressInfo(float HealthMax, float CurrnetHealth, float StaminaMax, float CurrentStamina, float MagicMax, float CurrentMagic)
+void UHUD_Main_PC::AddPlayerStatus(TArray<FStatusEffectInfo> addStatusArr)
 {
-	RETURN_IF_TRUE(PlayerStatusBar == nullptr);
-	PlayerStatusBar->UpdateProgressInfo(HealthMax, CurrnetHealth, StaminaMax, CurrentStamina, MagicMax, CurrentMagic);
+	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
+	m_playerStatusBar->AddPlayerStatus(addStatusArr);
 }
 
-void UHUD_Main_PC::AddPlayerStatus(TArray<FStatusEffectInfo> AddStatus)
+void UHUD_Main_PC::UpdatePlayerStatus(TArray<FStatusEffectInfo> updateStatusArr)
 {
-	RETURN_IF_TRUE(PlayerStatusBar == nullptr);
-	PlayerStatusBar->AddPlayerStatus(AddStatus);
+	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
+	m_playerStatusBar->UpdatePlayerStatus(updateStatusArr);
 }
 
-void UHUD_Main_PC::UpdatePlayerStatus(TArray<FStatusEffectInfo> UpdateStatus)
+void UHUD_Main_PC::RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr)
 {
-	RETURN_IF_TRUE(PlayerStatusBar == nullptr);
-	PlayerStatusBar->UpdatePlayerStatus(UpdateStatus);
-}
-
-void UHUD_Main_PC::RemovePlayerStatus(TArray<FStatusEffectInfo> RemoveStatus)
-{
-	RETURN_IF_TRUE(PlayerStatusBar == nullptr);
-	PlayerStatusBar->RemovePlayerStatus(RemoveStatus);
+	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
+	m_playerStatusBar->RemovePlayerStatus(removeStatusArr);
 }

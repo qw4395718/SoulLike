@@ -4,79 +4,77 @@
 #include "HUD_StatusBar.h"
 #include "HUD_StatusIcon.h"
 #include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
 
 UHUD_StatusBar::UHUD_StatusBar(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
 }
 
-void UHUD_StatusBar::InitializeStatusBar(UHorizontalBox* InStatusIconsContainer)
-{
-	StatusIconsContainer = InStatusIconsContainer;
-}
-
-void UHUD_StatusBar::AddStatus(FStatusEffectInfo StatusInfo)
+void UHUD_StatusBar::AddStatus(FStatusEffectInfo statusInfo)
 {
 	// 重复的Icon不接受,由上级管控确保传入是新状态
-	RETURN_IF_TRUE(StatusIconsContainer == nullptr || ActiveStatusIcons.Contains(StatusInfo.IconIndex))
+	RETURN_IF_TRUE(m_statusIconsContainer == nullptr || m_activeStatusIcons.Contains(statusInfo.IconIndex))
 
-	CreateNewStatus(StatusInfo);
+	CreateNewStatus(statusInfo);
 }
 
-void UHUD_StatusBar::RemoveStatus(int IconIndex)
+void UHUD_StatusBar::RemoveStatus(int iconIndex)
 {
-	if (UUserWidget** IconWidgetPtr = ActiveStatusIcons.Find(IconIndex))
+	if (UUserWidget** ppiconWidget = m_activeStatusIcons.Find(iconIndex))
 	{
-		UUserWidget* IconWidget = *IconWidgetPtr;
+		UUserWidget* iconWidget = *ppiconWidget;
 
 		// 调用蓝图移除动画
-		OnStatusIconRemoved(IconWidget);
+		OnStatusIconRemoved(iconWidget);
 
 		// 延迟实际销毁，让动画有时间播放
 		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, IconWidget, IconIndex]()
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, iconWidget, iconIndex]()
 			{
-				if (IconWidget && StatusIconsContainer)
+				if (iconWidget && m_statusIconsContainer)
 				{
-					StatusIconsContainer->RemoveChild(IconWidget);
+					m_statusIconsContainer->RemoveChild(iconWidget);
 				}
-				ActiveStatusIcons.Remove(IconIndex);
+				m_activeStatusIcons.Remove(iconIndex);
 			}, 0.3f, false); // 延迟时间匹配动画长度
 	}
 }
 
-void UHUD_StatusBar::UpdateStatus(FStatusEffectInfo StatusInfo)
+void UHUD_StatusBar::UpdateStatus(FStatusEffectInfo statusInfo)
 {
-	if (UUserWidget** WaitUpdateSubWidget = ActiveStatusIcons.Find(StatusInfo.IconIndex))
+	if (UUserWidget** ppwaitUpdateSubWidget = m_activeStatusIcons.Find(statusInfo.IconIndex))
 	{
-		if (UHUD_StatusIcon* StatusIcon = Cast<UHUD_StatusIcon>(*WaitUpdateSubWidget))
+		if (UUI_IconSlot* statusIcon = Cast<UUI_IconSlot>(*ppwaitUpdateSubWidget))
 		{
 			// 已经找到数据,可进行数据更新
-			StatusIcon->UpdateIcon(StatusInfo.RemainingTime, StatusInfo.Stacks);
+			statusIcon->SetData(statusInfo);
 		}
 	}
 }
 
-void UHUD_StatusBar::CreateNewStatus(FStatusEffectInfo StatusInfo)
+void UHUD_StatusBar::CreateNewStatus(FStatusEffectInfo statusInfo)
 {
-	RETURN_IF_TRUE(StatusIconWidgetClass == nullptr || GetWorld() == nullptr);
+	RETURN_IF_TRUE(m_statusIconWidgetClass == nullptr || GetWorld() == nullptr);
 	// 创建IconWidget
-	UUserWidget* NewIcon = CreateWidget<UUserWidget>(GetWorld(),StatusIconWidgetClass);
-	if (!NewIcon)
+	UUserWidget* newIcon = CreateWidget<UUserWidget>(GetWorld(), m_statusIconWidgetClass);
+	if (!newIcon)
 	return;
 	
-	UHUD_StatusIcon* StatusIcon = Cast<UHUD_StatusIcon>(NewIcon);
-	if (StatusIcon)
+	UUI_IconSlot* statusIcon = Cast<UUI_IconSlot>(newIcon);
+	if (statusIcon)
 	{
 		// 初始化后纳入管理
-	// 添加到容器
-		StatusIconsContainer->AddChild(NewIcon);
+		statusIcon->SetData(statusInfo);
+
+		// 添加到容器
+		m_statusIconsContainer->AddChild(statusIcon);
 
 		// 存储引用
-		ActiveStatusIcons.Add(StatusInfo.IconIndex, NewIcon);
+		m_activeStatusIcons.Add(statusInfo.IconIndex, newIcon);
 
 		// 调用蓝图动画事件
-		OnStatusIconAdded(NewIcon);
+		OnStatusIconAdded(newIcon);
 	}
 	
 }

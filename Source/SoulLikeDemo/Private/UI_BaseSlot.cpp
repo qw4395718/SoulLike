@@ -2,9 +2,9 @@
 
 
 #include "UI_BaseSlot.h"
-#include "Engine/StreamableManager.h"
-#include "Engine/AssetManager.h"
 #include "SL_Macros.h"
+#include "Components/TextBlock.h"
+#include "Components/Image.h"
 
 
 UUI_BaseSlot::UUI_BaseSlot(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -13,37 +13,14 @@ UUI_BaseSlot::UUI_BaseSlot(const FObjectInitializer& ObjectInitializer /*= FObje
 
 }
 
-void UUI_BaseSlot::SetLoadImageData(FString ImgPath)
+void UUI_BaseSlot::SetImageBrush(UTexture2D* icon)
 {
-	RETURN_IF_TRUE(ImgPath == "");
-	// 资源异步加载
-	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-	SoftImageReference = TSoftObjectPtr<UImage>(FSoftObjectPath(*ImgPath));
-	Streamable.RequestAsyncLoad(
-		SoftImageReference.ToSoftObjectPath(),
-		FStreamableDelegate::CreateUObject(this, &UUI_BaseSlot::OnLoadedImage)
-	);
-
+	RETURN_IF_TRUE(m_showImage == nullptr || icon == nullptr);
+	m_showImage->SetBrushFromTexture(icon,true);
 }
 
-void UUI_BaseSlot::SetPicSize(int Width, int Height)
+void UUI_BaseSlot::SetStacksNum(int num)
 {
-	RETURN_IF_TRUE(Width <= 0 || Height <= 0);
-	PicWidth = Width;
-	PicHeight = Height;
-}
-
-void UUI_BaseSlot::SetStacksNum(int Num)
-{
-	RETURN_IF_TRUE(Num < 0);
-	StatusStacksNum = Num;
-}
-
-void UUI_BaseSlot::OnLoadedImage()
-{
-	// 资源使用
-	if (SoftImageReference.Get() != nullptr)
-	{
-		ShowImage = SoftImageReference.Get();
-	}
+	RETURN_IF_TRUE(m_stackNum == nullptr);
+	m_stackNum->SetText(FText::AsNumber(num));
 }

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Image.h"
 #include "UI_BaseSlot.h"
 #include "UI_IconSlot.generated.h"
 
@@ -21,17 +20,18 @@ public:
 	/* 外部调用                                                                     */
 	/************************************************************************/
 
+	UFUNCTION(BlueprintCallable, Category = "IconSlot")
+		void SetData(FStatusEffectInfo effectInfo);
+
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
 
-
 protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
-
 };
 
 

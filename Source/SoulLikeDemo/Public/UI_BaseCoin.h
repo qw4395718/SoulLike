@@ -7,6 +7,10 @@
 #include "Components/Image.h"
 #include "UI_BaseCoin.generated.h"
 
+class UTexture2D;
+class UTextBlock;
+class UImage;
+
 /**
  * 
  */
@@ -19,23 +23,19 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	UFUNCTION()
-		void SetLoadImageData(FString ImgPath);
+	UFUNCTION(BlueprintCallable, Category = "Base Coin")
+		virtual void InitializeUIComp();
+
+	UFUNCTION(BlueprintCallable, Category = "Base Coin")
+		void SetImageBrush(UTexture2D* showImage);
 
 	UFUNCTION()
-		void SetPicSize(int Width, int Height);
-
-	UFUNCTION()
-		void SetDynamicStr(FString Str);
+		void SetDynamicStr(FString str);
 
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
-
-	void OnLoadedImage();
-
-
 
 protected:
 	/************************************************************************/
@@ -43,19 +43,10 @@ protected:
 	/************************************************************************/
 	// Icon图片
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UImage* ShowImage;
-
-	UPROPERTY()
-		TSoftObjectPtr<UImage> SoftImageReference;
-
-	UPROPERTY()
-		int PicWidth;
-
-	UPROPERTY()
-		int PicHeight;
+		UImage* m_showImage;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		FString DynamicStr;
+		UTextBlock* m_dynamicStr;
 
 
 };

@@ -30,10 +30,8 @@ public:
 			UHUD_ItemIcon* rightEquipment,
 			UHUD_ItemIcon* upSecondEquipment,
 			UHUD_ItemIcon* upThirdEquipment,
-			UHUD_ItemIcon* upFourthEquipment,
 			UHUD_ItemIcon* downSecondEquipment,
-			UHUD_ItemIcon* downThirdEquipment,
-			UHUD_ItemIcon* downFourthEquipment
+			UHUD_ItemIcon* downThirdEquipment
 			);
 
 	UFUNCTION(BlueprintCallable, Category = "EquipmentBarBar")

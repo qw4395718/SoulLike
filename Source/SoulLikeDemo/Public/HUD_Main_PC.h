@@ -8,6 +8,7 @@
 #include "HUD_Main_PC.generated.h"
 
 class UHUD_PlayerStatusBar;
+class UHUD_EquipmentBar;
 
 /**
  * 
@@ -36,6 +37,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Main PC")
 		void RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr);
+
+	UFUNCTION(BlueprintCallable, Category = "Main PC")
+		void UpdateTargetSlot(int type, FStatusEffectInfo status);
+
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
@@ -48,6 +53,9 @@ protected:
 	// 控件引用-暴露给外部
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UHUD_PlayerStatusBar* m_playerStatusBar;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UHUD_EquipmentBar* m_playerEquipmentBar;
 
 };
 

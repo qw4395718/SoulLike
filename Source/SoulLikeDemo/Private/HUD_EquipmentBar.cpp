@@ -14,9 +14,9 @@ UHUD_EquipmentBar::UHUD_EquipmentBar(const FObjectInitializer& ObjectInitializer
 
 }
 
-void UHUD_EquipmentBar::InitializeEquipmentBar(UHUD_ItemIcon* upEquipment, UHUD_ItemIcon* downEquipment, UHUD_ItemIcon* leftEquipment, UHUD_ItemIcon* rightEquipment, UHUD_ItemIcon* upSecondEquipment, UHUD_ItemIcon* upThirdEquipment, UHUD_ItemIcon* upFourthEquipment, UHUD_ItemIcon* downSecondEquipment, UHUD_ItemIcon* downThirdEquipment, UHUD_ItemIcon* downFourthEquipment)
+void UHUD_EquipmentBar::InitializeEquipmentBar(UHUD_ItemIcon* upEquipment, UHUD_ItemIcon* downEquipment, UHUD_ItemIcon* leftEquipment, UHUD_ItemIcon* rightEquipment, UHUD_ItemIcon* upSecondEquipment, UHUD_ItemIcon* upThirdEquipment, UHUD_ItemIcon* downSecondEquipment, UHUD_ItemIcon* downThirdEquipment)
 {
-	RETURN_IF_TRUE(upEquipment == nullptr || downEquipment == nullptr || leftEquipment == nullptr || rightEquipment == nullptr || upSecondEquipment == nullptr || upThirdEquipment == nullptr || upFourthEquipment == nullptr || downSecondEquipment == nullptr || downThirdEquipment == nullptr || downFourthEquipment == nullptr);
+	RETURN_IF_TRUE(upEquipment == nullptr || downEquipment == nullptr || leftEquipment == nullptr || rightEquipment == nullptr || upSecondEquipment == nullptr || upThirdEquipment == nullptr || downSecondEquipment == nullptr || downThirdEquipment == nullptr);
 	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Up, upEquipment);
 	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_UpSecond, upSecondEquipment);
 	EquipmentSotMap.Emplace(EHUDEquipmentSlotType::EHUDEquipmentSlotType_UpThird, upThirdEquipment);
@@ -32,6 +32,10 @@ void UHUD_EquipmentBar::UpdateTargetSlot(int type, FStatusEffectInfo status)
 {
 	RETURN_IF_TRUE(type >= int(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Max) || type <= int(EHUDEquipmentSlotType::EHUDEquipmentSlotType_None));
 	UHUD_ItemIcon* targetSlot = EquipmentSotMap.FindRef(EHUDEquipmentSlotType(type));
-	targetSlot->SetData(status);
+	if (targetSlot)
+	{
+		targetSlot->SetData(status);
+	}
+	
 }
 

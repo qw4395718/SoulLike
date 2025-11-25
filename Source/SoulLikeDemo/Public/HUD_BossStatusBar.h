@@ -10,6 +10,7 @@
 
 class UHUD_ProgressBar;
 class UHUD_StatusBar;
+class UTextBlock;
 
 /**
  * 
@@ -25,11 +26,6 @@ public:
 	/************************************************************************/
 	
 	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void InitializeBossStatusBar(
-			UHUD_StatusBar* bossSB
-			);
-
-	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
 		void UpdateProgressInfo(
 		float currnetHealthPercent);
 
@@ -41,6 +37,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
 		void RemoveBossStatus(TArray<FStatusEffectInfo> removeStatusArr);
+
+	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
+		void SetBossName(FString bossName);
 
 protected:
 	/************************************************************************/
@@ -55,9 +54,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UHUD_ProgressBar* m_healthProgressBar;
 
-
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UHUD_StatusBar* m_bossStatusBar;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UTextBlock* m_bossNameText;
 
 };
 

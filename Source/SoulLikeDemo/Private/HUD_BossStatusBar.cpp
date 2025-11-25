@@ -5,19 +5,13 @@
 #include "SoulLikeGameGlobal.h"
 #include "HUD_ProgressBar.h"
 #include "HUD_StatusBar.h"
+#include "Components/TextBlock.h"
 
 
 UHUD_BossStatusBar::UHUD_BossStatusBar(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
 
-}
-
-void UHUD_BossStatusBar::InitializeBossStatusBar(UHUD_StatusBar* bossSB)
-{
-	RETURN_IF_TRUE(bossSB == nullptr)
-	// 记录界面组件
-	m_bossStatusBar = bossSB;
 }
 
 void UHUD_BossStatusBar::UpdateProgressInfo(float currnetHealthPercent)
@@ -51,4 +45,10 @@ void UHUD_BossStatusBar::RemoveBossStatus(TArray<FStatusEffectInfo> removeStatus
 	{
 		m_bossStatusBar->RemoveStatus(Info.IconIndex);
 	}
+}
+
+void UHUD_BossStatusBar::SetBossName(FString bossName)
+{
+	RETURN_IF_TRUE(m_bossNameText == nullptr);
+	m_bossNameText->SetText(FText::FromString(bossName));
 }

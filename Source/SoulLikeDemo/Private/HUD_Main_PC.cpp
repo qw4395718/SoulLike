@@ -4,6 +4,7 @@
 #include "HUD_Main_PC.h"
 #include "SoulLikeGameGlobal.h"
 #include "HUD_PlayerStatusBar.h"
+#include "HUD_EquipmentBar.h"
 #include "StatusEffectInfo.h"
 
 UHUD_Main_PC::UHUD_Main_PC(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -34,4 +35,10 @@ void UHUD_Main_PC::RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr)
 {
 	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
 	m_playerStatusBar->RemovePlayerStatus(removeStatusArr);
+}
+
+void UHUD_Main_PC::UpdateTargetSlot(int type, FStatusEffectInfo status)
+{
+	RETURN_IF_TRUE(m_playerEquipmentBar == nullptr);
+	m_playerEquipmentBar->UpdateTargetSlot(type, status);
 }

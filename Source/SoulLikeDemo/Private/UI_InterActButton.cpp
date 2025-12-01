@@ -21,3 +21,35 @@ void UUI_InterActButton::UpdateInterActBtnInfo(UTexture2D* showIcon, FString sho
 	m_interActIcon->SetBrushFromTexture(showIcon);
 	m_interActDesc->SetText(FText::FromString(showText));
 }
+
+void UUI_InterActButton::SetSelected(bool bIsSelected, bool bPlayAnimation /*= true*/)
+{
+	if (bIsSelected == bSelected) return; // ±ÜÃâÖØ¸´×´Ì¬
+
+	bSelected = bIsSelected;
+
+	if (m_interActDesc)
+	{
+		FSlateColor NewColor = bSelected ?
+			FSlateColor(SelectedColor) : FSlateColor(NormalColor);
+		m_interActDesc->SetColorAndOpacity(NewColor);
+	}
+
+	// ²¥·Å¶¯»­
+	if (bPlayAnimation)
+	{
+		PlaySelectionAnimation(bIsSelected);
+	}
+}
+
+void UUI_InterActButton::PlaySelectionAnimation_Implementation(bool bIsSelected)
+{
+	if (bIsSelected && SelectionAnimation)
+	{
+		PlayAnimation(SelectionAnimation);
+	}
+	else if (!bIsSelected && DeselectionAnimation)
+	{
+		PlayAnimation(DeselectionAnimation);
+	}
+}

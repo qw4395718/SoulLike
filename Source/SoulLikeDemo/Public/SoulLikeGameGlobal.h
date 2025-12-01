@@ -288,3 +288,4 @@ struct FStatusIconInfo
 	int32 ElapsedTime;
 };
 
+

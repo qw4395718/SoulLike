@@ -10,12 +10,15 @@ UHUD_InterActBtnPanel::UHUD_InterActBtnPanel(const FObjectInitializer& ObjectIni
 
 void UHUD_InterActBtnPanel::UpdateBatch(const TArray<FInterActOptionInfo>& options)
 {
-	// 检测
+	// 重置已有数据进行更新
+	m_interActDataArr.Reset();
+	m_interActDataArr = options;
 }
 
 void UHUD_InterActBtnPanel::UpdateTarget(const FInterActOptionInfo& options)
 {
-
+	// 检索是否有同一索引的数据,若有则更新,若无则添加
+	if()
 }
 
 void UHUD_InterActBtnPanel::ClearAllOptions()

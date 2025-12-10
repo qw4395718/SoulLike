@@ -11,6 +11,7 @@
 class UUI_IconSlot;
 class UUI_InterActButton;
 class UTexture2D;
+class UVerticalBox;
 
 // 交互组件相关数据结构
 struct FInterActOptionInfo
@@ -33,11 +34,11 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	UFUNCTION(BlueprintCallable)
-		void UpdateBatch(const TArray<FInterActOptionInfo>& options);
+	// 所有数据更新
+	void UpdateBatch(const TArray<FInterActOptionInfo>& options);
 
-	UFUNCTION(BlueprintCallable)
-		void UpdateTarget(const FInterActOptionInfo& options);
+	// 单项数据更新
+	void UpdateTarget(const FInterActOptionInfo& options);
 
 	UFUNCTION(BlueprintCallable)
 		void ClearAllOptions();
@@ -68,11 +69,15 @@ protected:
 
 	// 控件引用
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		class UVerticalBox* m_interActBtnsContainer;
+		UVerticalBox* m_interActBtnsContainer;
 
-	// 交互控件管理器
+	// 交互控件管理器-虚拟化
 	UPROPERTY()
 		TArray<UUI_InterActButton*> m_interActBtnArr;
+
+	// 本地数据
+	UPROPERTY()
+		TArray<FInterActOptionInfo> m_interActDataArr;
 
 	// 当前选中索引
 	UPROPERTY(BlueprintReadOnly, Category = "State")

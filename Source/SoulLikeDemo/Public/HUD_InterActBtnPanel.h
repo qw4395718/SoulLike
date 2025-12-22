@@ -22,6 +22,7 @@ struct FInterActOptionInfo
 };
 
 
+
 /**
  * 
  */
@@ -53,6 +54,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetVisible(bool bVisible);
 
+	void UpdateVisibleSlots();
+
+	// 初始化虚拟化
+	void InitializeVirtualization(int32 TotalItemCount);
+
+	// 从池中获取或创建槽位
+	UUI_InterActButton* GetOrCreateSlot();
+
+	// 回收槽位到池中
+	void ReturnSlotToPool(UUI_InterActButton* Slot);
+
 
 protected:
 	/************************************************************************/
@@ -71,13 +83,21 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UVerticalBox* m_interActBtnsContainer;
 
-	// 交互控件管理器-虚拟化
+	// 交互控件管理器-虚拟化(可视区域缓存)
 	UPROPERTY()
-		TArray<UUI_InterActButton*> m_interActBtnArr;
+		TArray<UUI_InterActButton*> m_visibleSlots;
+
+	// 交互控件管理器-虚拟化(池)
+	UPROPERTY()
+		TArray<UUI_InterActButton*> m_slotPool;
+
 
 	// 本地数据
-	UPROPERTY()
 		TArray<FInterActOptionInfo> m_interActDataArr;
+
+		// 当前显示范围
+		int32 FirstVisibleIndex = 0;
+		int32 LastVisibleIndex = 0;
 
 	// 当前选中索引
 	UPROPERTY(BlueprintReadOnly, Category = "State")

@@ -32,6 +32,9 @@ const float REDUCE_DAMAGE_PERCENTAGE = 0.9f;
 // 体力消耗最小下限
 const float REDUCE_STAMINACOST_PERCENTAGE = 0.5f;
 
+// 对话选项栏最大缓存交互控件个数
+const INT INTERACT_BTN_MAX = 5;
+
 /************************************************************************/
 /*                              Enum                                         */
 /************************************************************************/

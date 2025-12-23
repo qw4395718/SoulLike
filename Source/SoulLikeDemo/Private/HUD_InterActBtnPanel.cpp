@@ -3,12 +3,20 @@
 
 #include "HUD_InterActBtnPanel.h"
 #include "UI_InterActButton.h"
+#include "Components/VerticalBox.h"
 
 
 UHUD_InterActBtnPanel::UHUD_InterActBtnPanel(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
-	InitializeVirtualization(INTERACT_BTN_MAX);
+	TArray<FInterActOptionInfo> test;
+	test.Add(FInterActOptionInfo{ 1,nullptr,L"1" });
+	test.Add(FInterActOptionInfo{ 2,nullptr,L"2" });
+	test.Add(FInterActOptionInfo{ 3,nullptr,L"3" });
+	test.Add(FInterActOptionInfo{ 4,nullptr,L"4" });
+	test.Add(FInterActOptionInfo{ 5,nullptr,L"5" });
+	test.Add(FInterActOptionInfo{ 6,nullptr,L"6" });
+	UpdateBatch(test);
 }
 
 void UHUD_InterActBtnPanel::UpdateBatch(const TArray<FInterActOptionInfo>& options)
@@ -38,6 +46,7 @@ void UHUD_InterActBtnPanel::ClearAllOptions()
 	for (int i = 0; i < NeedOpertatorSlotNum; i++)
 	{
 		ReturnSlotToPool(m_visibleSlots[0]);
+		m_interActBtnsContainer->RemoveChild(m_visibleSlots[0]);
 	}
 }
 
@@ -74,19 +83,23 @@ void UHUD_InterActBtnPanel::SetVisible(bool bVisible)
 void UHUD_InterActBtnPanel::UpdateVisibleSlots()
 {
 	// 更新显示范围
-	if (m_interActDataArr.Num() <= INTERACT_BTN_MAX )
+	if (m_interActDataArr.Num() <= INTERACT_BTN_MAX)
 	{
+		// 情况1：数据量小于等于最大显示数量
 		FirstVisibleIndex = 0;
-		LastVisibleIndex = m_interActDataArr.Num() -1 > 0? m_interActDataArr.Num() - 1:0;
+		LastVisibleIndex = FMath::Max(m_interActDataArr.Num() - 1, 0);
 	}
-	else if (m_interActDataArr.Num() <= FirstVisibleIndex + INTERACT_BTN_MAX)
+	else if (FirstVisibleIndex + INTERACT_BTN_MAX >= m_interActDataArr.Num())
 	{
-		LastVisibleIndex = m_interActDataArr.Num() - 1 > 0 ? m_interActDataArr.Num() - 1 : 0;
-		FirstVisibleIndex = LastVisibleIndex - INTERACT_BTN_MAX;
+		// 情况2：当前起始索引+最大显示数超过数组边界
+		LastVisibleIndex = m_interActDataArr.Num() - 1;
+		FirstVisibleIndex = FMath::Max(LastVisibleIndex - INTERACT_BTN_MAX + 1, 0);
 	}
 	else
 	{
-		LastVisibleIndex = FirstVisibleIndex + INTERACT_BTN_MAX;
+		// 情况3：正常情况，在数组范围内
+		LastVisibleIndex = FirstVisibleIndex + INTERACT_BTN_MAX - 1;
+		LastVisibleIndex = FMath::Min(LastVisibleIndex, m_interActDataArr.Num() - 1);
 	}
 
 	// 检测是否需要从池中获取控件
@@ -105,11 +118,15 @@ void UHUD_InterActBtnPanel::UpdateVisibleSlots()
 			m_interActDataArr[FirstVisibleIndex + i].OptionIcon,
 			m_interActDataArr[FirstVisibleIndex + i].OptionText
 			);
+		m_interActBtnsContainer->AddChild(m_visibleSlots[i]);
 	}
+
+	
 }
 
 void UHUD_InterActBtnPanel::InitializeVirtualization(int32 TotalItemCount)
 {
+	RETURN_IF_TRUE(m_interActBtnClass == nullptr || GetWorld() == nullptr);
 	for (int i = 0; i < TotalItemCount; i++)
 	{
 		UUI_InterActButton* newInterActBnt = CreateWidget<UUI_InterActButton>(GetWorld(), m_interActBtnClass);

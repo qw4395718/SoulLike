@@ -53,10 +53,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void SetVisible(bool bVisible);
-
+	
+	UFUNCTION(BlueprintCallable)
 	void UpdateVisibleSlots();
 
 	// 初始化虚拟化
+	UFUNCTION(BlueprintCallable)
 	void InitializeVirtualization(int32 TotalItemCount);
 
 	// 从池中获取或创建槽位

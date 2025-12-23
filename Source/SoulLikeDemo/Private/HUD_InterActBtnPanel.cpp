@@ -34,17 +34,28 @@ void UHUD_InterActBtnPanel::UpdateTarget(const FInterActOptionInfo& options)
 
 void UHUD_InterActBtnPanel::ClearAllOptions()
 {
-
+	int NeedOpertatorSlotNum = m_visibleSlots.Num();
+	for (int i = 0; i < NeedOpertatorSlotNum; i++)
+	{
+		ReturnSlotToPool(m_visibleSlots[0]);
+	}
 }
 
 void UHUD_InterActBtnPanel::SetTargetOptionSelected(int32 Index)
 {
-	
+	RETURN_IF_TRUE(Index >= INTERACT_BTN_MAX || Index > m_visibleSlots.Num());
+	for (int i = 0; i < m_visibleSlots.Num(); i++)
+	{
+		m_visibleSlots[i]->SetSelected(false);
+	}
+	m_visibleSlots[Index]->SetSelected(true);
 }
 
 void UHUD_InterActBtnPanel::OnButtonClicked(int32 Index)
 {
-	
+	SetTargetOptionSelected(Index);
+	// 执行选中的逻辑
+
 }
 
 void UHUD_InterActBtnPanel::SetVisible(bool bVisible)
@@ -62,8 +73,39 @@ void UHUD_InterActBtnPanel::SetVisible(bool bVisible)
 
 void UHUD_InterActBtnPanel::UpdateVisibleSlots()
 {
-	// 确定可视的slot并且将对应的数据覆盖上去
+	// 更新显示范围
+	if (m_interActDataArr.Num() <= INTERACT_BTN_MAX )
+	{
+		FirstVisibleIndex = 0;
+		LastVisibleIndex = m_interActDataArr.Num() -1 > 0? m_interActDataArr.Num() - 1:0;
+	}
+	else if (m_interActDataArr.Num() <= FirstVisibleIndex + INTERACT_BTN_MAX)
+	{
+		LastVisibleIndex = m_interActDataArr.Num() - 1 > 0 ? m_interActDataArr.Num() - 1 : 0;
+		FirstVisibleIndex = LastVisibleIndex - INTERACT_BTN_MAX;
+	}
+	else
+	{
+		LastVisibleIndex = FirstVisibleIndex + INTERACT_BTN_MAX;
+	}
 
+	// 检测是否需要从池中获取控件
+	if (LastVisibleIndex - FirstVisibleIndex > m_visibleSlots.Num())
+	{
+		for (int i = 0; i < LastVisibleIndex - FirstVisibleIndex; i++)
+		{
+			m_visibleSlots.Push(GetOrCreateSlot());
+		}
+	}
+
+	// 将数据进行更新
+	for (int i = 0; i < m_visibleSlots.Num(); i++)
+	{
+		m_visibleSlots[i]->UpdateInterActBtnInfo(
+			m_interActDataArr[FirstVisibleIndex + i].OptionIcon,
+			m_interActDataArr[FirstVisibleIndex + i].OptionText
+			);
+	}
 }
 
 void UHUD_InterActBtnPanel::InitializeVirtualization(int32 TotalItemCount)

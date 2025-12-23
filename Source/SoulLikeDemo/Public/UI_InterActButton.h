@@ -33,14 +33,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "InterActOption")
 		void UpdateInterActBtnInfo(UTexture2D* showIcon,FString showText);
 
+	UFUNCTION(BlueprintCallable, Category = "InterActOption")
+		void SetSelected(bool bIsSelected, bool bPlayAnimation = true);
 
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
-
-	UFUNCTION(BlueprintCallable, Category = "InterActOption")
-		void SetSelected(bool bIsSelected, bool bPlayAnimation = true);
 
 	// 为蓝图暴露的动画事件-播放动画
 	UFUNCTION(BlueprintNativeEvent, Category = "Animation")

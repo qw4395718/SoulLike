@@ -80,49 +80,49 @@ void UHUD_InterActBtnPanel::SetVisible(bool bVisible)
 	
 }
 
-void UHUD_InterActBtnPanel::UpdateVisibleSlots()
-{
-	// 更新显示范围
-	if (m_interActDataArr.Num() <= INTERACT_BTN_MAX)
-	{
-		// 情况1：数据量小于等于最大显示数量
-		FirstVisibleIndex = 0;
-		LastVisibleIndex = FMath::Max(m_interActDataArr.Num() - 1, 0);
-	}
-	else if (FirstVisibleIndex + INTERACT_BTN_MAX >= m_interActDataArr.Num())
-	{
-		// 情况2：当前起始索引+最大显示数超过数组边界
-		LastVisibleIndex = m_interActDataArr.Num() - 1;
-		FirstVisibleIndex = FMath::Max(LastVisibleIndex - INTERACT_BTN_MAX + 1, 0);
-	}
-	else
-	{
-		// 情况3：正常情况，在数组范围内
-		LastVisibleIndex = FirstVisibleIndex + INTERACT_BTN_MAX - 1;
-		LastVisibleIndex = FMath::Min(LastVisibleIndex, m_interActDataArr.Num() - 1);
-	}
-
-	// 检测是否需要从池中获取控件
-	if (LastVisibleIndex - FirstVisibleIndex > m_visibleSlots.Num())
-	{
-		for (int i = 0; i < LastVisibleIndex - FirstVisibleIndex; i++)
-		{
-			m_visibleSlots.Push(GetOrCreateSlot());
-		}
-	}
-
-	// 将数据进行更新
-	for (int i = 0; i < m_visibleSlots.Num(); i++)
-	{
-		m_visibleSlots[i]->UpdateInterActBtnInfo(
-			m_interActDataArr[FirstVisibleIndex + i].OptionIcon,
-			m_interActDataArr[FirstVisibleIndex + i].OptionText
-			);
-		m_interActBtnsContainer->AddChild(m_visibleSlots[i]);
-	}
-
-	
-}
+//void UHUD_InterActBtnPanel::UpdateVisibleSlots(int FirstVisibleIndex,int LastVisibleIndex)
+//{
+//	// 更新显示范围
+//	if (m_interActDataArr.Num() <= INTERACT_BTN_MAX)
+//	{
+//		// 情况1：数据量小于等于最大显示数量
+//		FirstVisibleIndex = 0;
+//		LastVisibleIndex = FMath::Max(m_interActDataArr.Num() - 1, 0);
+//	}
+//	else if (FirstVisibleIndex + INTERACT_BTN_MAX >= m_interActDataArr.Num())
+//	{
+//		// 情况2：当前起始索引+最大显示数超过数组边界
+//		LastVisibleIndex = m_interActDataArr.Num() - 1;
+//		FirstVisibleIndex = FMath::Max(LastVisibleIndex - INTERACT_BTN_MAX + 1, 0);
+//	}
+//	else
+//	{
+//		// 情况3：正常情况，在数组范围内
+//		LastVisibleIndex = FirstVisibleIndex + INTERACT_BTN_MAX - 1;
+//		LastVisibleIndex = FMath::Min(LastVisibleIndex, m_interActDataArr.Num() - 1);
+//	}
+//
+//	// 检测是否需要从池中获取控件
+//	if (LastVisibleIndex - FirstVisibleIndex > m_visibleSlots.Num())
+//	{
+//		for (int i = 0; i <= LastVisibleIndex - FirstVisibleIndex; i++)
+//		{
+//			m_visibleSlots.Push(GetOrCreateSlot());
+//		}
+//	}
+//
+//	// 将数据进行更新
+//	for (int i = 0; i < m_visibleSlots.Num(); i++)
+//	{
+//		m_visibleSlots[i]->UpdateInterActBtnInfo(
+//			m_interActDataArr[FirstVisibleIndex + i].OptionIcon,
+//			m_interActDataArr[FirstVisibleIndex + i].OptionText
+//			);
+//		m_interActBtnsContainer->AddChild(m_visibleSlots[i]);
+//	}
+//
+//	
+//}
 
 void UHUD_InterActBtnPanel::InitializeVirtualization(int32 TotalItemCount)
 {
@@ -146,5 +146,93 @@ void UHUD_InterActBtnPanel::ReturnSlotToPool(UUI_InterActButton* atcBtn)
 {
 	m_slotPool.Push(atcBtn);
 	m_visibleSlots.Remove(atcBtn);
+}
+
+FReply UHUD_InterActBtnPanel::NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	// 获取滚轮增量（正数向上滚，负数向下滚）
+	float WheelDelta = InMouseEvent.GetWheelDelta();
+
+	// 处理滚动逻辑
+	HandleScroll(WheelDelta);
+
+	// 标记事件已处理
+	return FReply::Handled();
+}
+
+void UHUD_InterActBtnPanel::HandleScroll(float wheelDelta)
+{
+	// 计算新的滚动便宜,需要反转方向
+	float newScrollOffset = currentScrollOffset + (wheelDelta * scrollSensitivity *(-1));
+
+	// 限制滚动范围
+	float maxScrollOffset = INTERACT_BTN_MAX * INTERACT_BTN_HEIGHT;
+	newScrollOffset = FMath::Clamp(newScrollOffset,0.0f, maxScrollOffset);
+
+	// 更新滚动
+	if (newScrollOffset != currentScrollOffset)
+	{
+		currentScrollOffset = newScrollOffset;
+		UpdateVisibleRange();
+	}
+
+}
+
+void UHUD_InterActBtnPanel::UpdateVisibleRange()
+{
+	// 获取ScrollBox的几何信息
+	FGeometry scrollGeometry = GetCachedGeometry();
+
+	// 获取可视区域的大小
+	float viewHeight = scrollGeometry.GetLocalSize().Y;
+
+	// 获取每个槽位的标准高度
+	float slotHeight = INTERACT_BTN_HEIGHT;
+
+	// 计算可见范围
+	// 向下取整确保完全可见的槽位
+	int32 newFirstVisibleIndex = FMath::FloorToInt(currentScrollOffset/slotHeight);
+
+	// 向上取整确保覆盖所有部分可见的槽位
+	int32 newLastVisibleIndex = FMath::CeilToInt((currentScrollOffset + viewHeight)/slotHeight);
+
+	// 限制范围在有效数量内
+	newFirstVisibleIndex = FMath::Clamp(newFirstVisibleIndex,0, m_interActDataArr.Num()-1);
+	newLastVisibleIndex = FMath::Clamp(newLastVisibleIndex,0, m_interActDataArr.Num()-1);
+
+	// 如果范围没有发生变化,无需更新
+	if (newFirstVisibleIndex == FirstVisibleIndex &&
+		newLastVisibleIndex == LastVisibleIndex)
+	{
+		return;
+	}
+
+	// 更新可见范围
+	int32 oldFirstVisibleIndex = FirstVisibleIndex;
+	int32 oldLastVisibleIndex = LastVisibleIndex;
+	FirstVisibleIndex = newFirstVisibleIndex;
+	LastVisibleIndex = newLastVisibleIndex;
+
+	// 根据新旧范围差异更新可见槽位
+	UpdateVisibleSlots(oldFirstVisibleIndex, oldLastVisibleIndex);
+}
+
+void UHUD_InterActBtnPanel::UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLastIndex)
+{
+	// 情况1: 完全的新范围(如跳转或者快速滚动)
+	if (oldLastIndex < FirstVisibleIndex || oldFirstIndex > LastVisibleIndex)
+	{
+		// 回收所有的旧槽位
+		for (int32 i = 0;i < m_visibleSlots.Num();i++)
+		{
+			ReturnSlotToPool(m_visibleSlots[i]);
+		}
+		m_visibleSlots.Empty();
+
+		// 创建新范围内的所有槽位
+
+	}
+
+	// 情况2
 }
 

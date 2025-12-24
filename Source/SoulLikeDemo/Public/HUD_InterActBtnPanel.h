@@ -55,7 +55,7 @@ public:
 		void SetVisible(bool bVisible);
 	
 	UFUNCTION(BlueprintCallable)
-	void UpdateVisibleSlots();
+	void UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLastIndex);
 
 	// 初始化虚拟化
 	UFUNCTION(BlueprintCallable)
@@ -72,7 +72,15 @@ protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
+	// 重写原生鼠标滚轮事件
+	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
+	// 鼠标滚动行为处理
+	UFUNCTION(BlueprintCallable, Category="Scroll")
+	void HandleScroll(float wheelDelta);
+
+	UFUNCTION(BlueprintCallable)
+		void UpdateVisibleRange();
 
 protected:
 	/************************************************************************/
@@ -104,5 +112,16 @@ protected:
 	// 当前选中索引
 	UPROPERTY(BlueprintReadOnly, Category = "State")
 		int32 SelectedIndex = -1;
+
+	private:
+	/************************************************************************/
+	/* 内部变量-配置                                                                     */
+	/************************************************************************/
+	// 滚动速度控制
+	UPROPERTY(EditAnywhere, Category = "Scroll")
+		float scrollSensitivity = 50.0f;
+
+	// 当前滚动偏移
+	float currentScrollOffset = 0.0f;
 
 };

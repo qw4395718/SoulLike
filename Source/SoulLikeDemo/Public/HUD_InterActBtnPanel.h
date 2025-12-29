@@ -72,6 +72,9 @@ protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
+	// 单元测试相关
+	void FakeInit();
+
 	// 重写原生鼠标滚轮事件
 	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
@@ -81,6 +84,20 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		void UpdateVisibleRange();
+
+	void UpdateSlotPositions();
+
+	// 将指定数据源索引填入新获取的控件中并纳入可视区域缓存
+	void AddSlotForIndex(int32 Index);
+
+	// 将指定数据源索引填入新获取的控件中并纳入可视区域缓存,插到头部
+	void AddSlotAtIndexZero(int32 Index);
+
+	// 获取数据源指定索引的数据
+	const FInterActOptionInfo* GetItemAtIndex(int32 Index);
+
+	// 获取基础控件配置高度
+	float GetSlotHeight();
 
 protected:
 	/************************************************************************/

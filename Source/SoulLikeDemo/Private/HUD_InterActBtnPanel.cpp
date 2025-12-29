@@ -9,14 +9,7 @@
 UHUD_InterActBtnPanel::UHUD_InterActBtnPanel(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
-	TArray<FInterActOptionInfo> test;
-	test.Add(FInterActOptionInfo{ 1,nullptr,L"1" });
-	test.Add(FInterActOptionInfo{ 2,nullptr,L"2" });
-	test.Add(FInterActOptionInfo{ 3,nullptr,L"3" });
-	test.Add(FInterActOptionInfo{ 4,nullptr,L"4" });
-	test.Add(FInterActOptionInfo{ 5,nullptr,L"5" });
-	test.Add(FInterActOptionInfo{ 6,nullptr,L"6" });
-	UpdateBatch(test);
+	FakeInit();
 }
 
 void UHUD_InterActBtnPanel::UpdateBatch(const TArray<FInterActOptionInfo>& options)
@@ -80,50 +73,6 @@ void UHUD_InterActBtnPanel::SetVisible(bool bVisible)
 	
 }
 
-//void UHUD_InterActBtnPanel::UpdateVisibleSlots(int FirstVisibleIndex,int LastVisibleIndex)
-//{
-//	// 更新显示范围
-//	if (m_interActDataArr.Num() <= INTERACT_BTN_MAX)
-//	{
-//		// 情况1：数据量小于等于最大显示数量
-//		FirstVisibleIndex = 0;
-//		LastVisibleIndex = FMath::Max(m_interActDataArr.Num() - 1, 0);
-//	}
-//	else if (FirstVisibleIndex + INTERACT_BTN_MAX >= m_interActDataArr.Num())
-//	{
-//		// 情况2：当前起始索引+最大显示数超过数组边界
-//		LastVisibleIndex = m_interActDataArr.Num() - 1;
-//		FirstVisibleIndex = FMath::Max(LastVisibleIndex - INTERACT_BTN_MAX + 1, 0);
-//	}
-//	else
-//	{
-//		// 情况3：正常情况，在数组范围内
-//		LastVisibleIndex = FirstVisibleIndex + INTERACT_BTN_MAX - 1;
-//		LastVisibleIndex = FMath::Min(LastVisibleIndex, m_interActDataArr.Num() - 1);
-//	}
-//
-//	// 检测是否需要从池中获取控件
-//	if (LastVisibleIndex - FirstVisibleIndex > m_visibleSlots.Num())
-//	{
-//		for (int i = 0; i <= LastVisibleIndex - FirstVisibleIndex; i++)
-//		{
-//			m_visibleSlots.Push(GetOrCreateSlot());
-//		}
-//	}
-//
-//	// 将数据进行更新
-//	for (int i = 0; i < m_visibleSlots.Num(); i++)
-//	{
-//		m_visibleSlots[i]->UpdateInterActBtnInfo(
-//			m_interActDataArr[FirstVisibleIndex + i].OptionIcon,
-//			m_interActDataArr[FirstVisibleIndex + i].OptionText
-//			);
-//		m_interActBtnsContainer->AddChild(m_visibleSlots[i]);
-//	}
-//
-//	
-//}
-
 void UHUD_InterActBtnPanel::InitializeVirtualization(int32 TotalItemCount)
 {
 	RETURN_IF_TRUE(m_interActBtnClass == nullptr || GetWorld() == nullptr);
@@ -146,6 +95,18 @@ void UHUD_InterActBtnPanel::ReturnSlotToPool(UUI_InterActButton* atcBtn)
 {
 	m_slotPool.Push(atcBtn);
 	m_visibleSlots.Remove(atcBtn);
+}
+
+void UHUD_InterActBtnPanel::FakeInit()
+{
+	TArray<FInterActOptionInfo> test;
+	test.Add(FInterActOptionInfo{ 1,nullptr,L"1" });
+	test.Add(FInterActOptionInfo{ 2,nullptr,L"2" });
+	test.Add(FInterActOptionInfo{ 3,nullptr,L"3" });
+	test.Add(FInterActOptionInfo{ 4,nullptr,L"4" });
+	test.Add(FInterActOptionInfo{ 5,nullptr,L"5" });
+	test.Add(FInterActOptionInfo{ 6,nullptr,L"6" });
+	UpdateBatch(test);
 }
 
 FReply UHUD_InterActBtnPanel::NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -181,24 +142,43 @@ void UHUD_InterActBtnPanel::HandleScroll(float wheelDelta)
 void UHUD_InterActBtnPanel::UpdateVisibleRange()
 {
 	// 获取ScrollBox的几何信息
-	FGeometry scrollGeometry = GetCachedGeometry();
+	//FGeometry scrollGeometry = GetCachedGeometry();
 
-	// 获取可视区域的大小
-	float viewHeight = scrollGeometry.GetLocalSize().Y;
+	//// 获取可视区域的大小
+	//float viewHeight = scrollGeometry.GetLocalSize().Y;
 
 	// 获取每个槽位的标准高度
-	float slotHeight = INTERACT_BTN_HEIGHT;
+	float slotHeight = GetSlotHeight();
+
+	float viewHeight = GetSlotHeight() * INTERACT_BTN_MAX;
 
 	// 计算可见范围
 	// 向下取整确保完全可见的槽位
 	int32 newFirstVisibleIndex = FMath::FloorToInt(currentScrollOffset/slotHeight);
 
 	// 向上取整确保覆盖所有部分可见的槽位
-	int32 newLastVisibleIndex = FMath::CeilToInt((currentScrollOffset + viewHeight)/slotHeight);
+	int32 newLastVisibleIndex = FMath::CeilToInt((currentScrollOffset + viewHeight)/slotHeight) - 1;
 
 	// 限制范围在有效数量内
 	newFirstVisibleIndex = FMath::Clamp(newFirstVisibleIndex,0, m_interActDataArr.Num()-1);
 	newLastVisibleIndex = FMath::Clamp(newLastVisibleIndex,0, m_interActDataArr.Num()-1);
+	if (newLastVisibleIndex - newFirstVisibleIndex + 1 < INTERACT_BTN_MAX)
+	{// 显示不完全
+		if (m_interActDataArr.Num() <= INTERACT_BTN_MAX)
+		{
+			newFirstVisibleIndex = 0;
+			newLastVisibleIndex = m_interActDataArr.Num() -1;
+		}
+		else if(newLastVisibleIndex >= m_interActDataArr.Num() - 1)
+		{
+			newFirstVisibleIndex = newLastVisibleIndex - INTERACT_BTN_MAX + 1;
+		}
+		else
+		{
+			newFirstVisibleIndex = 0;
+			newLastVisibleIndex = INTERACT_BTN_MAX -1;
+		}
+	}
 
 	// 如果范围没有发生变化,无需更新
 	if (newFirstVisibleIndex == FirstVisibleIndex &&
@@ -213,14 +193,78 @@ void UHUD_InterActBtnPanel::UpdateVisibleRange()
 	FirstVisibleIndex = newFirstVisibleIndex;
 	LastVisibleIndex = newLastVisibleIndex;
 
+	UE_LOG(LogTemp, Log, TEXT("ZYF_UHUD_InterActBtnPanel::UpdateVisibleRange() oldFirst:%d oldLast%d newFirst%d newLast%d"),
+		oldFirstVisibleIndex, oldLastVisibleIndex, FirstVisibleIndex, LastVisibleIndex);
+
 	// 根据新旧范围差异更新可见槽位
 	UpdateVisibleSlots(oldFirstVisibleIndex, oldLastVisibleIndex);
 }
 
+void UHUD_InterActBtnPanel::UpdateSlotPositions()
+{
+	float SlotHeight = GetSlotHeight();
+
+	for (UUI_InterActButton* interActSlot : m_visibleSlots)
+	{
+		int32 ItemIndex = interActSlot->GetAssignedIndex();
+
+		// 计算槽位的Y位置（相对位置）
+		float SlotY = (ItemIndex * SlotHeight) - currentScrollOffset;
+
+		// 设置槽位位置
+		interActSlot->SetRenderTranslation(FVector2D(0.0f, SlotY));
+	}
+}
+
+void UHUD_InterActBtnPanel::AddSlotForIndex(int32 Index)
+{
+	UUI_InterActButton* interActSlot = GetOrCreateSlot();
+
+	// 配置槽位数据
+	const FInterActOptionInfo* pItem = GetItemAtIndex(Index);
+	if(pItem == nullptr){return;}
+	interActSlot->UpdateInterActBtnInfo(Index, pItem->OptionIcon, pItem->OptionText);
+
+	// 添加到可见列表
+	m_visibleSlots.Add(interActSlot);
+
+	// 添加到ScrollBox作为子组件
+	//AddChild(interActSlot);
+}
+
+void UHUD_InterActBtnPanel::AddSlotAtIndexZero(int32 Index)
+{
+	UUI_InterActButton* interActSlot = GetOrCreateSlot();
+
+	// 配置槽位数据
+	const FInterActOptionInfo* pItem = GetItemAtIndex(Index);
+	if (pItem == nullptr) { return; }
+	interActSlot->UpdateInterActBtnInfo(Index, pItem->OptionIcon, pItem->OptionText);
+
+	// 添加到可见列表
+	m_visibleSlots.Insert(interActSlot,0);
+
+	// 添加到ScrollBox作为子组件
+	//AddChild(interActSlot);
+}
+
+const FInterActOptionInfo* UHUD_InterActBtnPanel::GetItemAtIndex(int32 Index)
+{
+	RETURN_VALUE_IF_TRUE(Index >= m_interActDataArr.Num(),nullptr);
+	return &m_interActDataArr[Index];
+}
+
+float UHUD_InterActBtnPanel::GetSlotHeight()
+{
+	return INTERACT_BTN_HEIGHT;
+}
+
 void UHUD_InterActBtnPanel::UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLastIndex)
 {
-	// 情况1: 完全的新范围(如跳转或者快速滚动)
-	if (oldLastIndex < FirstVisibleIndex || oldFirstIndex > LastVisibleIndex)
+	// 情况2: 完全的新范围(如跳转或者快速滚动)
+	if (oldLastIndex < FirstVisibleIndex || 
+	oldFirstIndex > LastVisibleIndex || 
+	(oldFirstIndex == 0 && oldLastIndex == 0))
 	{
 		// 回收所有的旧槽位
 		for (int32 i = 0;i < m_visibleSlots.Num();i++)
@@ -230,9 +274,79 @@ void UHUD_InterActBtnPanel::UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLas
 		m_visibleSlots.Empty();
 
 		// 创建新范围内的所有槽位
-
+		for (int32 i = FirstVisibleIndex; i <= LastVisibleIndex; i++)
+		{
+			AddSlotForIndex(i);
+		}
 	}
 
-	// 情况2
+	// 情况3: 滚动方向向下(显示更靠下的内容)
+	else if (FirstVisibleIndex > oldFirstIndex)
+	{
+		for (int32 i = 0;i < m_visibleSlots.Num();)
+		{
+			UUI_InterActButton* slot = m_visibleSlots[i];
+			int32 itemIndex = slot->GetAssignedIndex();
+
+			if (itemIndex < FirstVisibleIndex)
+			{
+				// 回收
+				ReturnSlotToPool(slot);
+				//m_visibleSlots.RemoveAt(i);
+			}
+			else
+			{
+				i++;
+			}
+		}
+
+		// 添加新加入视野的下部槽位
+		for (int32 i = oldLastIndex + 1;i <= LastVisibleIndex; i++)
+		{
+			AddSlotForIndex(i);
+		}
+	}
+
+	// 情况4 :滚动方向向上(显示更靠上的内容)
+	else if (LastVisibleIndex < oldLastIndex)
+	{
+		for (int32 i = 0; i < m_visibleSlots.Num();)
+		{
+			UUI_InterActButton* slot = m_visibleSlots[i];
+			int32 itemIndex = slot->GetAssignedIndex();
+
+			if (itemIndex > LastVisibleIndex)
+			{
+				// 回收
+				ReturnSlotToPool(slot);
+				//m_visibleSlots.RemoveAt(i);
+			}
+			else
+			{
+				i++;
+			}
+		}
+
+		// 添加新加入视野的上部槽位
+		for (int32 i = oldFirstIndex - 1; i >= FirstVisibleIndex; i--)
+		{
+			AddSlotAtIndexZero(i);
+		}
+	}
+
+	// 清空现有
+	for (int32 i= 0;i < m_interActBtnsContainer->GetChildrenCount();i++)
+	{
+		m_interActBtnsContainer->RemoveChildAt(i);
+	}
+
+	// 填入可视区域缓存槽位
+	for (UUI_InterActButton* interActSlot : m_visibleSlots)
+	{
+		m_interActBtnsContainer->AddChild(interActSlot);
+	}
+
+	// 更新所有可见槽位的位置
+	//UpdateSlotPositions();
 }
 

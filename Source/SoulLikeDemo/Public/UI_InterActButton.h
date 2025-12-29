@@ -31,10 +31,13 @@ public:
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable, Category = "InterActOption")
-		void UpdateInterActBtnInfo(UTexture2D* showIcon,FString showText);
+		void UpdateInterActBtnInfo(int32 index,UTexture2D* showIcon,FString showText);
 
 	UFUNCTION(BlueprintCallable, Category = "InterActOption")
 		void SetSelected(bool bIsSelected, bool bPlayAnimation = true);
+
+	UFUNCTION(BlueprintCallable, Category = "InterActOption")
+		int32 GetAssignedIndex();
 
 protected:
 	/************************************************************************/
@@ -82,6 +85,9 @@ protected:
 
 	// 选中状态
 	bool bSelected = false;
+
+	// 外部序号
+	int32 AssignedIndex;
 
 };
 

@@ -15,11 +15,15 @@ UUI_InterActButton::UUI_InterActButton(const FObjectInitializer& ObjectInitializ
 
 }
 
-void UUI_InterActButton::UpdateInterActBtnInfo(UTexture2D* showIcon, FString showText)
+void UUI_InterActButton::UpdateInterActBtnInfo(int32 index, UTexture2D* showIcon, FString showText)
 {
-	RETURN_IF_TRUE(m_interActIcon == nullptr || m_interActDesc == nullptr);
+	RETURN_IF_TRUE(m_interActIcon == nullptr || m_interActDesc == nullptr || index < 0);
+	AssignedIndex = index;
 	m_interActIcon->SetBrushFromTexture(showIcon);
 	m_interActDesc->SetText(FText::FromString(showText));
+	UE_LOG(LogTemp, Log, TEXT("UUI_InterActButton::UpdateInterActBtnInfo index:%d"),
+		index);
+
 }
 
 void UUI_InterActButton::SetSelected(bool bIsSelected, bool bPlayAnimation /*= true*/)
@@ -40,6 +44,11 @@ void UUI_InterActButton::SetSelected(bool bIsSelected, bool bPlayAnimation /*= t
 	{
 		PlaySelectionAnimation(bIsSelected);
 	}
+}
+
+int32 UUI_InterActButton::GetAssignedIndex()
+{
+	return AssignedIndex;
 }
 
 void UUI_InterActButton::PlaySelectionAnimation_Implementation(bool bIsSelected)

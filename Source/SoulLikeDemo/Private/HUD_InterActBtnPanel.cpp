@@ -106,6 +106,12 @@ void UHUD_InterActBtnPanel::FakeInit()
 	test.Add(FInterActOptionInfo{ 4,nullptr,L"4" });
 	test.Add(FInterActOptionInfo{ 5,nullptr,L"5" });
 	test.Add(FInterActOptionInfo{ 6,nullptr,L"6" });
+	test.Add(FInterActOptionInfo{ 7,nullptr,L"7" });
+	test.Add(FInterActOptionInfo{ 8,nullptr,L"8" });
+	test.Add(FInterActOptionInfo{ 9,nullptr,L"9" });
+	test.Add(FInterActOptionInfo{ 10,nullptr,L"10" });
+	test.Add(FInterActOptionInfo{ 11,nullptr,L"11" });
+	test.Add(FInterActOptionInfo{ 12,nullptr,L"12" });
 	UpdateBatch(test);
 }
 

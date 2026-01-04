@@ -66,6 +66,15 @@ protected:
 
 	/** 估算文本行数 */
 	int32 EstimateLinesForText(const FString& text) const;
+	
+	// 鼠标点击行为响应
+	void OnClickButtonClicked();
+
+	// 智能分页（基于宽度）
+	void SmartSplitTextByWidth();
+
+	// 简化分页（基于行数）
+	void SplitTextByEstimatedLines();
 
 protected:
 	/************************************************************************/
@@ -95,10 +104,16 @@ private:
 	int m_currentPageIndex;
 	// 总页码
 	int m_maxPageNum;
+	// 单页宽度
+	int m_maxPagePageWidth;
 	// 分页后的数据
 	TArray<FString> m_arrDialogSplit;
 	// 是否是多页显示
 	bool m_bIsMultiPage;
+	// 字体测量缓存
+	mutable TMap<TCHAR, float> m_characterWidthCache;
+	// 委托绑定 
+	FDelegateHandle OnClickedHandle;
 
 	/************************************************************************/
 	/* 内部变量-配置                                                                     */

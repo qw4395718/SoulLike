@@ -2,7 +2,6 @@
 
 
 #include "HUD_Dialog.h"
-#include "UI_InterActButton.h"
 
 
 UHUD_Dialog::UHUD_Dialog(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -53,21 +52,21 @@ void UHUD_Dialog::ShowPage(int32 PageIndex)
 
 bool UHUD_Dialog::IsChineseChar(TCHAR Char) const
 {
-
+	return true;
 }
 
 bool UHUD_Dialog::IsGoodBreakChar(TCHAR Char) const
 {
-
+	return true;
 }
 
 float UHUD_Dialog::GetCharWidth(TCHAR Char, const FSlateFontInfo& FontInfo) const
 {
-
+	return 0.0f;
 }
 
 int32 UHUD_Dialog::EstimateLinesForText(const FString& Text) const
 {
-
+	return 0;
 }
 

@@ -133,7 +133,7 @@ void UHUD_InterActBtnPanel::HandleScroll(float wheelDelta)
 	float newScrollOffset = currentScrollOffset + (wheelDelta * scrollSensitivity *(-1));
 
 	// 限制滚动范围
-	float maxScrollOffset = INTERACT_BTN_MAX * INTERACT_BTN_HEIGHT;
+	float maxScrollOffset = (m_interActDataArr.Num() - INTERACT_BTN_MAX) * INTERACT_BTN_HEIGHT;
 	newScrollOffset = FMath::Clamp(newScrollOffset,0.0f, maxScrollOffset);
 
 	// 更新滚动
@@ -185,6 +185,11 @@ void UHUD_InterActBtnPanel::UpdateVisibleRange()
 			newLastVisibleIndex = INTERACT_BTN_MAX -1;
 		}
 	}
+	else if (newLastVisibleIndex - newFirstVisibleIndex + 1 > INTERACT_BTN_MAX)
+	{// 显示数据超过限制
+		newLastVisibleIndex = newFirstVisibleIndex + INTERACT_BTN_MAX -1;
+	}
+	else{/*正常情况*/}
 
 	// 如果范围没有发生变化,无需更新
 	if (newFirstVisibleIndex == FirstVisibleIndex &&

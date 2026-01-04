@@ -136,7 +136,7 @@ protected:
 	/************************************************************************/
 	// 滚动速度控制
 	UPROPERTY(EditAnywhere, Category = "Scroll")
-		float scrollSensitivity = 50.0f;
+		float scrollSensitivity = 40.0f;
 
 	// 当前滚动偏移
 	float currentScrollOffset = 0.0f;

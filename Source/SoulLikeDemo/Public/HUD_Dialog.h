@@ -7,6 +7,8 @@
 #include "SoulLikeGameGlobal.h"
 #include "HUD_Dialog.generated.h"
 
+class UTextBlock;
+class UButton;
 
 /**
  * 
@@ -88,7 +90,7 @@ private:
 	// 角色姓名
 	FString m_pawnName;
 	// 文本总内容
-	FString m_dialogText;
+	FString m_dialogContent;
 	// 当前页码
 	int m_currentPageIndex;
 	// 总页码

@@ -20,21 +20,21 @@ class SOULLIKEDEMO_API UHUD_Dialog : public UUserWidget
 public:
 	UHUD_Dialog(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
-	/* Íâ²¿µ÷ÓÃ                                                                     */
+	/* å¤–éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
-	// µ¥Ôª²âÊÔÏà¹Ø
+	// å•å…ƒæµ‹è¯•ç›¸å…³
 	UFUNCTION(BlueprintCallable, Category = "Dialog")
 	void FakeInit();
 
-	/** ÉèÖÃÒªÏÔÊ¾µÄÎÄ±¾ */
+	/** è®¾ç½®è¦æ˜¾ç¤ºçš„æ–‡æœ¬ */
 	UFUNCTION(BlueprintCallable, Category = "Dialog")
 	void SetDialogText(const FString& pawnNameText,const FString& dialogText);
 
-	/** ÏÔÊ¾¶Ô»°¿ò */
+	/** æ˜¾ç¤ºå¯¹è¯æ¡† */
 	UFUNCTION(BlueprintCallable, Category = "Dialog")
 	void ShowDialog();
 
-	/** ¹Ø±Õ¶Ô»°¿ò */
+	/** å…³é—­å¯¹è¯æ¡† */
 	UFUNCTION(BlueprintCallable, Category = "Dialog")
 	void CloseDialog();
 
@@ -42,85 +42,86 @@ public:
 
 protected:
 	/************************************************************************/
-	/* ÄÚ²¿µ÷ÓÃ                                                                     */
+	/* å†…éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
-	// ¼Ì³Ğ
+	// ç»§æ‰¿
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
 
-	/** ÖÇÄÜ·ÖÒ³ÎÄ±¾ */
+	/** æ™ºèƒ½åˆ†é¡µæ–‡æœ¬ */
 	void SplitTextIntoSections();
 
-	/** ÏÔÊ¾Ö¸¶¨Ò³Âë */
+	/** æ˜¾ç¤ºæŒ‡å®šé¡µç  */
 	void ShowPage(int32 pageIndex);
 
-	/** ¼ì²éÊÇ·ñÎªÖĞÎÄ×Ö·û */
+	/** æ£€æŸ¥æ˜¯å¦ä¸ºä¸­æ–‡å­—ç¬¦ */
 	bool IsChineseChar(TCHAR charText) const;
 
-	/** ¼ì²éÊÇ·ñÎªÁ¼ºÃµÄ¶Ïµã×Ö·û */
+	/** æ£€æŸ¥æ˜¯å¦ä¸ºè‰¯å¥½çš„æ–­ç‚¹å­—ç¬¦ */
 	bool IsGoodBreakChar(TCHAR charText) const;
 
-	/** »ñÈ¡×Ö·û¿í¶È */
+	/** è·å–å­—ç¬¦å®½åº¦ */
 	float GetCharWidth(TCHAR charText, const FSlateFontInfo& fontInfo) const;
 
-	/** ¹ÀËãÎÄ±¾ĞĞÊı */
+	/** ä¼°ç®—æ–‡æœ¬è¡Œæ•° */
 	int32 EstimateLinesForText(const FString& text) const;
 	
-	// Êó±êµã»÷ĞĞÎªÏìÓ¦
+	// é¼ æ ‡ç‚¹å‡»è¡Œä¸ºå“åº”
+	UFUNCTION()
 	void OnClickButtonClicked();
 
-	// ÖÇÄÜ·ÖÒ³£¨»ùÓÚ¿í¶È£©
+	// æ™ºèƒ½åˆ†é¡µï¼ˆåŸºäºå®½åº¦ï¼‰
 	void SmartSplitTextByWidth();
 
-	// ¼ò»¯·ÖÒ³£¨»ùÓÚĞĞÊı£©
+	// ç®€åŒ–åˆ†é¡µï¼ˆåŸºäºè¡Œæ•°ï¼‰
 	void SplitTextByEstimatedLines();
 
 protected:
 	/************************************************************************/
-	/* ÄÚ²¿±äÁ¿-¿Ø¼ş                                                                   */
+	/* å†…éƒ¨å˜é‡-æ§ä»¶                                                                   */
 	/************************************************************************/
-	// ½ÇÉ«ĞÕÃû¿Ø¼şÒıÓÃ
+	// è§’è‰²å§“åæ§ä»¶å¼•ç”¨
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UTextBlock* m_pawnNameText;
 
-	// ¶Ô»°ÄÚÈİ¿Ø¼şÒıÓÃ
+	// å¯¹è¯å†…å®¹æ§ä»¶å¼•ç”¨
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UTextBlock* m_dialogText;
 
-	// ²»¿É¼û°´Å¥¿Ø¼şÒıÓÃ
+	// ä¸å¯è§æŒ‰é’®æ§ä»¶å¼•ç”¨
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UButton* m_clickButton;
 
 private:
 	/************************************************************************/
-	/* ÄÚ²¿±äÁ¿-Êı¾İ                                                                     */
+	/* å†…éƒ¨å˜é‡-æ•°æ®                                                                     */
 	/************************************************************************/
-	// ½ÇÉ«ĞÕÃû
+	// è§’è‰²å§“å
 	FString m_pawnName;
-	// ÎÄ±¾×ÜÄÚÈİ
+	// æ–‡æœ¬æ€»å†…å®¹
 	FString m_dialogContent;
-	// µ±Ç°Ò³Âë
+	// å½“å‰é¡µç 
 	int m_currentPageIndex;
-	// ×ÜÒ³Âë
+	// æ€»é¡µç 
 	int m_maxPageNum;
-	// µ¥Ò³¿í¶È
+	// å•é¡µå®½åº¦
 	int m_maxPagePageWidth;
-	// ·ÖÒ³ºóµÄÊı¾İ
+	// åˆ†é¡µåçš„æ•°æ®
 	TArray<FString> m_arrDialogSplit;
-	// ÊÇ·ñÊÇ¶àÒ³ÏÔÊ¾
+	// æ˜¯å¦æ˜¯å¤šé¡µæ˜¾ç¤º
 	bool m_bIsMultiPage;
-	// ×ÖÌå²âÁ¿»º´æ
+	// å­—ä½“æµ‹é‡ç¼“å­˜
 	mutable TMap<TCHAR, float> m_characterWidthCache;
-	// Î¯ÍĞ°ó¶¨ 
+	// å§”æ‰˜ç»‘å®š 
 	FDelegateHandle OnClickedHandle;
 
 	/************************************************************************/
-	/* ÄÚ²¿±äÁ¿-ÅäÖÃ                                                                     */
+	/* å†…éƒ¨å˜é‡-é…ç½®                                                                     */
 	/************************************************************************/
-	/** ÊôĞÔÅäÖÃ */
+	/** å±æ€§é…ç½® */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dialog", meta = (AllowPrivateAccess = "true"))
-	float m_maxPageWidth = 500.0f;
+	float m_maxPageWidth = 1300.0f * 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dialog", meta = (AllowPrivateAccess = "true"))
 	int32 m_maxLinesPerPage = 8;

@@ -11,12 +11,14 @@
 UHUD_Dialog::UHUD_Dialog(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
-	FakeInit();
+	
 }
 
 void UHUD_Dialog::FakeInit()
 {
-
+	FString tmpName = TEXT("åŸç¥");
+	FString tmpContent = TEXT("ã€ŠåŸç¥ã€‹æ˜¯ç”±ä¸­å›½æ¸¸æˆå…¬å¸ç±³å“ˆæ¸¸ï¼ˆmiHoYoï¼‰è‡ªä¸»ç ”å‘çš„ä¸€æ¬¾å¼€æ”¾ä¸–ç•ŒåŠ¨ä½œè§’è‰²æ‰®æ¼”æ¸¸æˆï¼Œäº2020å¹´9æœˆæ­£å¼å…¨çƒä¸Šçº¿ï¼Œæ”¯æŒiOSã€Androidã€PCã€PlayStationç­‰å¤šå¹³å°ï¼Œå¹¶è®¡åˆ’ç™»é™†Nintendo Switchã€‚æ¸¸æˆä»¥ç²¾ç¾çš„ç”»é¢ã€ä¸°å¯Œçš„æ¢ç´¢å†…å®¹å’Œæ·±åº¦çš„è§’è‰²å…»æˆç³»ç»Ÿé—»åï¼Œåœ¨å…¨çƒèŒƒå›´å†…æ‹¥æœ‰æé«˜çš„äººæ°”ã€‚ä¸€ã€æ¸¸æˆæ ¸å¿ƒç‰¹è‰²/nå¼€æ”¾ä¸–ç•Œæ¢ç´¢/næ¸¸æˆåœ°å›¾åºå¤§ä¸”å¤šæ ·åŒ–ï¼ŒåŒ…å«è‰åŸã€é›ªå±±ã€æ²™æ¼ ã€æµ·æ´‹ã€å¥‡å¹»å›½åº¦ç­‰åŒºåŸŸï¼Œé¼“åŠ±ç©å®¶è‡ªç”±æ¢ç´¢ã€‚/nä¸–ç•Œä¸­éšè—ç€å¤§é‡è°œé¢˜ã€å®ç®±ã€ç§˜å¢ƒå’Œéšæœºäº‹ä»¶ï¼Œæ¢ç´¢å¥–åŠ±ä¸°å¯Œã€‚");
+	SetDialogText(tmpName, tmpContent);
 }
 
 void UHUD_Dialog::SetDialogText(const FString& labelText, const FString& descText)
@@ -27,13 +29,13 @@ void UHUD_Dialog::SetDialogText(const FString& labelText, const FString& descTex
 	m_arrDialogSplit.Empty();
 	m_characterWidthCache.Empty();
 
-	// ·Ö¸îÎÄ±¾
+	// åˆ†å‰²æ–‡æœ¬
 	SplitTextIntoSections();
 
-	// ¸üĞÂ¶àÒ³×´Ì¬
+	// æ›´æ–°å¤šé¡µçŠ¶æ€
 	m_bIsMultiPage = (m_arrDialogSplit.Num() > 1);
 
-	// ÏÔÊ¾µÚÒ»Ò³
+	// æ˜¾ç¤ºç¬¬ä¸€é¡µ
 	if (m_arrDialogSplit.Num() > 0)
 	{
 		ShowPage(0);
@@ -55,13 +57,13 @@ void UHUD_Dialog::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// °ó¶¨°´Å¥µã»÷ÊÂ¼ş
+	// ç»‘å®šæŒ‰é’®ç‚¹å‡»äº‹ä»¶
 	if (m_clickButton)
 	{
 		m_clickButton->OnClicked.AddDynamic(this, &UHUD_Dialog::OnClickButtonClicked);
 	}
 
-	// ³õÊ¼ÏÔÊ¾µÚÒ»Ò³
+	// åˆå§‹æ˜¾ç¤ºç¬¬ä¸€é¡µ
 	if (m_arrDialogSplit.Num() > 0)
 	{
 		ShowPage(0);
@@ -70,7 +72,7 @@ void UHUD_Dialog::NativeConstruct()
 
 void UHUD_Dialog::NativeDestruct()
 {
-	// ÒÆ³ıÎ¯ÍĞ°ó¶¨
+	// ç§»é™¤å§”æ‰˜ç»‘å®š
 	if (m_clickButton)
 	{
 		m_clickButton->OnClicked.RemoveDynamic(this, &UHUD_Dialog::OnClickButtonClicked);
@@ -89,56 +91,68 @@ void UHUD_Dialog::SplitTextIntoSections()
 
 	if (m_bUseSmartSplitting && m_dialogText)
 	{
-		// Ê¹ÓÃÖÇÄÜ·ÖÒ³£¨»ùÓÚ¿í¶È£©
+		// ä½¿ç”¨æ™ºèƒ½åˆ†é¡µï¼ˆåŸºäºå®½åº¦ï¼‰
 		SmartSplitTextByWidth();
 	}
 	else
 	{
-		// Ê¹ÓÃ¼ò»¯·ÖÒ³£¨»ùÓÚĞĞÊı£©
+		// ä½¿ç”¨ç®€åŒ–åˆ†é¡µï¼ˆåŸºäºè¡Œæ•°ï¼‰
 		SplitTextByEstimatedLines();
 	}
 }
 
 void UHUD_Dialog::ShowPage(int32 PageIndex)
 {
+	if (!m_dialogText || !m_pawnNameText || !m_arrDialogSplit.IsValidIndex(PageIndex))
+	{
+		return;
+	}
 
+	m_currentPageIndex = PageIndex;
+
+	FText DisplayTextTitle = FText::FromString(m_pawnName);
+	m_pawnNameText->SetText(DisplayTextTitle);
+
+	// è®¾ç½®æ–‡æœ¬å†…å®¹
+	FText DisplayText = FText::FromString(m_arrDialogSplit[PageIndex]);
+	m_dialogText->SetText(DisplayText);
 }
 
 bool UHUD_Dialog::IsChineseChar(TCHAR Char) const
 {
 	uint32 CodePoint = static_cast<uint32>(Char);
 
-	// ³£ÓÃºº×Ö·¶Î§
-	return (CodePoint >= 0x4E00 && CodePoint <= 0x9FFF) ||     // »ù±¾ºº×Ö
-		(CodePoint >= 0x3400 && CodePoint <= 0x4DBF) ||     // À©Õ¹A
-		(CodePoint >= 0x20000 && CodePoint <= 0x2A6DF) ||   // À©Õ¹B
-		(CodePoint >= 0x2A700 && CodePoint <= 0x2B73F) ||   // À©Õ¹C
-		(CodePoint >= 0x2B740 && CodePoint <= 0x2B81F) ||   // À©Õ¹D
-		(CodePoint >= 0x2B820 && CodePoint <= 0x2CEAF) ||   // À©Õ¹E
-		(CodePoint >= 0x2CEB0 && CodePoint <= 0x2EBEF) ||   // À©Õ¹F
-		(CodePoint >= 0x30000 && CodePoint <= 0x3134F);     // À©Õ¹G
+	// å¸¸ç”¨æ±‰å­—èŒƒå›´
+	return (CodePoint >= 0x4E00 && CodePoint <= 0x9FFF) ||     // åŸºæœ¬æ±‰å­—
+		(CodePoint >= 0x3400 && CodePoint <= 0x4DBF) ||     // æ‰©å±•A
+		(CodePoint >= 0x20000 && CodePoint <= 0x2A6DF) ||   // æ‰©å±•B
+		(CodePoint >= 0x2A700 && CodePoint <= 0x2B73F) ||   // æ‰©å±•C
+		(CodePoint >= 0x2B740 && CodePoint <= 0x2B81F) ||   // æ‰©å±•D
+		(CodePoint >= 0x2B820 && CodePoint <= 0x2CEAF) ||   // æ‰©å±•E
+		(CodePoint >= 0x2CEB0 && CodePoint <= 0x2EBEF) ||   // æ‰©å±•F
+		(CodePoint >= 0x30000 && CodePoint <= 0x3134F);     // æ‰©å±•G
 }
 
 bool UHUD_Dialog::IsGoodBreakChar(TCHAR Char) const
 {
-	// ¿Õ¸ñ¡¢±êµã·ûºÅµÈ
-	return Char == TCHAR(' ') ||
-		Char == TCHAR(',') ||
-		Char == TCHAR('.') ||
-		Char == TCHAR('!') ||
-		Char == TCHAR('?') ||
-		Char == TCHAR('£¬') ||
-		Char == TCHAR('¡£') ||
-		Char == TCHAR('£¡') ||
-		Char == TCHAR('£¿') ||
-		Char == TCHAR('¡¢') ||
-		Char == TCHAR('£»') ||
-		Char == TCHAR('£º');
+	// ç©ºæ ¼ã€æ ‡ç‚¹ç¬¦å·ç­‰
+	return Char == TEXT(' ') ||
+		Char == TEXT(',') ||
+		Char == TEXT('.') ||
+		Char == TEXT('!') ||
+		Char == TEXT('?') ||
+		Char == TEXT('ï¼Œ') ||
+		Char == TEXT('ã€‚') ||
+		Char == TEXT('ï¼') ||
+		Char == TEXT('ï¼Ÿ') ||
+		Char == TEXT('ã€') ||
+		Char == TEXT('ï¼›') ||
+		Char == TEXT('ï¼š');
 }
 
 float UHUD_Dialog::GetCharWidth(TCHAR Char, const FSlateFontInfo& FontInfo) const
 {
-	// Ê¹ÓÃ»º´æÌá¸ßĞÔÄÜ
+	// ä½¿ç”¨ç¼“å­˜æé«˜æ€§èƒ½
 	float* CachedWidth = m_characterWidthCache.Find(Char);
 	if (CachedWidth)
 	{
@@ -151,7 +165,7 @@ float UHUD_Dialog::GetCharWidth(TCHAR Char, const FSlateFontInfo& FontInfo) cons
 	FString SingleChar(1, &Char);
 	float Width = FontMeasure->Measure(SingleChar, FontInfo).X;
 
-	// »º´æ½á¹û
+	// ç¼“å­˜ç»“æœ
 	m_characterWidthCache.Add(Char, Width);
 
 	return Width;
@@ -179,16 +193,16 @@ int32 UHUD_Dialog::EstimateLinesForText(const FString& Text) const
 		}
 		else if (Char == TCHAR('\t'))
 		{
-			// TabËã×÷4¸öÓ¢ÎÄ×Ö·û
+			// Tabç®—ä½œ4ä¸ªè‹±æ–‡å­—ç¬¦
 			EnglishCount += 4;
 		}
 	}
 
-	// ¹ÀËã£ºÃ¿ĞĞ´óÔ¼20¸öÖĞÎÄ×Ö·û»ò40¸öÓ¢ÎÄ×Ö·û
-	// ÕâÊÇÒ»¸ö´ÖÂÔ¹ÀËã£¬Êµ¼ÊĞèÒª¸ù¾İ×ÖÌå´óĞ¡µ÷Õû
+	// ä¼°ç®—ï¼šæ¯è¡Œå¤§çº¦20ä¸ªä¸­æ–‡å­—ç¬¦æˆ–40ä¸ªè‹±æ–‡å­—ç¬¦
+	// è¿™æ˜¯ä¸€ä¸ªç²—ç•¥ä¼°ç®—ï¼Œå®é™…éœ€è¦æ ¹æ®å­—ä½“å¤§å°è°ƒæ•´
 	float EstimatedLines = (ChineseCount / 20.0f) + (EnglishCount / 40.0f);
 
-	// ÖÁÉÙÎª1ĞĞ
+	// è‡³å°‘ä¸º1è¡Œ
 	return FMath::Max(1, FMath::CeilToInt(EstimatedLines));
 }
 
@@ -196,19 +210,19 @@ void UHUD_Dialog::OnClickButtonClicked()
 {
 	if (!m_bIsMultiPage)
 	{
-		// µ¥Ò³Ö±½Ó¹Ø±Õ
+		// å•é¡µç›´æ¥å…³é—­
 		CloseDialog();
 		return;
 	}
 
-	// ¼ì²éÊÇ·ñÎª×îºóÒ»Ò³
+	// æ£€æŸ¥æ˜¯å¦ä¸ºæœ€åä¸€é¡µ
 	if (m_currentPageIndex >= m_arrDialogSplit.Num() - 1)
 	{
 		CloseDialog();
 	}
 	else
 	{
-		// ÏÔÊ¾ÏÂÒ»Ò³
+		// æ˜¾ç¤ºä¸‹ä¸€é¡µ
 		ShowPage(m_currentPageIndex + 1);
 	}
 }
@@ -236,7 +250,7 @@ void UHUD_Dialog::SmartSplitTextByWidth()
 		{
 			TCHAR CurrentChar = m_dialogContent[i];
 
-			// ¼ì²é»»ĞĞ·û
+			// æ£€æŸ¥æ¢è¡Œç¬¦
 			if (CurrentChar == TCHAR('\n'))
 			{
 				CurrentPage = m_dialogContent.Mid(CurrentIndex, i - CurrentIndex);
@@ -248,38 +262,38 @@ void UHUD_Dialog::SmartSplitTextByWidth()
 			FString SingleChar = FString(1, &CurrentChar);
 			float CharWidth = GetCharWidth(CurrentChar, FontInfo);
 
-			// ¼ì²éÊÇ·ñ³¬¹ı¿í¶ÈÏŞÖÆ
+			// æ£€æŸ¥æ˜¯å¦è¶…è¿‡å®½åº¦é™åˆ¶
 			if (CurrentWidth + CharWidth > m_maxPageWidth)
 			{
-				// ÕÒµ½ºÏÊÊµÄ¶Ïµã
+				// æ‰¾åˆ°åˆé€‚çš„æ–­ç‚¹
 				if (LastSpaceIndex != -1 && LastSpaceIndex > CurrentIndex)
 				{
-					// ÔÚ¿Õ¸ñ´¦¶Ï¿ª
+					// åœ¨ç©ºæ ¼å¤„æ–­å¼€
 					CurrentPage = m_dialogContent.Mid(CurrentIndex, LastSpaceIndex - CurrentIndex);
 					CurrentIndex = LastSpaceIndex + 1;
 				}
 				else if (LastGoodBreak > CurrentIndex)
 				{
-					// ÔÚÉÏÒ»¸öºÏÊÊµÄ×Ö·û´¦¶Ï¿ª
+					// åœ¨ä¸Šä¸€ä¸ªåˆé€‚çš„å­—ç¬¦å¤„æ–­å¼€
 					CurrentPage = m_dialogContent.Mid(CurrentIndex, LastGoodBreak - CurrentIndex);
 					CurrentIndex = LastGoodBreak;
 				}
 				else
 				{
-					// Ç¿ÖÆÔÚµ±Ç°×Ö·ûÇ°¶Ï¿ª
+					// å¼ºåˆ¶åœ¨å½“å‰å­—ç¬¦å‰æ–­å¼€
 					CurrentPage = m_dialogContent.Mid(CurrentIndex, i - CurrentIndex);
 					CurrentIndex = i;
 				}
 				break;
 			}
 
-			// ¼ÇÂ¼¿ÉÄÜµÄ¶ÏµãÎ»ÖÃ
+			// è®°å½•å¯èƒ½çš„æ–­ç‚¹ä½ç½®
 			if (IsGoodBreakChar(CurrentChar))
 			{
 				LastSpaceIndex = i;
 			}
 
-			// ¼ÇÂ¼ÖĞÎÄ×Ö·û±ß½ç
+			// è®°å½•ä¸­æ–‡å­—ç¬¦è¾¹ç•Œ
 			if (IsChineseChar(CurrentChar))
 			{
 				LastGoodBreak = i + 1;
@@ -287,7 +301,7 @@ void UHUD_Dialog::SmartSplitTextByWidth()
 
 			CurrentWidth += CharWidth;
 
-			// ´¦Àí×îºóÒ»¸ö×Ö·û
+			// å¤„ç†æœ€åä¸€ä¸ªå­—ç¬¦
 			if (i == TextLength - 1)
 			{
 				CurrentPage = m_dialogContent.Mid(CurrentIndex, TextLength - CurrentIndex);
@@ -296,7 +310,7 @@ void UHUD_Dialog::SmartSplitTextByWidth()
 			}
 		}
 
-		// ´¦Àí»»ĞĞ·ûµÄÇé¿ö
+		// å¤„ç†æ¢è¡Œç¬¦çš„æƒ…å†µ
 		if (bLineBreakFound)
 		{
 			if (!CurrentPage.IsEmpty())
@@ -306,17 +320,17 @@ void UHUD_Dialog::SmartSplitTextByWidth()
 			continue;
 		}
 
-		// ÒÆ³ı¿ªÍ·µÄ¿Õ¸ñ
+		// ç§»é™¤å¼€å¤´çš„ç©ºæ ¼
 		CurrentPage.TrimStartInline();
 
-		// Ìí¼Óµ½½á¹û
+		// æ·»åŠ åˆ°ç»“æœ
 		if (!CurrentPage.IsEmpty())
 		{
 			m_arrDialogSplit.Add(CurrentPage);
 		}
 	}
 
-	// Èç¹ûÃ»ÓĞ·ÖÒ³£¬Ìí¼ÓÍêÕûÎÄ±¾
+	// å¦‚æœæ²¡æœ‰åˆ†é¡µï¼Œæ·»åŠ å®Œæ•´æ–‡æœ¬
 	if (m_arrDialogSplit.Num() == 0)
 	{
 		m_arrDialogSplit.Add(m_dialogContent);
@@ -337,14 +351,14 @@ void UHUD_Dialog::SplitTextByEstimatedLines()
 
 		if (CurrentLineCount + EstimatedLines > m_maxLinesPerPage && !CurrentPage.IsEmpty())
 		{
-			// ¿ªÊ¼ĞÂµÄÒ»Ò³
+			// å¼€å§‹æ–°çš„ä¸€é¡µ
 			m_arrDialogSplit.Add(CurrentPage);
 			CurrentPage = Line;
 			CurrentLineCount = EstimatedLines;
 		}
 		else
 		{
-			// Ìí¼Óµ½µ±Ç°Ò³
+			// æ·»åŠ åˆ°å½“å‰é¡µ
 			if (!CurrentPage.IsEmpty())
 			{
 				CurrentPage += TEXT("\n");
@@ -354,13 +368,13 @@ void UHUD_Dialog::SplitTextByEstimatedLines()
 		}
 	}
 
-	// Ìí¼Ó×îºóÒ»Ò³
+	// æ·»åŠ æœ€åä¸€é¡µ
 	if (!CurrentPage.IsEmpty())
 	{
 		m_arrDialogSplit.Add(CurrentPage);
 	}
 
-	// Èç¹ûÃ»ÓĞ·ÖÒ³£¬Ìí¼ÓÍêÕûÎÄ±¾
+	// å¦‚æœæ²¡æœ‰åˆ†é¡µï¼Œæ·»åŠ å®Œæ•´æ–‡æœ¬
 	if (m_arrDialogSplit.Num() == 0)
 	{
 		m_arrDialogSplit.Add(m_dialogContent);

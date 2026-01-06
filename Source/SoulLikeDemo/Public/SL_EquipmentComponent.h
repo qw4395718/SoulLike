@@ -26,31 +26,31 @@ public:
 
 public:
 	/************************************************************************/
-	/*                                ½Ó¿ÚÊµÏÖ                                      */
+	/*                                æ¥å£å®ç°                                      */
 	/************************************************************************/
-	// ¹¥»÷ĞĞÎªÏìÓ¦
+	// æ”»å‡»è¡Œä¸ºå“åº”
 	UFUNCTION()
 		void AttackBehaviorResponse(AActor* OwnerActor) override;
 
-	// ·ÀÓùĞĞÎªÏìÓ¦
+	// é˜²å¾¡è¡Œä¸ºå“åº”
 	UFUNCTION()
 		void DefenceBehaviorResponse(AActor* OwnerActor) override;
 
-	// ¼¼ÄÜĞĞÎªÏìÓ¦
+	// æŠ€èƒ½è¡Œä¸ºå“åº”
 	UFUNCTION()
 		void ComboSkillBehaviorResponse(AActor* OwnerActor) override;
 
-	// ´¦¾öĞĞÎªÏìÓ¦
+	// å¤„å†³è¡Œä¸ºå“åº”
 	UFUNCTION()
 		void ExecuteBehaviorResponse(AActor* OwnerActor) override;
 
-	// ±³´ÌĞĞÎªÏìÓ¦
+	// èƒŒåˆºè¡Œä¸ºå“åº”
 	UFUNCTION()
 		void BackStabBehaviorResponse(AActor* OwnerActor) override;
 
 public:
 	/************************************************************************/
-	/*                                 Íâ²¿µ÷ÓÃ                                     */
+	/*                                 å¤–éƒ¨è°ƒç”¨                                     */
 	/************************************************************************/
 	UFUNCTION()
 		void InitEquipmentComponent(const TArray<FWeaponData> WeaponList,const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex ,AActor* OwnerActor);
@@ -81,51 +81,51 @@ public:
 
 protected:
 	/************************************************************************/
-	/*                                  ÄÚ²¿µ÷ÓÃ                                    */
+	/*                                  å†…éƒ¨è°ƒç”¨                                    */
 	/************************************************************************/
 
 
 protected:
 	/************************************************************************/
-	/*                                  ±äÁ¿                                    */
+	/*                                  å˜é‡                                    */
 	/************************************************************************/
-	// µ±Ç°ËÄ¸ö×°±¸²ÛµÄµ±Ç°Index
+	// å½“å‰å››ä¸ªè£…å¤‡æ§½çš„å½“å‰Index
 	UPROPERTY()
 		TMap<EArrowKeyType,int> CurrentEquipmentIndex;
 
-	// ×óÊÖ×°±¸ĞÅÏ¢Êı×é
+	// å·¦æ‰‹è£…å¤‡ä¿¡æ¯æ•°ç»„
 	UPROPERTY()
 		ASL_WeaponBase* LeftHandEquipmentInfoList[EQUIPMENT_SLOT_NUM];
 
-	// µ±Ç°×óÊÖÎäÆ÷
+	// å½“å‰å·¦æ‰‹æ­¦å™¨
 	UPROPERTY()
 		ASL_WeaponBase* CurrentLeftHandWeapon;
 
-	// ÓÒÊÖ×°±¸ĞÅÏ¢Êı×é
+	// å³æ‰‹è£…å¤‡ä¿¡æ¯æ•°ç»„
 	UPROPERTY()
 		ASL_WeaponBase* RightHandEquipmentInfoList[EQUIPMENT_SLOT_NUM];
 
-	// µ±Ç°×óÊÖÎäÆ÷
+	// å½“å‰å·¦æ‰‹æ­¦å™¨
 	UPROPERTY()
 		ASL_WeaponBase* CurrentRightHandWeapon;
 
-	// ÉÏ·½×°±¸µÀ¾ßĞÅÏ¢
+	// ä¸Šæ–¹è£…å¤‡é“å…·ä¿¡æ¯
 	UPROPERTY()
 		int UpItemList[EQUIPMENT_SLOT_NUM];
 
-	// µ±Ç°ÉÏ·½×°±¸µÀ¾ß
+	// å½“å‰ä¸Šæ–¹è£…å¤‡é“å…·
 	UPROPERTY()
 		int CurrentUpSlotItemID;
 
-	// ÏÂ·½×°±¸µÀ¾ßĞÅÏ¢
+	// ä¸‹æ–¹è£…å¤‡é“å…·ä¿¡æ¯
 	UPROPERTY()
 		int DownItemList[EQUIPMENT_SLOT_NUM];
 	
-	// µ±Ç°ÏÂ·½×°±¸µÀ¾ß
+	// å½“å‰ä¸‹æ–¹è£…å¤‡é“å…·
 	UPROPERTY()
 		int CurrentDownSlotItemID;
 
-	//// ³ÖÓĞÕßĞÅÏ¢
+	//// æŒæœ‰è€…ä¿¡æ¯
 	//UPROPERTY()
 	//	AActor* Owning;
 };

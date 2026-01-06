@@ -20,7 +20,7 @@ class SOULLIKEDEMO_API UHUD_PlayerStatusBar : public UUserWidget
 public:
 	UHUD_PlayerStatusBar(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
-	/* 外部调用                                                                     */
+	/* 澶栭儴璋冪敤                                                                     */
 	/************************************************************************/
 
 	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
@@ -40,14 +40,14 @@ public:
 
 protected:
 	/************************************************************************/
-	/* 内部调用                                                                     */
+	/* 鍐呴儴璋冪敤                                                                     */
 	/************************************************************************/
 
 protected:
 	/************************************************************************/
-	/* 内部变量                                                                     */
+	/* 鍐呴儴鍙橀噺                                                                     */
 	/************************************************************************/
-	// 控件引用
+	// 鎺т欢寮曠敤
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UHUD_ProgressBar* m_healthProgressBar;
 

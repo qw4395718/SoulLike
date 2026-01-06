@@ -18,34 +18,34 @@ class SOULLIKEDEMO_API UHUD_ProgressBar : public UUserWidget
 public:
 	UHUD_ProgressBar(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
-	/* Íâ²¿µ÷ÓÃ                                                                     */
+	/* å¤–éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
 	UFUNCTION()
 		void UpdateProgressBar(float min, float max, float current);
 
 protected:
 	/************************************************************************/
-	/* ÄÚ²¿µ÷ÓÃ                                                                     */
+	/* å†…éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
 
 
 protected:
 	/************************************************************************/
-	/* ÄÚ²¿±äÁ¿                                                                     */
+	/* å†…éƒ¨å˜é‡                                                                     */
 	/************************************************************************/
-	// ¿Ø¼şÒıÓÃ
+	// æ§ä»¶å¼•ç”¨
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UProgressBar* m_progressBar;
 
-	// µ±Ç°½ø¶ÈÌõ°Ù·Ö±È(0~1)
+	// å½“å‰è¿›åº¦æ¡ç™¾åˆ†æ¯”(0~1)
 	UPROPERTY()
 		float m_currentProgressBarPercent;
 
-	// ÑªÁ¿½ø¶ÈÌõÉÏÏŞ,Ä¬ÈÏÊÇ1
+	// è¡€é‡è¿›åº¦æ¡ä¸Šé™,é»˜è®¤æ˜¯1
 	UPROPERTY()
 		float m_progressPercentMax;
 
-	// ÑªÁ¿½ø¶ÈÌõÏÂÏŞ,Ä¬ÈÏÊÇ0
+	// è¡€é‡è¿›åº¦æ¡ä¸‹é™,é»˜è®¤æ˜¯0
 	UPROPERTY()
 		float m_progressPercentMin;
 };

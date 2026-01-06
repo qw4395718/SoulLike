@@ -11,7 +11,7 @@
 UUI_InterActButton::UUI_InterActButton(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
-	// Ä¬ÈÏÑ¡ÖÐ×´Ì¬²»¿ÉÊÓ
+	// é»˜è®¤é€‰ä¸­çŠ¶æ€ä¸å¯è§†
 
 }
 
@@ -28,7 +28,7 @@ void UUI_InterActButton::UpdateInterActBtnInfo(int32 index, UTexture2D* showIcon
 
 void UUI_InterActButton::SetSelected(bool bIsSelected, bool bPlayAnimation /*= true*/)
 {
-	if (bIsSelected == bSelected) return; // ±ÜÃâÖØ¸´×´Ì¬
+	if (bIsSelected == bSelected) return; // é¿å…é‡å¤çŠ¶æ€
 
 	bSelected = bIsSelected;
 
@@ -39,7 +39,7 @@ void UUI_InterActButton::SetSelected(bool bIsSelected, bool bPlayAnimation /*= t
 		m_interActDesc->SetColorAndOpacity(NewColor);
 	}
 
-	// ²¥·Å¶¯»­
+	// æ’­æ”¾åŠ¨ç”»
 	if (bPlayAnimation)
 	{
 		PlaySelectionAnimation(bIsSelected);

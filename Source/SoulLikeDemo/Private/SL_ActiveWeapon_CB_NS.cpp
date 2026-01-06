@@ -10,7 +10,7 @@ void USL_ActiveWeapon_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnim
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{
-		// 假设角色持有武器，并通过接口控制碰撞
+		// 鍋囪瑙掕壊鎸佹湁姝﹀櫒锛屽苟閫氳繃鎺ュ彛鎺у埗纰版挒
 		ASoulLikeCharacter* Character = Cast<ASoulLikeCharacter>(MeshComp->GetOwner());
 		if (Character && Character->CombatComponent && Character->CombatComponent->LH_EquippedWeapon && bIsLHActive)
 		{
@@ -27,7 +27,7 @@ void USL_ActiveWeapon_CB_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSe
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{
-		// 假设角色持有武器，并通过接口控制碰撞
+		// 鍋囪瑙掕壊鎸佹湁姝﹀櫒锛屽苟閫氳繃鎺ュ彛鎺у埗纰版挒
 		ASoulLikeCharacter* Character = Cast<ASoulLikeCharacter>(MeshComp->GetOwner());
 		if (Character && Character->CombatComponent && Character->CombatComponent->LH_EquippedWeapon && bIsLHActive)
 		{

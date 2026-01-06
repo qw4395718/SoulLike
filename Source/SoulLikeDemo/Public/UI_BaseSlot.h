@@ -16,7 +16,7 @@ class SOULLIKEDEMO_API UUI_BaseSlot : public UUserWidget
 public:
 	UUI_BaseSlot(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
-	/* 外部调用                                                                     */
+	/* 澶栭儴璋冪敤                                                                     */
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable, Category = "Base Coin")
 		void SetImageBrush(UTexture2D* icon);
@@ -27,14 +27,14 @@ public:
 
 protected:
 	/************************************************************************/
-	/* 内部调用                                                                     */
+	/* 鍐呴儴璋冪敤                                                                     */
 	/************************************************************************/
 
 protected:
 	/************************************************************************/
-	/* 内部变量                                                                     */
+	/* 鍐呴儴鍙橀噺                                                                     */
 	/************************************************************************/
-	// Icon图片
+	// Icon鍥剧墖
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		class UImage* m_showImage;
 

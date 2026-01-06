@@ -8,7 +8,7 @@ USL_EquipmentComponent::USL_EquipmentComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// Ä¬ÈÏ³õÊ¼»¯
+	// é»˜è®¤åˆå§‹åŒ–
 	CurrentLeftHandWeapon = nullptr;
 	CurrentRightHandWeapon = nullptr;
 	CurrentUpSlotItemID = 0;
@@ -30,14 +30,14 @@ void USL_EquipmentComponent::AttackBehaviorResponse(AActor* OwnerActor)
 {
 	RETURN_IF_FALSE(OwnerActor);
 	RETURN_IF_FALSE(CurrentRightHandWeapon);
-	//¼ì²éÊÇ·ñÓĞÓÒÊÖÎäÆ÷
+	//æ£€æŸ¥æ˜¯å¦æœ‰å³æ‰‹æ­¦å™¨
 	CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_Attack, OwnerActor);
 	
 }
 
 void USL_EquipmentComponent::DefenceBehaviorResponse(AActor* OwnerActor)
 {
-	 //ÅĞ¶¨ÊÇ·ñÓĞ×óÊÖÎäÆ÷
+	 //åˆ¤å®šæ˜¯å¦æœ‰å·¦æ‰‹æ­¦å™¨
 	RETURN_IF_FALSE(OwnerActor);
 	RETURN_IF_FALSE(CurrentLeftHandWeapon);
 	CurrentLeftHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_Defence,OwnerActor);
@@ -64,7 +64,7 @@ void USL_EquipmentComponent::ExecuteBehaviorResponse(AActor* OwnerActor)
 {
 	RETURN_IF_FALSE(OwnerActor);
 	RETURN_IF_FALSE(CurrentRightHandWeapon);
-	// ¼ì²éÊÇ·ñÓĞÓÒÊÖÎäÆ÷
+	// æ£€æŸ¥æ˜¯å¦æœ‰å³æ‰‹æ­¦å™¨
 	if (CurrentRightHandWeapon->IsLoadExecuteMod())
 	{
 		CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_Execute,OwnerActor);
@@ -79,7 +79,7 @@ void USL_EquipmentComponent::BackStabBehaviorResponse(AActor* OwnerActor)
 {
 	RETURN_IF_FALSE(OwnerActor);
 	RETURN_IF_FALSE(CurrentRightHandWeapon);
-	// ¼ì²éÊÇ·ñÓĞÓÒÊÖÎäÆ÷
+	// æ£€æŸ¥æ˜¯å¦æœ‰å³æ‰‹æ­¦å™¨
 	if(CurrentRightHandWeapon->IsLoadBackStabMod())
 	{
 		CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_BackStab,OwnerActor);
@@ -93,11 +93,11 @@ void USL_EquipmentComponent::BackStabBehaviorResponse(AActor* OwnerActor)
 
 void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData> WeaponList, const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex,AActor* OwnerActor)
 {
-	// ¼ì²âÎäÆ÷Êı×éÓëItemÊı×éÊÇ·ñ·ûºÏÒªÇó
+	// æ£€æµ‹æ­¦å™¨æ•°ç»„ä¸Itemæ•°ç»„æ˜¯å¦ç¬¦åˆè¦æ±‚
 	check(WeaponList.Num() == EQUIPMENT_SLOT_NUM*2 && ItemList.Num() == EQUIPMENT_SLOT_NUM*2 && OwnerActor != nullptr)
-	// ³ÖÓĞÕßĞÅÏ¢³õÊ¼»¯
+	// æŒæœ‰è€…ä¿¡æ¯åˆå§‹åŒ–
 	/*Owning = OwnerActor;*/
-	// Ö´ĞĞÎäÆ÷Êı×é³õÊ¼»¯
+	// æ‰§è¡Œæ­¦å™¨æ•°ç»„åˆå§‹åŒ–
 	for (int i = 0; i < EQUIPMENT_SLOT_NUM*2; i++)
 	{
 		ASL_WeaponBase* NewWeapon = GetWorld()->SpawnActor<ASL_WeaponBase>(ASL_WeaponBase::StaticClass(),FTransform());
@@ -113,7 +113,7 @@ void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData> We
 		}
 		
 	}
-	// Ö´ĞĞµÀ¾ßÊı×é³õÊ¼»¯
+	// æ‰§è¡Œé“å…·æ•°ç»„åˆå§‹åŒ–
 	for (int i = 0; i < EQUIPMENT_SLOT_NUM *2; i++)
 	{
 		if (i < EQUIPMENT_SLOT_NUM)
@@ -125,9 +125,9 @@ void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData> We
 			DownItemList[i] = ItemList[i];
 		}
 	}
-	// ¼ÇÂ¼µ±Ç°¼¤»î²ÛÎ»Ë÷Òı(Éî¿½±´)
+	// è®°å½•å½“å‰æ¿€æ´»æ§½ä½ç´¢å¼•(æ·±æ‹·è´)
 	CurrentEquipmentIndex = ActiveSlotIndex;
-	// ¸ù¾İ¼ÇÂ¼ËùÓÃ¼¤»îÎäÆ÷
+	// æ ¹æ®è®°å½•æ‰€ç”¨æ¿€æ´»æ­¦å™¨
 	if (int* LeftHandIndex = CurrentEquipmentIndex.Find(EArrowKeyType::ARROWKEY_Left))
 	{
 		if (*LeftHandIndex >= 0 && *LeftHandIndex < EQUIPMENT_SLOT_NUM)
@@ -148,12 +148,12 @@ void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData> We
 
 void USL_EquipmentComponent::UseUpSlotItemEvent()
 {
-	// ºóĞøÌí¼ÓµÀ¾ßÊ¹ÓÃµÄ½Ó¿Ú£¬°ÑËùÊô²ÛÎ»ºÍË÷Òı·¢Éä³öÈ¥
+	// åç»­æ·»åŠ é“å…·ä½¿ç”¨çš„æ¥å£ï¼ŒæŠŠæ‰€å±æ§½ä½å’Œç´¢å¼•å‘å°„å‡ºå»
 }
 
 void USL_EquipmentComponent::UseDownSlotItemEvent()
 {
-	// ºóĞøÌí¼ÓµÀ¾ßÊ¹ÓÃµÄ½Ó¿Ú£¬°ÑËùÊô²ÛÎ»ºÍË÷Òı·¢Éä³öÈ¥
+	// åç»­æ·»åŠ é“å…·ä½¿ç”¨çš„æ¥å£ï¼ŒæŠŠæ‰€å±æ§½ä½å’Œç´¢å¼•å‘å°„å‡ºå»
 }
 
 void USL_EquipmentComponent::SwitchEquipmentEvent(EArrowKeyType ArrowType)
@@ -178,7 +178,7 @@ void USL_EquipmentComponent::SwitchEquipmentEvent(EArrowKeyType ArrowType)
 	break;
 	case EArrowKeyType::ARROWKEY_Left:
 	{
-		// ÉèÖÃµ±Ç°×óÊÖÎäÆ÷¾²Ä¬×´Ì¬
+		// è®¾ç½®å½“å‰å·¦æ‰‹æ­¦å™¨é™é»˜çŠ¶æ€
 		CurrentLeftHandWeapon->InActiveWeapon();
 		CurrentLeftHandWeapon = LeftHandEquipmentInfoList[*CurrentEquipmentIndex.Find(ArrowType)];
 		CurrentLeftHandWeapon->ActiveWeapon();
@@ -187,7 +187,7 @@ void USL_EquipmentComponent::SwitchEquipmentEvent(EArrowKeyType ArrowType)
 	break;
 	case EArrowKeyType::ARROWKEY_Right:
 	{
-		// ÉèÖÃµ±Ç°×óÊÖÎäÆ÷¾²Ä¬×´Ì¬
+		// è®¾ç½®å½“å‰å·¦æ‰‹æ­¦å™¨é™é»˜çŠ¶æ€
 		CurrentRightHandWeapon->InActiveWeapon();
 		CurrentRightHandWeapon = RightHandEquipmentInfoList[*CurrentEquipmentIndex.Find(ArrowType)];
 		CurrentRightHandWeapon->ActiveWeapon();
@@ -201,7 +201,7 @@ void USL_EquipmentComponent::SwitchEquipmentEvent(EArrowKeyType ArrowType)
 void USL_EquipmentComponent::SetEquipemntInfo(EArrowKeyType ArrowType, int SlotIndex, FWeaponData& WeaponInfo)
 {
 	if(SlotIndex < 0 || SlotIndex >= EQUIPMENT_SLOT_NUM){return;}
-	// ¸ù¾İEArrowKeyTypeÇø±ğÉÏÏÂ×°±¸²Û
+	// æ ¹æ®EArrowKeyTypeåŒºåˆ«ä¸Šä¸‹è£…å¤‡æ§½
 	ASL_WeaponBase* NewWeapon = NewObject<ASL_WeaponBase>(this);
 	NewWeapon->InitWeaponInfo(WeaponInfo,GetOwner());
 	if (ArrowType == EArrowKeyType::ARROWKEY_Left)
@@ -214,14 +214,14 @@ void USL_EquipmentComponent::SetEquipemntInfo(EArrowKeyType ArrowType, int SlotI
 	}
 	else
 	{
-		// ²»ÕıÈ·µÄµ÷ÓÃ
+		// ä¸æ­£ç¡®çš„è°ƒç”¨
 	}
 }
 
 void USL_EquipmentComponent::SetCostItemInfo(EArrowKeyType ArrowType, int SlotIndex, int ItemID)
 {
 	if (SlotIndex < 0 || SlotIndex >= EQUIPMENT_SLOT_NUM) { return; }
-	// ¸ù¾İEArrowKeyTypeÇø±ğÉÏÏÂ×°±¸²Û
+	// æ ¹æ®EArrowKeyTypeåŒºåˆ«ä¸Šä¸‹è£…å¤‡æ§½
 	if (ArrowType == EArrowKeyType::ARROWKEY_Up)
 	{
 		UpItemList[SlotIndex] = ItemID;
@@ -232,14 +232,14 @@ void USL_EquipmentComponent::SetCostItemInfo(EArrowKeyType ArrowType, int SlotIn
 	}
 	else
 	{
-		// ²»ÕıÈ·µÄµ÷ÓÃ
+		// ä¸æ­£ç¡®çš„è°ƒç”¨
 	}
 }
 
 void USL_EquipmentComponent::CleanCostItemInfo(EArrowKeyType ArrowType, int SlotIndex)
 {
 	if (SlotIndex < 0 || SlotIndex >= EQUIPMENT_SLOT_NUM) { return; }
-	// ¸ù¾İEArrowKeyTypeÇø±ğÉÏÏÂ×°±¸²Û
+	// æ ¹æ®EArrowKeyTypeåŒºåˆ«ä¸Šä¸‹è£…å¤‡æ§½
 	if (ArrowType == EArrowKeyType::ARROWKEY_Up)
 	{
 		UpItemList[SlotIndex] = 0;
@@ -250,7 +250,7 @@ void USL_EquipmentComponent::CleanCostItemInfo(EArrowKeyType ArrowType, int Slot
 	}
 	else
 	{
-		// ²»ÕıÈ·µÄµ÷ÓÃ
+		// ä¸æ­£ç¡®çš„è°ƒç”¨
 	}
 }
 

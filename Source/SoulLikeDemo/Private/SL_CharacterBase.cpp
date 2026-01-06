@@ -77,7 +77,7 @@ UActorComponent* ASL_CharacterBase::GetStateComponent()
 
 void ASL_CharacterBase::AnimNotifyResponse(int NotifyType)
 {
-	// ²ÎÊı¼ì²é
+	// å‚æ•°æ£€æŸ¥
 	RETURN_IF_TRUE(NotifyType <= int(EAnimNotifyType::EAnimNotify_Min) || NotifyType >= int(EAnimNotifyType::EAnimNotify_Max));
 	WeaponAnimProcess(CheckAnimNotifyToHand(EAnimNotifyType(NotifyType)), TranslteAnimNotifyToWeapon(EAnimNotifyType(NotifyType)));
 }
@@ -133,7 +133,7 @@ void ASL_CharacterBase::PerformSwitchEquipmentRight()
 
 EWeaponAnimNotifyType ASL_CharacterBase::TranslteAnimNotifyToWeapon(EAnimNotifyType NotifyType)
 {
-	// ²ÎÊı¼ì²é
+	// å‚æ•°æ£€æŸ¥
 	RETURN_VALUE_IF_FALSE(NotifyType <= EAnimNotifyType::EAnimNotify_Min || NotifyType <= EAnimNotifyType::EAnimNotify_Max, EWeaponAnimNotifyType::EWeaponAnimNotify_Min);
 	
 	EWeaponAnimNotifyType WeaponAnimType = EWeaponAnimNotifyType::EWeaponAnimNotify_Min;
@@ -207,7 +207,7 @@ EWeaponAnimNotifyType ASL_CharacterBase::TranslteAnimNotifyToWeapon(EAnimNotifyT
 
 int ASL_CharacterBase::CheckAnimNotifyToHand(EAnimNotifyType NotifyType)
 {
-	// ²ÎÊı¼ì²é
+	// å‚æ•°æ£€æŸ¥
 	RETURN_VALUE_IF_FALSE(NotifyType <= EAnimNotifyType::EAnimNotify_Min || NotifyType <= EAnimNotifyType::EAnimNotify_Max, int(EWeaponAnimNotifyType::EWeaponAnimNotify_Min));
 
 	int HandType = -1;
@@ -245,7 +245,7 @@ int ASL_CharacterBase::CheckAnimNotifyToHand(EAnimNotifyType NotifyType)
 
 void ASL_CharacterBase::WeaponAnimProcess(int HandType, EWeaponAnimNotifyType WeaponAnimType)
 {
-	// ¼ì²é×é¼şÊÇ·ñÓĞĞ§
+	// æ£€æŸ¥ç»„ä»¶æ˜¯å¦æœ‰æ•ˆ
 	RETURN_IF_TRUE(EquipmentCmp == nullptr);
 	RETURN_IF_TRUE(HandType != 0 && HandType != 1);
 
@@ -274,7 +274,7 @@ void ASL_CharacterBase::WeaponAnimProcess(int HandType, EWeaponAnimNotifyType We
 
 void ASL_CharacterBase::InitializeCharacter()
 {
-	//ÄâÔìÊı¾İ,³õÊ¼»¯×é¼ş
+	//æ‹Ÿé€ æ•°æ®,åˆå§‹åŒ–ç»„ä»¶
 	InitPartmentComponent();
 }
 
@@ -289,7 +289,7 @@ void ASL_CharacterBase::InitPartmentComponent()
 	if (EquipmentCmp == nullptr && true)
 	{
 		EquipmentCmp = NewObject<USL_EquipmentComponent>(this);
-		// ×°±¸×é¼şµÄĞÅÏ¢³õÊ¼»¯·ÅÔÚ±³°ü×é¼şÖĞ
+		// è£…å¤‡ç»„ä»¶çš„ä¿¡æ¯åˆå§‹åŒ–æ”¾åœ¨èƒŒåŒ…ç»„ä»¶ä¸­
 	}
 
 	if (HealthCmp == nullptr && true)

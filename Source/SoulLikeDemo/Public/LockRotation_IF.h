@@ -23,11 +23,11 @@ class SOULLIKEDEMO_API ILockRotation_IF
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	
-	// ÊÇ·ñ¿ÉÒÔ±»ËøÊÓ½Ç
+	// æ˜¯å¦å¯ä»¥è¢«é”è§†è§’
 	UFUNCTION()
 		virtual bool IsCanLockRotation() = 0;
 
-	// Ìá¹©ÓÃÓÚËø¶¨µÄÄ¿±êµãÎ»ÖÃºÍĞı×ª
+	// æä¾›ç”¨äºé”å®šçš„ç›®æ ‡ç‚¹ä½ç½®å’Œæ—‹è½¬
 	UFUNCTION()
 		virtual void GetLockRotationLocation(FVector& vLocationInWorld) = 0;
 };

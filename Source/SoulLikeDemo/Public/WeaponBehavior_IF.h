@@ -24,23 +24,23 @@ class SOULLIKEDEMO_API IWeaponBehavior_IF
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	// ¹¥»÷ĞĞÎªÏìÓ¦
+	// æ”»å‡»è¡Œä¸ºå“åº”
 	UFUNCTION()
 		virtual void AttackBehaviorResponse(AActor* OwnerActor) = 0;
 
-	// ·ÀÓùĞĞÎªÏìÓ¦
+	// é˜²å¾¡è¡Œä¸ºå“åº”
 	UFUNCTION()
 		virtual void DefenceBehaviorResponse(AActor* OwnerActor) = 0;
 
-	// ¼¼ÄÜĞĞÎªÏìÓ¦
+	// æŠ€èƒ½è¡Œä¸ºå“åº”
 	UFUNCTION()
 		virtual void ComboSkillBehaviorResponse(AActor* OwnerActor) = 0;
 
-	// ´¦¾öĞĞÎªÏìÓ¦
+	// å¤„å†³è¡Œä¸ºå“åº”
 	UFUNCTION()
 		virtual void ExecuteBehaviorResponse(AActor* OwnerActor) = 0;
 
-	// ±³´ÌĞĞÎªÏìÓ¦
+	// èƒŒåˆºè¡Œä¸ºå“åº”
 	UFUNCTION()
 		virtual void BackStabBehaviorResponse(AActor* OwnerActor) = 0;
 

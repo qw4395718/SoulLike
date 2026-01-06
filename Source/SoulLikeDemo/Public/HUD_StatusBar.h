@@ -20,7 +20,7 @@ class SOULLIKEDEMO_API UHUD_StatusBar : public UUserWidget
 public:
 	UHUD_StatusBar(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
-	/* Íâ²¿µ÷ÓÃ                                                                     */
+	/* å¤–éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable, Category = "Status Bar")
 		void AddStatus(FStatusEffectInfo statusInfo);
@@ -31,7 +31,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Status Bar")
 		void UpdateStatus(FStatusEffectInfo statusInfo);
 
-	// ÎªÀ¶Í¼±©Â¶µÄ¶¯»­ÊÂ¼ş
+	// ä¸ºè“å›¾æš´éœ²çš„åŠ¨ç”»äº‹ä»¶
 	UFUNCTION(BlueprintImplementableEvent, Category = "Status Bar")
 		void OnStatusIconAdded(UUserWidget* statusIconWidget);
 
@@ -43,7 +43,7 @@ public:
 
 protected:
 	/************************************************************************/
-	/* ÄÚ²¿µ÷ÓÃ                                                                     */
+	/* å†…éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
 
 	UFUNCTION()
@@ -51,16 +51,16 @@ protected:
 
 protected:
 	/************************************************************************/
-	/* ÄÚ²¿±äÁ¿                                                                     */
+	/* å†…éƒ¨å˜é‡                                                                     */
 	/************************************************************************/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatusBar")
 		TSubclassOf<UUI_IconSlot> m_statusIconWidgetClass;
 
-	// ¿Ø¼şÒıÓÃ
+	// æ§ä»¶å¼•ç”¨
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		class UHorizontalBox* m_statusIconsContainer;
 
-	// Í¼±ê¹ÜÀíÆ÷
+	// å›¾æ ‡ç®¡ç†å™¨
 	UPROPERTY()
 		TMap<int, UUserWidget*> m_activeStatusIcons;
 

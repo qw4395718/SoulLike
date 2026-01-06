@@ -16,7 +16,7 @@
 #include "AnimNotify_IF.h"
 #include "SL_CharacterBase.generated.h"
 
-// ÉùÃ÷Ò»¸ö×Ô¶¨ÒåÈÕÖ¾Àà±ğ
+// å£°æ˜ä¸€ä¸ªè‡ªå®šä¹‰æ—¥å¿—ç±»åˆ«
 DECLARE_LOG_CATEGORY_EXTERN(SL_CharacterBase, Log, All);
 
 UCLASS()
@@ -32,7 +32,7 @@ public:
 
 protected:
 	/************************************************************************/
-	/*                               ¼Ì³ĞÊµÏÖ                                       */
+	/*                               ç»§æ‰¿å®ç°                                       */
 	/************************************************************************/
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,7 +45,7 @@ protected:
 
 public:
 	/************************************************************************/
-	/*                               ½Ó¿ÚÊµÏÖ(ICharacterComponent_IF)                                       */
+	/*                               æ¥å£å®ç°(ICharacterComponent_IF)                                       */
 	/************************************************************************/
 
 	UFUNCTION()
@@ -70,67 +70,67 @@ public:
 		UActorComponent* GetStateComponent() override;
 
 	/************************************************************************/
-	/*                               ½Ó¿ÚÊµÏÖ(IAnimNotify_IF)                                       */
+	/*                               æ¥å£å®ç°(IAnimNotify_IF)                                       */
 	/************************************************************************/
 
-	// ¶¯»­(×´Ì¬)Í¨ÖªÏìÓ¦
+	// åŠ¨ç”»(çŠ¶æ€)é€šçŸ¥å“åº”
 	UFUNCTION()
 		void AnimNotifyResponse(int NotifyType) override;
 
 protected:
 	/************************************************************************/
-	/*                                ÄÚ²¿µ÷ÓÃ                                      */
+	/*                                å†…éƒ¨è°ƒç”¨                                      */
 	/************************************************************************/
-	// ×ó¼üÏìÓ¦
+	// å·¦é”®å“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformAttack();
 
-	// ÓÒ¼üÏìÓ¦
+	// å³é”®å“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformDefence();
 
-	// ×óCtrlÏìÓ¦
+	// å·¦Ctrlå“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformComboSkill();
 
-	// Ëø¶¨ÏìÓ¦
+	// é”å®šå“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformLockRotation();
 
-	// ·­¹öÏìÓ¦
+	// ç¿»æ»šå“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformRoll();
 
-	// ÇĞ»»ÉÏ·½µÀ¾ßÀ¸ÏìÓ¦
+	// åˆ‡æ¢ä¸Šæ–¹é“å…·æ å“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformSwitchEquipmentUp();
 
-	// ÇĞ»»ÉÏ·½µÀ¾ßÀ¸ÏìÓ¦
+	// åˆ‡æ¢ä¸Šæ–¹é“å…·æ å“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformSwitchEquipmentDown();
 
-	// ÇĞ»»×ó·½ÎäÆ÷À¸ÏìÓ¦
+	// åˆ‡æ¢å·¦æ–¹æ­¦å™¨æ å“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformSwitchEquipmentLeft();
 
-	// ÇĞ»»ÓÒ·½ÎäÆ÷À¸ÏìÓ¦
+	// åˆ‡æ¢å³æ–¹æ­¦å™¨æ å“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformSwitchEquipmentRight();
 
-	// ½ÇÉ«Í¨Öª×ªÎäÆ÷Í¨Öª(EAnimNotifyType -> EWeaponAnimNotifyType)
+	// è§’è‰²é€šçŸ¥è½¬æ­¦å™¨é€šçŸ¥(EAnimNotifyType -> EWeaponAnimNotifyType)
 	EWeaponAnimNotifyType TranslteAnimNotifyToWeapon(EAnimNotifyType NotifyType);
 
-	// ¸ù¾İ½ÇÉ«Í¨ÖªÈ·¶¨ÊÇÄÄÖ»ÊÖ(EAnimNotifyType -> Hand(L/R))
+	// æ ¹æ®è§’è‰²é€šçŸ¥ç¡®å®šæ˜¯å“ªåªæ‰‹(EAnimNotifyType -> Hand(L/R))
 	int CheckAnimNotifyToHand(EAnimNotifyType NotifyType);
 
-	// ÎäÆ÷¶¯»­Í¨ÖªÏÂ·¢
+	// æ­¦å™¨åŠ¨ç”»é€šçŸ¥ä¸‹å‘
 	void WeaponAnimProcess(int HandType,EWeaponAnimNotifyType NotifyType);
 
 public:
 	/************************************************************************/
-	/*                               Íâ²¿µ÷ÓÃ                                       */
+	/*                               å¤–éƒ¨è°ƒç”¨                                       */
 	/************************************************************************/
-	// °×ºĞ³õÊ¼»¯
+	// ç™½ç›’åˆå§‹åŒ–
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitializeCharacter();
 
@@ -139,10 +139,10 @@ public:
 
 protected:
 	/************************************************************************/
-	/*                                ±äÁ¿                                      */
+	/*                                å˜é‡                                      */
 	/************************************************************************/
-	// ÏÈ²»Éè¼Æ×é¼ş¹ÜÀíÆ÷£¬Ö±½Ó´´½¨×é¼şÊ¹ÓÃ
-	// Õ½¶·×é¼ş
+	// å…ˆä¸è®¾è®¡ç»„ä»¶ç®¡ç†å™¨ï¼Œç›´æ¥åˆ›å»ºç»„ä»¶ä½¿ç”¨
+	// æˆ˜æ–—ç»„ä»¶
 	UPROPERTY()
 		USL_CombatantComponent* CombatCmp;
 

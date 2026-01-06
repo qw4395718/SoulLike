@@ -24,7 +24,7 @@ class SOULLIKEDEMO_API IAnimNotify_IF
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	// ����(״̬)֪ͨ��Ӧ
+	// 动画(状态)通知响应
 	UFUNCTION()
 		virtual void AnimNotifyResponse(int NotifyType) = 0;
 

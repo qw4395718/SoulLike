@@ -13,7 +13,7 @@ class UUI_InterActButton;
 class UTexture2D;
 class UVerticalBox;
 
-// ½»»¥×é¼şÏà¹ØÊı¾İ½á¹¹
+// äº¤äº’ç»„ä»¶ç›¸å…³æ•°æ®ç»“æ„
 struct FInterActOptionInfo
 {
 	int32				Index;
@@ -33,12 +33,12 @@ class SOULLIKEDEMO_API UHUD_InterActBtnPanel : public UUserWidget
 public:
 	UHUD_InterActBtnPanel(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
-	/* Íâ²¿µ÷ÓÃ                                                                     */
+	/* å¤–éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
-	// ËùÓĞÊı¾İ¸üĞÂ
+	// æ‰€æœ‰æ•°æ®æ›´æ–°
 	void UpdateBatch(const TArray<FInterActOptionInfo>& options);
 
-	// µ¥ÏîÊı¾İ¸üĞÂ
+	// å•é¡¹æ•°æ®æ›´æ–°
 	void UpdateTarget(const FInterActOptionInfo& options);
 
 	UFUNCTION(BlueprintCallable)
@@ -47,7 +47,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetTargetOptionSelected(int32 Index);
 
-	// °´Å¥µã»÷ÊÂ¼ş
+	// æŒ‰é’®ç‚¹å‡»äº‹ä»¶
 	UFUNCTION(BlueprintCallable)
 		void OnButtonClicked(int32 Index);
 
@@ -57,28 +57,28 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLastIndex);
 
-	// ³õÊ¼»¯ĞéÄâ»¯
+	// åˆå§‹åŒ–è™šæ‹ŸåŒ–
 	UFUNCTION(BlueprintCallable)
 	void InitializeVirtualization(int32 TotalItemCount);
 
-	// ´Ó³ØÖĞ»ñÈ¡»ò´´½¨²ÛÎ»
+	// ä»æ± ä¸­è·å–æˆ–åˆ›å»ºæ§½ä½
 	UUI_InterActButton* GetOrCreateSlot();
 
-	// »ØÊÕ²ÛÎ»µ½³ØÖĞ
+	// å›æ”¶æ§½ä½åˆ°æ± ä¸­
 	void ReturnSlotToPool(UUI_InterActButton* Slot);
 
 
 protected:
 	/************************************************************************/
-	/* ÄÚ²¿µ÷ÓÃ                                                                     */
+	/* å†…éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
-	// µ¥Ôª²âÊÔÏà¹Ø
+	// å•å…ƒæµ‹è¯•ç›¸å…³
 	void FakeInit();
 
-	// ÖØĞ´Ô­ÉúÊó±ê¹öÂÖÊÂ¼ş
+	// é‡å†™åŸç”Ÿé¼ æ ‡æ»šè½®äº‹ä»¶
 	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
-	// Êó±ê¹ö¶¯ĞĞÎª´¦Àí
+	// é¼ æ ‡æ»šåŠ¨è¡Œä¸ºå¤„ç†
 	UFUNCTION(BlueprintCallable, Category="Scroll")
 	void HandleScroll(float wheelDelta);
 
@@ -87,58 +87,58 @@ protected:
 
 	void UpdateSlotPositions();
 
-	// ½«Ö¸¶¨Êı¾İÔ´Ë÷ÒıÌîÈëĞÂ»ñÈ¡µÄ¿Ø¼şÖĞ²¢ÄÉÈë¿ÉÊÓÇøÓò»º´æ
+	// å°†æŒ‡å®šæ•°æ®æºç´¢å¼•å¡«å…¥æ–°è·å–çš„æ§ä»¶ä¸­å¹¶çº³å…¥å¯è§†åŒºåŸŸç¼“å­˜
 	void AddSlotForIndex(int32 Index);
 
-	// ½«Ö¸¶¨Êı¾İÔ´Ë÷ÒıÌîÈëĞÂ»ñÈ¡µÄ¿Ø¼şÖĞ²¢ÄÉÈë¿ÉÊÓÇøÓò»º´æ,²åµ½Í·²¿
+	// å°†æŒ‡å®šæ•°æ®æºç´¢å¼•å¡«å…¥æ–°è·å–çš„æ§ä»¶ä¸­å¹¶çº³å…¥å¯è§†åŒºåŸŸç¼“å­˜,æ’åˆ°å¤´éƒ¨
 	void AddSlotAtIndexZero(int32 Index);
 
-	// »ñÈ¡Êı¾İÔ´Ö¸¶¨Ë÷ÒıµÄÊı¾İ
+	// è·å–æ•°æ®æºæŒ‡å®šç´¢å¼•çš„æ•°æ®
 	const FInterActOptionInfo* GetItemAtIndex(int32 Index);
 
-	// »ñÈ¡»ù´¡¿Ø¼şÅäÖÃ¸ß¶È
+	// è·å–åŸºç¡€æ§ä»¶é…ç½®é«˜åº¦
 	float GetSlotHeight();
 
 protected:
 	/************************************************************************/
-	/* ÄÚ²¿±äÁ¿                                                                     */
+	/* å†…éƒ¨å˜é‡                                                                     */
 	/************************************************************************/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "interActPanel")
 		TSubclassOf<UUI_InterActButton> m_interActBtnClass;
 
-	// ¿Ø¼şÒıÓÃ
+	// æ§ä»¶å¼•ç”¨
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UVerticalBox* m_interActBtnsContainer;
 
-	// ½»»¥¿Ø¼ş¹ÜÀíÆ÷-ĞéÄâ»¯(¿ÉÊÓÇøÓò»º´æ)
+	// äº¤äº’æ§ä»¶ç®¡ç†å™¨-è™šæ‹ŸåŒ–(å¯è§†åŒºåŸŸç¼“å­˜)
 	UPROPERTY()
 		TArray<UUI_InterActButton*> m_visibleSlots;
 
-	// ½»»¥¿Ø¼ş¹ÜÀíÆ÷-ĞéÄâ»¯(³Ø)
+	// äº¤äº’æ§ä»¶ç®¡ç†å™¨-è™šæ‹ŸåŒ–(æ± )
 	UPROPERTY()
 		TArray<UUI_InterActButton*> m_slotPool;
 
 
-	// ±¾µØÊı¾İ
+	// æœ¬åœ°æ•°æ®
 		TArray<FInterActOptionInfo> m_interActDataArr;
 
-		// µ±Ç°ÏÔÊ¾·¶Î§
+		// å½“å‰æ˜¾ç¤ºèŒƒå›´
 		int32 FirstVisibleIndex = 0;
 		int32 LastVisibleIndex = 0;
 
-	// µ±Ç°Ñ¡ÖĞË÷Òı
+	// å½“å‰é€‰ä¸­ç´¢å¼•
 	UPROPERTY(BlueprintReadOnly, Category = "State")
 		int32 SelectedIndex = -1;
 
 	private:
 	/************************************************************************/
-	/* ÄÚ²¿±äÁ¿-ÅäÖÃ                                                                     */
+	/* å†…éƒ¨å˜é‡-é…ç½®                                                                     */
 	/************************************************************************/
-	// ¹ö¶¯ËÙ¶È¿ØÖÆ
+	// æ»šåŠ¨é€Ÿåº¦æ§åˆ¶
 	UPROPERTY(EditAnywhere, Category = "Scroll")
 		float scrollSensitivity = 40.0f;
 
-	// µ±Ç°¹ö¶¯Æ«ÒÆ
+	// å½“å‰æ»šåŠ¨åç§»
 	float currentScrollOffset = 0.0f;
 
 };

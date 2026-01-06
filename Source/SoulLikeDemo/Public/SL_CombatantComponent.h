@@ -22,7 +22,7 @@ public:
 
 public:
 	/************************************************************************/
-	/*                              ½Ó¿ÚÊµÏÖ                                        */
+	/*                              æ¥å£å®ç°                                        */
 	/************************************************************************/
 	UFUNCTION()
 		void TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
@@ -63,38 +63,38 @@ public:
 
 public:
 	/************************************************************************/
-	/*                              Íâ²¿µ÷ÓÃ                                        */
+	/*                              å¤–éƒ¨è°ƒç”¨                                        */
 	/************************************************************************/
-	// Íâ²¿³õÊ¼»¯
+	// å¤–éƒ¨åˆå§‹åŒ–
 	UFUNCTION()
 		void InitCombatComponentInfo(AActor* OwnerActor,FString OwnerMentagePath,int OwnerTeamID,bool OwnerCanBackStab);
 
 protected:
 	/************************************************************************/
-	/*                              ÄÚ²¿µ÷ÓÃ                                        */
+	/*                              å†…éƒ¨è°ƒç”¨                                        */
 	/************************************************************************/
-	// ²¥·ÅÃÉÌ«Ææ¶¯»­
+	// æ’­æ”¾è’™å¤ªå¥‡åŠ¨ç”»
 	void PlaySoftMentage(FName MetageSectionName);
 
-	// Òì²½¼ÓÔØÃÉÌ«Ææ¶¯»­
+	// å¼‚æ­¥åŠ è½½è’™å¤ªå¥‡åŠ¨ç”»
 	void LoadActorMentageAsync(const FString MentagePath);
 
-	// µ±Ö¸¶¨ÃÉÌ«Ææ¶¯»­¼ÓÔØÍê³ÉÊ±
+	// å½“æŒ‡å®šè’™å¤ªå¥‡åŠ¨ç”»åŠ è½½å®Œæˆæ—¶
 	void OnActorMentageLoaded();
 
 protected:
 	/************************************************************************/
-	/*                              ÄÚ²¿±äÁ¿                                        */
+	/*                              å†…éƒ¨å˜é‡                                        */
 	/************************************************************************/
-	// ËùÊôÕóÓª
+	// æ‰€å±é˜µè¥
 	UPROPERTY()
 		int TeamID;
 
-	// ÊÇ·ñ´ı´¦¾ö
+	// æ˜¯å¦å¾…å¤„å†³
 	UPROPERTY()
 		bool bWaitingForExecuted;
 
-	// ÊÇ·ñ¿É±³´Ì
+	// æ˜¯å¦å¯èƒŒåˆº
 	UPROPERTY()
 		bool bAllowedBackStabsed;
 
@@ -104,11 +104,11 @@ protected:
 	UPROPERTY()
 		FName NeedPlayMetageSectionName;
 
-	// ´¦¾öÃÉÌ«Ææ¶¯»­×Ê²ú(ºóĞø¿ÉÒÔ¹é²¢µ½¶¯»­×é¼şÖĞ£¬Í³Ò»¹ÜÀí)
+	// å¤„å†³è’™å¤ªå¥‡åŠ¨ç”»èµ„äº§(åç»­å¯ä»¥å½’å¹¶åˆ°åŠ¨ç”»ç»„ä»¶ä¸­ï¼Œç»Ÿä¸€ç®¡ç†)
 	UPROPERTY()
 		TSoftObjectPtr<UAnimMontage> SoftMentageRefrence;
 
-	// ×é¼şÒıÓÃ
+	// ç»„ä»¶å¼•ç”¨
 	UPROPERTY()
 		AActor* ActorOwner;
 	

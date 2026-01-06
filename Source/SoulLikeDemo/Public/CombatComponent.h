@@ -21,126 +21,126 @@ public:
 	UCombatComponent();
 
 	/************************************************************************/
-	/*Íâ²¿³õÊ¼»¯                                                                     */
+	/*å¤–éƒ¨åˆå§‹åŒ–                                                                     */
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Init")
 		virtual void InitializeComponent() override;
-	// µ÷ÊÔ³õÊ¼»¯
+	// è°ƒè¯•åˆå§‹åŒ–
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Init")
 		virtual void Initialize();
-	//Ìá¹©¸øÍâ²¿³õÊ¼»¯ÎäÆ÷±³°ü
+	//æä¾›ç»™å¤–éƒ¨åˆå§‹åŒ–æ­¦å™¨èƒŒåŒ…
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponInventoryManage")
 		void InitWeaponInventory(TArray<AWeaponBase*> arrWeaponInventory);
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponInventoryManage")
 		void WeaponInventoryChange(int32 Weaponindex, AWeaponBase* NewWeapon);
 
 	/************************************************************************/
-	/* Íâ²¿µ÷ÓÃ                                                                     */
+	/* å¤–éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
-	// °Î³öµ±Ç°×°±¸ÎäÆ÷
+	// æ‹”å‡ºå½“å‰è£…å¤‡æ­¦å™¨
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponOperation")
 		void DrawWeapon();
-	// ÊÕÆğÎäÆ÷
+	// æ”¶èµ·æ­¦å™¨
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponOperation")
 		void SheathWeapon();
-	// ÎäÆ÷ÇĞ»»
+	// æ­¦å™¨åˆ‡æ¢
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponOperation")
 		void SwitchToWeapon(int32 Index);
-	// Ö´ĞĞ¹¥»÷
+	// æ‰§è¡Œæ”»å‡»
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponOperation")
 		void PerformAttack();
-	// Ö´ĞĞÕ½¼¼
+	// æ‰§è¡Œæˆ˜æŠ€
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponOperation")
 		void PerformCombatSkill();
 
 
 	/************************************************************************/
-	/* ÄÚ²¿µ÷ÓÃ                                                                     */
+	/* å†…éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
 
-	// ¾«×¼¶Ü·´ÅĞ¶¨£¨½öC++¿ÉÓÃ£©
+	// ç²¾å‡†ç›¾ååˆ¤å®šï¼ˆä»…C++å¯ç”¨ï¼‰
 	bool CheckPerfectParry(float PlayerInputTime, float EnemyAttackTime);
 
-	// ±©Â¶¸øÀ¶Í¼µÄÉËº¦Ó¦ÓÃ½Ó¿Ú
+	// æš´éœ²ç»™è“å›¾çš„ä¼¤å®³åº”ç”¨æ¥å£
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ProcessAttackHit(AActor* HitActor, const FHitResult& HitResult);
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 		void HandleDamage(const FDamageEventData& DamageEvent);
 
-	// µ¯·´ĞĞÎªÓ¦ÓÃ(ÄÚ²¿ÅĞ¶¨ÊÇ·ñÓĞĞ§¼°ºóĞøĞĞÎª)
+	// å¼¹åè¡Œä¸ºåº”ç”¨(å†…éƒ¨åˆ¤å®šæ˜¯å¦æœ‰æ•ˆåŠåç»­è¡Œä¸º)
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 		void HandleParry();
 
-	// µ±Ç°ÌåÁ¦ÊÇ·ñ¿ÉÒÔÖ´ĞĞ¶¯×÷
+	// å½“å‰ä½“åŠ›æ˜¯å¦å¯ä»¥æ‰§è¡ŒåŠ¨ä½œ
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 		bool CanAction();
 
-	// ÏûºÄÌåÁ¦
+	// æ¶ˆè€—ä½“åŠ›
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 		void ChangeAP(float CostNum);
 
-	// ¿ªÆôÌåÁ¦»Ö¸´
+	// å¼€å¯ä½“åŠ›æ¢å¤
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 		void ReviveAP();
 
 protected:
 
-	// ¿¹ĞÔÊı¾İ£¨C++¼ÆËã£©
+	// æŠ—æ€§æ•°æ®ï¼ˆC++è®¡ç®—ï¼‰
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 		TMap<EDamageType, float> DamageResistances;
 
-	// ½ÇÉ«ÊôĞÔ-HP
+	// è§’è‰²å±æ€§-HP
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
 		float HealthPoint;
 
-	// ½ÇÉ«ÊôĞÔ-AP
+	// è§’è‰²å±æ€§-AP
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
 		float ActionPoint;
 
-	// ½ÇÉ«ÊôĞÔ-HP
+	// è§’è‰²å±æ€§-HP
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
 		float HealthPointMaxValue;
 
-	// ½ÇÉ«ÊôĞÔ-AP
+	// è§’è‰²å±æ€§-AP
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
 		float ActionPointMaxValue;
 
-	// ÌåÁ¦»Ö¸´¶¨Ê±Æ÷handle
+	// ä½“åŠ›æ¢å¤å®šæ—¶å™¨handle
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
 		FTimerHandle ReviveActionPointHandle;
 
-	// ÌåÁ¦»Ö¸´¶¨Ê±Æ÷¼ä¸ô
+	// ä½“åŠ›æ¢å¤å®šæ—¶å™¨é—´éš”
 	UPROPERTY()
 		float TriggerReviveAPTimerInterval = 0.1f;
 
-	// ÌåÁ¦»Ö¸´¶¨Ê±Æ÷¿ªÆô¼ä¸ô
+	// ä½“åŠ›æ¢å¤å®šæ—¶å™¨å¼€å¯é—´éš”
 	UPROPERTY()
 	float EnableReviveAPTimerInterval = 1.0f;
 
-	// µ¥´Î´¥·¢»Ö¸´Á¿
+	// å•æ¬¡è§¦å‘æ¢å¤é‡
 	UPROPERTY()
 		float APReviveValue = 1.0f;
 
 protected:
-	//ÉËº¦ÊÂ¼ş·Ö·¢Æ÷
+	//ä¼¤å®³äº‹ä»¶åˆ†å‘å™¨
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		UDamageEventDispatcher* DamageDispatcher;
 
 public:
-	// µ±Ç°ÓÒÊÖ×°±¸ÎäÆ÷
+	// å½“å‰å³æ‰‹è£…å¤‡æ­¦å™¨
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 		AWeaponBase* LH_EquippedWeapon;
 
-	// µ±Ç°ÓÒÊÖ×°±¸ÎäÆ÷
+	// å½“å‰å³æ‰‹è£…å¤‡æ­¦å™¨
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 		AWeaponBase* RH_EquippedWeapon;
 
-	// ÎäÆ÷¿â´æ
+	// æ­¦å™¨åº“å­˜
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 		TArray<AWeaponBase*> WeaponInventory;
 
-	// ×é¼şÒıÓÃ
+	// ç»„ä»¶å¼•ç”¨
 	UPROPERTY()
 		ASoulLikeCharacter* CharacterOwner;
 

@@ -23,15 +23,15 @@ class SOULLIKEDEMO_API IStateCalculate_IF
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	// Ôì³ÉÉËº¦Á¿½áËã
+	// é€ æˆä¼¤å®³é‡ç»“ç®—
 	UFUNCTION()
 		virtual float DamageDealtCalculate(float Damage) = 0;
 
-	// ÊÜ³ÉÉËº¦Á¿½áËã
+	// å—æˆä¼¤å®³é‡ç»“ç®—
 	UFUNCTION()
 		virtual float DamageReceivedCalculate(float Damage) = 0;
 
-	// ÏûºÄÌåÁ¦Á¿½áËã
+	// æ¶ˆè€—ä½“åŠ›é‡ç»“ç®—
 	UFUNCTION()
 		virtual float StaminaCostCalculate(float StaminaCost) = 0;
 

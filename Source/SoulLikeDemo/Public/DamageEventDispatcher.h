@@ -15,7 +15,7 @@ USTRUCT(BlueprintType)
 struct FWeaponStats {
 	GENERATED_BODY()
 
-		// »ù´¡ÊôĞÔ
+		// åŸºç¡€å±æ€§
 		UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		float BaseDamage = 20.0f;
 
@@ -25,7 +25,7 @@ struct FWeaponStats {
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		float StaminaCost = 15.0f;
 
-	// Àà»êÌØĞÔ
+	// ç±»é­‚ç‰¹æ€§
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		float CriticalMultiplier = 2.0f;
 
@@ -59,7 +59,7 @@ struct FDamageEventData
 {
 	GENERATED_BODY()
 
-	// »ù´¡ÉËº¦ĞÅÏ¢
+	// åŸºç¡€ä¼¤å®³ä¿¡æ¯
 	UPROPERTY(BlueprintReadWrite)
 	float BaseDamage;
 
@@ -69,7 +69,7 @@ struct FDamageEventData
 	UPROPERTY(BlueprintReadWrite)
 		FVector HitNormal;
 
-	// Àà»êÌØĞÔÊı¾İ
+	// ç±»é­‚ç‰¹æ€§æ•°æ®
 	UPROPERTY(BlueprintReadWrite)
 		bool bIsCriticalHit;
 
@@ -79,7 +79,7 @@ struct FDamageEventData
 	UPROPERTY(BlueprintReadWrite)
 		AActor* DamageCauser;
 
-	// ¹¹ÔìÆ÷
+	// æ„é€ å™¨
 	FDamageEventData(float Damage = 0.0f,
 		const FVector& Location = FVector::ZeroVector,
 		const FVector& Normal = FVector::UpVector,

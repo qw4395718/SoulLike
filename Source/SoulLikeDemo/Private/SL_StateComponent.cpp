@@ -7,7 +7,7 @@ USL_StateComponent::USL_StateComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// Ĭ�ϳ�ʼ��
+	// 默认初始化
 	DamageIncreasePercentage = 0.0f;
 	DamageReducePercentage = 0.0f;
 }

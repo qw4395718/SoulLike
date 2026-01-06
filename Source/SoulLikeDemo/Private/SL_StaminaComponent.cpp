@@ -9,7 +9,7 @@ USL_StaminaComponent::USL_StaminaComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// Ä¬ÈÏ³õÊ¼»¯
+	// é»˜è®¤åˆå§‹åŒ–
 	CurrentStaminaValue = 100.0f;
 	MaxStaminaValue = 100.0f;
 	IsStaminaZero = false;
@@ -21,7 +21,7 @@ USL_StaminaComponent::USL_StaminaComponent()
 
 void USL_StaminaComponent::InitStaminaInfo(float MaxStaminaSetiingsValue)
 {
-	// Íâ²¿Ìá¹©ĞÅÏ¢³õÊ¼»¯
+	// å¤–éƒ¨æä¾›ä¿¡æ¯åˆå§‹åŒ–
 	MaxStaminaValue = MaxStaminaSetiingsValue;
 	CurrentStaminaValue = MaxStaminaSetiingsValue;
 }
@@ -45,22 +45,22 @@ void USL_StaminaComponent::ReduceStamina(float ReduceValue)
 {
 	if (CurrentStaminaValue - ReduceValue < 0)
 	{
-		// ½øÈëÁ¦½ß×´Ì¬
+		// è¿›å…¥åŠ›ç«­çŠ¶æ€
 		IsStaminaZero = true;
 		OnStaminaValueZero();
 	}
 
-	// ¼ì²é¾«Á¦»Ö¸´¶¨Ê±Æ÷ÊÇ·ñÆô¶¯
+	// æ£€æŸ¥ç²¾åŠ›æ¢å¤å®šæ—¶å™¨æ˜¯å¦å¯åŠ¨
 	if (StaminaReviveTimerHandle.IsValid())
 	{
-		// ÈôÒÑÆô¶¯Ôò¹Ø±Õ¶¨Ê±Æ÷
+		// è‹¥å·²å¯åŠ¨åˆ™å…³é—­å®šæ—¶å™¨
 		GetWorld()->GetTimerManager().ClearTimer(StaminaReviveTimerHandle);
 	}
 
 
 	if (IsStaminaZero == true)
 	{
-		// Æô¶¯¾«Á¦Æô¶¯»Ö¸´¶¨Ê±Æ÷
+		// å¯åŠ¨ç²¾åŠ›å¯åŠ¨æ¢å¤å®šæ—¶å™¨
 		GetWorld()->GetTimerManager().SetTimer(
 			StaminaReviveTimerHandle,
 			this,
@@ -71,7 +71,7 @@ void USL_StaminaComponent::ReduceStamina(float ReduceValue)
 	}
 	else
 	{
-		// Æô¶¯¾«Á¦Æô¶¯»Ö¸´¶¨Ê±Æ÷
+		// å¯åŠ¨ç²¾åŠ›å¯åŠ¨æ¢å¤å®šæ—¶å™¨
 		GetWorld()->GetTimerManager().SetTimer(
 			StaminaReviveTimerHandle,
 			this,
@@ -88,14 +88,14 @@ void USL_StaminaComponent::ReduceStamina(float ReduceValue)
 
 void USL_StaminaComponent::ReviveStamina(float ReviveValue)
 {
-	// Íâ½ç»Ö¸´
+	// å¤–ç•Œæ¢å¤
 	if (CurrentStaminaValue + ReviveValue > MaxStaminaValue)
 	{
 		CurrentStaminaValue = MaxStaminaValue;
-		// ÇåÀíÌåÁ¦ËæÊ±¼ä»Ö¸´µÄ¶¨Ê±Æ÷
+		// æ¸…ç†ä½“åŠ›éšæ—¶é—´æ¢å¤çš„å®šæ—¶å™¨
 		if (StaminaReviveTimerHandle.IsValid())
 		{
-			// ÈôÒÑÆô¶¯Ôò¹Ø±Õ¶¨Ê±Æ÷
+			// è‹¥å·²å¯åŠ¨åˆ™å…³é—­å®šæ—¶å™¨
 			GetWorld()->GetTimerManager().ClearTimer(StaminaReviveTimerHandle);
 		}
 	}
@@ -110,11 +110,11 @@ void USL_StaminaComponent::ReviveStaminaValueByTime()
 {
 	if (CurrentStaminaValue + StaminaReviveSingleValue > MaxStaminaValue)
 	{
-		// ÌåÁ¦»Ö¸´ÂúÔòÇå¿Õ¾«Á¦»Ö¸´¶¨Ê±Æ÷
+		// ä½“åŠ›æ¢å¤æ»¡åˆ™æ¸…ç©ºç²¾åŠ›æ¢å¤å®šæ—¶å™¨
 		CurrentStaminaValue = MaxStaminaValue;
 		if (StaminaReviveTimerHandle.IsValid())
 		{
-			// ÈôÒÑÆô¶¯Ôò¹Ø±Õ¶¨Ê±Æ÷
+			// è‹¥å·²å¯åŠ¨åˆ™å…³é—­å®šæ—¶å™¨
 			GetWorld()->GetTimerManager().ClearTimer(StaminaReviveTimerHandle);
 		}
 	}
@@ -123,7 +123,7 @@ void USL_StaminaComponent::ReviveStaminaValueByTime()
 		CurrentStaminaValue += StaminaReviveSingleValue;
 	}
 
-	// ½â³ıÁ¦½ß×´Ì¬
+	// è§£é™¤åŠ›ç«­çŠ¶æ€
 	if(IsStaminaZero == true){ IsStaminaZero = false; }
 	
 }

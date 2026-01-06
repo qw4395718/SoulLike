@@ -19,7 +19,7 @@ public:
 
 public:
 /************************************************************************/
-/*                                    Íâ²¿µ÷ÓÃ                                  */
+/*                                    å¤–éƒ¨è°ƒç”¨                                  */
 /************************************************************************/
 	UFUNCTION()
 		void InitMovemenetInfo(bool hasRollAbility,FString RollMentagePath);
@@ -31,7 +31,7 @@ public:
 protected:
 
 /************************************************************************/
-/*                                    ÄÚ²¿µ÷ÓÃ                                  */
+/*                                    å†…éƒ¨è°ƒç”¨                                  */
 /************************************************************************/
 	UFUNCTION()
 		bool CanExeRoll();
@@ -40,11 +40,11 @@ protected:
 		void LoadMovementMentage(const FString MentagePath);
 
 protected:
-	// ·­¹öÃÉÌ«Ææ
+	// ç¿»æ»šè’™å¤ªå¥‡
 	UPROPERTY()
 		UAnimMontage* DodgeMontage;
 
-	// ÊÇ·ñ¿ÉÒÔÌøÔ¾
+	// æ˜¯å¦å¯ä»¥è·³è·ƒ
 	UPROPERTY()
 		bool CanRoll;
 };

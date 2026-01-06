@@ -11,7 +11,7 @@ UWeaponComboCoordinatorComponent::UWeaponComboCoordinatorComponent()
 
 float UWeaponComboCoordinatorComponent::GetAttackComboDamage(int type)
 {
-	// ���type�Ƿ�Ϸ�
+	// 检测type是否合法
 	RETURN_VALUE_IF_FALSE(type>=int(EWeaponModeTyoe::WEAPONMODE_Max) || type<= int(EWeaponModeTyoe::WEAPONMODE_Min),0.0f);
 	if (ComboCoordinatorInfoMap.Find(EWeaponModeTyoe(type)))
 	{
@@ -26,7 +26,7 @@ float UWeaponComboCoordinatorComponent::GetAttackComboDamage(int type)
 
 float UWeaponComboCoordinatorComponent::GetAttackStateCost(int type,int CostType)
 {
-	// ���type,costtype�Ƿ�Ϸ�
+	// 检测type,costtype是否合法
 	RETURN_VALUE_IF_FALSE(type >= int(EWeaponModeTyoe::WEAPONMODE_Max) || type <= int(EWeaponModeTyoe::WEAPONMODE_Min), 0.0f);
 	RETURN_VALUE_IF_FALSE(CostType >= int(EWeaponActionCostType::EWeaponAction_Max) || CostType <= int(EWeaponActionCostType::EWeaponAction_Min), 0.0f);
 
@@ -59,7 +59,7 @@ void UWeaponComboCoordinatorComponent::InitComboCoordinatorComponet(const TMap<E
 
 void UWeaponComboCoordinatorComponent::ActiveComboWindowInputState(EWeaponModeTyoe type)
 {
-	// ���type�Ƿ�Ϸ�
+	// 检测type是否合法
 	RETURN_IF_TRUE(type <= EWeaponModeTyoe::WEAPONMODE_Min || type >= EWeaponModeTyoe::WEAPONMODE_Max);
 	if (ComboCoordinatorInfoMap.Find(EWeaponModeTyoe(type)))
 	{
@@ -71,7 +71,7 @@ void UWeaponComboCoordinatorComponent::ActiveComboWindowInputState(EWeaponModeTy
 
 void UWeaponComboCoordinatorComponent::InActiveComboWindowInputState(EWeaponModeTyoe type)
 {
-	// ���type�Ƿ�Ϸ�
+	// 检测type是否合法
 	RETURN_IF_TRUE(type <= EWeaponModeTyoe::WEAPONMODE_Min || type >= EWeaponModeTyoe::WEAPONMODE_Max);
 	if (ComboCoordinatorInfoMap.Find(EWeaponModeTyoe(type)))
 	{
@@ -83,7 +83,7 @@ void UWeaponComboCoordinatorComponent::InActiveComboWindowInputState(EWeaponMode
 
 int UWeaponComboCoordinatorComponent::GetNextComboNum(EWeaponModeTyoe type)
 {
-	// ���type�Ƿ�Ϸ�
+	// 检测type是否合法
 	RETURN_VALUE_IF_TRUE(type >= EWeaponModeTyoe::WEAPONMODE_Max || type <= EWeaponModeTyoe::WEAPONMODE_Min, 0.0f);
 	if (ComboCoordinatorInfoMap.Find(EWeaponModeTyoe(type)))
 	{

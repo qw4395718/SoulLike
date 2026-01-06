@@ -14,19 +14,19 @@ UHUD_InterActBtnPanel::UHUD_InterActBtnPanel(const FObjectInitializer& ObjectIni
 
 void UHUD_InterActBtnPanel::UpdateBatch(const TArray<FInterActOptionInfo>& options)
 {
-	// ÖØÖÃÒÑÓÐÊý¾Ý½øÐÐ¸üÐÂ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý½ï¿½ï¿½Ð¸ï¿½ï¿½ï¿½
 	m_interActDataArr.Reset();
 	m_interActDataArr = options;
 }
 
 void UHUD_InterActBtnPanel::UpdateTarget(const FInterActOptionInfo& options)
 {
-	// ¼ìË÷ÊÇ·ñÓÐÍ¬Ò»Ë÷ÒýµÄÊý¾Ý,ÈôÓÐÔò¸üÐÂ,ÈôÎÞÔòÌí¼Ó,´Ë´¦µÄÊý¾ÝË÷ÒýÓëÏÔÊ¾Ë÷ÒýÒ»ÖÂ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Ë´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
 	for  (FInterActOptionInfo dataObj : m_interActDataArr)
 	{
 		if (dataObj.Index == options.Index)
 		{
-			// ¸üÐÂÊý¾Ý
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			dataObj = options;
 		}
 	}
@@ -56,7 +56,7 @@ void UHUD_InterActBtnPanel::SetTargetOptionSelected(int32 Index)
 void UHUD_InterActBtnPanel::OnButtonClicked(int32 Index)
 {
 	SetTargetOptionSelected(Index);
-	// Ö´ÐÐÑ¡ÖÐµÄÂß¼­
+	// Ö´ï¿½ï¿½Ñ¡ï¿½Ðµï¿½ï¿½ß¼ï¿½
 
 }
 
@@ -117,26 +117,26 @@ void UHUD_InterActBtnPanel::FakeInit()
 
 FReply UHUD_InterActBtnPanel::NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	// »ñÈ¡¹öÂÖÔöÁ¿£¨ÕýÊýÏòÉÏ¹ö£¬¸ºÊýÏòÏÂ¹ö£©
+	// ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¹ï¿½ï¿½ï¿½
 	float WheelDelta = InMouseEvent.GetWheelDelta();
 
-	// ´¦Àí¹ö¶¯Âß¼­
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½
 	HandleScroll(WheelDelta);
 
-	// ±ê¼ÇÊÂ¼þÒÑ´¦Àí
+	// ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½Ñ´ï¿½ï¿½ï¿½
 	return FReply::Handled();
 }
 
 void UHUD_InterActBtnPanel::HandleScroll(float wheelDelta)
 {
-	// ¼ÆËãÐÂµÄ¹ö¶¯±ãÒË,ÐèÒª·´×ª·½Ïò
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ÂµÄ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½Òªï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½
 	float newScrollOffset = currentScrollOffset + (wheelDelta * scrollSensitivity *(-1));
 
-	// ÏÞÖÆ¹ö¶¯·¶Î§
+	// ï¿½ï¿½ï¿½Æ¹ï¿½ï¿½ï¿½ï¿½ï¿½Î§
 	float maxScrollOffset = (m_interActDataArr.Num() - INTERACT_BTN_MAX) * INTERACT_BTN_HEIGHT;
 	newScrollOffset = FMath::Clamp(newScrollOffset,0.0f, maxScrollOffset);
 
-	// ¸üÐÂ¹ö¶¯
+	// ï¿½ï¿½ï¿½Â¹ï¿½ï¿½ï¿½
 	if (newScrollOffset != currentScrollOffset)
 	{
 		currentScrollOffset = newScrollOffset;
@@ -147,29 +147,29 @@ void UHUD_InterActBtnPanel::HandleScroll(float wheelDelta)
 
 void UHUD_InterActBtnPanel::UpdateVisibleRange()
 {
-	// »ñÈ¡ScrollBoxµÄ¼¸ºÎÐÅÏ¢
+	// ï¿½ï¿½È¡ScrollBoxï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 	//FGeometry scrollGeometry = GetCachedGeometry();
 
-	//// »ñÈ¡¿ÉÊÓÇøÓòµÄ´óÐ¡
+	//// ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´ï¿½Ð¡
 	//float viewHeight = scrollGeometry.GetLocalSize().Y;
 
-	// »ñÈ¡Ã¿¸ö²ÛÎ»µÄ±ê×¼¸ß¶È
+	// ï¿½ï¿½È¡Ã¿ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ä±ï¿½×¼ï¿½ß¶ï¿½
 	float slotHeight = GetSlotHeight();
 
 	float viewHeight = GetSlotHeight() * INTERACT_BTN_MAX;
 
-	// ¼ÆËã¿É¼û·¶Î§
-	// ÏòÏÂÈ¡ÕûÈ·±£ÍêÈ«¿É¼ûµÄ²ÛÎ»
+	// ï¿½ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½Î§
+	// ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½È«ï¿½É¼ï¿½ï¿½Ä²ï¿½Î»
 	int32 newFirstVisibleIndex = FMath::FloorToInt(currentScrollOffset/slotHeight);
 
-	// ÏòÉÏÈ¡ÕûÈ·±£¸²¸ÇËùÓÐ²¿·Ö¿É¼ûµÄ²ÛÎ»
+	// ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð²ï¿½ï¿½Ö¿É¼ï¿½ï¿½Ä²ï¿½Î»
 	int32 newLastVisibleIndex = FMath::CeilToInt((currentScrollOffset + viewHeight)/slotHeight) - 1;
 
-	// ÏÞÖÆ·¶Î§ÔÚÓÐÐ§ÊýÁ¿ÄÚ
+	// ï¿½ï¿½ï¿½Æ·ï¿½Î§ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	newFirstVisibleIndex = FMath::Clamp(newFirstVisibleIndex,0, m_interActDataArr.Num()-1);
 	newLastVisibleIndex = FMath::Clamp(newLastVisibleIndex,0, m_interActDataArr.Num()-1);
 	if (newLastVisibleIndex - newFirstVisibleIndex + 1 < INTERACT_BTN_MAX)
-	{// ÏÔÊ¾²»ÍêÈ«
+	{// ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½È«
 		if (m_interActDataArr.Num() <= INTERACT_BTN_MAX)
 		{
 			newFirstVisibleIndex = 0;
@@ -186,19 +186,19 @@ void UHUD_InterActBtnPanel::UpdateVisibleRange()
 		}
 	}
 	else if (newLastVisibleIndex - newFirstVisibleIndex + 1 > INTERACT_BTN_MAX)
-	{// ÏÔÊ¾Êý¾Ý³¬¹ýÏÞÖÆ
+	{// ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		newLastVisibleIndex = newFirstVisibleIndex + INTERACT_BTN_MAX -1;
 	}
-	else{/*Õý³£Çé¿ö*/}
+	else{/*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/}
 
-	// Èç¹û·¶Î§Ã»ÓÐ·¢Éú±ä»¯,ÎÞÐè¸üÐÂ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Î§Ã»ï¿½Ð·ï¿½ï¿½ï¿½ï¿½ä»¯,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (newFirstVisibleIndex == FirstVisibleIndex &&
 		newLastVisibleIndex == LastVisibleIndex)
 	{
 		return;
 	}
 
-	// ¸üÐÂ¿É¼û·¶Î§
+	// ï¿½ï¿½ï¿½Â¿É¼ï¿½ï¿½ï¿½Î§
 	int32 oldFirstVisibleIndex = FirstVisibleIndex;
 	int32 oldLastVisibleIndex = LastVisibleIndex;
 	FirstVisibleIndex = newFirstVisibleIndex;
@@ -207,7 +207,7 @@ void UHUD_InterActBtnPanel::UpdateVisibleRange()
 	UE_LOG(LogTemp, Log, TEXT("ZYF_UHUD_InterActBtnPanel::UpdateVisibleRange() oldFirst:%d oldLast%d newFirst%d newLast%d"),
 		oldFirstVisibleIndex, oldLastVisibleIndex, FirstVisibleIndex, LastVisibleIndex);
 
-	// ¸ù¾ÝÐÂ¾É·¶Î§²îÒì¸üÐÂ¿É¼û²ÛÎ»
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Â¾É·ï¿½Î§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¿É¼ï¿½ï¿½ï¿½Î»
 	UpdateVisibleSlots(oldFirstVisibleIndex, oldLastVisibleIndex);
 }
 
@@ -219,10 +219,10 @@ void UHUD_InterActBtnPanel::UpdateSlotPositions()
 	{
 		int32 ItemIndex = interActSlot->GetAssignedIndex();
 
-		// ¼ÆËã²ÛÎ»µÄYÎ»ÖÃ£¨Ïà¶ÔÎ»ÖÃ£©
+		// ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½YÎ»ï¿½Ã£ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã£ï¿½
 		float SlotY = (ItemIndex * SlotHeight) - currentScrollOffset;
 
-		// ÉèÖÃ²ÛÎ»Î»ÖÃ
+		// ï¿½ï¿½ï¿½Ã²ï¿½Î»Î»ï¿½ï¿½
 		interActSlot->SetRenderTranslation(FVector2D(0.0f, SlotY));
 	}
 }
@@ -231,15 +231,15 @@ void UHUD_InterActBtnPanel::AddSlotForIndex(int32 Index)
 {
 	UUI_InterActButton* interActSlot = GetOrCreateSlot();
 
-	// ÅäÖÃ²ÛÎ»Êý¾Ý
+	// ï¿½ï¿½ï¿½Ã²ï¿½Î»ï¿½ï¿½ï¿½ï¿½
 	const FInterActOptionInfo* pItem = GetItemAtIndex(Index);
 	if(pItem == nullptr){return;}
 	interActSlot->UpdateInterActBtnInfo(Index, pItem->OptionIcon, pItem->OptionText);
 
-	// Ìí¼Óµ½¿É¼ûÁÐ±í
+	// ï¿½ï¿½Óµï¿½ï¿½É¼ï¿½ï¿½Ð±ï¿½
 	m_visibleSlots.Add(interActSlot);
 
-	// Ìí¼Óµ½ScrollBox×÷Îª×Ó×é¼þ
+	// ï¿½ï¿½Óµï¿½ScrollBoxï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½
 	//AddChild(interActSlot);
 }
 
@@ -247,15 +247,15 @@ void UHUD_InterActBtnPanel::AddSlotAtIndexZero(int32 Index)
 {
 	UUI_InterActButton* interActSlot = GetOrCreateSlot();
 
-	// ÅäÖÃ²ÛÎ»Êý¾Ý
+	// ï¿½ï¿½ï¿½Ã²ï¿½Î»ï¿½ï¿½ï¿½ï¿½
 	const FInterActOptionInfo* pItem = GetItemAtIndex(Index);
 	if (pItem == nullptr) { return; }
 	interActSlot->UpdateInterActBtnInfo(Index, pItem->OptionIcon, pItem->OptionText);
 
-	// Ìí¼Óµ½¿É¼ûÁÐ±í
+	// ï¿½ï¿½Óµï¿½ï¿½É¼ï¿½ï¿½Ð±ï¿½
 	m_visibleSlots.Insert(interActSlot,0);
 
-	// Ìí¼Óµ½ScrollBox×÷Îª×Ó×é¼þ
+	// ï¿½ï¿½Óµï¿½ScrollBoxï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½
 	//AddChild(interActSlot);
 }
 
@@ -272,26 +272,26 @@ float UHUD_InterActBtnPanel::GetSlotHeight()
 
 void UHUD_InterActBtnPanel::UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLastIndex)
 {
-	// Çé¿ö2: ÍêÈ«µÄÐÂ·¶Î§(ÈçÌø×ª»òÕß¿ìËÙ¹ö¶¯)
+	// ï¿½ï¿½ï¿½2: ï¿½ï¿½È«ï¿½ï¿½ï¿½Â·ï¿½Î§(ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ß¿ï¿½ï¿½Ù¹ï¿½ï¿½ï¿½)
 	if (oldLastIndex < FirstVisibleIndex || 
 	oldFirstIndex > LastVisibleIndex || 
 	(oldFirstIndex == 0 && oldLastIndex == 0))
 	{
-		// »ØÊÕËùÓÐµÄ¾É²ÛÎ»
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄ¾É²ï¿½Î»
 		for (int32 i = 0;i < m_visibleSlots.Num();i++)
 		{
 			ReturnSlotToPool(m_visibleSlots[i]);
 		}
 		m_visibleSlots.Empty();
 
-		// ´´½¨ÐÂ·¶Î§ÄÚµÄËùÓÐ²ÛÎ»
+		// ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½Î§ï¿½Úµï¿½ï¿½ï¿½ï¿½Ð²ï¿½Î»
 		for (int32 i = FirstVisibleIndex; i <= LastVisibleIndex; i++)
 		{
 			AddSlotForIndex(i);
 		}
 	}
 
-	// Çé¿ö3: ¹ö¶¯·½ÏòÏòÏÂ(ÏÔÊ¾¸ü¿¿ÏÂµÄÄÚÈÝ)
+	// ï¿½ï¿½ï¿½3: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½Âµï¿½ï¿½ï¿½ï¿½ï¿½)
 	else if (FirstVisibleIndex > oldFirstIndex)
 	{
 		for (int32 i = 0;i < m_visibleSlots.Num();)
@@ -301,7 +301,7 @@ void UHUD_InterActBtnPanel::UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLas
 
 			if (itemIndex < FirstVisibleIndex)
 			{
-				// »ØÊÕ
+				// ï¿½ï¿½ï¿½ï¿½
 				ReturnSlotToPool(slot);
 				//m_visibleSlots.RemoveAt(i);
 			}
@@ -311,14 +311,14 @@ void UHUD_InterActBtnPanel::UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLas
 			}
 		}
 
-		// Ìí¼ÓÐÂ¼ÓÈëÊÓÒ°µÄÏÂ²¿²ÛÎ»
+		// ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½Ò°ï¿½ï¿½ï¿½Â²ï¿½ï¿½ï¿½Î»
 		for (int32 i = oldLastIndex + 1;i <= LastVisibleIndex; i++)
 		{
 			AddSlotForIndex(i);
 		}
 	}
 
-	// Çé¿ö4 :¹ö¶¯·½ÏòÏòÉÏ(ÏÔÊ¾¸ü¿¿ÉÏµÄÄÚÈÝ)
+	// ï¿½ï¿½ï¿½4 :ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½)
 	else if (LastVisibleIndex < oldLastIndex)
 	{
 		for (int32 i = 0; i < m_visibleSlots.Num();)
@@ -328,7 +328,7 @@ void UHUD_InterActBtnPanel::UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLas
 
 			if (itemIndex > LastVisibleIndex)
 			{
-				// »ØÊÕ
+				// ï¿½ï¿½ï¿½ï¿½
 				ReturnSlotToPool(slot);
 				//m_visibleSlots.RemoveAt(i);
 			}
@@ -338,26 +338,26 @@ void UHUD_InterActBtnPanel::UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLas
 			}
 		}
 
-		// Ìí¼ÓÐÂ¼ÓÈëÊÓÒ°µÄÉÏ²¿²ÛÎ»
+		// ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½Ò°ï¿½ï¿½ï¿½Ï²ï¿½ï¿½ï¿½Î»
 		for (int32 i = oldFirstIndex - 1; i >= FirstVisibleIndex; i--)
 		{
 			AddSlotAtIndexZero(i);
 		}
 	}
 
-	// Çå¿ÕÏÖÓÐ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	for (int32 i= 0;i < m_interActBtnsContainer->GetChildrenCount();i++)
 	{
 		m_interActBtnsContainer->RemoveChildAt(i);
 	}
 
-	// ÌîÈë¿ÉÊÓÇøÓò»º´æ²ÛÎ»
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ò»º´ï¿½ï¿½Î»
 	for (UUI_InterActButton* interActSlot : m_visibleSlots)
 	{
 		m_interActBtnsContainer->AddChild(interActSlot);
 	}
 
-	// ¸üÐÂËùÓÐ¿É¼û²ÛÎ»µÄÎ»ÖÃ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¿É¼ï¿½ï¿½ï¿½Î»ï¿½ï¿½Î»ï¿½ï¿½
 	//UpdateSlotPositions();
 }
 

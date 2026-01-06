@@ -28,7 +28,7 @@ class SOULLIKEDEMO_API UUI_InterActButton : public UUserWidget
 public:
 	UUI_InterActButton(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
-	/* Íâ²¿µ÷ÓÃ                                                                     */
+	/* å¤–éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable, Category = "InterActOption")
 		void UpdateInterActBtnInfo(int32 index,UTexture2D* showIcon,FString showText);
@@ -41,16 +41,16 @@ public:
 
 protected:
 	/************************************************************************/
-	/* ÄÚ²¿µ÷ÓÃ                                                                     */
+	/* å†…éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
 
-	// ÎªÀ¶Í¼±©Â¶µÄ¶¯»­ÊÂ¼ş-²¥·Å¶¯»­
+	// ä¸ºè“å›¾æš´éœ²çš„åŠ¨ç”»äº‹ä»¶-æ’­æ”¾åŠ¨ç”»
 	UFUNCTION(BlueprintNativeEvent, Category = "Animation")
 		void PlaySelectionAnimation(bool bIsSelected);
 
 protected:
 	/************************************************************************/
-	/* ÄÚ²¿±äÁ¿                                                                     */
+	/* å†…éƒ¨å˜é‡                                                                     */
 	/************************************************************************/
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
@@ -62,31 +62,31 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UTextBlock* m_interActDesc;
 
-	// ºóĞøÔö¼ÓÕë¶Ô²»Í¬µÄÉè±¸µÄ¹ÜÀí
+	// åç»­å¢åŠ é’ˆå¯¹ä¸åŒçš„è®¾å¤‡çš„ç®¡ç†
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UImage* m_playerInputIcon;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UTextBlock* m_playerInputDesc;
 
-	// ¶¯»­Ïà¹ØÊôĞÔ
+	// åŠ¨ç”»ç›¸å…³å±æ€§
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 		UWidgetAnimation* SelectionAnimation;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 		UWidgetAnimation* DeselectionAnimation;
 
-	// ÔÊĞíÀ¶Í¼ÅäÖÃµÄÑÕÉ«
+	// å…è®¸è“å›¾é…ç½®çš„é¢œè‰²
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Appearance")
 		FLinearColor NormalColor = FLinearColor::White;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Appearance")
 		FLinearColor SelectedColor = FLinearColor::Yellow;
 
-	// Ñ¡ÖĞ×´Ì¬
+	// é€‰ä¸­çŠ¶æ€
 	bool bSelected = false;
 
-	// Íâ²¿ĞòºÅ
+	// å¤–éƒ¨åºå·
 	int32 AssignedIndex;
 
 };

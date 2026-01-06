@@ -10,14 +10,14 @@ USL_InventoryComponent::USL_InventoryComponent()
 
 void USL_InventoryComponent::InitInventoryComponentInfo()
 {
-	// ³õÊ¼»¯×°±¸±í£¬µÀ¾ß±íµÈ±¾µØÊı¾İ½Ó¿Ú
-	// µÈÊı¾İ±íÍê³ÉºóÔÙÍêÉÆ
+	// åˆå§‹åŒ–è£…å¤‡è¡¨ï¼Œé“å…·è¡¨ç­‰æœ¬åœ°æ•°æ®æ¥å£
+	// ç­‰æ•°æ®è¡¨å®Œæˆåå†å®Œå–„
 
 }
 
 void USL_InventoryComponent::InitEquipmentInfo(const TArray<int> WeaponList, const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex)
 {
-	//¸ù¾İ²é±í½« WeapList->EquipmentInfoList,ÔİÊ±ÓÃÄâÔìÊı¾İ´úÌæ
+	//æ ¹æ®æŸ¥è¡¨å°† WeapList->EquipmentInfoList,æš‚æ—¶ç”¨æ‹Ÿé€ æ•°æ®ä»£æ›¿
 	UnitTest(WeaponList);
 	InventoryEquippableItemInfoList = ItemList;
 	CurrentActiveEquipmentIndex = ActiveSlotIndex;
@@ -40,7 +40,7 @@ void USL_InventoryComponent::GetEquipmentInfoList(TArray<FWeaponData>& Equipment
 
 void USL_InventoryComponent::UnitTest(const TArray<int> WeaponList)
 {
-	// ºóĞøÍê³É¶Á±íµÄ³õÊ¼»¯
+	// åç»­å®Œæˆè¯»è¡¨çš„åˆå§‹åŒ–
 	EquipWeaponInfoList.Reset();
 	for(int WeaponID : WeaponList)
 	{
@@ -57,7 +57,7 @@ void USL_InventoryComponent::UnitTest(const TArray<int> WeaponList)
 		UnitTestData.WeaponCollisionBoxSize.X = 100.0f;
 		UnitTestData.WeaponCollisionBoxSize.Y = 5.0f;
 		UnitTestData.WeaponCollisionBoxSize.Z = 5.0f;
-		// ÎäÆ÷Êı¾İĞÅÏ¢
+		// æ­¦å™¨æ•°æ®ä¿¡æ¯
 		FAbilityCostInfo AbilityCostInfo;
 		AbilityCostInfo.HealthCost = 20.0f;
 		AbilityCostInfo.StaminaCost = 20.0f;

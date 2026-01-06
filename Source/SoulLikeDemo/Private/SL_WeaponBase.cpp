@@ -11,25 +11,25 @@
 
 ASL_WeaponBase::ASL_WeaponBase()
 {
-	//ÊÇ·ñ¿ªÆôtick
+	//æ˜¯å¦å¼€å¯tick
 	PrimaryActorTick.bCanEverTick = false;
 
 	/************************************************************************/
-	/*                              ×é¼ş³õÊ¼»¯                                        */
+	/*                              ç»„ä»¶åˆå§‹åŒ–                                        */
 	/************************************************************************/
-	// ³¡¾°×é¼şroot
+	// åœºæ™¯ç»„ä»¶root
 	USceneComponent* SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	RootComponent = SceneRoot;
 
-	// ¹Ç÷ÀÍø¸ñÌå-
+	// éª¨éª¼ç½‘æ ¼ä½“-
 	SkeletalWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalWeaponMesh->SetupAttachment(RootComponent);
 
-	// ÎäÆ÷ÖĞÑëĞ­µ÷×é¼ş
+	// æ­¦å™¨ä¸­å¤®åè°ƒç»„ä»¶
 	WeaponComboCoordinatorComp = CreateDefaultSubobject<UWeaponComboCoordinatorComponent>(TEXT("ComboCoordinator"));
 
 	/************************************************************************/
-	/*                              ±äÁ¿³õÊ¼»¯                                        */
+	/*                              å˜é‡åˆå§‹åŒ–                                        */
 	/************************************************************************/
 	WeaponID = 0;
 	SoftMeshReference = nullptr;
@@ -42,13 +42,13 @@ ASL_WeaponBase::ASL_WeaponBase()
 
 void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 {
-	// ²ÎÊı¼ì²é
+	// å‚æ•°æ£€æŸ¥
 	RETURN_IF_TRUE(NotifyType <= int(EWeaponAnimNotifyType::EWeaponAnimNotify_Min) || NotifyType >= int(EWeaponAnimNotifyType::EWeaponAnimNotify_Max));
 	switch (EWeaponAnimNotifyType(NotifyType))
 	{
 	case EWeaponAnimNotifyType::EWeaponAnimNotify_Active_NormalComboWindow:
 	{
-		// ¼ì²é×é¼şÊÇ·ñÓĞĞ§
+		// æ£€æŸ¥ç»„ä»¶æ˜¯å¦æœ‰æ•ˆ
 		if(WeaponComboCoordinatorComp)
 		{
 			WeaponComboCoordinatorComp->ActiveComboWindowInputState(EWeaponModeTyoe::WEAPONMODE_Attack);
@@ -56,7 +56,7 @@ void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 	}; break;
 	case EWeaponAnimNotifyType::EWeaponAnimNotify_InActive_NormalComboWindow:
 	{
-		// ¼ì²é×é¼şÊÇ·ñÓĞĞ§
+		// æ£€æŸ¥ç»„ä»¶æ˜¯å¦æœ‰æ•ˆ
 		if (WeaponComboCoordinatorComp)
 		{
 			WeaponComboCoordinatorComp->InActiveComboWindowInputState(EWeaponModeTyoe::WEAPONMODE_Attack);
@@ -64,7 +64,7 @@ void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 	}; break;
 	case EWeaponAnimNotifyType::EWeaponAnimNotify_Active_SkillComboWindow:
 	{
-		// ¼ì²é×é¼şÊÇ·ñÓĞĞ§
+		// æ£€æŸ¥ç»„ä»¶æ˜¯å¦æœ‰æ•ˆ
 		if (WeaponComboCoordinatorComp)
 		{
 			WeaponComboCoordinatorComp->ActiveComboWindowInputState(EWeaponModeTyoe::WEAPONMODE_ComboSkill);
@@ -79,7 +79,7 @@ void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 	}; break;
 	case EWeaponAnimNotifyType::EWeaponAnimNotify_EnableCollision_Melee:
 	{
-		// ¼ì²é×é¼şÊÇ·ñÓĞĞ§
+		// æ£€æŸ¥ç»„ä»¶æ˜¯å¦æœ‰æ•ˆ
 		if (WeaponComponentMap.Find(EWeaponComponentType::MeleeAttack) != nullptr)
 		{
 			UWeaponMeleeAttackComponent* Comp = Cast<UWeaponMeleeAttackComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::MeleeAttack));
@@ -91,7 +91,7 @@ void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 	}; break;
 	case EWeaponAnimNotifyType::EWeaponAnimNotify_DisableCollision_Melee:
 	{
-		// ¼ì²é×é¼şÊÇ·ñÓĞĞ§
+		// æ£€æŸ¥ç»„ä»¶æ˜¯å¦æœ‰æ•ˆ
 		if (WeaponComponentMap.Find(EWeaponComponentType::MeleeAttack) != nullptr)
 		{
 			UWeaponMeleeAttackComponent* Comp = Cast<UWeaponMeleeAttackComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::MeleeAttack));
@@ -103,7 +103,7 @@ void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 	}; break;
 	case EWeaponAnimNotifyType::EWeaponAnimNotify_ActiveParryWindow_Melee:
 	{
-		// ¼ì²é×é¼şÊÇ·ñÓĞĞ§
+		// æ£€æŸ¥ç»„ä»¶æ˜¯å¦æœ‰æ•ˆ
 		if (WeaponComponentMap.Find(EWeaponComponentType::MeleeAttack) != nullptr)
 		{
 			UWeaponMeleeAttackComponent* Comp = Cast<UWeaponMeleeAttackComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::MeleeAttack));
@@ -115,7 +115,7 @@ void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 	}; break;
 	case EWeaponAnimNotifyType::EWeaponAnimNotify_InActiveParryWindow_Melee:
 	{
-		// ¼ì²é×é¼şÊÇ·ñÓĞĞ§
+		// æ£€æŸ¥ç»„ä»¶æ˜¯å¦æœ‰æ•ˆ
 		if (WeaponComponentMap.Find(EWeaponComponentType::MeleeAttack) != nullptr)
 		{
 			UWeaponMeleeAttackComponent* Comp = Cast<UWeaponMeleeAttackComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::MeleeAttack));
@@ -127,7 +127,7 @@ void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 	}; break;
 	case EWeaponAnimNotifyType::EWeaponAnimNotify_EnableCollision_ComboSkil_Parry:
 	{
-		// ¼ì²é×é¼şÊÇ·ñÓĞĞ§
+		// æ£€æŸ¥ç»„ä»¶æ˜¯å¦æœ‰æ•ˆ
 		if (WeaponComponentMap.Find(EWeaponComponentType::Parry) != nullptr)
 		{
 			UWeaponParryComponent* Comp = Cast<UWeaponParryComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::Parry));
@@ -139,7 +139,7 @@ void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 	}; break;
 	case EWeaponAnimNotifyType::EWeaponAnimNotify_DisableCollision_ComboSkil_Parry:
 	{
-		// ¼ì²é×é¼şÊÇ·ñÓĞĞ§
+		// æ£€æŸ¥ç»„ä»¶æ˜¯å¦æœ‰æ•ˆ
 		if (WeaponComponentMap.Find(EWeaponComponentType::Parry) != nullptr)
 		{
 			UWeaponParryComponent* Comp = Cast<UWeaponParryComponent>(WeaponComponentMap.FindRef(EWeaponComponentType::Parry));
@@ -155,7 +155,7 @@ void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 
 void ASL_WeaponBase::Attack(AActor* OwnerActor)
 {
-	// ¼ÓÈëÁ¬¶ÎÂß¼­
+	// åŠ å…¥è¿æ®µé€»è¾‘
 	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_Attack,TEXT("Default"));
 }
 
@@ -166,7 +166,7 @@ void ASL_WeaponBase::Defence(AActor* OwnerActor)
 
 void ASL_WeaponBase::ComboSkill(AActor* OwnerActor)
 {
-	// ¼ÓÈëÁ¬¶ÎÂß¼­
+	// åŠ å…¥è¿æ®µé€»è¾‘
 	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_ComboSkill, TEXT("Default"));
 }
 
@@ -182,39 +182,39 @@ void ASL_WeaponBase::BackStab(AActor* OwnerActor)
 
 void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo,AActor* OwnerActor)
 {
-	// ³õÊ¼»¯³ÖÓĞÕßĞÅÏ¢ºÍ²å²ÛĞÅÏ¢
+	// åˆå§‹åŒ–æŒæœ‰è€…ä¿¡æ¯å’Œæ’æ§½ä¿¡æ¯
 	Owning = OwnerActor;
 	WeaponOnwerSocketName = WeaponInfo.SocketName;
-	// ¼ÓÔØÎäÆ÷Ä£ĞÍ
+	// åŠ è½½æ­¦å™¨æ¨¡å‹
 	LoadWeaponMeshAsync(WeaponInfo.Mesh);
 	CollisionBoxSize = WeaponInfo.WeaponCollisionBoxSize;
-	// ¼ÓÔØÎäÆ÷¶¯×÷À¶Í¼
+	// åŠ è½½æ­¦å™¨åŠ¨ä½œè“å›¾
 	LoadWeaponAnimInstanceAsync(WeaponInfo.AnimClass);
 
-	// ¼ÓÔØÎäÆ÷ÃÉÌ«Ææ
+	// åŠ è½½æ­¦å™¨è’™å¤ªå¥‡
 	LoadWeaponMentageAsync(EWeaponModeTyoe::WEAPONMODE_Attack, WeaponInfo.AttackMentageName);
-	// ¼ÓÔØÎäÆ÷ÃÉÌ«Ææ
+	// åŠ è½½æ­¦å™¨è’™å¤ªå¥‡
 	LoadWeaponMentageAsync(EWeaponModeTyoe::WEAPONMODE_ComboSkill, WeaponInfo.ComboSkillMentageName);
-	// ¼ÓÔØÎäÆ÷ÃÉÌ«Ææ
+	// åŠ è½½æ­¦å™¨è’™å¤ªå¥‡
 	LoadWeaponMentageAsync(EWeaponModeTyoe::WEAPONMODE_Execute, WeaponInfo.ExecuteMentageName);
-	// ¼ÓÔØÎäÆ÷ÃÉÌ«Ææ
+	// åŠ è½½æ­¦å™¨è’™å¤ªå¥‡
 	LoadWeaponMentageAsync(EWeaponModeTyoe::WEAPONMODE_BackStab, WeaponInfo.BackStabMentageName);
-	// ¼ÓÔØÎäÆ÷Ä£×é
+	// åŠ è½½æ­¦å™¨æ¨¡ç»„
 	LoadWeaponComponents(WeaponInfo.NeedLoadComponentInfoMap);
 
-	// ³õÊ¼»¯ÎäÆ÷ÖĞÑë¹ÜÀí×é¼ş
+	// åˆå§‹åŒ–æ­¦å™¨ä¸­å¤®ç®¡ç†ç»„ä»¶
 	WeaponComboCoordinatorComp->InitComboCoordinatorComponet(WeaponInfo.ComboCoordinatorInfoMap);
 }
 
 void ASL_WeaponBase::ActiveWeapon()
 {
-	// ¿ÉÊÓ
+	// å¯è§†
 	SetActorHiddenInGame(false);
 }
 
 void ASL_WeaponBase::InActiveWeapon()
 {
-	// ²»¿ÉÊÓ
+	// ä¸å¯è§†
 	SetActorHiddenInGame(true);
 }
 
@@ -251,7 +251,7 @@ bool ASL_WeaponBase::PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* Own
 void ASL_WeaponBase::LoadWeaponMeshAsync(const FString WeaponMeshName)
 {
 	if (WeaponMeshName == "") { return; }
-	// ×ÊÔ´Òì²½¼ÓÔØ
+	// èµ„æºå¼‚æ­¥åŠ è½½
 	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
 	SoftMeshReference = TSoftObjectPtr<USkeletalMesh>(FSoftObjectPath(*WeaponMeshName));
 	Streamable.RequestAsyncLoad(
@@ -269,13 +269,13 @@ void ASL_WeaponBase::OnLoadedWeaponMesh()
 	{
 		if (ACharacter* CharacterOwner = Cast<ACharacter>(Owning))
 		{
-			//½«ÎäÆ÷°ó¶¨µ½Ö¸¶¨ĞéÄâ¹Ç÷À
+			//å°†æ­¦å™¨ç»‘å®šåˆ°æŒ‡å®šè™šæ‹Ÿéª¨éª¼
 			if (CharacterOwner->GetMesh()->DoesSocketExist(FName(*WeaponOnwerSocketName)))
 			{
 				this->AttachToComponent(
 					CharacterOwner->GetMesh(),
-					FAttachmentTransformRules::SnapToTargetNotIncludingScale, // ±£³ÖÏà¶Ô±ä»»
-					FName(*WeaponOnwerSocketName) // Socket Ãû³Æ
+					FAttachmentTransformRules::SnapToTargetNotIncludingScale, // ä¿æŒç›¸å¯¹å˜æ¢
+					FName(*WeaponOnwerSocketName) // Socket åç§°
 				);
 			}
 		}
@@ -285,13 +285,13 @@ void ASL_WeaponBase::OnLoadedWeaponMesh()
 void ASL_WeaponBase::LoadWeaponMentageAsync(EWeaponModeTyoe MentageType, const FString MentagePath)
 {
 	if (MentagePath == "") { return; }
-	// ×ÊÔ´Òì²½¼ÓÔØ
+	// èµ„æºå¼‚æ­¥åŠ è½½
 	/*FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
 	SoftMentageRefrence = FSoftObjectPath(*MentagePath);
 	Streamable.RequestAsyncLoad(
 		SoftMentageRefrence.ToSoftObjectPath()
 	);*/
-	// ×ÊÔ´Í¬²½¼ÓÔØ
+	// èµ„æºåŒæ­¥åŠ è½½
 	UAnimMontage* Montage = LoadObject<UAnimMontage>(
 		nullptr,
 		*MentagePath
@@ -306,7 +306,7 @@ void ASL_WeaponBase::LoadWeaponMentageAsync(EWeaponModeTyoe MentageType, const F
 void ASL_WeaponBase::LoadWeaponAnimInstanceAsync(const FString WeapinAnimName)
 {
 	if (WeapinAnimName == "") { return; }
-	// ×ÊÔ´Òì²½¼ÓÔØ
+	// èµ„æºå¼‚æ­¥åŠ è½½
 	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
 	FSoftObjectPath AnimPathStr(WeapinAnimName + "_C");
 	SoftWeaponAnimInstanceReference = AnimPathStr;
@@ -326,7 +326,7 @@ void ASL_WeaponBase::OnLoadedWeaponAnimInstance()
 
 bool ASL_WeaponBase::LoadWeaponComponents(const TMap<EWeaponComponentType, bool>& pWeaponComponentInfo)
 {
-	// ¸ù¾İmapĞÅÏ¢´´½¨¸÷¸öÄ£×é,²¢½«´´½¨µÄÊµ¼ÊÇé¿ö¸üĞÂÖÁWeaponLoadComponentInfoMap
+	// æ ¹æ®mapä¿¡æ¯åˆ›å»ºå„ä¸ªæ¨¡ç»„,å¹¶å°†åˆ›å»ºçš„å®é™…æƒ…å†µæ›´æ–°è‡³WeaponLoadComponentInfoMap
 	WeaponLoadComponentInfoMap.Reset();
 	for (const auto& Pair : pWeaponComponentInfo)
 	{
@@ -370,20 +370,20 @@ bool ASL_WeaponBase::LoadWeaponComponents(const TMap<EWeaponComponentType, bool>
 		}
 		else if (Pair.Key == EWeaponComponentType::Execute)
 		{
-			// Ä¿Ç°´¦¾öÄ£×éÎŞĞèµ¥¶À×é¼ş
+			// ç›®å‰å¤„å†³æ¨¡ç»„æ— éœ€å•ç‹¬ç»„ä»¶
 			NewComponent.Key = Pair.Key;
 			NewComponent.Value = true;
 		}
 		else if (Pair.Key == EWeaponComponentType::BackStab)
 		{
-			// Ä¿Ç°´¦¾öÄ£×éÎŞĞèµ¥¶À×é¼ş
+			// ç›®å‰å¤„å†³æ¨¡ç»„æ— éœ€å•ç‹¬ç»„ä»¶
 			NewComponent.Key = Pair.Key;
 			NewComponent.Value = true;
 		}
 		else
 		{continue; }
 
-		// ¸üĞÂĞÅÏ¢
+		// æ›´æ–°ä¿¡æ¯
 		WeaponLoadComponentInfoMap.Add(NewComponent);
 	}
 
@@ -413,7 +413,7 @@ void ASL_WeaponBase::PlayWeaponMentage(AActor* OwnerActor, EWeaponModeTyoe Menta
 		}
 		else
 		{
-			// ²»Õ¹Ê¾¶¯»­
+			// ä¸å±•ç¤ºåŠ¨ç”»
 			if (MentageType == EWeaponModeTyoe::WEAPONMODE_Attack && MentageSectionName == "Default")
 			{
 				AnimInstance->Montage_Play(NeedPlayMentage);

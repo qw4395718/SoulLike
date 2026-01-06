@@ -21,7 +21,7 @@ USL_CombatantComponent::USL_CombatantComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// Ä¬ÈÏ³õÊ¼»¯
+	// é»˜è®¤åˆå§‹åŒ–
 	TeamID = 0;
 	bWaitingForExecuted = false;
 	bAllowedBackStabsed = false;
@@ -33,7 +33,7 @@ USL_CombatantComponent::USL_CombatantComponent()
 
 void USL_CombatantComponent::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	// Ö±½ÓÊ¹ÓÃÉúÃü½Ó¿Ú,ºóĞøÊôĞÔ×é¼şÍê³ÉÊ±£¬ÏÈÓÉ×é¼ş½øĞĞ¼ÆËãºóÔÙ·¢¸øÉúÃü×é¼ş
+	// ç›´æ¥ä½¿ç”¨ç”Ÿå‘½æ¥å£,åç»­å±æ€§ç»„ä»¶å®Œæˆæ—¶ï¼Œå…ˆç”±ç»„ä»¶è¿›è¡Œè®¡ç®—åå†å‘ç»™ç”Ÿå‘½ç»„ä»¶
 	float CalculateDamage = Damage;
 	if (IStateCalculate_IF* StateCalculateTarge = Cast<IStateCalculate_IF>(GetOwner()))
 	{
@@ -59,7 +59,7 @@ int USL_CombatantComponent::GetTeamID()
 
 void USL_CombatantComponent::OnAttackEventCall()
 {
-	// Í¨ÖªÆäËû×é¼şÏìÓ¦ÉËº¦ÊÂ¼ş
+	// é€šçŸ¥å…¶ä»–ç»„ä»¶å“åº”ä¼¤å®³äº‹ä»¶
 }
 
 void USL_CombatantComponent::SetCanExecuteState(bool bCanExecuted)
@@ -93,7 +93,7 @@ void USL_CombatantComponent::PerformAttack()
 	if(MyWeaponBehavior == nullptr){return;}
 
 	IStamina_IF* StaminaTarget = Cast<IStamina_IF>(MyCharacterComponentTarget->GetStaminaComponent());
-	// ¼ì²éÊÇ·ñ´¦ÓÚ¾«Æ£Á¦½ß×´Ì¬
+	// æ£€æŸ¥æ˜¯å¦å¤„äºç²¾ç–²åŠ›ç«­çŠ¶æ€
 	if (StaminaTarget)
 	{
 		if (StaminaTarget->GetIsStaminaZero() == true)
@@ -102,14 +102,14 @@ void USL_CombatantComponent::PerformAttack()
 		}
 	}
 
-	// »ñÈ¡½ÇÉ«Î»ÖÃºÍÇ°·½ÏòÁ¿
+	// è·å–è§’è‰²ä½ç½®å’Œå‰æ–¹å‘é‡
 	FVector CharacterLocation = GetOwner()->GetActorLocation();
 	FVector CharacterForward = GetOwner()->GetActorForwardVector();
 	FRotator CharacterRotator = GetOwner()->GetActorRotation();
 
-	// ÉèÖÃÇòĞÎ¼ì²â²ÎÊı
+	// è®¾ç½®çƒå½¢æ£€æµ‹å‚æ•°
 	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(ActorOwner); // ºöÂÔ×Ô¼º
+	ActorsToIgnore.Add(ActorOwner); // å¿½ç•¥è‡ªå·±
 
 	TArray<FHitResult> OutHits;
 	bool bHit = UKismetSystemLibrary::SphereTraceMulti(
@@ -117,18 +117,18 @@ void USL_CombatantComponent::PerformAttack()
 		CharacterLocation,
 		CharacterLocation,
 		DETECTION_RADIUS,
-		UEngineTypes::ConvertToTraceType(ECC_Pawn), // ¼ì²âpawnÀàĞÍ
-		false, // ²»¼ì²â¸´ÔÓÅö×²
+		UEngineTypes::ConvertToTraceType(ECC_Pawn), // æ£€æµ‹pawnç±»å‹
+		false, // ä¸æ£€æµ‹å¤æ‚ç¢°æ’
 		ActorsToIgnore,
-		EDrawDebugTrace::ForDuration, // µ÷ÊÔÊ±ÏÔÊ¾£¬·¢²¼Ê±¿É¸ÄÎªNone
+		EDrawDebugTrace::ForDuration, // è°ƒè¯•æ—¶æ˜¾ç¤ºï¼Œå‘å¸ƒæ—¶å¯æ”¹ä¸ºNone
 		OutHits,
 		true
 	);
 
 	if (!bHit || OutHits.Num() == 0)
 	{
-		// ÈôÎŞ·ûºÏµÄÌØÊâ¹¥»÷Ôò½øĞĞÆÕÍ¨¹¥»÷
-		// ÏûºÄÌåÁ¦
+		// è‹¥æ— ç¬¦åˆçš„ç‰¹æ®Šæ”»å‡»åˆ™è¿›è¡Œæ™®é€šæ”»å‡»
+		// æ¶ˆè€—ä½“åŠ›
 		IStateCalculate_IF* StateCalculateTarget = Cast<IStateCalculate_IF>(GetOwner());
 		if (StateCalculateTarget)
 		{
@@ -139,7 +139,7 @@ void USL_CombatantComponent::PerformAttack()
 		return;
 	}
 
-	// ±éÀúËùÓĞ¼ì²âµ½µÄµĞÈË
+	// éå†æ‰€æœ‰æ£€æµ‹åˆ°çš„æ•Œäºº
 	for (const FHitResult& Hit : OutHits)
 	{
 		AActor* Enemy = Cast<AActor>(Hit.GetActor());
@@ -152,7 +152,7 @@ void USL_CombatantComponent::PerformAttack()
 			IHealth_IF* EnemyHealthTarget = Cast<IHealth_IF>(EnemyCharacterComponentTarget->GetHealthComponent());
 			ICombat_IF* EnemyCombatTarget = Cast<ICombat_IF>(EnemyCharacterComponentTarget->GetCombatantComponent());
 		
-			// ÊÇ·ñ¿ÉÒÔ½øĞĞÏÂÒ»²½
+			// æ˜¯å¦å¯ä»¥è¿›è¡Œä¸‹ä¸€æ­¥
 			if (EnemyHealthTarget == nullptr ||
 				EnemyCombatTarget == nullptr ||
 				EnemyHealthTarget->IsAlive() == false)
@@ -160,50 +160,50 @@ void USL_CombatantComponent::PerformAttack()
 				continue;
 			}
 
-			// ¼ì²éµĞÈËÊÇ·ñ´¦ÓÚ¿É´¦¾ö×´Ì¬
+			// æ£€æŸ¥æ•Œäººæ˜¯å¦å¤„äºå¯å¤„å†³çŠ¶æ€
 			if (EnemyCombatTarget->CanExecute())
 			{
 				//RH_EquippedWeapon->PerformExecute();
-				// ½«µĞÈËË²ÒÆµ½½ÇÉ«ÃæÇ°Ö¸¶¨Î»ÖÃ
+				// å°†æ•Œäººç¬ç§»åˆ°è§’è‰²é¢å‰æŒ‡å®šä½ç½®
 				FRotator NewRotator = CharacterRotator.Add(0, 180, 0);
 				NewRotator.Normalize();
 				EnemyCombatTarget->MoveToLocationAndRotation(
 					CharacterLocation + CharacterForward * 100.0f,
 					NewRotator);
 				EnemyCombatTarget->PerformExecuted(FName("Executed_Sword"));
-				// ÎÒ·½µÄÎäÆ÷½Ó¿Ú
+				// æˆ‘æ–¹çš„æ­¦å™¨æ¥å£
 				MyWeaponBehavior->ExecuteBehaviorResponse(My);
 				return;
 			}
 
-			// ¼ÆËãµĞÈËÎ»ÖÃºÍ·½Ïò
+			// è®¡ç®—æ•Œäººä½ç½®å’Œæ–¹å‘
 			FVector EnemyLocation = Enemy->GetActorLocation();
 			FVector EnemyForward = Enemy->GetActorForwardVector();
 
-			// ¼ÆËãÍæ¼Òµ½µĞÈËµÄÏòÁ¿
+			// è®¡ç®—ç©å®¶åˆ°æ•Œäººçš„å‘é‡
 			FVector ToEnemy = EnemyLocation - CharacterLocation;
 			float DistanceToEnemy = ToEnemy.Size();
 			ToEnemy.Normalize();
 
-			// ¼ÆËãµĞÈËºó·½½Ç¶È
+			// è®¡ç®—æ•Œäººåæ–¹è§’åº¦
 			float DotProduct = FVector::DotProduct(EnemyForward, ToEnemy);
 			float Angle = FMath::RadiansToDegrees(FMath::Acos(DotProduct));
 
-			// ¼ì²éÊÇ·ñÂú×ã±³´ÌÌõ¼ş
+			// æ£€æŸ¥æ˜¯å¦æ»¡è¶³èƒŒåˆºæ¡ä»¶
 			if (DistanceToEnemy <= BACKSTAB_DISTANCE_THRESHOLD && Angle <= BACKSTAB_ANGLE_THRESHOLD)
 			{
 				EnemyCombatTarget->MoveToLocationAndRotation(
 					CharacterLocation + CharacterForward * 100.0f,
 					FRotator(CharacterRotator.Pitch, CharacterRotator.Yaw, CharacterRotator.Roll));
 				EnemyCombatTarget->PerformBackStabbed("BackStabbed_Sword");
-				// ÎÒ·½µÄÎäÆ÷½Ó¿Ú
+				// æˆ‘æ–¹çš„æ­¦å™¨æ¥å£
 				MyWeaponBehavior->BackStabBehaviorResponse(My);
 				return;
 			}
 		}
 	}
 
-	// ÈôÎŞ·ûºÏµÄÌØÊâ¹¥»÷Ôò½øĞĞÆÕÍ¨¹¥»÷
+	// è‹¥æ— ç¬¦åˆçš„ç‰¹æ®Šæ”»å‡»åˆ™è¿›è¡Œæ™®é€šæ”»å‡»
 	MyWeaponBehavior->AttackBehaviorResponse(My);
 	IStateCalculate_IF* StateCalculateTarget = Cast<IStateCalculate_IF>(My);
 	if (StateCalculateTarget)
@@ -260,8 +260,8 @@ void USL_CombatantComponent::MoveToLocationAndRotation(FVector LocationPosition,
 		{
 			OwnCharacter->GetCharacterMovement()->SetMovementMode(MOVE_None);
 			OwnCharacter->SetActorLocationAndRotation(LocationPosition, Rotaion, false, nullptr, ETeleportType::TeleportPhysics);
-			// »Ö¸´ÒÆ¶¯£¨Èç¹ûÊÇ£©
-			OwnCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking); // »Ö¸´ĞĞ×ßÄ£Ê½
+			// æ¢å¤ç§»åŠ¨ï¼ˆå¦‚æœæ˜¯ï¼‰
+			OwnCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking); // æ¢å¤è¡Œèµ°æ¨¡å¼
 
 		}
 		else
@@ -283,7 +283,7 @@ void USL_CombatantComponent::InitCombatComponentInfo(AActor* OwnerActor, FString
 
 void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)
 {
-	// 0. ÏÈ¼ì²éÈíÒıÓÃÊÇ·ñÓĞĞ§£¨Â·¾¶ÊÇ·ñÕıÈ·£©
+	// 0. å…ˆæ£€æŸ¥è½¯å¼•ç”¨æ˜¯å¦æœ‰æ•ˆï¼ˆè·¯å¾„æ˜¯å¦æ­£ç¡®ï¼‰
 	if (!SoftMentageRefrence.IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SoftMontage path is not valid!"));
@@ -293,7 +293,7 @@ void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)
 	AActor* OwnActor = GetOwner();
 	if (OwnActor == nullptr) { return; }
 
-	// 1. ¼ì²éÊÇ·ñÒÑ¾­¼ÓÔØÍê³ÉÁË£¨ÀıÈç£ºÖ®Ç°ÒÑ¾­¼ÓÔØ¹ı£©
+	// 1. æ£€æŸ¥æ˜¯å¦å·²ç»åŠ è½½å®Œæˆäº†ï¼ˆä¾‹å¦‚ï¼šä¹‹å‰å·²ç»åŠ è½½è¿‡ï¼‰
 	if (UAnimMontage* LoadedMontage = SoftMentageRefrence.Get())
 	{
 		ACharacter* OwnCharacter = Cast<ACharacter>(OwnActor);
@@ -313,33 +313,33 @@ void USL_CombatantComponent::PlaySoftMentage(FName MetageSectionName)
 			}
 			else
 			{
-				// ²»Õ¹Ê¾¶¯»­
+				// ä¸å±•ç¤ºåŠ¨ç”»
 			}
 		}
 		return;
 	}
 
-	// ÁÙÊ±´æ´¢ĞèÒª²¥·ÅµÄÃÉÌ«ÆæÆ¬¶ÎÃû³Æ
+	// ä¸´æ—¶å­˜å‚¨éœ€è¦æ’­æ”¾çš„è’™å¤ªå¥‡ç‰‡æ®µåç§°
 	NeedPlayMetageSectionName = MetageSectionName;
 
-	// 2. Èç¹û»¹Î´¼ÓÔØ£¬Ôò·¢ÆğÒì²½¼ÓÔØÇëÇó
+	// 2. å¦‚æœè¿˜æœªåŠ è½½ï¼Œåˆ™å‘èµ·å¼‚æ­¥åŠ è½½è¯·æ±‚
 	//LoadActorMentageAsync();
 
-	//// ¿ÉÑ¡µÄ£ºÉèÖÃ¼ÓÔØÓÅÏÈ¼¶ºÍ²ÎÊı
+	//// å¯é€‰çš„ï¼šè®¾ç½®åŠ è½½ä¼˜å…ˆçº§å’Œå‚æ•°
 	//MontageStreamableHandle = Streamable.RequestAsyncLoad(
 	//	SoftMentageRefrence.ToSoftObjectPath(),
 	//	Delegate
 	//	//, FStreamableManager::DefaultAsyncLoadPriority, false
 	//);
 
-	// ´ËÊ±£¬Äã¿ÉÒÔÔÚÕâÀï¸üĞÂUI£¬±ÈÈçÏÔÊ¾Ò»¸ö¡°¼ÓÔØÖĞ¡±µÄÌáÊ¾
+	// æ­¤æ—¶ï¼Œä½ å¯ä»¥åœ¨è¿™é‡Œæ›´æ–°UIï¼Œæ¯”å¦‚æ˜¾ç¤ºä¸€ä¸ªâ€œåŠ è½½ä¸­â€çš„æç¤º
 	UE_LOG(LogTemp, Log, TEXT("Started async loading montage..."));
 }
 
 void USL_CombatantComponent::LoadActorMentageAsync(const FString MentagePath)
 {
 	if (MentagePath == "") { return; }
-	// ×ÊÔ´Òì²½¼ÓÔØ
+	// èµ„æºå¼‚æ­¥åŠ è½½
 	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
 	SoftMentageRefrence = TSoftObjectPtr<UAnimMontage>(FSoftObjectPath(*MentagePath));
 	Streamable.RequestAsyncLoad(
@@ -350,37 +350,37 @@ void USL_CombatantComponent::LoadActorMentageAsync(const FString MentagePath)
 
 void USL_CombatantComponent::OnActorMentageLoaded()
 {
-	// ´òÓ¡ĞÅÏ¢
+	// æ‰“å°ä¿¡æ¯
 	UE_LOG(LogTemp,Log,TEXT("ZYF_ALS_USL_CombatantComponent::OnActorMentageLoaded()"));
-	// 3.1 Í¨¹ı¾ä±ú¼ì²é£¨ÍÆ¼ö£©
+	// 3.1 é€šè¿‡å¥æŸ„æ£€æŸ¥ï¼ˆæ¨èï¼‰
 	//if (MontageStreamableHandle.IsValid() && MontageStreamableHandle->HasLoadCompleted())
 	//{
-	//	// ´ÓÈíÒıÓÃÖĞ»ñÈ¡ÒÑ¾­¼ÓÔØÍê³ÉµÄ×ÊÔ´¶ÔÏó
+	//	// ä»è½¯å¼•ç”¨ä¸­è·å–å·²ç»åŠ è½½å®Œæˆçš„èµ„æºå¯¹è±¡
 	//	UAnimMontage* LoadedMontage = SoftMentageRefrence.Get();
-	//	// 3.2 ÔÙ´Î¼ì²é»ñÈ¡µ½µÄ¶ÔÏóÊÇ·ñÓĞĞ§
+	//	// 3.2 å†æ¬¡æ£€æŸ¥è·å–åˆ°çš„å¯¹è±¡æ˜¯å¦æœ‰æ•ˆ
 	//	if (LoadedMontage)
 	//	{
-	//		// 4. ×ÊÔ´¼ÓÔØ³É¹¦£¬Ê¹ÓÃËü£¡
+	//		// 4. èµ„æºåŠ è½½æˆåŠŸï¼Œä½¿ç”¨å®ƒï¼
 	//		PlaySoftMentage(NeedPlayMetageSectionName);
 	//		UE_LOG(LogTemp, Log, TEXT("Montage loaded and played successfully!"));
 	//	}
 	//	else
 	//	{
-	//		// ÀíÂÛÉÏ²»Ó¦¸Ã×ßµ½ÕâÀï£¬³ı·Ç×ÊÔ´¼ÓÔØºóÓÖ±»Ç¿ÖÆĞ¶ÔØÁË
+	//		// ç†è®ºä¸Šä¸åº”è¯¥èµ°åˆ°è¿™é‡Œï¼Œé™¤éèµ„æºåŠ è½½ååˆè¢«å¼ºåˆ¶å¸è½½äº†
 	//		UE_LOG(LogTemp, Error, TEXT("Montage failed to load: Get() returned nullptr after successful load."));
 	//	}
 
-	//	// ÊÍ·Å¾ä±úÒıÓÃ¡£×¢Òâ£ºÕâ²»»áĞ¶ÔØ×ÊÔ´£¬ÒòÎªMySkeletalMeshComponentÏÖÔÚ³ÖÓĞ¶ÔËüµÄÇ¿ÒıÓÃ£¨PlayAnimMontageÄÚ²¿»áÉèÖÃ£©
+	//	// é‡Šæ”¾å¥æŸ„å¼•ç”¨ã€‚æ³¨æ„ï¼šè¿™ä¸ä¼šå¸è½½èµ„æºï¼Œå› ä¸ºMySkeletalMeshComponentç°åœ¨æŒæœ‰å¯¹å®ƒçš„å¼ºå¼•ç”¨ï¼ˆPlayAnimMontageå†…éƒ¨ä¼šè®¾ç½®ï¼‰
 	//	MontageStreamableHandle->ReleaseHandle();
 	//	MontageStreamableHandle.Reset();
 	//}
 	//else
 	//{
-	//	// 5. ´¦Àí¼ÓÔØÊ§°ÜµÄÇé¿ö
+	//	// 5. å¤„ç†åŠ è½½å¤±è´¥çš„æƒ…å†µ
 	//	UE_LOG(LogTemp, Error, TEXT("Failed to load montage at path: %s"), *LoadedPath.ToString());
-	//	// ÕâÀï¿ÉÒÔ¸øÍæ¼ÒÒ»¸ö·´À¡£¬±ÈÈç²¥·ÅÒ»¸öÄ¬ÈÏ¶¯»­»òÏÔÊ¾´íÎóĞÅÏ¢
+	//	// è¿™é‡Œå¯ä»¥ç»™ç©å®¶ä¸€ä¸ªåé¦ˆï¼Œæ¯”å¦‚æ’­æ”¾ä¸€ä¸ªé»˜è®¤åŠ¨ç”»æˆ–æ˜¾ç¤ºé”™è¯¯ä¿¡æ¯
 
-	//	// È·±£ÇåÀí¾ä±ú
+	//	// ç¡®ä¿æ¸…ç†å¥æŸ„
 	//	if (MontageStreamableHandle.IsValid())
 	//	{
 	//		MontageStreamableHandle->ReleaseHandle();

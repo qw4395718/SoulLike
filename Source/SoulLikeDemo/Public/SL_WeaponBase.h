@@ -26,135 +26,135 @@ public:
 	ASL_WeaponBase();
 public:
 	/************************************************************************/
-	/*                               ½Ó¿ÚÊµÏÖ                                       */
+	/*                               æ¥å£å®ç°                                       */
 	/************************************************************************/
-		// ¶¯»­(×´Ì¬)Í¨ÖªÏìÓ¦
+		// åŠ¨ç”»(çŠ¶æ€)é€šçŸ¥å“åº”
 	UFUNCTION()
 		void WeaponAnimNotifyResponse(int NotifyType) override;
 
 	/************************************************************************/
-	/*Íâ²¿µ÷ÓÃ                                                                     */
+	/*å¤–éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
-	// ³õÊ¼»¯ÎäÆ÷ĞÅÏ¢
+	// åˆå§‹åŒ–æ­¦å™¨ä¿¡æ¯
 	UFUNCTION()
 		void InitWeaponInfo(const FWeaponData& WeaponInfo,AActor* OwnerActor);
 
 
-	// ¼¤»î¸ÃÎäÆ÷
+	// æ¿€æ´»è¯¥æ­¦å™¨
 	UFUNCTION()
 		void ActiveWeapon();
 
-	// ¾²Ä¬¸ÃÎäÆ÷
+	// é™é»˜è¯¥æ­¦å™¨
 	UFUNCTION()
 		void InActiveWeapon();
 	
-	// ¸üĞÂÎäÆ÷×´Ì¬
+	// æ›´æ–°æ­¦å™¨çŠ¶æ€
 	UFUNCTION()
 		void UpdateWeaponEquipState(EWeaponEquipState CurrentState);
 
-	// ¸ÃÎäÆ÷ÊÇ·ñÅäÖÃÁË´¦¾öÄ£×é
+	// è¯¥æ­¦å™¨æ˜¯å¦é…ç½®äº†å¤„å†³æ¨¡ç»„
 	UFUNCTION()
 		bool IsLoadExecuteMod();
 
-	// ¸ÃÎäÆ÷ÊÇ·ñÅäÖÃÁË±³´ÌÄ£×é
+	// è¯¥æ­¦å™¨æ˜¯å¦é…ç½®äº†èƒŒåˆºæ¨¡ç»„
 	UFUNCTION()
 		bool IsLoadBackStabMod();
 
-	// Ö´ĞĞÎäÆ÷ĞĞÎª
+	// æ‰§è¡Œæ­¦å™¨è¡Œä¸º
 	UFUNCTION()
 		bool PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* OwnerActor);
 protected:
 	/************************************************************************/
-	/*                               ¼Ì³ĞÊµÏÖ                                       */
+	/*                               ç»§æ‰¿å®ç°                                       */
 	/************************************************************************/
 
 	/************************************************************************/
-	/*ÄÚ²¿µ÷ÓÃ                                                                     */
+	/*å†…éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
-	// Òì²½¼ÓÔØÎäÆ÷Íø¸ñÌå
+	// å¼‚æ­¥åŠ è½½æ­¦å™¨ç½‘æ ¼ä½“
 	void LoadWeaponMeshAsync(const FString WeaponMeshName);
 
-	// µ±ÎäÆ÷Íø¸ñÌå¼ÓÔØÍê³ÉÊ±
+	// å½“æ­¦å™¨ç½‘æ ¼ä½“åŠ è½½å®Œæˆæ—¶
 	void OnLoadedWeaponMesh();
 
-	// Òì²½¼ÓÔØÎäÆ÷ÃÉÌ«Ææ¶¯»­(¹©¸ø½ÇÉ«ÀàÊ¹ÓÃ)
+	// å¼‚æ­¥åŠ è½½æ­¦å™¨è’™å¤ªå¥‡åŠ¨ç”»(ä¾›ç»™è§’è‰²ç±»ä½¿ç”¨)
 	void LoadWeaponMentageAsync(EWeaponModeTyoe MentageType,const FString MentagePath);
 
-	// Òì²½¼ÓÔØÎäÆ÷¶¯»­À¶Í¼
+	// å¼‚æ­¥åŠ è½½æ­¦å™¨åŠ¨ç”»è“å›¾
 	void LoadWeaponAnimInstanceAsync(const FString WeapinAnimName);
 
-	// µ±ÎäÆ÷Íø¸ñÌå¼ÓÔØÍê³ÉÊ±
+	// å½“æ­¦å™¨ç½‘æ ¼ä½“åŠ è½½å®Œæˆæ—¶
 	void OnLoadedWeaponAnimInstance();
 
-	// ¼ÓÔØÎäÆ÷Ä£×é
+	// åŠ è½½æ­¦å™¨æ¨¡ç»„
 	bool LoadWeaponComponents(const TMap<EWeaponComponentType, bool>& WeaponComponentInfo);
 
-	// ²¥·ÅÎäÆ÷ÃÉÌ«Ææ
+	// æ’­æ”¾æ­¦å™¨è’™å¤ªå¥‡
 	void PlayWeaponMentage(AActor* OwnerActor,EWeaponModeTyoe MentageType,FName MentageSectionName);
 
-	// ¹¥»÷ĞĞÎªÏìÓ¦
+	// æ”»å‡»è¡Œä¸ºå“åº”
 	void Attack(AActor* OwnerActor);
 
-	// ·ÀÓùĞĞÎªÏìÓ¦
+	// é˜²å¾¡è¡Œä¸ºå“åº”
 	void Defence(AActor* OwnerActor);
 
-	// ¼¼ÄÜĞĞÎªÏìÓ¦
+	// æŠ€èƒ½è¡Œä¸ºå“åº”
 	void ComboSkill(AActor* OwnerActor);
 
-	// ´¦¾öĞĞÎªÏìÓ¦
+	// å¤„å†³è¡Œä¸ºå“åº”
 	void Execute(AActor* OwnerActor);
 
-	// ±³´ÌĞĞÎªÏìÓ¦
+	// èƒŒåˆºè¡Œä¸ºå“åº”
 	void BackStab(AActor* OwnerActor);
 protected:
 	/************************************************************************/
-	/*ÄÚ²¿±äÁ¿                                                                     */
+	/*å†…éƒ¨å˜é‡                                                                     */
 	/************************************************************************/
 
-	// ÎäÆ÷ID
+	// æ­¦å™¨ID
 	UPROPERTY()
 		uint32 WeaponID;
 
-	// Òì²½¼ÓÔØ¹Ç÷ÀÍø¸ñÌåÄ£ĞÍ
+	// å¼‚æ­¥åŠ è½½éª¨éª¼ç½‘æ ¼ä½“æ¨¡å‹
 		TSoftObjectPtr<USkeletalMesh> SoftMeshReference;
 
-	// ÎäÆ÷¹Ç÷ÀÍø¸ñÌå×é¼ş
+	// æ­¦å™¨éª¨éª¼ç½‘æ ¼ä½“ç»„ä»¶
 	UPROPERTY()
 		USkeletalMeshComponent* SkeletalWeaponMesh;
 
-	// Åö×²ºĞ×Ó³ß´ç
+	// ç¢°æ’ç›’å­å°ºå¯¸
 	UPROPERTY()
 		FVector CollisionBoxSize;
 
-	// ÎäÆ÷ÃÉÌ«Ææ¶¯»­Òì²½¼ÓÔØptr
+	// æ­¦å™¨è’™å¤ªå¥‡åŠ¨ç”»å¼‚æ­¥åŠ è½½ptr
 	UPROPERTY()
 		TMap<EWeaponModeTyoe, UAnimMontage*> WeaponMentageMap;
 
-	// ÎäÆ÷¶¯»­À¶Í¼
+	// æ­¦å™¨åŠ¨ç”»è“å›¾
 	UPROPERTY()
 		TSoftClassPtr<UClass> SoftWeaponAnimInstanceReference;
 
-	// ÎäÆ÷Ä£×é(Çë×¢ÒâÎäÆ÷Ä£×éÓëÎäÆ÷¶¯»­À¶Í¼ÊÇÖ±½Ó¹ØÁªµÄ)
+	// æ­¦å™¨æ¨¡ç»„(è¯·æ³¨æ„æ­¦å™¨æ¨¡ç»„ä¸æ­¦å™¨åŠ¨ç”»è“å›¾æ˜¯ç›´æ¥å…³è”çš„)
 	UPROPERTY()
 		TMap<EWeaponComponentType, USceneComponent*> WeaponComponentMap;
 
-	// ÎäÆ÷Ä£×éÊµ¼Ê¼ÓÔØÇé¿ö
+	// æ­¦å™¨æ¨¡ç»„å®é™…åŠ è½½æƒ…å†µ
 	UPROPERTY()
 		TMap<EWeaponComponentType, bool> WeaponLoadComponentInfoMap;
 
-	// ÎäÆ÷×°±¸²ÛÎ»Çé¿ö
+	// æ­¦å™¨è£…å¤‡æ§½ä½æƒ…å†µ
 	UPROPERTY()
 		EWeaponEquipState WeaponEquipInfo;
 
-	// ÎäÆ÷³ÖÓĞÕß
+	// æ­¦å™¨æŒæœ‰è€…
 	UPROPERTY()
 		TWeakObjectPtr<AActor> Owning;
 
-	// ÎäÆ÷°ó¶¨²å²ÛÃû
+	// æ­¦å™¨ç»‘å®šæ’æ§½å
 	UPROPERTY()
 		FString WeaponOnwerSocketName;
 
-	// ÎäÆ÷ÖĞÑëĞ­µ÷×é¼ş
+	// æ­¦å™¨ä¸­å¤®åè°ƒç»„ä»¶
 	UPROPERTY()
 		UWeaponComboCoordinatorComponent* WeaponComboCoordinatorComp;
 };

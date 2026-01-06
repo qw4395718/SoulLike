@@ -13,16 +13,16 @@ UWeaponParryComponent::UWeaponParryComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 
 	/************************************************************************/
-	/*                              ×é¼ş³õÊ¼»¯                                        */
+	/*                              ç»„ä»¶åˆå§‹åŒ–                                        */
 	/************************************************************************/
-	// Åö×²ºĞ-Ä¬ÈÏ²»¿ªÆô¼ì²â
+	// ç¢°æ’ç›’-é»˜è®¤ä¸å¼€å¯æ£€æµ‹
 	CollisonBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisonBox"));
 	CollisonBox->SetupAttachment(this);
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisonBox->SetGenerateOverlapEvents(false);
 
 	/************************************************************************/
-	/*                              ±äÁ¿³õÊ¼»¯                                        */
+	/*                              å˜é‡åˆå§‹åŒ–                                        */
 	/************************************************************************/
 	OnwerWeapon = nullptr;
 	OnwerActor = nullptr;
@@ -51,36 +51,36 @@ void UWeaponParryComponent::InitalizeWeaponComponent(AActor* Onwer, FVector CBSi
 void UWeaponParryComponent::EnableCollisionBoxCheck()
 {
 	RETURN_IF_FALSE(CollisonBox);
-	// ¸ù¾İÅäÖÃÊı¾İ³õÊ¼»¯Åö×²ºĞ´óĞ¡ºÍÅäÖÃ
+	// æ ¹æ®é…ç½®æ•°æ®åˆå§‹åŒ–ç¢°æ’ç›’å¤§å°å’Œé…ç½®
 	CollisonBox->OnComponentBeginOverlap.AddDynamic(this, &UWeaponParryComponent::OnCollisionOverlapBegin);
 	CollisonBox->OnComponentEndOverlap.AddDynamic(this, &UWeaponParryComponent::OnCollisionOverlapEnd);
-	// ÉèÖÃÅö×²
+	// è®¾ç½®ç¢°æ’
 	CollisonBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisonBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisonBox->SetGenerateOverlapEvents(true);
-	// ¿ªÆô¶¨Ê±Æ÷
+	// å¼€å¯å®šæ—¶å™¨
 	GetWorld()->GetTimerManager().SetTimer(ParryTimerHandle, this,
 		&UWeaponParryComponent::ApplyParryToOverlappingActors,
 		ParrtInterval, true);
-	// ÖØÖÃÒÑÃüÖĞÄ¿±ê¼ÇÂ¼
+	// é‡ç½®å·²å‘½ä¸­ç›®æ ‡è®°å½•
 	AlreadyParryActors.Reset();
 }
 
 void UWeaponParryComponent::DisableCollisionBoxCheck()
 {
-	// ¸ù¾İÅäÖÃÊı¾İ³õÊ¼»¯Åö×²ºĞ´óĞ¡ºÍÅäÖÃ
+	// æ ¹æ®é…ç½®æ•°æ®åˆå§‹åŒ–ç¢°æ’ç›’å¤§å°å’Œé…ç½®
 	CollisonBox->OnComponentBeginOverlap.RemoveDynamic(this, &UWeaponParryComponent::OnCollisionOverlapBegin);
 	CollisonBox->OnComponentEndOverlap.RemoveDynamic(this, &UWeaponParryComponent::OnCollisionOverlapEnd);
-	// ¹Ø±ÕÅö×²¼ì²â
+	// å…³é—­ç¢°æ’æ£€æµ‹
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisonBox->SetGenerateOverlapEvents(false);
-	// ¹Ø±Õ¶¨Ê±Æ÷
+	// å…³é—­å®šæ—¶å™¨
 	if (ParryTimerHandle.IsValid())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ParryTimerHandle);
 	}
-	// Çå¿ÕÒÑÃû×ÖÄ¿±ê¼ÇÂ¼
+	// æ¸…ç©ºå·²åå­—ç›®æ ‡è®°å½•
 	AlreadyParryActors.Reset();
 }
 
@@ -108,7 +108,7 @@ void UWeaponParryComponent::ApplyParryToOverlappingActors()
 		{
 			if (Actor && OnwerWeapon && OnwerActor != Actor && !AlreadyParryActors.Contains(Actor))
 			{
-				// µ÷ÓÃÎäÆ÷ÀàµÄµ¯·´½áËãÂß¼­
+				// è°ƒç”¨æ­¦å™¨ç±»çš„å¼¹åç»“ç®—é€»è¾‘
 
 			}
 		}

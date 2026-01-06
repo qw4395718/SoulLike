@@ -64,8 +64,8 @@ void ASoulLikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void ASoulLikeCharacter::Initialize()
 {
-	// ×Ê²ú³õÊ¼»¯
-	// ¼ÓÔØÎäÆ÷¶¯»­×ÊÔ´
+	// èµ„äº§åˆå§‹åŒ–
+	// åŠ è½½æ­¦å™¨åŠ¨ç”»èµ„æº
 	UAnimMontage* Montage = LoadObject<UAnimMontage>(
 		nullptr,
 		TEXT("/Game/SoulLikeDemo/Anim/AM_Character_Backstabbed.AM_Character_Backstabbed")
@@ -75,7 +75,7 @@ void ASoulLikeCharacter::Initialize()
 		BackStabbedMontage = Montage;
 	}
 
-	// ¼ÓÔØÎäÆ÷¶¯»­×ÊÔ´
+	// åŠ è½½æ­¦å™¨åŠ¨ç”»èµ„æº
 	Montage = LoadObject<UAnimMontage>(
 		nullptr,
 		TEXT("/Game/SoulLikeDemo/Anim/AM_Character_Executed.AM_Character_Executed")
@@ -89,7 +89,7 @@ void ASoulLikeCharacter::Initialize()
 
 void ASoulLikeCharacter::PlayBackStabbedMontage()
 {
-	// Ö±½Ó²¥·ÅÃÉÌ«Ææ¶¯»­£¬ºóĞø²¹³ä×´Ì¬ÅĞ¶Ï
+	// ç›´æ¥æ’­æ”¾è’™å¤ªå¥‡åŠ¨ç”»ï¼Œåç»­è¡¥å……çŠ¶æ€åˆ¤æ–­
 	UAnimInstance* AnimInstance = this->GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
@@ -99,7 +99,7 @@ void ASoulLikeCharacter::PlayBackStabbedMontage()
 
 void ASoulLikeCharacter::PlayExecutionedMontage(FName MontageSectionName)
 {
-	// Ö±½Ó²¥·ÅÃÉÌ«Ææ¶¯»­£¬ºóĞø²¹³ä×´Ì¬ÅĞ¶Ï
+	// ç›´æ¥æ’­æ”¾è’™å¤ªå¥‡åŠ¨ç”»ï¼Œåç»­è¡¥å……çŠ¶æ€åˆ¤æ–­
 	UAnimInstance* AnimInstance = this->GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
@@ -142,7 +142,7 @@ void ASoulLikeCharacter::MoveToLocationAndRotation(FVector LocationPosition,FRot
 {
 	this->GetCharacterMovement()->SetMovementMode(MOVE_None);
 	this->SetActorLocationAndRotation(LocationPosition, Rotaion, false, nullptr, ETeleportType::TeleportPhysics);
-	// »Ö¸´ÒÆ¶¯£¨Èç¹ûÊÇ£©
-	this->GetCharacterMovement()->SetMovementMode(MOVE_Walking); // »Ö¸´ĞĞ×ßÄ£Ê½
+	// æ¢å¤ç§»åŠ¨ï¼ˆå¦‚æœæ˜¯ï¼‰
+	this->GetCharacterMovement()->SetMovementMode(MOVE_Walking); // æ¢å¤è¡Œèµ°æ¨¡å¼
 }
 

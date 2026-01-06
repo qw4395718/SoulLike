@@ -8,7 +8,7 @@
 UHUD_ProgressBar::UHUD_ProgressBar(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
-	// Ĭ��ֵ
+	// Ĭ��ֵ
 	m_progressPercentMin = 0.0f;
 	m_progressPercentMax = 1.0f;
 	m_currentProgressBarPercent = 1.0f;

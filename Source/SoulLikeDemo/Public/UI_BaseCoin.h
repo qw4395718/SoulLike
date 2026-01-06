@@ -21,7 +21,7 @@ class SOULLIKEDEMO_API UUI_BaseCoin : public UUserWidget
 public:
 	UUI_BaseCoin(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/************************************************************************/
-	/* 外部调用                                                                     */
+	/* 澶栭儴璋冪敤                                                                     */
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable, Category = "Base Coin")
 		virtual void InitializeUIComp();
@@ -34,14 +34,14 @@ public:
 
 protected:
 	/************************************************************************/
-	/* 内部调用                                                                     */
+	/* 鍐呴儴璋冪敤                                                                     */
 	/************************************************************************/
 
 protected:
 	/************************************************************************/
-	/* 内部变量                                                                     */
+	/* 鍐呴儴鍙橀噺                                                                     */
 	/************************************************************************/
-	// Icon图片
+	// Icon鍥剧墖
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UImage* m_showImage;
 

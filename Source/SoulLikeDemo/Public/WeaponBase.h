@@ -24,18 +24,18 @@ public:
 
 protected:
 	/************************************************************************/
-	/*                               ¼Ì³ĞÊµÏÖ                                       */
+	/*                               ç»§æ‰¿å®ç°                                       */
 	/************************************************************************/
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 
 public:
-	// µ÷ÊÔ³õÊ¼»¯,¼òÒ×Á÷³Ì
+	// è°ƒè¯•åˆå§‹åŒ–,ç®€æ˜“æµç¨‹
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		virtual void Initialize();
 
-	// »ñÈ¡ÉËº¦Êı¾İ£¨º¬Àà»êÌØĞÔ¼ÆËã£©
+	// è·å–ä¼¤å®³æ•°æ®ï¼ˆå«ç±»é­‚ç‰¹æ€§è®¡ç®—ï¼‰
 	UFUNCTION(BlueprintNativeEvent, Category = "Combat")
 		FDamageData GetDamageData() const;
 
@@ -51,7 +51,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 		void PerformExecute();
 
-	// Åö×²¼ì²â»Øµ÷
+	// ç¢°æ’æ£€æµ‹å›è°ƒ
 	UFUNCTION()
 		virtual void OnWeaponHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, FVector NormalImpulse,
@@ -60,31 +60,31 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		virtual float GetStaminaCost(EAttackType AttackType);
 
-	// Íâ²¿µ÷ÓÃ-ÓÃÒÔ¿ªÆô¹¥»÷Åö×²ºĞ¼ì²â
+	// å¤–éƒ¨è°ƒç”¨-ç”¨ä»¥å¼€å¯æ”»å‡»ç¢°æ’ç›’æ£€æµ‹
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void EnableAttackCollisonCheck();
 
-	// Íâ²¿µ÷ÓÃ-ÓÃÒÔ¹Ø±Õ¹¥»÷Åö×²ºĞ¼ì²â
+	// å¤–éƒ¨è°ƒç”¨-ç”¨ä»¥å…³é—­æ”»å‡»ç¢°æ’ç›’æ£€æµ‹
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void DisableAttackCollisonCheck();
 
-	// Íâ²¿µ÷ÓÃ-ÓÃÒÔ¿ªÆôµ¯·´Åö×²ºĞ¼ì²â
+	// å¤–éƒ¨è°ƒç”¨-ç”¨ä»¥å¼€å¯å¼¹åç¢°æ’ç›’æ£€æµ‹
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void EnableParryCollisonCheck();
 
-	// Íâ²¿µ÷ÓÃ-ÓÃÒÔ¹Ø±Õ¹¥»÷Åö×²ºĞ¼ì²â
+	// å¤–éƒ¨è°ƒç”¨-ç”¨ä»¥å…³é—­æ”»å‡»ç¢°æ’ç›’æ£€æµ‹
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void DisableParryCollisonCheck();
 
-	// Íâ²¿µ÷ÓÃ-ÓÃÒÔ¼¤»îµ¯·´´°¿Ú
+	// å¤–éƒ¨è°ƒç”¨-ç”¨ä»¥æ¿€æ´»å¼¹åçª—å£
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Parry")
 		void ActivateParryWindow(float Duration);
 
-	// Íâ²¿µ÷ÓÃ-ÓÃÒÔ¹Ø±Õµ¯·´´°¿Ú
+	// å¤–éƒ¨è°ƒç”¨-ç”¨ä»¥å…³é—­å¼¹åçª—å£
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Parry")
 		void DeactivateParryWindow();
 
-	// Íâ²¿µ÷ÓÃ-»ñÈ¡µ±Ç°ÊÇ·ñ´¦ÓÚµ¯·´´°¿Ú¼¤»î×´Ì¬
+	// å¤–éƒ¨è°ƒç”¨-è·å–å½“å‰æ˜¯å¦å¤„äºå¼¹åçª—å£æ¿€æ´»çŠ¶æ€
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_Parry")
 		bool IsParryWindowActive();
 
@@ -93,138 +93,138 @@ public:
 	void SetJumpSection_NS(USL_Attack_JumpSection_NS* NS);
 
 protected:
-	// ÎäÆ÷¶¯×÷½Ó¿Ú
+	// æ­¦å™¨åŠ¨ä½œæ¥å£
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 		void PlayAttackMontage(FName MontageSectionName);
 
-	// ÎäÆ÷Õ½¼¼¶¯×÷½Ó¿Ú
+	// æ­¦å™¨æˆ˜æŠ€åŠ¨ä½œæ¥å£
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 		void PlayCombatSkillMontage(FName MontageSectionName);
 
-	// ¹¥»÷ÖØµş¿ªÊ¼
+	// æ”»å‡»é‡å å¼€å§‹
 	UFUNCTION()
 	void OnAttackOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 			bool bFromSweep, const FHitResult& SweepResult);
 	
-	// ¹¥»÷ÖØµş½áÊø
+	// æ”»å‡»é‡å ç»“æŸ
 	UFUNCTION()
 	void OnAttackOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	// µ¯·´ÖØµş¿ªÊ¼
+	// å¼¹åé‡å å¼€å§‹
 	UFUNCTION()
 		void OnParryOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 			bool bFromSweep, const FHitResult& SweepResult);
 
-	// µ¯·´ÖØµş½áÊø
+	// å¼¹åé‡å ç»“æŸ
 	UFUNCTION()
 		void OnParryOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
-	// ´¦Àí¹¥»÷ÖØµşactor
+	// å¤„ç†æ”»å‡»é‡å actor
 	UFUNCTION()
 	void ApplyDamageToOverlappingActors();
 
-	// ´¦Àíµ¯·´ÖØµşactor
+	// å¤„ç†å¼¹åé‡å actor
 	UFUNCTION()
 		void ApplyParryToOverlappingActors();
 
 
 public:
-	//×´Ì¬
+	//çŠ¶æ€
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 		bool IsStaticMesh;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 		bool bEnableCapsuleCheck;
-	// ×é¼ş
+	// ç»„ä»¶
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 		USkeletalMeshComponent* SkeletalWeaponMesh;
 
-	// ×é¼ş
+	// ç»„ä»¶
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 		UStaticMeshComponent* StaticWeaponMesh;
 
-	// ½ºÄÒÌå-ÍÖÇòĞÎ×´
+	// èƒ¶å›Šä½“-æ¤­çƒå½¢çŠ¶
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 		UCapsuleComponent* CapsuleComp;
 
-	// Åö×²ºĞ-¹æÔò¶à±ßĞÎ
+	// ç¢°æ’ç›’-è§„åˆ™å¤šè¾¹å½¢
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 		UBoxComponent* CollisonBox;
 
-	// ÎäÆ÷ÊôĞÔ
+	// æ­¦å™¨å±æ€§
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 		FWeaponStats WeaponData;
 
-	// ¶¯»­×ÊÔ´-¹¥»÷
+	// åŠ¨ç”»èµ„æº-æ”»å‡»
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* AttackMontage;
 
-	// ¶¯»­×ÊÔ´-Õ½¼¼
+	// åŠ¨ç”»èµ„æº-æˆ˜æŠ€
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* CombatSkillMontage;
 
-	// ¶¯»­×ÊÔ´-´¦¾ö
+	// åŠ¨ç”»èµ„æº-å¤„å†³
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* ExecutionMontage;
 
-	// ¶¯»­×ÊÔ´-±»´Ì
+	// åŠ¨ç”»èµ„æº-è¢«åˆº
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* BackStabbMontage;
 
-	// ¶¯»­×´Ì¬Í¨ÖªÒıÓÃ
+	// åŠ¨ç”»çŠ¶æ€é€šçŸ¥å¼•ç”¨
 	UPROPERTY(VisibleAnywhere, Category = "Animation")
 		USL_Attack_JumpSection_NS* AttackSection_NS;
 
-	// ÊÇ·ñ¿ÉÒÔÁ¬»÷
+	// æ˜¯å¦å¯ä»¥è¿å‡»
 	UPROPERTY(VisibleAnywhere, Category = "Animation")
 		bool EnableComboContinue;
 
-	// ³ÖÓĞÕßÒıÓÃ
+	// æŒæœ‰è€…å¼•ç”¨
 	UPROPERTY(Transient)
 		ASoulLikeCharacter* OwningCharacter;
 	
 protected:
-	// ÉËº¦¶¨Ê±Æ÷handle
+	// ä¼¤å®³å®šæ—¶å™¨handle
 	UPROPERTY()
 	FTimerHandle DamageTimerHandle;
 
-	// ¶¨Ê±Æ÷¼ä¸ô
+	// å®šæ—¶å™¨é—´éš”
 	UPROPERTY()
 	float DamageInterval = 0.1f;
 
-	// ÉËº¦Åö×²ÃüÖĞactorÊı×é
+	// ä¼¤å®³ç¢°æ’å‘½ä¸­actoræ•°ç»„
 	UPROPERTY()
 	TArray<AActor*> AttackOverlappingActors;
 
-	// µ¯·´Åö×²ÃüÖĞactorÊı×é,½öĞèÕÒµ½µÚÒ»¸ö³É¹¦¼´¿ÉÇå¿Õ
+	// å¼¹åç¢°æ’å‘½ä¸­actoræ•°ç»„,ä»…éœ€æ‰¾åˆ°ç¬¬ä¸€ä¸ªæˆåŠŸå³å¯æ¸…ç©º
 	UPROPERTY()
 	TArray<AActor*> ParryOverlappingActors;
 
-	// ÒÑÓ¦ÓÃÉËº¦actor¼¯
+	// å·²åº”ç”¨ä¼¤å®³actoré›†
 	UPROPERTY()
 	TSet<AActor*> AlreadyHitActors;
 
-	// ÒÑÓ¦ÓÃÉËº¦actor¼¯
+	// å·²åº”ç”¨ä¼¤å®³actoré›†
 	UPROPERTY()
 		TSet<AActor*> AlreadyParryActors;
 
-	// µ¯·´´°¿ÚÊÇ·ñ¼¤»î
+	// å¼¹åçª—å£æ˜¯å¦æ¿€æ´»
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
 		bool bIsParryWindowActive;
 
-	// µ¯·´¶¨Ê±Æ÷handle
+	// å¼¹åå®šæ—¶å™¨handle
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CharacterAttribute")
 		FTimerHandle ParryWindowTimer;
 
-	// ¶¨Ê±Æ÷¼ä¸ô
+	// å®šæ—¶å™¨é—´éš”
 	UPROPERTY()
 		float ParryInterval = 0.1f;
 
-	// APÏûºÄ²ÎÊı
+	// APæ¶ˆè€—å‚æ•°
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WeaponSettings")
 		TMap<EAttackType,float> APCostMap;
 };

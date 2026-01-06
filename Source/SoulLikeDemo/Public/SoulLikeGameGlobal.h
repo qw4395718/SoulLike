@@ -5,61 +5,61 @@
 /*                              Const                                         */
 /************************************************************************/
 
-// ½ÇÉ«ÅäÖÃ-±³´Ì¾àÀëÏŞÖÆ
+// è§’è‰²é…ç½®-èƒŒåˆºè·ç¦»é™åˆ¶
 const INT BACKSTAB_DISTANCE_THRESHOLD = 150;
 
-// ½ÇÉ«ÅäÖÃ-±³´Ì½Ç¶ÈÏŞÖÆ
+// è§’è‰²é…ç½®-èƒŒåˆºè§’åº¦é™åˆ¶
 const INT BACKSTAB_ANGLE_THRESHOLD = 30;
 
-// ½ÇÉ«ÅäÖÃ-´¦¾ö¾àÀëÏŞÖÆ
+// è§’è‰²é…ç½®-å¤„å†³è·ç¦»é™åˆ¶
 const INT EXECUTE_DISTANCE_THRESHOLD = 150;
 
-// ÌØÊâ¹¥»÷(±³´Ì,´¦¾ö)¼ì²â°ë¾¶
+// ç‰¹æ®Šæ”»å‡»(èƒŒåˆº,å¤„å†³)æ£€æµ‹åŠå¾„
 const INT DETECTION_RADIUS = 150;
 
-// ×°±¸À¸µ¥À¸µÄ²ÛÎ»ÊıÁ¿
+// è£…å¤‡æ å•æ çš„æ§½ä½æ•°é‡
 const INT EQUIPMENT_SINGLE_CAPACITY = 4;
 
-// ²Ö¿â·ÖÀ¸ÀàĞÍÊıÁ¿
+// ä»“åº“åˆ†æ ç±»å‹æ•°é‡
 const INT INVENTORYTYPE_NUM = 12;
 
-// ²Ö¿âµ¥À¸ÀàĞÍÈİÄÉÊıÁ¿
+// ä»“åº“å•æ ç±»å‹å®¹çº³æ•°é‡
 const INT INVENTORY_SINGLE_CAPACITY = 100;
 
-// ¼õÉË×î´óÉÏÏŞ
+// å‡ä¼¤æœ€å¤§ä¸Šé™
 const float REDUCE_DAMAGE_PERCENTAGE = 0.9f;
 
-// ÌåÁ¦ÏûºÄ×îĞ¡ÏÂÏŞ
+// ä½“åŠ›æ¶ˆè€—æœ€å°ä¸‹é™
 const float REDUCE_STAMINACOST_PERCENTAGE = 0.5f;
 
-// ¶Ô»°Ñ¡ÏîÀ¸×î´ó»º´æ½»»¥¿Ø¼ş¸öÊı
+// å¯¹è¯é€‰é¡¹æ æœ€å¤§ç¼“å­˜äº¤äº’æ§ä»¶ä¸ªæ•°
 const INT INTERACT_BTN_MAX = 5;
 
-// ¶Ô»°Ñ¡ÏîÀ¸¿Ø¼ş¸ß¶È
+// å¯¹è¯é€‰é¡¹æ æ§ä»¶é«˜åº¦
 const INT INTERACT_BTN_HEIGHT = 40;
 
 /************************************************************************/
 /*                              Enum                                         */
 /************************************************************************/
 
-//ÉËº¦ÀàĞÍ
+//ä¼¤å®³ç±»å‹
 UENUM(BlueprintType)
 enum class EDamageType :uint8
 {
-	SLASH      UMETA(DisplayName = "Slash"),      // Õ¶»÷
-	PIERCE     UMETA(DisplayName = "Pierce"),     // ´©´Ì
-	BLUNT      UMETA(DisplayName = "Blunt"),      // ´ò»÷£¨²¹³äÀàĞÍ£©
-	FIRE       UMETA(DisplayName = "Fire")        // »ğÑæ
+	SLASH      UMETA(DisplayName = "Slash"),      // æ–©å‡»
+	PIERCE     UMETA(DisplayName = "Pierce"),     // ç©¿åˆº
+	BLUNT      UMETA(DisplayName = "Blunt"),      // æ‰“å‡»ï¼ˆè¡¥å……ç±»å‹ï¼‰
+	FIRE       UMETA(DisplayName = "Fire")        // ç«ç„°
 };
 
-// ÎäÆ÷¹¥»÷¶¯×÷ÀàĞÍ
+// æ­¦å™¨æ”»å‡»åŠ¨ä½œç±»å‹
 UENUM(BlueprintType)
 enum class EAttackType :uint8
 {
-	Normal_Combo_Phase_1		UMETA(DisplayName = "Normal_Combo_Phase_1"),		// ÆÕ¹¥µÚÒ»¶Î
-	Normal_Combo_Phase_2		UMETA(DisplayName = "Normal_Combo_Phase_2"),		// ÆÕ¹¥µÚ¶ş¶Î
-	Normal_Combo_Phase_3		UMETA(DisplayName = "Normal_Combo_Phase_3"),		// ÆÕ¹¥µÚÈı¶Î
-	Skill_Combo_Phase_1			UMETA(DisplayName = "Skill_Combo_Phase_1"),			// Õ½»úµÚÒ»¶Î
+	Normal_Combo_Phase_1		UMETA(DisplayName = "Normal_Combo_Phase_1"),		// æ™®æ”»ç¬¬ä¸€æ®µ
+	Normal_Combo_Phase_2		UMETA(DisplayName = "Normal_Combo_Phase_2"),		// æ™®æ”»ç¬¬äºŒæ®µ
+	Normal_Combo_Phase_3		UMETA(DisplayName = "Normal_Combo_Phase_3"),		// æ™®æ”»ç¬¬ä¸‰æ®µ
+	Skill_Combo_Phase_1			UMETA(DisplayName = "Skill_Combo_Phase_1"),			// æˆ˜æœºç¬¬ä¸€æ®µ
 	Skill_Combo_Phase_2,
 	Skill_Combo_Phase_3,
 	Special_Execution,
@@ -94,7 +94,7 @@ enum class EArrowKeyType :uint8
 	ARROWKEY_Max
 };
 
-// ÎäÆ÷Ä£×éÀà±ğ
+// æ­¦å™¨æ¨¡ç»„ç±»åˆ«
 UENUM(BlueprintType)
 enum class EWeaponModeTyoe :uint8
 {
@@ -107,7 +107,7 @@ enum class EWeaponModeTyoe :uint8
 	WEAPONMODE_Max
 };
 
-// ÎäÆ÷¼¼ÄÜÄ£×éÀà±ğ
+// æ­¦å™¨æŠ€èƒ½æ¨¡ç»„ç±»åˆ«
 UENUM(BlueprintType)
 enum class EWeaponCombaoSkillType :uint8
 {
@@ -118,7 +118,7 @@ enum class EWeaponCombaoSkillType :uint8
 	COMBAOSKILL_Max
 };
 
-// ×°±¸À¸Àà±ğ
+// è£…å¤‡æ ç±»åˆ«
 UENUM(BlueprintType)
 enum class EEquipmentSlotType :uint8
 {
@@ -130,7 +130,7 @@ enum class EEquipmentSlotType :uint8
 	EQUIPMENT_Max
 };
 
-// ²Ö¿â·ÖÀ¸Àà±ğ
+// ä»“åº“åˆ†æ ç±»åˆ«
 UENUM(BlueprintType)
 enum class EInventoryCompartmentType :uint8
 {
@@ -150,7 +150,7 @@ enum class EInventoryCompartmentType :uint8
 	INVENTORYTYPE_Max,
 };
 
-// UIÒ³ÃæÀà±ğ
+// UIé¡µé¢ç±»åˆ«
 UENUM()
 enum class EUIWidgetType :uint32
 {
@@ -161,7 +161,7 @@ enum class EUIWidgetType :uint32
 
 
 
-// ÎäÆ÷ĞĞÎªÏûºÄ×ÊÔ´Àà±ğ
+// æ­¦å™¨è¡Œä¸ºæ¶ˆè€—èµ„æºç±»åˆ«
 UENUM()
 enum class EWeaponActionCostType :uint8
 {
@@ -174,13 +174,13 @@ enum class EWeaponActionCostType :uint8
 
 
 
-// ¶¯»­Í¨ÖªÖÖÀà
+// åŠ¨ç”»é€šçŸ¥ç§ç±»
 UENUM()
 enum class EAnimNotifyType :uint32
 {
 	EAnimNotify_Min,
 
-	// Á¬ÕĞÏµÍ³Ïà¹Ø
+	// è¿æ‹›ç³»ç»Ÿç›¸å…³
 	EAnimNotify_LH_Active_NormalComboWindow,
 	EAnimNotify_LH_InActive_NormalComboWindow,
 	EAnimNotify_LH_Active_SkillComboWindow,
@@ -208,7 +208,7 @@ enum class EAnimNotifyType :uint32
 	EAnimNotify_Max
 };
 
-// ¶¯»­Í¨ÖªÖÖÀà
+// åŠ¨ç”»é€šçŸ¥ç§ç±»
 UENUM()
 enum class EWeaponAnimNotifyType :uint32
 {
@@ -250,14 +250,14 @@ enum class EHUDEquipmentSlotType :uint8
 /*                              Struct                                         */
 /************************************************************************/
 
-// ²ÛÎ»ĞÅÏ¢
+// æ§½ä½ä¿¡æ¯
 struct FInventorySlot
 {
 	EInventoryCompartmentType SlotType;
 	int SlotIndex;
 };
 
-// Á¬¶ÎÏûºÄ×ÊÔ´±¶ÂÊ
+// è¿æ®µæ¶ˆè€—èµ„æºå€ç‡
 struct FAbilityCostInfo
 {
 	float HealthCost = 0;
@@ -265,25 +265,25 @@ struct FAbilityCostInfo
 	float MagicCost = 0;
 };
 
-// Á¬¶Î¿ØÖÆĞÅÏ¢
+// è¿æ®µæ§åˆ¶ä¿¡æ¯
 struct FComboCoordinatorInfo
 {
-	// ÎäÆ÷»ù´¡ÉËº¦
+	// æ­¦å™¨åŸºç¡€ä¼¤å®³
 	float BaseDamage;
 
-	// Á¬¶Î¶ÔÓ¦µÄÉËº¦±¶ÂÊ
+	// è¿æ®µå¯¹åº”çš„ä¼¤å®³å€ç‡
 	TArray<float> ComboDamageMultiplier;
 
-	// Á¬ÕĞ×î¸ßÉÏÏŞ
+	// è¿æ‹›æœ€é«˜ä¸Šé™
 	int ComboMaxNum;
 
-	// µ±Ç°Á¬¶Î
+	// å½“å‰è¿æ®µ
 	int CurrentComboNum;
 
-	// µ±Ç°Á¬¶Î´°¿ÚÊÇ·ñ¼¤»î
+	// å½“å‰è¿æ®µçª—å£æ˜¯å¦æ¿€æ´»
 	bool CanContinueCombo;
 
-	// ¶ÔÓ¦Á¬¶ÎµÄ×ÊÔ´ÏûºÄ(¶ÔÓ¦½ÇÉ«µÄ»ù´¡ÊôĞÔ,ÀıÈçÌåÁ¦,ÑªÁ¿,À¶Á¿)
+	// å¯¹åº”è¿æ®µçš„èµ„æºæ¶ˆè€—(å¯¹åº”è§’è‰²çš„åŸºç¡€å±æ€§,ä¾‹å¦‚ä½“åŠ›,è¡€é‡,è“é‡)
 	TMap<int, FAbilityCostInfo> ComboStateCostMultiplier;
 };
 

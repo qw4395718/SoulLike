@@ -8,63 +8,63 @@ struct FWeaponTableInfo : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	// Î¨Ò»±êÊ¶
+	// å”¯ä¸€æ ‡è¯†
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 WeaponID;
-	// Ä£ĞÍÃû
+	// æ¨¡å‹å
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Mesh;
-	// ¶¯»­À¶Í¼Ãû
+	// åŠ¨ç”»è“å›¾å
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString AnimClass;
-	// ÃÉÌ«ÆæÃû
+	// è’™å¤ªå¥‡å
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Mentage;
-	// ¸÷¶Î¹¥»÷µÄÉËº¦
+	// å„æ®µæ”»å‡»çš„ä¼¤å®³
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TMap<EAttackType, float> BaseDamageMap;
-	// ¸÷¶Î¹¥»÷ÏûºÄµÄÌåÁ¦
+	// å„æ®µæ”»å‡»æ¶ˆè€—çš„ä½“åŠ›
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TMap<EAttackType, float> APCostMap;
-	// ¸÷¶Î¹¥»÷ÏûºÄµÄÀ¶Á¿
+	// å„æ®µæ”»å‡»æ¶ˆè€—çš„è“é‡
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TMap<EAttackType, float> MPCostMap;
-	// ÎäÆ÷Åö×²ºĞ´óĞ¡
+	// æ­¦å™¨ç¢°æ’ç›’å¤§å°
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FVector WeaponCollisionBoxSize;
-	// ÎäÆ÷Ä£×é¼ÓÔØÇé¿ö
+	// æ­¦å™¨æ¨¡ç»„åŠ è½½æƒ…å†µ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TMap<EWeaponComponentType, bool> NeedLoadComponentInfoMap;
 
-	// ÒÔÏÂĞÅÏ¢Îª±í¸ñĞÅÏ¢
+	// ä»¥ä¸‹ä¿¡æ¯ä¸ºè¡¨æ ¼ä¿¡æ¯
 	///************************************************************************/
-	///*                        ½üÕ½Ä£×é(×î¶àÖ»ÄÜ×°ÔÚÒ»¸ö)                     */
+	///*                        è¿‘æˆ˜æ¨¡ç»„(æœ€å¤šåªèƒ½è£…åœ¨ä¸€ä¸ª)                     */
 	///************************************************************************/
-	//// ½üÕ½¹¥»÷Ä£×é
+	//// è¿‘æˆ˜æ”»å‡»æ¨¡ç»„
 	//bool bNeedLoadMeleeAttackComponent;
-	//// Í¶ÉäÎï¹¥»÷Ä£×é
+	//// æŠ•å°„ç‰©æ”»å‡»æ¨¡ç»„
 	//bool bNeedLoadProjectileComponent;
 
 	///************************************************************************/
-	///*                        ½üÕ½Ä£×é(×î¶àÖ»ÄÜ×°ÔÚÒ»¸ö)                    */
+	///*                        è¿‘æˆ˜æ¨¡ç»„(æœ€å¤šåªèƒ½è£…åœ¨ä¸€ä¸ª)                    */
 	///************************************************************************/
-	//// ·ÀÓùÄ£×é
+	//// é˜²å¾¡æ¨¡ç»„
 	//bool bNeedLoadDefenceComponent;
 
 	///************************************************************************/
-	///*                        ¼¼ÄÜÄ£×é(×î¶àÖ»ÄÜ×°ÔÚÒ»¸ö)                    */
+	///*                        æŠ€èƒ½æ¨¡ç»„(æœ€å¤šåªèƒ½è£…åœ¨ä¸€ä¸ª)                    */
 	///************************************************************************/
-	//// ¼¼ÄÜÄ£×é
+	//// æŠ€èƒ½æ¨¡ç»„
 	//bool bNeedLoadSkillComponent;
 
 	///************************************************************************/
-	///*                        ÌØÊâÄ£×é(¿É×°ÔØ¶à¸ö)                    */
+	///*                        ç‰¹æ®Šæ¨¡ç»„(å¯è£…è½½å¤šä¸ª)                    */
 	///************************************************************************/
-	//// ´¦¾öÄ£×é
+	//// å¤„å†³æ¨¡ç»„
 	//bool bNeedLoadExecuteComponent;
 
-	//// ´¦¾öÄ£×é
+	//// å¤„å†³æ¨¡ç»„
 	//bool bNeedLoadBackStabComponent;
 
-	// ...ÆäËûÍ¨ÓÃ²ÎÊı
+	// ...å…¶ä»–é€šç”¨å‚æ•°
 };

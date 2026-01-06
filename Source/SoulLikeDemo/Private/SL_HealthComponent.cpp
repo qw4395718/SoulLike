@@ -7,7 +7,7 @@ USL_HealthComponent::USL_HealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// Ä¬ÈÏ³õÊ¼»¯
+	// é»˜è®¤åˆå§‹åŒ–
 	CurrentHealthValue = 100.0f;
 	MaxHealthValue = 100.0f;
 	bIsAlive = true;
@@ -15,7 +15,7 @@ USL_HealthComponent::USL_HealthComponent()
 
 void USL_HealthComponent::InitHealthInfo(float MaxHealthSettings)
 {
-	// Íâ²¿Ìá¹©ĞÅÏ¢³õÊ¼»¯
+	// å¤–éƒ¨æä¾›ä¿¡æ¯åˆå§‹åŒ–
 	MaxHealthValue = MaxHealthSettings;
 	CurrentHealthValue = MaxHealthSettings;
 	bIsAlive = true;
@@ -51,7 +51,7 @@ void USL_HealthComponent::ReduceCurrentHealth(float ReduceValue)
 
 void USL_HealthComponent::OnHealthEqualZero()
 {
-	//¹ã²¥Î¯ÍĞ-Í¨ÖªUI×é¼ş,ÒôĞ§,¶¯»­
+	//å¹¿æ’­å§”æ‰˜-é€šçŸ¥UIç»„ä»¶,éŸ³æ•ˆ,åŠ¨ç”»
 
 	bIsAlive = false;
 }

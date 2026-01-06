@@ -24,11 +24,11 @@ class SOULLIKEDEMO_API IWeaponCoordinatorControl_IF
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	// ÎäÆ÷ÉËº¦»ñÈ¡(int -> enum)
+	// æ­¦å™¨ä¼¤å®³èŽ·å–(int -> enum)
 	UFUNCTION()
 		virtual float GetAttackComboDamage(int type) = 0;
 
-	// ÎäÆ÷ÐÐÎªÏûºÄ»ñÈ¡(int -> enum)
+	// æ­¦å™¨è¡Œä¸ºæ¶ˆè€—èŽ·å–(int -> enum)
 	UFUNCTION()
 		virtual float GetAttackStateCost(int type,int CostType) = 0;
 

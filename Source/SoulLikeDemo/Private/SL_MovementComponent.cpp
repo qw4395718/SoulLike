@@ -17,14 +17,14 @@ USL_MovementComponent::USL_MovementComponent()
 
 void USL_MovementComponent::InitMovemenetInfo(bool hasRollAbility, FString RollMentagePath)
 {
-	// 由外部信息进行初始化
+	// 鐢卞閮ㄤ俊鎭繘琛屽垵濮嬪寲
 	CanRoll = hasRollAbility;
 	LoadMovementMentage(RollMentagePath);
 }
 
 void USL_MovementComponent::ExeRoll()
 {
-	// 获取拥有者的信息
+	// 鑾峰彇鎷ユ湁鑰呯殑淇℃伅
 	AActor* OwnActor = GetOwner();
 	if (OwnActor == nullptr) { return; }
 	ACharacter* OwnCharacter = Cast<ACharacter>(OwnActor);

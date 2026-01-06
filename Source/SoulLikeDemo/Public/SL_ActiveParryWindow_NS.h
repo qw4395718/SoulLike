@@ -20,9 +20,9 @@ public:
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 	
 protected:
-	// 弹反成功时的额外帧数（用于容错）
+	// 寮瑰弽鎴愬姛鏃剁殑棰濆甯ф暟锛堢敤浜庡閿欙級
 	UPROPERTY(EditAnywhere, Category = "Parry Settings")
-		float SuccessWindowExtension = 0.05f; // 额外5帧@60FPS
+		float SuccessWindowExtension = 0.05f; // 棰濆5甯60FPS
 
 public:
 	UPROPERTY(EditAnywhere)

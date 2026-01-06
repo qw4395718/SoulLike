@@ -20,17 +20,17 @@ public:
 
 public:
 	/************************************************************************/
-	/*									Íâ²¿µ÷ÓÃ                                   */
+	/*									å¤–éƒ¨è°ƒç”¨                                   */
 	/************************************************************************/
-	// ³õÊ¼»¯²Ö¿â×é¼şĞÅÏ¢
+	// åˆå§‹åŒ–ä»“åº“ç»„ä»¶ä¿¡æ¯
 	UFUNCTION()
 		void InitInventoryComponentInfo();
 
-	// ³õÊ¼»¯×°±¸À¸
+	// åˆå§‹åŒ–è£…å¤‡æ 
 	UFUNCTION()
 		void InitEquipmentInfo(const TArray<int> WeaponList, const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex);
 
-	// ³õÊ¼»¯²Ö¿âĞÅÏ¢
+	// åˆå§‹åŒ–ä»“åº“ä¿¡æ¯
 	UFUNCTION()
 		void InitInventoryWeaponInfo(TArray<int> WeaponList);
 
@@ -43,34 +43,34 @@ public:
 
 protected:
 	/************************************************************************/
-	/*                                  ÄÚ²¿µ÷ÓÃ                                    */
+	/*                                  å†…éƒ¨è°ƒç”¨                                    */
 	/************************************************************************/
 	
-	//ÄâÔìÊı¾İ
+	//æ‹Ÿé€ æ•°æ®
 	void UnitTest(const TArray<int> WeaponList);
 
 protected:
 	/************************************************************************/
-	/*                                   ±äÁ¿                                   */
+	/*                                   å˜é‡                                   */
 	/************************************************************************/
-	// µ±Ç°×°±¸À¸¼¤»îË÷Òı
+	// å½“å‰è£…å¤‡æ æ¿€æ´»ç´¢å¼•
 	UPROPERTY()
 		TMap<EArrowKeyType,int> CurrentActiveEquipmentIndex;
 
-	// ×°±¸ÎäÆ÷À¸ĞÅÏ¢Êı×é
+	// è£…å¤‡æ­¦å™¨æ ä¿¡æ¯æ•°ç»„
 	UPROPERTY()
 		TArray<FWeaponData> EquipWeaponInfoList;
 
-	// ×°±¸µÀ¾ßÀ¸ĞÅÏ¢Êı×é
+	// è£…å¤‡é“å…·æ ä¿¡æ¯æ•°ç»„
 	UPROPERTY()
 		TArray<int> EquipItemInfoList;
 	
-	 // Ä¿Ç°ÆäËû×°±¸ÏÈ¼òµ¥µÄÀ´£¬½¨¹¹Ò»¸ö¼òÒ×µÄ¿ò¼Ü£¬´ıºóĞøUI¿ªÊ¼ºó£¬ÖØĞÂÉè¼ÆÊı¾İ½á¹¹
+	 // ç›®å‰å…¶ä»–è£…å¤‡å…ˆç®€å•çš„æ¥ï¼Œå»ºæ„ä¸€ä¸ªç®€æ˜“çš„æ¡†æ¶ï¼Œå¾…åç»­UIå¼€å§‹åï¼Œé‡æ–°è®¾è®¡æ•°æ®ç»“æ„
 	UPROPERTY()
 		TArray<int> InventoryWeaponInfoList;
 
 	UPROPERTY()
 		TArray<int> InventoryEquippableItemInfoList;
 
-	// Í·¿ø,»¤¼×......
+	// å¤´ç›”,æŠ¤ç”²......
 };

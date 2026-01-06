@@ -16,12 +16,12 @@ UCombatComponent::UCombatComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 
 	/************************************************************************/
-	/*                              ×é¼ş³õÊ¼»¯                                        */
+	/*                              ç»„ä»¶åˆå§‹åŒ–                                        */
 	/************************************************************************/
 	LH_EquippedWeapon = nullptr;
 	RH_EquippedWeapon = nullptr;
 	// ...
-	// ´´½¨ÊÂ¼ş·Ö·¢Æ÷
+	// åˆ›å»ºäº‹ä»¶åˆ†å‘å™¨
 	DamageDispatcher = nullptr;
 }
 
@@ -29,7 +29,7 @@ void UCombatComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	// »ñÈ¡ËùÊô½ÇÉ«
+	// è·å–æ‰€å±è§’è‰²
 	CharacterOwner = Cast<ASoulLikeCharacter>(GetOwner());
 	if (!CharacterOwner) return;
 
@@ -38,16 +38,16 @@ void UCombatComponent::InitializeComponent()
 		DamageDispatcher = NewObject<UDamageEventDispatcher>(this,TEXT("DamageDispatcher"));
 	}
 
-	// ³õÊ¼»¯ÎäÆ÷¿â´æ
-	WeaponInventory.Empty(4); // Àà»ê±ê×¼4ÎäÆ÷²Û
+	// åˆå§‹åŒ–æ­¦å™¨åº“å­˜
+	WeaponInventory.Empty(4); // ç±»é­‚æ ‡å‡†4æ­¦å™¨æ§½
 
-	//Ä¬ÈÏ³õÊ¼»¯±äÁ¿
+	//é»˜è®¤åˆå§‹åŒ–å˜é‡
 	HealthPoint = 100.0f;
 	ActionPoint = 100.0f;
 	HealthPointMaxValue = 100.0f;
 	ActionPointMaxValue = 100.0f;
 
-	//½«º¯Êı°ó¶¨µ½ÊÂ¼şÉÏ
+	//å°†å‡½æ•°ç»‘å®šåˆ°äº‹ä»¶ä¸Š
 	DamageDispatcher->OnDamageEvent.AddDynamic(this, &UCombatComponent::HandleDamage);
 
 	Initialize();
@@ -57,7 +57,7 @@ void UCombatComponent::InitializeComponent()
 
 void UCombatComponent::Initialize()
 {
-	// ³õÊ¼»¯×óÊÖÎäÆ÷
+	// åˆå§‹åŒ–å·¦æ‰‹æ­¦å™¨
 	if (LH_EquippedWeapon == nullptr)
 	{
 		LH_EquippedWeapon = GetWorld()->SpawnActor<AWeaponBase>(
@@ -65,19 +65,19 @@ void UCombatComponent::Initialize()
 		);
 	}
 
-	//½«ÎäÆ÷°ó¶¨µ½Ö¸¶¨ĞéÄâ¹Ç÷À
+	//å°†æ­¦å™¨ç»‘å®šåˆ°æŒ‡å®šè™šæ‹Ÿéª¨éª¼
 	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("ik_hand_l")) && 
 		LH_EquippedWeapon)
 	{
 		LH_EquippedWeapon->AttachToComponent(
 			CharacterOwner->GetMesh(),
-			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // ±£³ÖÏà¶Ô±ä»»
-			TEXT("ik_hand_l") // Socket Ãû³Æ
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // ä¿æŒç›¸å¯¹å˜æ¢
+			TEXT("ik_hand_l") // Socket åç§°
 		);
 		LH_EquippedWeapon->OwningCharacter = CharacterOwner;
 	}
 
-	// ³õÊ¼»¯ÓÒÊÖÎäÆ÷
+	// åˆå§‹åŒ–å³æ‰‹æ­¦å™¨
 	if (RH_EquippedWeapon == nullptr)
 	{
 		RH_EquippedWeapon = GetWorld()->SpawnActor<AWeaponBase>(
@@ -85,14 +85,14 @@ void UCombatComponent::Initialize()
 			);
 	}
 
-	//½«ÎäÆ÷°ó¶¨µ½Ö¸¶¨ĞéÄâ¹Ç÷À
+	//å°†æ­¦å™¨ç»‘å®šåˆ°æŒ‡å®šè™šæ‹Ÿéª¨éª¼
 	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("ik_hand_r")) &&
 		RH_EquippedWeapon)
 	{
 		RH_EquippedWeapon->AttachToComponent(
 			CharacterOwner->GetMesh(),
-			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // ±£³ÖÏà¶Ô±ä»»
-			TEXT("ik_hand_r") // Socket Ãû³Æ
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // ä¿æŒç›¸å¯¹å˜æ¢
+			TEXT("ik_hand_r") // Socket åç§°
 		);
 		RH_EquippedWeapon->OwningCharacter = CharacterOwner;
 	}
@@ -102,7 +102,7 @@ void UCombatComponent::Initialize()
 void UCombatComponent::DrawWeapon()
 {
 	//if (EquippedWeapon == nullptr) 
-	//{//Èç¹ûµ±Ç°Î´ÓĞÎäÆ÷×°±¸,Ôò´ÓÎäÆ÷²Ö¿âÖĞÄÃÒ»°Ñ
+	//{//å¦‚æœå½“å‰æœªæœ‰æ­¦å™¨è£…å¤‡,åˆ™ä»æ­¦å™¨ä»“åº“ä¸­æ‹¿ä¸€æŠŠ
 	//	bool bFindValidWeapon = false;
 	//	for each (AWeaponBase* pWeapon in WeaponInventory)
 	//	{
@@ -118,7 +118,7 @@ void UCombatComponent::DrawWeapon()
 	//		}
 	//		else
 	//		{
-	//			//ÎŞÓĞĞ§µÄÎäÆ÷
+	//			//æ— æœ‰æ•ˆçš„æ­¦å™¨
 	//		}
 	//	}
 	//}
@@ -135,7 +135,7 @@ void UCombatComponent::PerformCombatSkill()
 	if (LH_EquippedWeapon && CanAction()) {
 		LH_EquippedWeapon->PerformCombatSkill();
 
-		// Àà»êÌØĞÔ£ºÏûºÄÄÍÁ¦
+		// ç±»é­‚ç‰¹æ€§ï¼šæ¶ˆè€—è€åŠ›
 		ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Skill_Combo_Phase_1));
 	}
 }
@@ -147,7 +147,7 @@ void UCombatComponent::SwitchToWeapon(int32 Index)
 
 bool UCombatComponent::CheckPerfectParry(float PlayerInputTime,float EnemyAttackTime)
 {
-	// ÅĞ¶¨´°¿Ú£º¡À0.3Ö¡£¨60FPSÏÂÎª5ms£©
+	// åˆ¤å®šçª—å£ï¼šÂ±0.3å¸§ï¼ˆ60FPSä¸‹ä¸º5msï¼‰
 	const float ParryWindow = 0.005f;
 	return FMath::Abs(PlayerInputTime - EnemyAttackTime) <= ParryWindow;
 }
@@ -155,25 +155,25 @@ bool UCombatComponent::CheckPerfectParry(float PlayerInputTime,float EnemyAttack
 void UCombatComponent::ProcessAttackHit(AActor* HitActor, const FHitResult& HitResult) {
 	if (!HitActor) return;
 
-	//// ¼ì²éÊÇ·ñ¿ÉÉËº¦
+	//// æ£€æŸ¥æ˜¯å¦å¯ä¼¤å®³
 	//if (IDamageable* Damageable = Cast<IDamageable>(HitActor)) {
 	//	if (Damageable->CanReceiveDamage()) {
-	//		// ´´½¨ÉËº¦ÊÂ¼ş
+	//		// åˆ›å»ºä¼¤å®³äº‹ä»¶
 	//		FDamageEventData DamageEvent;
 	//		DamageEvent.BaseDamage = 10;
 	//		DamageEvent.HitLocation = HitResult.Location;
 	//		DamageEvent.bIsCriticalHit = false;
 	//		DamageEvent.DamageCauser = GetOwner();
 
-	//		// Àà»êÌØĞÔ£ºÎäÆ÷ÀàĞÍÓ°Ïì
+	//		// ç±»é­‚ç‰¹æ€§ï¼šæ­¦å™¨ç±»å‹å½±å“
 	//		/*if (CurrentWeapon) {
 	//			DamageEvent.AttackType = CurrentWeapon->GetAttackType();
 	//		}*/
 
-	//		// ´¥·¢ÉËº¦ÊÂ¼ş
+	//		// è§¦å‘ä¼¤å®³äº‹ä»¶
 	//		Damageable->ReceiveDamage(DamageEvent);
 
-	//		// ÃüÖĞ·´À¡
+	//		// å‘½ä¸­åé¦ˆ
 	//		//PlayHitEffect(DamageEvent.HitLocation);
 	//	}
 	//}
@@ -181,31 +181,31 @@ void UCombatComponent::ProcessAttackHit(AActor* HitActor, const FHitResult& HitR
 
 void UCombatComponent::HandleDamage(const FDamageEventData& DamageEvent)
 {
-	//´¦ÀíÉËº¦
+	//å¤„ç†ä¼¤å®³
 	float ResultHP = 0;
 	ResultHP = HealthPoint - DamageEvent.BaseDamage > 0? HealthPoint - DamageEvent.BaseDamage : 0;
 	
 	if (ResultHP == 0)
 	{
 		HealthPoint = 0;
-		//²¥·Å½ÇÉ«ËÀÍö¶¯»­
+		//æ’­æ”¾è§’è‰²æ­»äº¡åŠ¨ç”»
 		UE_LOG(LogTemp, Display, TEXT("Player Die"));
 	}
 	else
 	{
 		HealthPoint = ResultHP;
-		//²¥·Å½ÇÉ«ÊÜ»÷¶¯»­
+		//æ’­æ”¾è§’è‰²å—å‡»åŠ¨ç”»
 		UE_LOG(LogTemp, Display, TEXT("Player Currnet HP:%f"), HealthPoint);
 	}
 }
 
 void UCombatComponent::HandleParry()
 {
-	////¼ì²éµ±Ç°ÎäÆ÷ÊÇ·ñ´¦ÓÚµ¯·´´°¿Ú
+	////æ£€æŸ¥å½“å‰æ­¦å™¨æ˜¯å¦å¤„äºå¼¹åçª—å£
 	//if (RH_EquippedWeapon && RH_EquippedWeapon->IsParryWindowActive())
 	//{	
 	//	UE_LOG(LogTemp, Display, TEXT("Player Parryed"));
-	//	// ±»µ¯·´³É¹¦,½ÇÉ«ÖĞ¶ÏËùÓĞÃÉÌ«Ææ½øÈëµ½´ı´¦¾öÄ£Ê½
+	//	// è¢«å¼¹åæˆåŠŸ,è§’è‰²ä¸­æ–­æ‰€æœ‰è’™å¤ªå¥‡è¿›å…¥åˆ°å¾…å¤„å†³æ¨¡å¼
 	//	if (CharacterOwner)
 	//	{
 	//		CharacterOwner->PerformExecuted(FName(""));
@@ -222,7 +222,7 @@ void UCombatComponent::ChangeAP(float CostNum)
 {
 	if (CostNum != 0 )
 	{
-		// ÖØÖÃÌåÁ¦»Ö¸´¶¨Ê±Æ÷
+		// é‡ç½®ä½“åŠ›æ¢å¤å®šæ—¶å™¨
 		if (ReviveActionPointHandle.IsValid())
 		{
 			GetWorld()->GetTimerManager().ClearTimer(ReviveActionPointHandle);
@@ -238,7 +238,7 @@ void UCombatComponent::ChangeAP(float CostNum)
 
 	if (ActionPoint + CostNum < 0)
 	{
-		// Ö´ĞĞÍê±¾´ÎĞĞ¶¯ºó½øÈëÁ¦½ß×´Ì¬
+		// æ‰§è¡Œå®Œæœ¬æ¬¡è¡ŒåŠ¨åè¿›å…¥åŠ›ç«­çŠ¶æ€
 		ActionPoint = 0;
 	}
 	else if(ActionPoint + CostNum > ActionPointMaxValue)
@@ -253,18 +253,18 @@ void UCombatComponent::ChangeAP(float CostNum)
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(
-			-1,               // Key£¨-1 ±íÊ¾²»¸²¸Ç¾ÉÏûÏ¢£©
-			5.0f,             // ÏÔÊ¾Ê±¼ä£¨Ãë£©
-			FColor::Green,    // ÑÕÉ«
-			FString::Printf(TEXT("CurrentAP %f CostNum"), ActionPoint, CostNum) // ÏûÏ¢ÄÚÈİ
+			-1,               // Keyï¼ˆ-1 è¡¨ç¤ºä¸è¦†ç›–æ—§æ¶ˆæ¯ï¼‰
+			5.0f,             // æ˜¾ç¤ºæ—¶é—´ï¼ˆç§’ï¼‰
+			FColor::Green,    // é¢œè‰²
+			FString::Printf(TEXT("CurrentAP %f CostNum"), ActionPoint, CostNum) // æ¶ˆæ¯å†…å®¹
 		);
 	}
 }
 
 void UCombatComponent::ReviveAP()
 {
-	// ¸ù¾İÊôĞÔÈ·¶¨»Ö¸´Á¿
-	// µ±»Ö¸´ÂúÊ±,¹Ø±Õ¶¨Ê±Æ÷
+	// æ ¹æ®å±æ€§ç¡®å®šæ¢å¤é‡
+	// å½“æ¢å¤æ»¡æ—¶,å…³é—­å®šæ—¶å™¨
 	if (ActionPoint + APReviveValue >= ActionPointMaxValue)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ReviveActionPointHandle);
@@ -277,28 +277,28 @@ void UCombatComponent::ReviveAP()
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(
-			-1,               // Key£¨-1 ±íÊ¾²»¸²¸Ç¾ÉÏûÏ¢£©
-			5.0f,             // ÏÔÊ¾Ê±¼ä£¨Ãë£©
-			FColor::Green,    // ÑÕÉ«
-			FString::Printf(TEXT("CurrentAP %f"), ActionPoint) // ÏûÏ¢ÄÚÈİ
+			-1,               // Keyï¼ˆ-1 è¡¨ç¤ºä¸è¦†ç›–æ—§æ¶ˆæ¯ï¼‰
+			5.0f,             // æ˜¾ç¤ºæ—¶é—´ï¼ˆç§’ï¼‰
+			FColor::Green,    // é¢œè‰²
+			FString::Printf(TEXT("CurrentAP %f"), ActionPoint) // æ¶ˆæ¯å†…å®¹
 		);
 	}
 }
 
 void UCombatComponent::PerformAttack()
 {
-	//// ¸ù¾İµ±Ç°Ìõ¼şÈ·¶¨Õ½¶·×é¼şÖ´ĞĞ
-	//// ½øĞĞÒ»´ÎÇòĞÎ¼ì²â,ÅĞ¶ÏÃæÇ°ÊÇ·ñÓĞµĞÈË,¸ù¾İµĞÈËµÄµ±Ç°×´Ì¬(´ı´¦¾ö)ÒÔ¼°µĞÈËµÄ³¯ÏòºÍ¾àÀë(¿É±³´Ì)È·¶¨²¥·ÅµÄÃÉÌ«Ææ¶¯»­
+	//// æ ¹æ®å½“å‰æ¡ä»¶ç¡®å®šæˆ˜æ–—ç»„ä»¶æ‰§è¡Œ
+	//// è¿›è¡Œä¸€æ¬¡çƒå½¢æ£€æµ‹,åˆ¤æ–­é¢å‰æ˜¯å¦æœ‰æ•Œäºº,æ ¹æ®æ•Œäººçš„å½“å‰çŠ¶æ€(å¾…å¤„å†³)ä»¥åŠæ•Œäººçš„æœå‘å’Œè·ç¦»(å¯èƒŒåˆº)ç¡®å®šæ’­æ”¾çš„è’™å¤ªå¥‡åŠ¨ç”»
 	//if(CharacterOwner == nullptr || RH_EquippedWeapon == nullptr) return;
 	//
-	//// »ñÈ¡½ÇÉ«Î»ÖÃºÍÇ°·½ÏòÁ¿
+	//// è·å–è§’è‰²ä½ç½®å’Œå‰æ–¹å‘é‡
 	//FVector CharacterLocation = CharacterOwner->GetActorLocation();
 	//FVector CharacterForward = CharacterOwner->GetActorForwardVector();
 	//FRotator CharacterRotator = CharacterOwner->GetActorRotation();
 
-	//// ÉèÖÃÇòĞÎ¼ì²â²ÎÊı
+	//// è®¾ç½®çƒå½¢æ£€æµ‹å‚æ•°
 	//TArray<AActor*> ActorsToIgnore;
-	//ActorsToIgnore.Add(CharacterOwner); // ºöÂÔ×Ô¼º
+	//ActorsToIgnore.Add(CharacterOwner); // å¿½ç•¥è‡ªå·±
 
 	//TArray<FHitResult> OutHits;
 	//bool bHit = UKismetSystemLibrary::SphereTraceMulti(
@@ -306,40 +306,40 @@ void UCombatComponent::PerformAttack()
 	//	CharacterLocation,
 	//	CharacterLocation,
 	//	DETECTION_RADIUS,
-	//	UEngineTypes::ConvertToTraceType(ECC_Pawn), // ¼ì²âpawnÀàĞÍ
-	//	false, // ²»¼ì²â¸´ÔÓÅö×²
+	//	UEngineTypes::ConvertToTraceType(ECC_Pawn), // æ£€æµ‹pawnç±»å‹
+	//	false, // ä¸æ£€æµ‹å¤æ‚ç¢°æ’
 	//	ActorsToIgnore,
-	//	EDrawDebugTrace::ForDuration, // µ÷ÊÔÊ±ÏÔÊ¾£¬·¢²¼Ê±¿É¸ÄÎªNone
+	//	EDrawDebugTrace::ForDuration, // è°ƒè¯•æ—¶æ˜¾ç¤ºï¼Œå‘å¸ƒæ—¶å¯æ”¹ä¸ºNone
 	//	OutHits,
 	//	true
 	//);
 
 	//if (!bHit || OutHits.Num() == 0)
 	//{
-	//	// ÈôÎŞ·ûºÏµÄÌØÊâ¹¥»÷Ôò½øĞĞÆÕÍ¨¹¥»÷
-	//	// ¼ì²éÌåÁ¦ÊÇ·ñ×ã¹»
+	//	// è‹¥æ— ç¬¦åˆçš„ç‰¹æ®Šæ”»å‡»åˆ™è¿›è¡Œæ™®é€šæ”»å‡»
+	//	// æ£€æŸ¥ä½“åŠ›æ˜¯å¦è¶³å¤Ÿ
 	//	if (CanAction())
 	//	{
 	//		RH_EquippedWeapon->PerformAttack();
-	//		// Àà»êÌØĞÔ£ºÏûºÄÄÍÁ¦
+	//		// ç±»é­‚ç‰¹æ€§ï¼šæ¶ˆè€—è€åŠ›
 	//		ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
 
 	//	}
 	//	return;
 	//}
 
-	//// ±éÀúËùÓĞ¼ì²âµ½µÄµĞÈË
+	//// éå†æ‰€æœ‰æ£€æµ‹åˆ°çš„æ•Œäºº
 	//for (const FHitResult& Hit : OutHits)
 	//{
 	//	ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Hit.GetActor());
 
-	//	if (Enemy /*&& Enemy->IsAlive()*/) // È·±£ÊÇµĞÈËÇÒ´æ»î
+	//	if (Enemy /*&& Enemy->IsAlive()*/) // ç¡®ä¿æ˜¯æ•Œäººä¸”å­˜æ´»
 	//	{
-	//		// ¼ì²éµĞÈËÊÇ·ñ´¦ÓÚ¿É´¦¾ö×´Ì¬
+	//		// æ£€æŸ¥æ•Œäººæ˜¯å¦å¤„äºå¯å¤„å†³çŠ¶æ€
 	//		if (Enemy->CanExecute())
 	//		{
 	//			RH_EquippedWeapon->PerformExecute();
-	//			// ½«µĞÈËË²ÒÆµ½½ÇÉ«ÃæÇ°Ö¸¶¨Î»ÖÃ
+	//			// å°†æ•Œäººç¬ç§»åˆ°è§’è‰²é¢å‰æŒ‡å®šä½ç½®
 	//			FRotator NewRotator = CharacterRotator.Add(0,180,0);
 	//			NewRotator.Normalize();
 	//			Enemy->MoveToLocationAndRotation(
@@ -349,20 +349,20 @@ void UCombatComponent::PerformAttack()
 	//			return;
 	//		}
 
-	//		// ¼ÆËãµĞÈËÎ»ÖÃºÍ·½Ïò
+	//		// è®¡ç®—æ•Œäººä½ç½®å’Œæ–¹å‘
 	//		FVector EnemyLocation = Enemy->GetActorLocation();
 	//		FVector EnemyForward = Enemy->GetActorForwardVector();
 
-	//		// ¼ÆËãÍæ¼Òµ½µĞÈËµÄÏòÁ¿
+	//		// è®¡ç®—ç©å®¶åˆ°æ•Œäººçš„å‘é‡
 	//		FVector ToEnemy = EnemyLocation - CharacterLocation;
 	//		float DistanceToEnemy = ToEnemy.Size();
 	//		ToEnemy.Normalize();
 
-	//		// ¼ÆËãµĞÈËºó·½½Ç¶È
+	//		// è®¡ç®—æ•Œäººåæ–¹è§’åº¦
 	//		float DotProduct = FVector::DotProduct(EnemyForward, ToEnemy);
 	//		float Angle = FMath::RadiansToDegrees(FMath::Acos(DotProduct));
 
-	//		// ¼ì²éÊÇ·ñÂú×ã±³´ÌÌõ¼ş
+	//		// æ£€æŸ¥æ˜¯å¦æ»¡è¶³èƒŒåˆºæ¡ä»¶
 	//		if (DistanceToEnemy <= BACKSTAB_DISTANCE_THRESHOLD && Angle <= BACKSTAB_ANGLE_THRESHOLD)
 	//		{
 	//			RH_EquippedWeapon->PerformBackstab();
@@ -375,11 +375,11 @@ void UCombatComponent::PerformAttack()
 	//	}
 	//}
 
-	//// ÈôÎŞ·ûºÏµÄÌØÊâ¹¥»÷Ôò½øĞĞÆÕÍ¨¹¥»÷
+	//// è‹¥æ— ç¬¦åˆçš„ç‰¹æ®Šæ”»å‡»åˆ™è¿›è¡Œæ™®é€šæ”»å‡»
 	//if (CanAction())
 	//{
 	//	RH_EquippedWeapon->PerformAttack();
-	//	// Àà»êÌØĞÔ£ºÏûºÄÄÍÁ¦
+	//	// ç±»é­‚ç‰¹æ€§ï¼šæ¶ˆè€—è€åŠ›
 	//	ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Normal_Combo_Phase_1));
 
 	//}

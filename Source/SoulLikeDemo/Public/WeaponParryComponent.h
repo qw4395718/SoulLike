@@ -19,7 +19,7 @@ public:
 	UWeaponParryComponent();
 
 	/************************************************************************/
-	/*Íâ²¿µ÷ÓÃ                                                                     */
+	/*å¤–éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable, Category = "WeaponComponent")
 		void InitalizeWeaponComponent(AActor* Onwer,FVector CBSize);
@@ -32,58 +32,58 @@ public:
 
 protected:
 	/************************************************************************/
-	/*ÄÚ²¿µ÷ÓÃ                                                                     */
+	/*å†…éƒ¨è°ƒç”¨                                                                     */
 	/************************************************************************/
-	// Åö×²ÖØµş¿ªÊ¼
+	// ç¢°æ’é‡å å¼€å§‹
 	UFUNCTION()
 		void OnCollisionOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 			bool bFromSweep, const FHitResult& SweepResult);
 
-	// Åö×²ÖØµş½áÊø
+	// ç¢°æ’é‡å ç»“æŸ
 	UFUNCTION()
 		void OnCollisionOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	// ´¦ÀíÅö×²ÖØµşactor
+	// å¤„ç†ç¢°æ’é‡å actor
 	UFUNCTION()
 		void ApplyParryToOverlappingActors();
 
 
 protected:
 	/************************************************************************/
-	/*ÄÚ²¿±äÁ¿                                                                     */
+	/*å†…éƒ¨å˜é‡                                                                     */
 	/************************************************************************/
 
-	// ³ÖÓĞÕß(ÎäÆ÷Àà)ÒıÓÃ
+	// æŒæœ‰è€…(æ­¦å™¨ç±»)å¼•ç”¨
 	UPROPERTY()
 		AActor* OnwerWeapon;
 
-	// ³ÖÓĞÕß(½ÇÉ«Àà)ÒıÓÃ
+	// æŒæœ‰è€…(è§’è‰²ç±»)å¼•ç”¨
 	UPROPERTY()
 		AActor* OnwerActor;
 
-	// Åö×²ºĞ³ß´ç
+	// ç¢°æ’ç›’å°ºå¯¸
 	UPROPERTY()
 		FVector CollisionBoxSize;
 
-	// Åö×²ºĞ-¹æÔò¶à±ßĞÎ
+	// ç¢°æ’ç›’-è§„åˆ™å¤šè¾¹å½¢
 	UPROPERTY()
 		UBoxComponent* CollisonBox;
 
-	// µ¯·´¶¨Ê±Æ÷handle
+	// å¼¹åå®šæ—¶å™¨handle
 	UPROPERTY()
 		FTimerHandle ParryTimerHandle;
 
-	// ¶¨Ê±Æ÷¼ä¸ô
+	// å®šæ—¶å™¨é—´éš”
 	UPROPERTY()
 		float ParrtInterval;
 
-	// Åö×²ÃüÖĞactorÊı×é
+	// ç¢°æ’å‘½ä¸­actoræ•°ç»„
 	UPROPERTY()
 		TArray<AActor*> CollsionOverlappingActors;
 
-	// ÒÑÓ¦ÓÃµ¯·´actor¼¯
+	// å·²åº”ç”¨å¼¹åactoré›†
 	UPROPERTY()
 		TSet<AActor*> AlreadyParryActors;
 

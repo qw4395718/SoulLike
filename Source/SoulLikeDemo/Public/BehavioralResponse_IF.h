@@ -23,43 +23,43 @@ class SOULLIKEDEMO_API IBehavioralResponse_IF
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	// ¹¥»÷ĞĞÎªÏìÓ¦
+	// æ”»å‡»è¡Œä¸ºå“åº”
 	UFUNCTION()
 		virtual void AttackResponse() = 0;
 
-	// ·ÀÓùĞĞÎªÏìÓ¦
+	// é˜²å¾¡è¡Œä¸ºå“åº”
 	UFUNCTION()
 		virtual void DefenceResponse() = 0;
 
-	// ¼¼ÄÜĞĞÎªÏìÓ¦
+	// æŠ€èƒ½è¡Œä¸ºå“åº”
 	UFUNCTION()
 		virtual void ComboSkillResponse() = 0;
 
-	// ·­¹öÏìÓ¦
+	// ç¿»æ»šå“åº”
 	UFUNCTION()
 		virtual void RollResponse() = 0;
 
-	// Ëø¶¨ÏìÓ¦
+	// é”å®šå“åº”
 	UFUNCTION()
 		virtual void LockRotationResponse() = 0;
 
-	// ÇĞ»»ÉÏ·½µÀ¾ßÀ¸ÏìÓ¦
+	// åˆ‡æ¢ä¸Šæ–¹é“å…·æ å“åº”
 	UFUNCTION()
 		virtual void SwitchEquipemntUpBarResponse() = 0;
 
-	// ÇĞ»»ÏÂ·½µÀ¾ßÀ¸ÏìÓ¦
+	// åˆ‡æ¢ä¸‹æ–¹é“å…·æ å“åº”
 	UFUNCTION()
 		virtual void SwitchEquipemntDownBarResponse() = 0;
 
-	// ÇĞ»»×óÊÖ×°±¸À¸ÏìÓ¦
+	// åˆ‡æ¢å·¦æ‰‹è£…å¤‡æ å“åº”
 	UFUNCTION()
 		virtual void SwitchEquipemntLeftBarResponse() = 0;
 
-	// ÇĞ»»ÓÒÊÖ×°±¸À¸ÏìÓ¦
+	// åˆ‡æ¢å³æ‰‹è£…å¤‡æ å“åº”
 	UFUNCTION()
 		virtual void SwitchEquipemntRightBarResponse() = 0;
 
-	// Ê¹ÓÃµÀ¾ßÏìÓ¦
+	// ä½¿ç”¨é“å…·å“åº”
 	UFUNCTION()
 		virtual void UseItem() = 0;
 

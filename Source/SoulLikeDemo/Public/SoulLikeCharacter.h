@@ -24,7 +24,7 @@ public:
 
 public:
 	/************************************************************************/
-	/*                                Íâ²¿µ÷ÓÃ                                      */
+	/*                                å¤–éƒ¨è°ƒç”¨                                      */
 	/************************************************************************/
 
 	UFUNCTION(BlueprintCallable, Category = "SetState")
@@ -37,17 +37,17 @@ public:
 
 protected:
 	/************************************************************************/
-	/*                                ÄÚ²¿µ÷ÓÃ                                      */
+	/*                                å†…éƒ¨è°ƒç”¨                                      */
 	/************************************************************************/
-	// ×ó¼üÏìÓ¦
+	// å·¦é”®å“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformAttack();
 
-	// ×óCtrlÏìÓ¦
+	// å·¦Ctrlå“åº”
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void PerformCombatSkill();
 
-	// °×ºĞ³õÊ¼»¯
+	// ç™½ç›’åˆå§‹åŒ–
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void Initialize();
 
@@ -61,7 +61,7 @@ protected:
 		void ReadTableTest(const FString TablePath);
 protected:
 	/************************************************************************/
-	/*                               ¼Ì³ĞÊµÏÖ                                       */
+	/*                               ç»§æ‰¿å®ç°                                       */
 	/************************************************************************/
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -79,25 +79,25 @@ public:
 
 protected:
 
-	// ¶¯»­×ÊÔ´-´ı´¦¾ö
+	// åŠ¨ç”»èµ„æº-å¾…å¤„å†³
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* ExecutionedMontage;
 
-	// ¶¯»­×ÊÔ´-±»±»´Ì
+	// åŠ¨ç”»èµ„æº-è¢«è¢«åˆº
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* BackStabbedMontage;
 
 
 
-	// ½ÇÉ«×´Ì¬-ÊÇ·ñ´¦ÓÚ´ı´¦¾ö×´Ì¬
+	// è§’è‰²çŠ¶æ€-æ˜¯å¦å¤„äºå¾…å¤„å†³çŠ¶æ€
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterState")
 		bool CanBackStab;
 
-	// ½ÇÉ«×´Ì¬-ÊÇ·ñ´¦ÓÚÕıÔÚ´¦¾ö×´Ì¬(ÎŞµĞ,²»±»´ò¶Ï)
+	// è§’è‰²çŠ¶æ€-æ˜¯å¦å¤„äºæ­£åœ¨å¤„å†³çŠ¶æ€(æ— æ•Œ,ä¸è¢«æ‰“æ–­)
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterState")
 		bool bIsExecuting;
 
-	// ½ÇÉ«×´Ì¬-ÊÇ·ñ´¦ÓÚÕıÔÚ´¦¾ö×´Ì¬(ÎŞµĞ,²»±»´ò¶Ï)
+	// è§’è‰²çŠ¶æ€-æ˜¯å¦å¤„äºæ­£åœ¨å¤„å†³çŠ¶æ€(æ— æ•Œ,ä¸è¢«æ‰“æ–­)
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterState")
 		bool bIsBackStabbing;
 	

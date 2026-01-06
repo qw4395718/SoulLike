@@ -13,7 +13,7 @@ UHUD_StatusBar::UHUD_StatusBar(const FObjectInitializer& ObjectInitializer /*= F
 
 void UHUD_StatusBar::AddStatus(FStatusEffectInfo statusInfo)
 {
-	// ÖØ¸´µÄIcon²»½ÓÊÜ,ÓÉÉÏ¼¶¹Ü¿ØÈ·±£´«ÈëÊÇÐÂ×´Ì¬
+	// ï¿½Ø¸ï¿½ï¿½ï¿½Iconï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½Ï¼ï¿½ï¿½Ü¿ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
 	RETURN_IF_TRUE(m_statusIconsContainer == nullptr || m_activeStatusIcons.Contains(statusInfo.IconIndex))
 
 	CreateNewStatus(statusInfo);
@@ -25,10 +25,10 @@ void UHUD_StatusBar::RemoveStatus(int iconIndex)
 	{
 		UUserWidget* iconWidget = *ppiconWidget;
 
-		// µ÷ÓÃÀ¶Í¼ÒÆ³ý¶¯»­
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½Æ³ï¿½ï¿½ï¿½ï¿½ï¿½
 		OnStatusIconRemoved(iconWidget);
 
-		// ÑÓ³ÙÊµ¼ÊÏú»Ù£¬ÈÃ¶¯»­ÓÐÊ±¼ä²¥·Å
+		// ï¿½Ó³ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½Ù£ï¿½ï¿½Ã¶ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä²¥ï¿½ï¿½
 		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, iconWidget, iconIndex]()
 			{
@@ -37,7 +37,7 @@ void UHUD_StatusBar::RemoveStatus(int iconIndex)
 					m_statusIconsContainer->RemoveChild(iconWidget);
 				}
 				m_activeStatusIcons.Remove(iconIndex);
-			}, 0.3f, false); // ÑÓ³ÙÊ±¼äÆ¥Åä¶¯»­³¤¶È
+			}, 0.3f, false); // ï¿½Ó³ï¿½Ê±ï¿½ï¿½Æ¥ï¿½ä¶¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	}
 }
 
@@ -47,7 +47,7 @@ void UHUD_StatusBar::UpdateStatus(FStatusEffectInfo statusInfo)
 	{
 		if (UUI_IconSlot* statusIcon = Cast<UUI_IconSlot>(*ppwaitUpdateSubWidget))
 		{
-			// ÒÑ¾­ÕÒµ½Êý¾Ý,¿É½øÐÐÊý¾Ý¸üÐÂ
+			// ï¿½Ñ¾ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½É½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¸ï¿½ï¿½ï¿½
 			statusIcon->SetData(statusInfo);
 		}
 	}
@@ -56,7 +56,7 @@ void UHUD_StatusBar::UpdateStatus(FStatusEffectInfo statusInfo)
 void UHUD_StatusBar::CreateNewStatus(FStatusEffectInfo statusInfo)
 {
 	RETURN_IF_TRUE(m_statusIconWidgetClass == nullptr || GetWorld() == nullptr);
-	// ´´½¨IconWidget
+	// ï¿½ï¿½ï¿½ï¿½IconWidget
 	UUserWidget* newIcon = CreateWidget<UUserWidget>(GetWorld(), m_statusIconWidgetClass);
 	if (!newIcon)
 	return;
@@ -64,16 +64,16 @@ void UHUD_StatusBar::CreateNewStatus(FStatusEffectInfo statusInfo)
 	UUI_IconSlot* statusIcon = Cast<UUI_IconSlot>(newIcon);
 	if (statusIcon)
 	{
-		// ³õÊ¼»¯ºóÄÉÈë¹ÜÀí
+		// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		statusIcon->SetData(statusInfo);
 
-		// Ìí¼Óµ½ÈÝÆ÷
+		// ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½
 		m_statusIconsContainer->AddChild(statusIcon);
 
-		// ´æ´¢ÒýÓÃ
+		// ï¿½æ´¢ï¿½ï¿½ï¿½ï¿½
 		m_activeStatusIcons.Add(statusInfo.IconIndex, newIcon);
 
-		// µ÷ÓÃÀ¶Í¼¶¯»­ÊÂ¼þ
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½
 		OnStatusIconAdded(newIcon);
 	}
 	

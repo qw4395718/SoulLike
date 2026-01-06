@@ -14,7 +14,7 @@ UHUD_ItemIcon::UHUD_ItemIcon()
 void UHUD_ItemIcon::SetData(FStatusEffectInfo effectInfo)
 {
 	RETURN_IF_TRUE(m_stackNum == nullptr || m_showImage == nullptr);
-	// ÉèÖÃ¶ÑµþÊýÁ¿
+	// ï¿½ï¿½ï¿½Ã¶Ñµï¿½ï¿½ï¿½ï¿½ï¿½
 	m_stackNum->SetText(FText::AsNumber(effectInfo.Stacks));
 	m_showImage->SetBrushFromTexture(effectInfo.Icon);
 }

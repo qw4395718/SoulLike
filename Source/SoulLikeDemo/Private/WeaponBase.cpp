@@ -11,31 +11,31 @@
 
 AWeaponBase::AWeaponBase()
 {
-	//ÊÇ·ñ¿ªÆôtick
+	//æ˜¯å¦å¼€å¯tick
 	PrimaryActorTick.bCanEverTick = false;
 
 	/************************************************************************/
-	/*                              ×é¼ş³õÊ¼»¯                                        */
+	/*                              ç»„ä»¶åˆå§‹åŒ–                                        */
 	/************************************************************************/
-	// ³¡¾°×é¼şroot
+	// åœºæ™¯ç»„ä»¶root
 	USceneComponent* SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	RootComponent = SceneRoot;
 
-	// Åö×²ºĞ-Ä¬ÈÏ²»¿ªÆô¼ì²â
+	// ç¢°æ’ç›’-é»˜è®¤ä¸å¼€å¯æ£€æµ‹
 	CollisonBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisonBox"));
 	CollisonBox->SetupAttachment(RootComponent);
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisonBox->SetGenerateOverlapEvents(false);
 
-	// ¹Ç÷ÀÍø¸ñÌå-
+	// éª¨éª¼ç½‘æ ¼ä½“-
 	SkeletalWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalWeaponMesh->SetupAttachment(RootComponent);
-	// ¾²Ì¬Íø¸ñÌå-
+	// é™æ€ç½‘æ ¼ä½“-
 	StaticWeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticWeaponMesh->SetupAttachment(RootComponent);
 
 	/************************************************************************/
-	/*                              ±äÁ¿³õÊ¼»¯                                        */
+	/*                              å˜é‡åˆå§‹åŒ–                                        */
 	/************************************************************************/
 
 	Initialize();
@@ -46,7 +46,7 @@ void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// »ñÈ¡³ÖÓĞÕß
+	// è·å–æŒæœ‰è€…
 	if (GetOwner() && Cast<ASoulLikeCharacter>(GetOwner()))
 	{
 		OwningCharacter = Cast<ASoulLikeCharacter>(GetOwner());
@@ -55,7 +55,7 @@ void AWeaponBase::BeginPlay()
 
 void AWeaponBase::Initialize()
 {
-	// ±äÁ¿³õÊ¼»¯
+	// å˜é‡åˆå§‹åŒ–
 	bEnableCapsuleCheck = false;
 	IsStaticMesh = true;
 	WeaponData.WeaponCollisonBoxLength = 100.0f;
@@ -69,17 +69,17 @@ void AWeaponBase::Initialize()
 	//APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Normal_Combo_Phase_3, -20.0f});
 	//APCostMap.Add(TTuple<EAttackType, float>{EAttackType::Skill_Combo_Phase_1, -40.0f});
 
-	// ×ÊÔ´³õÊ¼»¯
+	// èµ„æºåˆå§‹åŒ–
 	USkeletalMesh* Mesh = LoadObject<USkeletalMesh>(
-		nullptr, // Outer¶ÔÏó£¨Í¨³£Îªnull»òGetTransientPackage£©
-		TEXT("/Game/InfinityBladeWeapons/Weapons/Blade/Swords/Blade_BlackKnight/SK_Blade_BlackKnight.SK_Blade_BlackKnight") // ×ÊÔ´Â·¾¶
+		nullptr, // Outerå¯¹è±¡ï¼ˆé€šå¸¸ä¸ºnullæˆ–GetTransientPackageï¼‰
+		TEXT("/Game/InfinityBladeWeapons/Weapons/Blade/Swords/Blade_BlackKnight/SK_Blade_BlackKnight.SK_Blade_BlackKnight") // èµ„æºè·¯å¾„
 		);
 	if (Mesh)
 	{
 		SkeletalWeaponMesh->SetSkeletalMesh(Mesh);
 	}
 
-	// ¼ÓÔØÎäÆ÷¶¯»­×ÊÔ´
+	// åŠ è½½æ­¦å™¨åŠ¨ç”»èµ„æº
 	UAnimMontage* Montage = LoadObject<UAnimMontage>(
 		nullptr,
 		TEXT("/Game/SoulLikeDemo/Anim/AM_Attack_Sword.AM_Attack_Sword")
@@ -89,7 +89,7 @@ void AWeaponBase::Initialize()
 		AttackMontage = Montage;
 	}
 
-	// ÁÙÊ±²âÊÔÌí¼Ó¶ÜÅÆÕ½¼¼¶¯»­
+	// ä¸´æ—¶æµ‹è¯•æ·»åŠ ç›¾ç‰Œæˆ˜æŠ€åŠ¨ç”»
 	Montage = LoadObject<UAnimMontage>(
 		nullptr,
 		TEXT("/Game/SoulLikeDemo/Anim/AM_CombatSkill_Sheild.AM_CombatSkill_Sheild")
@@ -99,7 +99,7 @@ void AWeaponBase::Initialize()
 		CombatSkillMontage = Montage;
 	}
 
-	// ÁÙÊ±²âÊÔÌí¼Ó±³´Ì¶¯»­
+	// ä¸´æ—¶æµ‹è¯•æ·»åŠ èƒŒåˆºåŠ¨ç”»
 	Montage = LoadObject<UAnimMontage>(
 		nullptr,
 		TEXT("/Game/SoulLikeDemo/Anim/AM_BackStab_Sword.AM_BackStab_Sword")
@@ -109,7 +109,7 @@ void AWeaponBase::Initialize()
 		BackStabbMontage = Montage;
 	}
 
-	// ÁÙÊ±²âÊÔÌí¼Ó´¦¾ö¶¯»­
+	// ä¸´æ—¶æµ‹è¯•æ·»åŠ å¤„å†³åŠ¨ç”»
 	Montage = LoadObject<UAnimMontage>(
 		nullptr,
 		TEXT("/Game/SoulLikeDemo/Anim/AM_Execute_Sword.AM_Execute_Sword")
@@ -129,8 +129,8 @@ FDamageData AWeaponBase::GetDamageData_Implementation() const
 
 void AWeaponBase::PerformAttack()
 {
-	// ¸ù¾İµ±Ç°²¥·Å×´Ì¬½øĞĞÅĞ¶ÏÊÇ·ñÔÊĞíÇĞ»»
-	// ¸ù¾İÍ¨ÖªÀ´È·¶¨²¥·ÅµÄmontageÆ¬¶Î
+	// æ ¹æ®å½“å‰æ’­æ”¾çŠ¶æ€è¿›è¡Œåˆ¤æ–­æ˜¯å¦å…è®¸åˆ‡æ¢
+	// æ ¹æ®é€šçŸ¥æ¥ç¡®å®šæ’­æ”¾çš„montageç‰‡æ®µ
 	if (AttackSection_NS != nullptr && EnableComboContinue == true)
 	{
 
@@ -145,7 +145,7 @@ void AWeaponBase::PerformAttack()
 
 void AWeaponBase::PerformCombatSkill()
 {
-	// ¸ù¾İÍ¨ÖªÀ´È·¶¨²¥·ÅµÄmontageÆ¬¶Î
+	// æ ¹æ®é€šçŸ¥æ¥ç¡®å®šæ’­æ”¾çš„montageç‰‡æ®µ
 	if (AttackSection_NS != nullptr && EnableComboContinue == true)
 	{
 
@@ -159,7 +159,7 @@ void AWeaponBase::PerformCombatSkill()
 
 void AWeaponBase::PerformBackstab()
 {
-	// Ö±½Ó²¥·ÅÃÉÌ«Ææ¶¯»­£¬ºóĞø²¹³ä×´Ì¬ÅĞ¶Ï
+	// ç›´æ¥æ’­æ”¾è’™å¤ªå¥‡åŠ¨ç”»ï¼Œåç»­è¡¥å……çŠ¶æ€åˆ¤æ–­
 	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
@@ -169,7 +169,7 @@ void AWeaponBase::PerformBackstab()
 
 void AWeaponBase::PerformExecute()
 {
-	// Ö±½Ó²¥·ÅÃÉÌ«Ææ¶¯»­£¬ºóĞø²¹³ä×´Ì¬ÅĞ¶Ï
+	// ç›´æ¥æ’­æ”¾è’™å¤ªå¥‡åŠ¨ç”»ï¼Œåç»­è¡¥å……çŠ¶æ€åˆ¤æ–­
 	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
@@ -179,7 +179,7 @@ void AWeaponBase::PerformExecute()
 
 void AWeaponBase::PlayAttackMontage(FName MontageSectionName)
 {
-	// ¼ì²âÊÇ·ñÓĞĞ§
+	// æ£€æµ‹æ˜¯å¦æœ‰æ•ˆ
 	if (OwningCharacter == nullptr || OwningCharacter->GetMesh()->GetAnimInstance() == nullptr)
 		return;
 
@@ -197,7 +197,7 @@ void AWeaponBase::PlayAttackMontage(FName MontageSectionName)
 
 void AWeaponBase::PlayCombatSkillMontage(FName MontageSectionName)
 {
-	// ¼ì²âÊÇ·ñÓĞĞ§
+	// æ£€æµ‹æ˜¯å¦æœ‰æ•ˆ
 	if (OwningCharacter == nullptr || OwningCharacter->GetMesh()->GetAnimInstance() == nullptr)
 		return;
 
@@ -225,83 +225,83 @@ float AWeaponBase::GetStaminaCost(EAttackType AttackType)
 
 void AWeaponBase::EnableAttackCollisonCheck()
 {
-	// ¸ù¾İÅäÖÃÊı¾İ³õÊ¼»¯Åö×²ºĞ´óĞ¡ºÍÅäÖÃ
+	// æ ¹æ®é…ç½®æ•°æ®åˆå§‹åŒ–ç¢°æ’ç›’å¤§å°å’Œé…ç½®
 	CollisonBox->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::OnAttackOverlapBegin);
 	CollisonBox->OnComponentEndOverlap.AddDynamic(this, &AWeaponBase::OnAttackOverlapEnd);
-	// ÉèÖÃÅö×²
+	// è®¾ç½®ç¢°æ’
 	CollisonBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisonBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisonBox->SetGenerateOverlapEvents(true);
-	// ¿ªÆô¶¨Ê±Æ÷
+	// å¼€å¯å®šæ—¶å™¨
 	GetWorld()->GetTimerManager().SetTimer(DamageTimerHandle, this,
 		&AWeaponBase::ApplyDamageToOverlappingActors,
 		DamageInterval, true);
-	// ÖØÖÃÒÑÃüÖĞÄ¿±ê¼ÇÂ¼
+	// é‡ç½®å·²å‘½ä¸­ç›®æ ‡è®°å½•
 	AlreadyHitActors.Reset();
 }
 
 void AWeaponBase::DisableAttackCollisonCheck()
 {
-	// ¸ù¾İÅäÖÃÊı¾İ³õÊ¼»¯Åö×²ºĞ´óĞ¡ºÍÅäÖÃ
+	// æ ¹æ®é…ç½®æ•°æ®åˆå§‹åŒ–ç¢°æ’ç›’å¤§å°å’Œé…ç½®
 	CollisonBox->OnComponentBeginOverlap.RemoveDynamic(this, &AWeaponBase::OnAttackOverlapBegin);
 	CollisonBox->OnComponentEndOverlap.RemoveDynamic(this, &AWeaponBase::OnAttackOverlapEnd);
-	// ¹Ø±ÕÅö×²¼ì²â
+	// å…³é—­ç¢°æ’æ£€æµ‹
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisonBox->SetGenerateOverlapEvents(false);
-	// ¹Ø±Õ¶¨Ê±Æ÷
+	// å…³é—­å®šæ—¶å™¨
 	if (DamageTimerHandle.IsValid())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(DamageTimerHandle);
 	}
-	// Çå¿ÕÒÑÃû×ÖÄ¿±ê¼ÇÂ¼
+	// æ¸…ç©ºå·²åå­—ç›®æ ‡è®°å½•
 	AlreadyHitActors.Reset();
 }
 
 void AWeaponBase::EnableParryCollisonCheck()
 {
-	// ¸ù¾İÅäÖÃÊı¾İ³õÊ¼»¯Åö×²ºĞ´óĞ¡ºÍÅäÖÃ
+	// æ ¹æ®é…ç½®æ•°æ®åˆå§‹åŒ–ç¢°æ’ç›’å¤§å°å’Œé…ç½®
 	CollisonBox->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::OnParryOverlapBegin);
 	CollisonBox->OnComponentEndOverlap.AddDynamic(this, &AWeaponBase::OnParryOverlapEnd);
-	// ÉèÖÃÅö×²
+	// è®¾ç½®ç¢°æ’
 	CollisonBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisonBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisonBox->SetGenerateOverlapEvents(true);
-	// ¿ªÆô¶¨Ê±Æ÷
+	// å¼€å¯å®šæ—¶å™¨
 	GetWorld()->GetTimerManager().SetTimer(ParryWindowTimer, this,
 		&AWeaponBase::ApplyParryToOverlappingActors,
 		ParryInterval, true);
-	// ÖØÖÃÒÑÃüÖĞÄ¿±ê¼ÇÂ¼
+	// é‡ç½®å·²å‘½ä¸­ç›®æ ‡è®°å½•
 	AlreadyParryActors.Reset();
 	UE_LOG(LogTemp, Display, TEXT("EnableParryCollisonCheck"));
 }
 
 void AWeaponBase::DisableParryCollisonCheck()
 {
-	// ¸ù¾İÅäÖÃÊı¾İ³õÊ¼»¯Åö×²ºĞ´óĞ¡ºÍÅäÖÃ
+	// æ ¹æ®é…ç½®æ•°æ®åˆå§‹åŒ–ç¢°æ’ç›’å¤§å°å’Œé…ç½®
 	CollisonBox->OnComponentBeginOverlap.RemoveDynamic(this, &AWeaponBase::OnParryOverlapBegin);
 	CollisonBox->OnComponentEndOverlap.RemoveDynamic(this, &AWeaponBase::OnParryOverlapEnd);
-	// ¹Ø±ÕÅö×²¼ì²â
+	// å…³é—­ç¢°æ’æ£€æµ‹
 	CollisonBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisonBox->SetGenerateOverlapEvents(false);
-	// ¹Ø±Õ¶¨Ê±Æ÷
+	// å…³é—­å®šæ—¶å™¨
 	if (ParryWindowTimer.IsValid())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ParryWindowTimer);
 	}
-	// Çå¿ÕÒÑÃû×ÖÄ¿±ê¼ÇÂ¼
+	// æ¸…ç©ºå·²åå­—ç›®æ ‡è®°å½•
 	AlreadyParryActors.Reset();
 	UE_LOG(LogTemp, Display, TEXT("DisableParryCollisonCheck"));
 }
 
 void AWeaponBase::ActivateParryWindow(float Duration)
 {
-	// ¸ù¾İÅäÖÃÊı¾İ³õÊ¼»¯Åö×²ºĞ´óĞ¡ºÍÅäÖÃ
+	// æ ¹æ®é…ç½®æ•°æ®åˆå§‹åŒ–ç¢°æ’ç›’å¤§å°å’Œé…ç½®
 
 	bIsParryWindowActive = true;
 
-	// ÉèÖÃ¶¨Ê±Æ÷×Ô¶¯¹Ø±Õµ¯·´´°¿Ú,µ±µ¯·´³É¹¦Ê±ĞèÒªÍ¨¹ı¶¨Ê±Æ÷¹Ø±Õ
+	// è®¾ç½®å®šæ—¶å™¨è‡ªåŠ¨å…³é—­å¼¹åçª—å£,å½“å¼¹åæˆåŠŸæ—¶éœ€è¦é€šè¿‡å®šæ—¶å™¨å…³é—­
 	GetWorld()->GetTimerManager().SetTimer(
 		ParryWindowTimer,
 		this,
@@ -363,11 +363,11 @@ void AWeaponBase::ApplyDamageToOverlappingActors()
 	{
 		if (Actor)
 		{
-			// ¼ì²éÊÇ·ñÊÇÌØ¶¨Àà
+			// æ£€æŸ¥æ˜¯å¦æ˜¯ç‰¹å®šç±»
 			ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Actor);
 			if (Enemy && OwningCharacter != Enemy && !AlreadyHitActors.Contains(Enemy))
 			{
-				// ´¦ÀíµĞÈËÃüÖĞÂß¼­
+				// å¤„ç†æ•Œäººå‘½ä¸­é€»è¾‘
 				FDamageEventData DamageEventData;
 				DamageEventData.BaseDamage = WeaponData.BaseDamage;
 				//DamageEventData.HitLocation = HitResult.Location;
@@ -389,7 +389,7 @@ void AWeaponBase::ApplyParryToOverlappingActors()
 	{
 		if (Actor)
 		{
-			// ¼ì²éÊÇ·ñÊÇÌØ¶¨Àà
+			// æ£€æŸ¥æ˜¯å¦æ˜¯ç‰¹å®šç±»
 			ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Actor);
 			if (Enemy && OwningCharacter != Enemy && !AlreadyParryActors.Contains(Enemy))
 			{

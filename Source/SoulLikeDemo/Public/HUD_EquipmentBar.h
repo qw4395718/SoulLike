@@ -27,7 +27,7 @@ public:
 		void FakeInit();
 	// 初始化组件
 	UFUNCTION(BlueprintCallable, Category = "EquipmentBarBar")
-		void Initialize();
+		void InitializeEquipmentBar();
 	// 更新指定槽位数据
 	UFUNCTION(BlueprintCallable, Category = "EquipmentBarBar")
 		void UpdateTargetSlot(EHUDEquipmentSlotType type,FStatusEffectInfo status);
@@ -42,6 +42,9 @@ protected:
 		// 重写原生鼠标滚轮事件
 	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
+	// 重写原生Tick事件
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
+
 	// 鼠标滚动行为处理
 	UFUNCTION(BlueprintCallable, Category = "Scroll")
 		void HandleScroll(float wheelDelta);
@@ -55,7 +58,7 @@ protected:
 		UHUD_ItemIcon* m_upSlot;
 
 	UPROPERTY(meta = (BindWidget))
-		UHUD_ItemIcon* m_dowpSlot;
+		UHUD_ItemIcon* m_downSlot;
 
 	UPROPERTY(meta = (BindWidget))
 		UHUD_ItemIcon* m_leftSlot;
@@ -69,8 +72,7 @@ protected:
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 		UWidgetAnimation* m_changeEquipmentAnimation;
 
-	UPROPERTY()
-		bool m_bIsActiveCtrl = false;
+	bool m_bIsCtrlHeldInternal = false;
 private:
 	/************************************************************************/
 	/* 内部变量-配置                                                                     */
@@ -82,8 +84,5 @@ private:
 	// 滚动速度控制
 	UPROPERTY(EditAnywhere, Category = "Scroll")
 		float scrollHeightLimit = 40.0f;
-
-	// 当前滚动偏移
-	float currentScrollOffset = 0.0f;
 };
 

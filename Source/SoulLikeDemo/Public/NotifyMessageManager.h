@@ -74,7 +74,7 @@ protected:
 
 	// 初始Y位置
 	UPROPERTY(EditDefaultsOnly, Category = "Notification Settings")
-		float m_initialYPosition = 200.0f;
+		float m_initialYPosition = 0;
 
 	bool m_bIsInitialized = false;
 };

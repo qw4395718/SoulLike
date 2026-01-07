@@ -37,7 +37,7 @@ void UHUD_Main_PC::RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr)
 	m_playerStatusBar->RemovePlayerStatus(removeStatusArr);
 }
 
-void UHUD_Main_PC::UpdateTargetSlot(int type, FStatusEffectInfo status)
+void UHUD_Main_PC::UpdateTargetSlot(EHUDEquipmentSlotType type, FStatusEffectInfo status)
 {
 	RETURN_IF_TRUE(m_playerEquipmentBar == nullptr);
 	m_playerEquipmentBar->UpdateTargetSlot(type, status);

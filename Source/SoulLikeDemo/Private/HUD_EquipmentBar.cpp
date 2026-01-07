@@ -16,12 +16,12 @@ void UHUD_EquipmentBar::FakeInit()
 
 }
 
-void UHUD_EquipmentBar::Initialize()
+void UHUD_EquipmentBar::InitializeEquipmentBar()
 {
-	RETURN_IF_TRUE(m_upSlot == nullptr || m_dowpSlot == nullptr || m_leftSlot == nullptr || m_rightSlot == nullptr);
+	RETURN_IF_TRUE(m_upSlot == nullptr || m_downSlot == nullptr || m_leftSlot == nullptr || m_rightSlot == nullptr);
 	EquipmentSotMap.Empty();
 	EquipmentSotMap.Add(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Up, m_upSlot);
-	EquipmentSotMap.Add(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Down, m_dowpSlot);
+	EquipmentSotMap.Add(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Down, m_downSlot);
 	EquipmentSotMap.Add(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Left, m_leftSlot);
 	EquipmentSotMap.Add(EHUDEquipmentSlotType::EHUDEquipmentSlotType_Right, m_rightSlot);
 }
@@ -56,6 +56,21 @@ FReply UHUD_EquipmentBar::NativeOnMouseWheel(const FGeometry& InGeometry, const 
 	return FReply::Handled();
 }
 
+
+
+void UHUD_EquipmentBar::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	// 检测是否按下了Ctrl键（左Ctrl或右Ctrl）
+
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		m_bIsCtrlHeldInternal = PC->IsInputKeyDown(EKeys::LeftControl) ||
+			PC->IsInputKeyDown(EKeys::RightControl);
+	}
+}
+
 void UHUD_EquipmentBar::HandleScroll(float wheelDelta)
 {
 	// 
@@ -66,6 +81,7 @@ void UHUD_EquipmentBar::HandleScroll(float wheelDelta)
 	if (changeNum != 0)
 	{
 		// 多播委托到管理类中
+		UE_LOG(LogTemp,Display,TEXT("UHUD_EquipmentBar::HandleScroll changeNum:%d isActiveLeftCtrl:%d"), changeNum, m_bIsCtrlHeldInternal);
 
 	}
 }

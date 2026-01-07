@@ -39,7 +39,7 @@ public:
 		void RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr);
 
 	UFUNCTION(BlueprintCallable, Category = "Main PC")
-		void UpdateTargetSlot(int type, FStatusEffectInfo status);
+		void UpdateTargetSlot(EHUDEquipmentSlotType type, FStatusEffectInfo status);
 
 protected:
 	/************************************************************************/

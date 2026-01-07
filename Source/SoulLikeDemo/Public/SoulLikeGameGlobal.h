@@ -236,11 +236,7 @@ enum class EHUDEquipmentSlotType :uint8
 {
 	EHUDEquipmentSlotType_None,
 	EHUDEquipmentSlotType_Up,
-	EHUDEquipmentSlotType_UpSecond,
-	EHUDEquipmentSlotType_UpThird,
 	EHUDEquipmentSlotType_Down,
-	EHUDEquipmentSlotType_DownSecond,
-	EHUDEquipmentSlotType_DownThird,
 	EHUDEquipmentSlotType_Left,
 	EHUDEquipmentSlotType_Right,
 	EHUDEquipmentSlotType_Max,

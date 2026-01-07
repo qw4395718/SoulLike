@@ -108,7 +108,7 @@ void UNotifyMessageManager::UpdateNotificationPositions()
 		if (UPop_NotifyMessage* notification = m_activeNotifications[i])
 		{
 			notification->MoveToPosition(curcrentY);
-			curcrentY += m_notificationSpacing;
+			curcrentY -= m_notificationSpacing;
 		}
 	}
 }
@@ -129,6 +129,7 @@ void UNotifyMessageManager::RemoveNotification(class UPop_NotifyMessage* notific
 			{
 				notification->RemoveFromParent();
 				m_activeNotifications.Remove(notification);
+				UpdateNotificationPositions();
 			}
 		});
 

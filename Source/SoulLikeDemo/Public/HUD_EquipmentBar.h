@@ -8,6 +8,7 @@
 #include "HUD_EquipmentBar.generated.h"
 
 class UHUD_ItemIcon;
+class UWidgetAnimation;
 
 /**
  * 
@@ -21,35 +22,68 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	
+	// 单元测试相关
 	UFUNCTION(BlueprintCallable, Category = "EquipmentBarBar")
-		void InitializeEquipmentBar(
-			UHUD_ItemIcon* upEquipment,
-			UHUD_ItemIcon* downEquipment,
-			UHUD_ItemIcon* leftEquipment,
-			UHUD_ItemIcon* rightEquipment,
-			UHUD_ItemIcon* upSecondEquipment,
-			UHUD_ItemIcon* upThirdEquipment,
-			UHUD_ItemIcon* downSecondEquipment,
-			UHUD_ItemIcon* downThirdEquipment
-			);
-
+		void FakeInit();
+	// 初始化组件
 	UFUNCTION(BlueprintCallable, Category = "EquipmentBarBar")
-		void UpdateTargetSlot(int type,FStatusEffectInfo status);
-
+		void Initialize();
+	// 更新指定槽位数据
+	UFUNCTION(BlueprintCallable, Category = "EquipmentBarBar")
+		void UpdateTargetSlot(EHUDEquipmentSlotType type,FStatusEffectInfo status);
+	// 开始切换装备UI动画
+	UFUNCTION(BlueprintCallable)
+		void StartChangeEquipment();
 
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
+		// 重写原生鼠标滚轮事件
+	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
+	// 鼠标滚动行为处理
+	UFUNCTION(BlueprintCallable, Category = "Scroll")
+		void HandleScroll(float wheelDelta);
 
 protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
 	// 控件引用
+	UPROPERTY(meta = (BindWidget))
+		UHUD_ItemIcon* m_upSlot;
+
+	UPROPERTY(meta = (BindWidget))
+		UHUD_ItemIcon* m_dowpSlot;
+
+	UPROPERTY(meta = (BindWidget))
+		UHUD_ItemIcon* m_leftSlot;
+
+	UPROPERTY(meta = (BindWidget))
+		UHUD_ItemIcon* m_rightSlot;
+
 	UPROPERTY()
 		TMap<EHUDEquipmentSlotType, UHUD_ItemIcon*> EquipmentSotMap;
 
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+		UWidgetAnimation* m_changeEquipmentAnimation;
+
+	UPROPERTY()
+		bool m_bIsActiveCtrl = false;
+private:
+	/************************************************************************/
+	/* 内部变量-配置                                                                     */
+	/************************************************************************/
+	// 滚动速度控制
+	UPROPERTY(EditAnywhere, Category = "Scroll")
+		float scrollSensitivity = 40.0f;
+
+	// 滚动速度控制
+	UPROPERTY(EditAnywhere, Category = "Scroll")
+		float scrollHeightLimit = 40.0f;
+
+	// 当前滚动偏移
+	float currentScrollOffset = 0.0f;
 };
 

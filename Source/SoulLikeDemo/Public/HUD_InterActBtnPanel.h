@@ -21,8 +21,6 @@ struct FInterActOptionInfo
 	FString			OptionText;
 };
 
-
-
 /**
  * 
  */
@@ -129,6 +127,8 @@ protected:
 	// 当前选中索引
 	UPROPERTY(BlueprintReadOnly, Category = "State")
 		int32 SelectedIndex = -1;
+
+	FOnInterActBtnClick OnInterActBtnClick;
 
 	private:
 	/************************************************************************/

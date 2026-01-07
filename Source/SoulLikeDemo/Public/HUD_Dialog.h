@@ -10,6 +10,9 @@
 class UTextBlock;
 class UButton;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInterActBtnClick, int, type);
+
+
 /**
  * 
  */
@@ -92,6 +95,8 @@ protected:
 	// 不可见按钮控件引用
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UButton* m_clickButton;
+
+	FOnInventoryItemClicked OnItemClicked;
 
 private:
 	/************************************************************************/

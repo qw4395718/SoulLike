@@ -11,11 +11,6 @@
 UHUD_Dialog::UHUD_Dialog(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
-	OnItemClicked.AddDynamic(this, [this,strName,strContent]
-	{
-			SetDialogText(strName, strContent);
-	}
-	)
 }
 
 void UHUD_Dialog::FakeInit()

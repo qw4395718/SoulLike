@@ -96,8 +96,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UButton* m_clickButton;
 
-	FOnInventoryItemClicked OnItemClicked;
-
 private:
 	/************************************************************************/
 	/* 内部变量-数据                                                                     */

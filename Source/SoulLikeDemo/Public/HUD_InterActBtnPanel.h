@@ -128,8 +128,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "State")
 		int32 SelectedIndex = -1;
 
-	FOnInterActBtnClick OnInterActBtnClick;
-
 	private:
 	/************************************************************************/
 	/* 内部变量-配置                                                                     */

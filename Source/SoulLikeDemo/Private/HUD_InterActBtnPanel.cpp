@@ -4,7 +4,8 @@
 #include "HUD_InterActBtnPanel.h"
 #include "UI_InterActButton.h"
 #include "Components/VerticalBox.h"
-
+#include "GlobalDelegatesManager.h"
+#include "Components/Button.h"
 
 UHUD_InterActBtnPanel::UHUD_InterActBtnPanel(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
@@ -83,6 +84,8 @@ void UHUD_InterActBtnPanel::InitializeVirtualization(int32 TotalItemCount)
 		UUI_InterActButton* newInterActBnt = CreateWidget<UUI_InterActButton>(GetWorld(), m_interActBtnClass);
 		if (newInterActBnt != nullptr)
 		{
+			//添加按钮的委托事件
+			newInterActBnt->m_interActBtn->OnClicked.AddDynamic(this, &UHUD_InterActBtnPanel::OnClickInterActButtonClicked);
 			m_slotPool.Push(newInterActBnt);
 		}
 	}
@@ -97,6 +100,15 @@ void UHUD_InterActBtnPanel::ReturnSlotToPool(UUI_InterActButton* atcBtn)
 {
 	m_slotPool.Push(atcBtn);
 	m_visibleSlots.Remove(atcBtn);
+}
+
+void UHUD_InterActBtnPanel::OnClickInterActButtonClicked()
+{
+	UGlobalDelegatesManager* Manager = UGlobalDelegatesManager::Get(this);
+	if (Manager)
+	{
+		Manager->BroadcastDialogShow(TEXT("yuanshen"),TEXT("mihoyo"));
+	}
 }
 
 void UHUD_InterActBtnPanel::FakeInit()
@@ -357,10 +369,11 @@ void UHUD_InterActBtnPanel::UpdateVisibleSlots(int32 oldFirstIndex, int32 oldLas
 	for (UUI_InterActButton* interActSlot : m_visibleSlots)
 	{
 		m_interActBtnsContainer->AddChild(interActSlot);
-		// 添加按钮的委托事件
 	}
 
 	// 
 	//UpdateSlotPositions();
 }
+
+
 

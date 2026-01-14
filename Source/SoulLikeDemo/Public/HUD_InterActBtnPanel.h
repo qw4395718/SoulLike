@@ -65,6 +65,9 @@ public:
 	// 回收槽位到池中
 	void ReturnSlotToPool(UUI_InterActButton* Slot);
 
+	UFUNCTION()
+	void OnClickInterActButtonClicked();
+
 
 protected:
 	/************************************************************************/

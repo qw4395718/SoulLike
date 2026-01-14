@@ -6,7 +6,7 @@
 #include "GlobalDelegatesManager.generated.h"
 
 // 前向声明
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnClickInterActBtnToDialog, FString, labelText, FString, descText);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnClickInterActBtnToDialog, const FString&, const FString&);
 
 UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UGlobalDelegatesManager : public UGameInstanceSubsystem
@@ -19,15 +19,7 @@ public:
 		static UGlobalDelegatesManager* Get(const UObject* WorldContextObject);
 
 	// 委托实例
-	UPROPERTY(BlueprintAssignable, Category = "Game Events")
 		FOnClickInterActBtnToDialog OnClickInterActBtnToDialog;
-
-	// 工具函数：绑定原始函数指针
-	template<typename FuncPtr>
-	FDelegateHandle BindDialogShow(FuncPtr InFuncPtr)
-	{
-		return OnClickInterActBtnToDialog.AddStatic(InFuncPtr);
-	}
 
 	// 触发事件的函数
 	UFUNCTION(BlueprintCallable, Category = "Global Delegates")

@@ -6,11 +6,13 @@
 #include "Components/TextBlock.h"
 #include "Fonts/SlateFontInfo.h"
 #include "Fonts/FontMeasure.h"
+#include "GlobalDelegatesManager.h"
 
 
 UHUD_Dialog::UHUD_Dialog(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
+
 }
 
 void UHUD_Dialog::FakeInit()
@@ -66,6 +68,18 @@ void UHUD_Dialog::NativeConstruct()
 	if (m_arrDialogSplit.Num() > 0)
 	{
 		ShowPage(0);
+	}
+
+	UGlobalDelegatesManager* Manager = UGlobalDelegatesManager::Get(this);
+	if (Manager)
+	{
+		// ✅ 使用AddUObject绑定成员函数
+		FDelegateHandle Handle = Manager->OnClickInterActBtnToDialog.AddLambda(
+			[this](const FString& labelText, const FString& descText)
+			{
+				this->SetDialogText(labelText, descText);
+			}
+			);
 	}
 }
 

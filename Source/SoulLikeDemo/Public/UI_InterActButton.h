@@ -48,13 +48,15 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Animation")
 		void PlaySelectionAnimation(bool bIsSelected);
 
+public:
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UButton* m_interActBtn;
 protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
 
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UButton* m_interActBtn;
+
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UImage* m_interActIcon;

@@ -9,7 +9,7 @@ UGlobalDelegatesManager* UGlobalDelegatesManager::Instance = nullptr;
 UGlobalDelegatesManager::UGlobalDelegatesManager()
 {
 	// 确保实例唯一
-	check(!Instance);
+	//check(!Instance);
 	Instance = this;
 }
 

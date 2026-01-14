@@ -14,6 +14,7 @@ class SOULLIKEDEMO_API UGlobalDelegatesManager : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	
 	// 获取单例实例
 	UFUNCTION(BlueprintPure, Category = "Global Delegates", meta = (WorldContext = "WorldContextObject"))
 		static UGlobalDelegatesManager* Get(const UObject* WorldContextObject);
@@ -25,10 +26,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Global Delegates")
 		void BroadcastDialogShow(const FString& labelText, const FString& descText);
 
-private:
-	// 私有构造函数
-	UGlobalDelegatesManager();
+protected:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
-	// 存储单例实例
-	static UGlobalDelegatesManager* Instance;
+	// 解除所有委托绑定
+	void ClearAllBinding();
 };

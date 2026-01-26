@@ -7,6 +7,7 @@
 
 // 前向声明
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnClickInterActBtnToDialog, const FString&, const FString&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnClickInterMainMenuButton, const int);
 
 UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UGlobalDelegatesManager : public UGameInstanceSubsystem
@@ -19,12 +20,25 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Global Delegates", meta = (WorldContext = "WorldContextObject"))
 		static UGlobalDelegatesManager* Get(const UObject* WorldContextObject);
 
-	// 委托实例
+	/**
+	 * 委托实例
+	 */ 
+	// 交互按钮行为委托
 		FOnClickInterActBtnToDialog OnClickInterActBtnToDialog;
+	// 菜单按钮行为委托
+		FOnClickInterMainMenuButton OnClickInterMainMenuButton;
 
-	// 触发事件的函数
+	/**
+	 * 委托响应函数
+	 */
+	// 交互按钮行为响应
 	UFUNCTION(BlueprintCallable, Category = "Global Delegates")
 		void BroadcastDialogShow(const FString& labelText, const FString& descText);
+
+	// 菜单按钮行为响应
+	UFUNCTION(BlueprintCallable, Category = "Global Delegates")
+		void BroadcastOnClickMainMenuButton(const int widgetIndex);
+
 
 protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;

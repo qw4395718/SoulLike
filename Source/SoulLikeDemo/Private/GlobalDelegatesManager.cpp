@@ -46,9 +46,15 @@ UGlobalDelegatesManager* UGlobalDelegatesManager::Get(const UObject* WorldContex
 void UGlobalDelegatesManager::ClearAllBinding()
 {
 	OnClickInterActBtnToDialog.RemoveAll(this);
+	OnClickInterMainMenuButton.RemoveAll(this);
 }
 
 void UGlobalDelegatesManager::BroadcastDialogShow(const FString& labelText, const FString& descText)
 {
 	OnClickInterActBtnToDialog.Broadcast(labelText, descText);
+}
+
+void UGlobalDelegatesManager::BroadcastOnClickMainMenuButton(const int widgetIndex)
+{
+	OnClickInterMainMenuButton.Broadcast(widgetIndex);
 }

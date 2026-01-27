@@ -6,10 +6,12 @@
 #include "Components/WidgetSwitcher.h"
 #include "Components/Button.h"
 #include "Components/VerticalBox.h"
+#include "SoulLikeGameGlobal.h"
 #include "Pop_MainMenu.generated.h"
 
 class UUI_IconSlot;
 class UButton;
+class UUI_MenuItem;
 
 USTRUCT(BlueprintType)
 struct FMenuButtonInfo
@@ -21,7 +23,7 @@ struct FMenuButtonInfo
 		FText ButtonText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		UTexture2D ButtonImg;
+		UTexture2D* ButtonImg;
 
 	// 按钮标签（用于标识）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -38,25 +40,31 @@ class SOULLIKEDEMO_API UPop_MainMenu : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	// 添加菜单按钮
-	UFUNCTION(BlueprintCallable, Category = "Menu")
-		void AddMenuButton(const FMenuButtonInfo& ButtonInfo);
+	// 设置按钮信息
+	void SetButtonInfos(const TArray<FMenuButtonInfo>& infos);
 
-	// 清除所有按钮
-	UFUNCTION(BlueprintCallable, Category = "Menu")
-		void ClearAllButtons();
+	// 清理按钮信息
+	void ClearAllButtonInfos();
 
-	// 移除特定标签的按钮
-	UFUNCTION(BlueprintCallable, Category = "Menu")
-		bool RemoveButtonByTag(FName ButtonTag);
+	// 新增按钮信息
+	void AddButtonInfo(const FMenuButtonInfo& info);
 
-	// 获取按钮数量
-	UFUNCTION(BlueprintPure, Category = "Menu")
-		int32 GetButtonCount() const { return m_arrButtonInfos.Num(); }
+	// 移除按钮信息
+	void RemoveButtonInfo(const FName buttonFlag);
 
-	// 切换菜单界面
-	UFUNCTION(BlueprintCallable, Category = "Menu")
-		void SwitchToMenu(int32 MenuIndex);
+	// 更新按钮信息
+	void UpdateButtonInfo(const FMenuButtonInfo& info);
+
+protected:
+
+	// 创建新的按钮
+	void CreateNewMenuItem(const FMenuButtonInfo& info);
+
+	// 移除指定按钮
+	void RemoveMenuItem(const FName buttonFlag);
+
+	// 清理所有的按钮
+	void ClearAllMenuItems();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -79,6 +87,7 @@ private:
 	UPROPERTY()
 		TMap<FName, UUserWidget*> m_mapButtonWidgets;
 
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	//UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		
 		
 };

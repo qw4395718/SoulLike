@@ -242,6 +242,15 @@ enum class EHUDEquipmentSlotType :uint8
 	EHUDEquipmentSlotType_Max,
 };
 
+//伤害类型
+UENUM(BlueprintType)
+enum class EWidgetType :uint8
+{
+	EWIDGET_Min,
+	EWIDGET_Inventory,
+	EWIDGET_Max
+};
+
 /************************************************************************/
 /*                              Struct                                         */
 /************************************************************************/

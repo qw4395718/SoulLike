@@ -10,6 +10,9 @@
 void UPop_MainMenu::NativeConstruct()
 {
     Super::NativeConstruct();
+
+    // 完成初始化
+    
 }
 
 UButton* UPop_MainMenu::AddMenuButton(const FMenuButtonInfo& ButtonInfo)
@@ -22,7 +25,7 @@ UButton* UPop_MainMenu::AddMenuButton(const FMenuButtonInfo& ButtonInfo)
     }
     
     // 创建按钮控件
-    UButton* NewButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+    UButton* NewButton = CreateWidget<UButton>(GetWorld(),UButton::StaticClass());
     if (!NewButton) return nullptr;
     
     // 创建文本控件并添加到按钮

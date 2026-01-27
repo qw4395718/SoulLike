@@ -20,13 +20,16 @@ struct FMenuButtonInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FText ButtonText;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UTexture2D ButtonImg;
+
 	// 按钮标签（用于标识）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FName ButtonTag;
 
 	// 关联的界面控件（可选）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		UWidget* LinkedWidget = nullptr;
+		EWidgetType linkWidgetIndex;
 };
 
 UCLASS()
@@ -37,7 +40,7 @@ class SOULLIKEDEMO_API UPop_MainMenu : public UUserWidget
 public:
 	// 添加菜单按钮
 	UFUNCTION(BlueprintCallable, Category = "Menu")
-		UButton* AddMenuButton(const FMenuButtonInfo& ButtonInfo);
+		void AddMenuButton(const FMenuButtonInfo& ButtonInfo);
 
 	// 清除所有按钮
 	UFUNCTION(BlueprintCallable, Category = "Menu")
@@ -65,7 +68,7 @@ protected:
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatusBar")
-		TSubclassOf<UUI_IconSlot> m_menuBtnWidgetClass;
+		TSubclassOf<UUI_MenuItem> m_menuBtnWidgetClass;
 
 private:
 	// 存储按钮信息
@@ -74,5 +77,8 @@ private:
 
 	// 按钮控件映射
 	UPROPERTY()
-		TMap<FName, UButton*> m_mapButtonWidgets;
+		TMap<FName, UUserWidget*> m_mapButtonWidgets;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		
 };

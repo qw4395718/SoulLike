@@ -13,7 +13,7 @@ UHUD_StatusBar::UHUD_StatusBar(const FObjectInitializer& ObjectInitializer /*= F
 
 void UHUD_StatusBar::AddStatus(FStatusEffectInfo statusInfo)
 {
-	// �ظ���Icon������,���ϼ��ܿ�ȷ����������״̬
+	// 
 	RETURN_IF_TRUE(m_statusIconsContainer == nullptr || m_activeStatusIcons.Contains(statusInfo.IconIndex))
 
 	CreateNewStatus(statusInfo);
@@ -25,10 +25,10 @@ void UHUD_StatusBar::RemoveStatus(int iconIndex)
 	{
 		UUserWidget* iconWidget = *ppiconWidget;
 
-		// ������ͼ�Ƴ�����
+		// 
 		OnStatusIconRemoved(iconWidget);
 
-		// �ӳ�ʵ�����٣��ö�����ʱ�䲥��
+		// 
 		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, iconWidget, iconIndex]()
 			{
@@ -37,7 +37,7 @@ void UHUD_StatusBar::RemoveStatus(int iconIndex)
 					m_statusIconsContainer->RemoveChild(iconWidget);
 				}
 				m_activeStatusIcons.Remove(iconIndex);
-			}, 0.3f, false); // �ӳ�ʱ��ƥ�䶯������
+			}, 0.3f, false); //
 	}
 }
 
@@ -47,7 +47,7 @@ void UHUD_StatusBar::UpdateStatus(FStatusEffectInfo statusInfo)
 	{
 		if (UUI_IconSlot* statusIcon = Cast<UUI_IconSlot>(*ppwaitUpdateSubWidget))
 		{
-			// �Ѿ��ҵ�����,�ɽ������ݸ���
+			// 
 			statusIcon->SetData(statusInfo);
 		}
 	}
@@ -56,7 +56,7 @@ void UHUD_StatusBar::UpdateStatus(FStatusEffectInfo statusInfo)
 void UHUD_StatusBar::CreateNewStatus(FStatusEffectInfo statusInfo)
 {
 	RETURN_IF_TRUE(m_statusIconWidgetClass == nullptr || GetWorld() == nullptr);
-	// ����IconWidget
+	// 
 	UUserWidget* newIcon = CreateWidget<UUserWidget>(GetWorld(), m_statusIconWidgetClass);
 	if (!newIcon)
 	return;
@@ -64,16 +64,16 @@ void UHUD_StatusBar::CreateNewStatus(FStatusEffectInfo statusInfo)
 	UUI_IconSlot* statusIcon = Cast<UUI_IconSlot>(newIcon);
 	if (statusIcon)
 	{
-		// ��ʼ�����������
+		// 
 		statusIcon->SetData(statusInfo);
 
-		// ��ӵ�����
+		// 
 		m_statusIconsContainer->AddChild(statusIcon);
 
-		// �洢����
+		// 
 		m_activeStatusIcons.Add(statusInfo.IconIndex, newIcon);
 
-		// ������ͼ�����¼�
+		// 
 		OnStatusIconAdded(newIcon);
 	}
 	

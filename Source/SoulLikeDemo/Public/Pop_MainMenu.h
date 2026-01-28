@@ -55,6 +55,9 @@ public:
 	// 更新按钮信息
 	void UpdateButtonInfo(const FMenuButtonInfo& info);
 
+	// 同步信息到按钮上
+	void UpdateInfoToUI();
+
 protected:
 
 	// 创建新的按钮
@@ -62,6 +65,9 @@ protected:
 
 	// 移除指定按钮
 	void RemoveMenuItem(const FName buttonFlag);
+
+	// 更新按钮
+	void UpdateMenuItem(const FMenuButtonInfo& info);
 
 	// 清理所有的按钮
 	void ClearAllMenuItems();
@@ -87,7 +93,7 @@ private:
 	UPROPERTY()
 		TMap<FName, UUserWidget*> m_mapButtonWidgets;
 
-	//UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		TSubclassOf<UUI_MenuItem> m_menuItemWidgetClass;
 		
 };

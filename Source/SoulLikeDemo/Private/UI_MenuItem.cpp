@@ -6,7 +6,7 @@
 #include "Engine/AssetManager.h"
 #include "SL_Macros.h"
 #include "Components/Image.h"
-
+#include "Components/TextBlock.h"
 
 UUI_MenuItem::UUI_MenuItem()
 {
@@ -24,4 +24,10 @@ void UUI_MenuItem::SetNewAcquireImageVisible(bool visible)
 	{
 		m_newTipImage->SetVisibility(ESlateVisibility::Visible);
 	}
+}
+
+void UUI_MenuItem::SetCenterTitle(FString title)
+{
+	RETURN_IF_TRUE(m_btnLabel == nullptr);
+	m_btnLabel->SetText(FText::FromString(title));
 }

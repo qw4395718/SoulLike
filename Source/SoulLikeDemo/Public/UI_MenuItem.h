@@ -9,6 +9,7 @@
 
 class UImage;
 class UButton;
+class UTextBlock;
 
 /**
  * 
@@ -29,6 +30,9 @@ public:
 	UFUNCTION()
 		void SetNewAcquireImageVisible(bool visible);
 
+	UFUNCTION()
+		void SetCenterTitle(FString title);
+
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
@@ -45,4 +49,8 @@ protected:
 	// 交互行为按钮
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UButton* m_actionButton;
+
+	// 按钮文本
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UTextBlock* m_btnLabel;
 };

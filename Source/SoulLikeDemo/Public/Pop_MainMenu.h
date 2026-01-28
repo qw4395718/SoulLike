@@ -12,6 +12,8 @@
 class UUI_IconSlot;
 class UButton;
 class UUI_MenuItem;
+class UScrollBox;
+class UGridPanel;
 
 USTRUCT(BlueprintType)
 struct FMenuButtonInfo
@@ -20,7 +22,7 @@ struct FMenuButtonInfo
 
 	// 按钮显示文本
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FText ButtonText;
+		FString ButtonText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UTexture2D* ButtonImg;
@@ -32,6 +34,12 @@ struct FMenuButtonInfo
 	// 关联的界面控件（可选）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		EWidgetType linkWidgetIndex;
+
+	bool operator==(const FMenuButtonInfo& Other) const
+	{
+		return ButtonTag == Other.ButtonTag;  // 使用唯一标识进行比较
+	}
+
 };
 
 UCLASS()
@@ -56,7 +64,10 @@ public:
 	void UpdateButtonInfo(const FMenuButtonInfo& info);
 
 	// 同步信息到按钮上
-	void UpdateInfoToUI();
+	void RefreshMenuToUI();
+
+	// 设置宽高系数
+	void SetupGridLayout();
 
 protected:
 
@@ -79,10 +90,30 @@ protected:
 	UFUNCTION()
 		void OnMenuButtonClicked(FName ButtonTag);
 
+public:
+	// 暴露给蓝图的属性
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Settings")
+		int32 ColumnsPerRow = 3;  // 每行列数
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Settings")
+		float ButtonWidth = 150.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Settings")
+		float ButtonHeight = 60.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu Settings")
+		FMargin ButtonPadding = FMargin(10.0f);
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatusBar")
-		TSubclassOf<UUI_MenuItem> m_menuBtnWidgetClass;
+		TSubclassOf<UUI_MenuItem> m_menuItemWidgetClass;
+
+	UPROPERTY(meta = (BindWidget))
+		UScrollBox* ScrollBox;
+
+	UPROPERTY(meta = (BindWidget))
+		UGridPanel* GridPanel;
 
 private:
 	// 存储按钮信息
@@ -91,9 +122,5 @@ private:
 
 	// 按钮控件映射
 	UPROPERTY()
-		TMap<FName, UUserWidget*> m_mapButtonWidgets;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		TSubclassOf<UUI_MenuItem> m_menuItemWidgetClass;
-		
+		TArray< UUI_MenuItem*> m_arrButtonWidgets;
 };

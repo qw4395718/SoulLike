@@ -33,6 +33,9 @@ public:
 	UFUNCTION()
 		void SetCenterTitle(FString title);
 
+	UFUNCTION()
+		FName GetButtonFlag() const {return m_menuFuncName};
+
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
@@ -53,4 +56,7 @@ protected:
 	// 按钮文本
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UTextBlock* m_btnLabel;
+
+	// 在容器标识
+	FName m_menuFuncName;
 };

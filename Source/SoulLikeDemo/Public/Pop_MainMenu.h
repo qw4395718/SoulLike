@@ -112,8 +112,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 		UScrollBox* ScrollBox;
 
-	UPROPERTY(meta = (BindWidget))
-		UGridPanel* GridPanel;
+	UPROPERTY()
+		UWrapBox* MenuWrapBox;
 
 private:
 	// 存储按钮信息
@@ -122,5 +122,5 @@ private:
 
 	// 按钮控件映射
 	UPROPERTY()
-		TArray< UUI_MenuItem*> m_arrButtonWidgets;
+		TMap<FName, UUI_MenuItem*> m_mapButtonWidgets;
 };

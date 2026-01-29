@@ -18,6 +18,20 @@ void UPop_MainMenu::NativeConstruct()
     
 }
 
+void UPop_MainMenu::InitMainMenu()
+{
+    // 创建 WrapBox
+    MenuWrapBox = CreateWidget<UWrapBox>(this, UWrapBox::StaticClass());
+
+    // 基本配置
+    MenuWrapBox->SetOrientation(Orient_Horizontal);
+    MenuWrapBox->SetWrapSize(500.0f);
+    MenuWrapBox->SetInnerSlotPadding(FVector2D(10.0f, 10.0f));
+    MenuWrapBox->SetHorizontalAlignment(HAlign_Center);
+
+    ScrollBox->AddChild(MenuWrapBox);
+}
+
 void UPop_MainMenu::OnMenuButtonClicked(FName ButtonTag)
 {
     
@@ -58,6 +72,7 @@ void UPop_MainMenu::RemoveButtonInfo(const FName buttonFlag)
        if(buttonInfo.ButtonTag == buttonFlag)
        {// 已存在该信息则进行更新
             m_arrButtonInfos.Remove(buttonInfo);
+            RemoveMenuItem(buttonFlag);
             return;
        }
     }
@@ -73,73 +88,10 @@ void UPop_MainMenu::UpdateButtonInfo(const FMenuButtonInfo& info)
             buttonInfo.ButtonImg = info.ButtonImg;
             buttonInfo.ButtonTag = info.ButtonTag;
             buttonInfo.linkWidgetIndex = info.linkWidgetIndex;
+            UpdateMenuItem(buttonInfo);
             return;
        }
     }
-}
-
-void UPop_MainMenu::RefreshMenuToUI()
-{
-	if (!GridPanel) return;
-    // 清理现有的按钮
-    GridPanel->ClearChildren();
-
-	// 计算总行数
-	int32 TotalRows = FMath::CeilToInt((float)m_arrButtonWidgets.Num() / ColumnsPerRow);
-
-	// 设置Grid的行列数
-	SetupGridLayout();
-
-	// 创建按钮
-	for (int32 Index = 0; Index < m_arrButtonWidgets.Num(); Index++)
-	{
-		int32 Row = Index / ColumnsPerRow;
-		int32 Column = Index % ColumnsPerRow;
-
-		// 创建按钮控件
-        UUI_MenuItem* ButtonWidget = m_arrButtonWidgets[Index];
-		if (ButtonWidget)
-		{
-			// 添加到Grid
-			UGridSlot* GridSlot = GridPanel->AddChildToGrid(ButtonWidget, Row, Column);
-
-			if (GridSlot)
-			{
-				// 设置填充和对齐
-				GridSlot->SetPadding(ButtonPadding);
-				GridSlot->SetHorizontalAlignment(HAlign_Fill);
-				GridSlot->SetVerticalAlignment(VAlign_Fill);
-
-				// 设置大小
-				GridSlot->SetColumnSpan(1);
-				GridSlot->SetRowSpan(1);
-			}
-		}
-	}
-
-}
-
-void UPop_MainMenu::SetupGridLayout()
-{
-	if (!GridPanel) return;
-
-	int32 TotalRows = FMath::CeilToInt((float)m_arrButtonWidgets.Num() / ColumnsPerRow);
-
-	// 清除现有行列设置
-	//GridPanel->ClearRowFill();
-	//GridPanel->ClearColumnFill();
-
-	// 设置列填充系数（等宽）
-	for (int32 Col = 0; Col < ColumnsPerRow; Col++)
-	{
-		GridPanel->SetColumnFill(Col, 1.0f);
-	}
-
-	// 设置行填充系数（等高）
-	for (int32 Row = 0; Row < TotalRows; Row++)
-	{
-		GridPanel->SetRowFill(Row, 1.0f);
-	}
 }
 
 void UPop_MainMenu::CreateNewMenuItem(const FMenuButtonInfo& info)
@@ -154,6 +106,17 @@ void UPop_MainMenu::CreateNewMenuItem(const FMenuButtonInfo& info)
 
         if (newMenuItem)
 		{
+             // 添加到 WrapBox 并获取槽位
+            UWrapBoxSlot* menuSlot = MenuWrapBox->AddChildToWrapBox(newMenuItem);
+             // 配置槽位属性
+            if (menuSlot)
+            {
+                Slot->SetPadding(FMargin(5.0f));
+                Slot->SetHorizontalAlignment(HAlign_Center);
+                Slot->SetVerticalAlignment(VAlign_Center);
+                //Slot->SetSize(FSlateChildSize(ESlateSizeRule::Auto)); // 自动大小
+            }
+
             // 添加到队列
             m_arrButtonWidgets.Add(newMenuItem);
             newMenuItem->SetImageBrush(info.ButtonImg);
@@ -164,6 +127,20 @@ void UPop_MainMenu::CreateNewMenuItem(const FMenuButtonInfo& info)
 
 void UPop_MainMenu::RemoveMenuItem(const FName buttonFlag)
 {
+
+    TArray<UWidget*> Children = MenuWrapBox->GetAllChildren();
+    for (UWidget* Child : Children)
+    {
+        if (UUI_MenuItem* menuItem = Cast<UUI_MenuItem>(Child))
+        {
+            if (menuItem->GetButtonFlag() == buttonFlag)
+            {
+                MenuWrapBox->RemoveChild(menuItem);
+                break;
+            }
+        }
+    }
+
     for (const FMenuButtonInfo& buttonInfo : m_arrButtonInfos)
     {
         if (buttonInfo.ButtonTag == buttonFlag)
@@ -172,7 +149,6 @@ void UPop_MainMenu::RemoveMenuItem(const FName buttonFlag)
             return;
         }
     }
-    m_arrButtonWidgets.;
 }
 
 void UPop_MainMenu::UpdateMenuItem(const FMenuButtonInfo& info)

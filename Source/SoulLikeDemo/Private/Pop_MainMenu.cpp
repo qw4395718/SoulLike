@@ -9,6 +9,9 @@
 #include "UI_MenuItem.h"
 #include "Components/GridPanel.h"
 #include "Components/GridSlot.h"
+#include "Components/WrapBoxSlot.h"
+#include "Components/ScrollBox.h"
+#include "Components/WrapBox.h"
 
 void UPop_MainMenu::NativeConstruct()
 {
@@ -20,16 +23,8 @@ void UPop_MainMenu::NativeConstruct()
 
 void UPop_MainMenu::InitMainMenu()
 {
-    // 创建 WrapBox
-    MenuWrapBox = CreateWidget<UWrapBox>(this, UWrapBox::StaticClass());
-
-    // 基本配置
-    MenuWrapBox->SetOrientation(Orient_Horizontal);
-    MenuWrapBox->SetWrapSize(500.0f);
-    MenuWrapBox->SetInnerSlotPadding(FVector2D(10.0f, 10.0f));
-    MenuWrapBox->SetHorizontalAlignment(HAlign_Center);
-
-    ScrollBox->AddChild(MenuWrapBox);
+    RETURN_IF_TRUE(m_scrollBox == nullptr || m_menuWrapBox == nullptr);
+    m_scrollBox->AddChild(m_menuWrapBox);
 }
 
 void UPop_MainMenu::OnMenuButtonClicked(FName ButtonTag)
@@ -107,18 +102,18 @@ void UPop_MainMenu::CreateNewMenuItem(const FMenuButtonInfo& info)
         if (newMenuItem)
 		{
              // 添加到 WrapBox 并获取槽位
-            UWrapBoxSlot* menuSlot = MenuWrapBox->AddChildToWrapBox(newMenuItem);
+            UWrapBoxSlot* menuSlot = m_menuWrapBox->AddChildToWrapBox(newMenuItem);
              // 配置槽位属性
             if (menuSlot)
             {
-                Slot->SetPadding(FMargin(5.0f));
-                Slot->SetHorizontalAlignment(HAlign_Center);
-                Slot->SetVerticalAlignment(VAlign_Center);
-                //Slot->SetSize(FSlateChildSize(ESlateSizeRule::Auto)); // 自动大小
+                menuSlot->SetPadding(FMargin(5.0f));
+                menuSlot->SetHorizontalAlignment(HAlign_Center);
+                menuSlot->SetVerticalAlignment(VAlign_Center);
+                //menuSlot->SetSize(FSlateChildSize(ESlateSizeRule::Auto)); // 自动大小
             }
 
             // 添加到队列
-            m_arrButtonWidgets.Add(newMenuItem);
+            m_mapButtonWidgets.Add(info.ButtonTag,newMenuItem);
             newMenuItem->SetImageBrush(info.ButtonImg);
             newMenuItem->SetCenterTitle(info.ButtonText);
         }
@@ -127,15 +122,14 @@ void UPop_MainMenu::CreateNewMenuItem(const FMenuButtonInfo& info)
 
 void UPop_MainMenu::RemoveMenuItem(const FName buttonFlag)
 {
-
-    TArray<UWidget*> Children = MenuWrapBox->GetAllChildren();
+    TArray<UWidget*> Children = m_menuWrapBox->GetAllChildren();
     for (UWidget* Child : Children)
     {
         if (UUI_MenuItem* menuItem = Cast<UUI_MenuItem>(Child))
         {
             if (menuItem->GetButtonFlag() == buttonFlag)
             {
-                MenuWrapBox->RemoveChild(menuItem);
+                m_menuWrapBox->RemoveChild(menuItem);
                 break;
             }
         }
@@ -153,7 +147,7 @@ void UPop_MainMenu::RemoveMenuItem(const FName buttonFlag)
 
 void UPop_MainMenu::UpdateMenuItem(const FMenuButtonInfo& info)
 {
-    UUI_MenuItem** widgetpptr = m_arrButtonWidgets.Find(info.ButtonTag);
+    UUI_MenuItem** widgetpptr = m_mapButtonWidgets.Find(info.ButtonTag);
     if (widgetpptr)
     {
         // 更新数据
@@ -164,5 +158,5 @@ void UPop_MainMenu::UpdateMenuItem(const FMenuButtonInfo& info)
 
 void UPop_MainMenu::ClearAllMenuItems()
 {
-    m_arrButtonWidgets.Empty();
+    m_mapButtonWidgets.Empty();
 }

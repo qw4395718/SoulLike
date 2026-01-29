@@ -34,7 +34,7 @@ public:
 		void SetCenterTitle(FString title);
 
 	UFUNCTION()
-		FName GetButtonFlag() const {return m_menuFuncName};
+		FName GetButtonFlag();
 
 protected:
 	/************************************************************************/

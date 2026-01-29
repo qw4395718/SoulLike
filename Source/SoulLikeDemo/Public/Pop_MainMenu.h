@@ -13,7 +13,7 @@ class UUI_IconSlot;
 class UButton;
 class UUI_MenuItem;
 class UScrollBox;
-class UGridPanel;
+class UWrapBox;
 
 USTRUCT(BlueprintType)
 struct FMenuButtonInfo
@@ -48,6 +48,10 @@ class SOULLIKEDEMO_API UPop_MainMenu : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	// 初始化界面
+	UFUNCTION()
+	void InitMainMenu();
+
 	// 设置按钮信息
 	void SetButtonInfos(const TArray<FMenuButtonInfo>& infos);
 
@@ -109,11 +113,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatusBar")
 		TSubclassOf<UUI_MenuItem> m_menuItemWidgetClass;
 
-	UPROPERTY(meta = (BindWidget))
-		UScrollBox* ScrollBox;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UScrollBox* m_scrollBox;
 
-	UPROPERTY()
-		UWrapBox* MenuWrapBox;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UWrapBox* m_menuWrapBox;
 
 private:
 	// 存储按钮信息

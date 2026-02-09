@@ -242,11 +242,14 @@ enum class EHUDEquipmentSlotType :uint8
 	EHUDEquipmentSlotType_Max,
 };
 
-//伤害类型
+// 界面类型
 UENUM(BlueprintType)
 enum class EWidgetType :uint8
 {
-	EWIDGET_Min,
+	EWIDGET_None,
+	EWIDGET_MainMenu,
+	EWIDGET_InterActPanel,
+	EWIDGET_NPCDialog,
 	EWIDGET_Inventory,
 	EWIDGET_Max
 };

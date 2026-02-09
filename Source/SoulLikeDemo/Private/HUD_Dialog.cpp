@@ -73,7 +73,7 @@ void UHUD_Dialog::NativeConstruct()
 	UGlobalDelegatesManager* Manager = UGlobalDelegatesManager::Get(this);
 	if (Manager)
 	{
-		// ✅ 使用AddUObject绑定成员函数
+		// ✅ 使用AddLambda绑定成员函数
 		FDelegateHandle Handle = Manager->OnClickInterActBtnToDialog.AddLambda(
 			[this](const FString& labelText, const FString& descText)
 			{

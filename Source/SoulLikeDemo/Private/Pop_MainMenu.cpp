@@ -35,7 +35,10 @@ void UPop_MainMenu::OnMenuButtonClicked(FName ButtonTag)
 void UPop_MainMenu::SetButtonInfos(const TArray<FMenuButtonInfo>& infos)
 {
     ClearAllButtonInfos();
-    m_arrButtonInfos = infos;
+    for (int i = 0; i < infos.Num(); i++)
+    {
+        AddButtonInfo(infos[i]);
+    }
 }
 
 void UPop_MainMenu::ClearAllButtonInfos()
@@ -107,9 +110,9 @@ void UPop_MainMenu::CreateNewMenuItem(const FMenuButtonInfo& info)
             if (menuSlot)
             {
                 menuSlot->SetPadding(FMargin(5.0f));
-                menuSlot->SetHorizontalAlignment(HAlign_Center);
-                menuSlot->SetVerticalAlignment(VAlign_Center);
-                //menuSlot->SetSize(FSlateChildSize(ESlateSizeRule::Auto)); // 自动大小
+                menuSlot->SetHorizontalAlignment(HAlign_Fill);
+                menuSlot->SetVerticalAlignment(VAlign_Fill);
+                
             }
 
             // 添加到队列

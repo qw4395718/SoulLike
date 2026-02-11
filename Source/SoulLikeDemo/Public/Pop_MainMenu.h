@@ -49,10 +49,11 @@ class SOULLIKEDEMO_API UPop_MainMenu : public UUserWidget
 
 public:
 	// 初始化界面
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "MainMenu")
 	void InitMainMenu();
 
 	// 设置按钮信息
+	UFUNCTION(BlueprintCallable, Category = "MainMenu")
 	void SetButtonInfos(const TArray<FMenuButtonInfo>& infos);
 
 	// 清理按钮信息

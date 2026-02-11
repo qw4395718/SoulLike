@@ -2,11 +2,33 @@
 #include "UIManagerSubsystem.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
+#include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 
 void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+	/**
+	 * WidgetBlueprint'/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_CoinIconBar.WBP_HUD_CoinIconBar'
+	 * WidgetBlueprint'/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_Dialog.WBP_HUD_Dialog'
+	 * WidgetBlueprint'/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_EquipmentBar.WBP_HUD_EquipmentBar'
+	 * WidgetBlueprint'/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PC.WBP_HUD_PC'
+	 * WidgetBlueprint'/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_InterActPanel.WBP_PU_InterActPanel'
+	 * WidgetBlueprint'/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_MainMenu.WBP_PU_MainMenu'
+	 * WidgetBlueprint'/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_NotifyMessage.WBP_PU_NotifyMessage'
+	 * 
+	 */
+	 /************************************************************************/
+	 /*                             HUDLayer                                         */
+	 /************************************************************************/
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PCGameMain, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PC.WBP_HUD_PC"));
+	/************************************************************************/
+	/*                              PopLayer                                        */
+	/************************************************************************/
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_InterActPanel,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_InterActPanel.WBP_PU_InterActPanel"));
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_MainMenu,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_MainMenu.WBP_PU_MainMenu"));
+	//RegisterWidgetFromBPPath(EWidgetType::EWIDGET_Inventory,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_NotifyMessage.WBP_PU_NotifyMessage"));
 }
 
 void UUIManagerSubsystem::Deinitialize()
@@ -40,14 +62,35 @@ UUIManagerSubsystem* UUIManagerSubsystem::Get(const UObject* WorldContextObject)
 	return GameInstance->GetSubsystem<UUIManagerSubsystem>();
 }
 
-void UUIManagerSubsystem::RegisterWidget(EWidgetType WidgetType,TSubclassOf<UUserWidget>> WidgetClass)
+void UUIManagerSubsystem::RegisterWidgetFromBPPath(EWidgetType WidgetType,const FString& WidgetClassPathStr)
+{
+	// 确保路径以 "_C" 结尾
+	FString ClassPath = WidgetClassPathStr;
+	if (!ClassPath.EndsWith("_C"))
+	{
+		ClassPath += "_C";
+	}
+
+	// 使用 LoadClass 动态加载
+	UClass* WidgetClass = LoadClass<UUserWidget>(nullptr, *ClassPath);
+	if (WidgetClass)
+	{
+		RegisterWidget(WidgetType, WidgetClass);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load widget class: %s"), *WidgetClassPathStr);
+	}
+}
+
+void UUIManagerSubsystem::RegisterWidget(EWidgetType WidgetType,TSubclassOf<UUserWidget> WidgetClass)
 {
 	RegisteredWidgets.Add(WidgetType,WidgetClass);
 }
 
 void UUIManagerSubsystem::UnregisterWidget(EWidgetType WidgetType)
 {
-	if(RegisteredWidgets.Container(WidgetType))
+	if(RegisteredWidgets.Contains(WidgetType))
 	{
 		RegisteredWidgets.Remove(WidgetType);
 	}
@@ -55,9 +98,9 @@ void UUIManagerSubsystem::UnregisterWidget(EWidgetType WidgetType)
 
 void UUIManagerSubsystem::OpenWidget(EWidgetType WidgetType)
 {
-	if(RegisteredWidgets.Container(WidgetType))
+	if(RegisteredWidgets.Contains(WidgetType))
 	{
-		if(ActiveWidgets.Container(WidgetType))
+		if(ActiveWidgets.Contains(WidgetType))
 		{
 			CloseWidget(WidgetType);
 		}
@@ -79,7 +122,7 @@ void UUIManagerSubsystem::OpenWidget(EWidgetType WidgetType)
 
 void UUIManagerSubsystem::CloseWidget(EWidgetType WidgetType)
 {
-	if(ActiveWidgets.Container(WidgetType))
+	if(ActiveWidgets.Contains(WidgetType))
 	{
 		ActiveWidgets.Remove(WidgetType);
 	}
@@ -94,13 +137,13 @@ void UUIManagerSubsystem::CloseAllWidgets()
 
 UUserWidget *UUIManagerSubsystem::GetWidget(EWidgetType WidgetType) const
 {
-	if(ActiveWidgets.Container(WidgetType)){ return ActiveWidgets.FindRef(WidgetType);}
+	if(ActiveWidgets.Contains(WidgetType)){ return ActiveWidgets.FindRef(WidgetType);}
     return nullptr;
 }
 
 bool UUIManagerSubsystem::IsWidgetOpen(EWidgetType WidgetType) const
 {
-	return ActiveWidgets.Container(WidgetType);
+	return ActiveWidgets.Contains(WidgetType);
 }
 
 void UUIManagerSubsystem::PushWidget(EWidgetType WidgetType)

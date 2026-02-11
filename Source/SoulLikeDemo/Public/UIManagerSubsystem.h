@@ -18,10 +18,14 @@ public:
 	// 获取单例实例
 	UFUNCTION(BlueprintPure, Category = "UIManagerSubsystem", meta = (WorldContext = "WorldContextObject"))
 		static UUIManagerSubsystem* Get(const UObject* WorldContextObject);
+    
+    // 根据路径加载BP资源
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
+		void RegisterWidgetFromBPPath(EWidgetType WidgetType,const FString& WidgetClassPathstr);
 
 	// 注册/注销界面,蓝图调用
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
-    void RegisterWidget(EWidgetType WidgetType,TSubclassOf<UUserWidget>> WidgetClass);
+    void RegisterWidget(EWidgetType WidgetType,TSubclassOf<UUserWidget> WidgetClass);
     
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
     void UnregisterWidget(EWidgetType WidgetType);
@@ -59,7 +63,7 @@ public:
 
 private:
     // 存储所有注册的界面-蓝图调用
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    UPROPERTY()
     TMap<EWidgetType, TSubclassOf<UUserWidget>> RegisteredWidgets;
     
     // 活动界面（当前打开的）

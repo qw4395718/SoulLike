@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Engine/Texture2D.h"
-#include "ItemData.generated.h"
+#include "ItemDataObject.generated.h"
 
 UENUM(BlueprintType)
 enum class EItemRarity : uint8

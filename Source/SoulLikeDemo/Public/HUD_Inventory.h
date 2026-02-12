@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "ItemData.h"
+#include "ItemDataObject.h"
 #include "HUD_Inventory.generated.h"
 
 class UTileView;

@@ -1,4 +1,4 @@
-#include "ItemData.h"
+#include "ItemDataObject.h"
 #include "Engine/Engine.h"
 
 UItemData::UItemData()

@@ -27,10 +27,7 @@ void UHUD_Inventory::NativeDestruct()
     Super::NativeDestruct();
 
     // 清理绑定
-    if (InventoryComponent && InventoryComponent->OnInventoryUpdated.IsAlreadyBound(this, &UHUD_Inventory::OnInventoryUpdated))
-    {
-        InventoryComponent->OnInventoryUpdated.RemoveDynamic(this, &UHUD_Inventory::OnInventoryUpdated);
-    }
+
 }
 
 FReply UHUD_Inventory::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
@@ -61,20 +58,20 @@ FReply UHUD_Inventory::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEv
     return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
-void UHUD_Inventory::SetInventoryComponent(UInventoryComponent* NewInventoryComponent)
+void UHUD_Inventory::SetInventoryComponent(USL_InventoryComponent* NewInventoryComponent)
 {
-    if (InventoryComponent && InventoryComponent->OnInventoryUpdated.IsAlreadyBound(this, &UHUD_Inventory::OnInventoryUpdated))
-    {
-        InventoryComponent->OnInventoryUpdated.RemoveDynamic(this, &UHUD_Inventory::OnInventoryUpdated);
-    }
+	if (InventoryComponent && InventoryComponent->OnInventoryUpdated.IsAlreadyBound(this, &UHUD_Inventory::OnInventoryUpdated))
+	{
+		InventoryComponent->OnInventoryUpdated.RemoveDynamic(this, &UHUD_Inventory::OnInventoryUpdated);
+	}
 
-    InventoryComponent = NewInventoryComponent;
+	InventoryComponent = NewInventoryComponent;
 
-    if (InventoryComponent)
-    {
-        InventoryComponent->OnInventoryUpdated.AddDynamic(this, &UHUD_Inventory::OnInventoryUpdated);
-        RefreshInventory();
-    }
+	if (InventoryComponent)
+	{
+		InventoryComponent->OnInventoryUpdated.AddDynamic(this, &UHUD_Inventory::OnInventoryUpdated);
+		RefreshInventory();
+	}
 }
 
 void UHUD_Inventory::RefreshInventory()

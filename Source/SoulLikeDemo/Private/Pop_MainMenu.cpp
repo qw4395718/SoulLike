@@ -27,9 +27,21 @@ void UPop_MainMenu::InitMainMenu()
     m_scrollBox->AddChild(m_menuWrapBox);
 }
 
-void UPop_MainMenu::OnMenuButtonClicked(FName ButtonTag)
+void UPop_MainMenu::OnMenuButtonClicked(const FName ButtonTag)
 {
-    
+    UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
+	{
+        for (const FMenuButtonInfo& buttonInfo : m_arrButtonInfos)
+        {
+            if(buttonInfo.ButtonTag == ButtonTag)
+            {
+                UIManager->OpenWidget(buttonInfo.linkWidgetIndex);
+                return;
+            }
+        }
+
+    }
 }
 
 void UPop_MainMenu::SetButtonInfos(const TArray<FMenuButtonInfo>& infos)
@@ -112,13 +124,20 @@ void UPop_MainMenu::CreateNewMenuItem(const FMenuButtonInfo& info)
                 menuSlot->SetPadding(FMargin(5.0f));
                 menuSlot->SetHorizontalAlignment(HAlign_Fill);
                 menuSlot->SetVerticalAlignment(VAlign_Fill);
-                
             }
+         
 
             // 添加到队列
             m_mapButtonWidgets.Add(info.ButtonTag,newMenuItem);
             newMenuItem->SetImageBrush(info.ButtonImg);
             newMenuItem->SetCenterTitle(info.ButtonText);
+            // 添加绑定函数
+            const FName ButtonTag = info.ButtonTag;
+            newMenuItem->OnClicked.AddLambda(this,[this,ButtonTag]()
+			{
+				OnMenuButtonClicked(ButtonTag);
+			}
+			);
         }
     }
 }

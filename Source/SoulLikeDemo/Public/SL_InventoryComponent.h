@@ -9,6 +9,8 @@
 #include "SL_InventoryComponent.generated.h"
 
 
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SOULLIKEDEMO_API USL_InventoryComponent : public UActorComponent
 {

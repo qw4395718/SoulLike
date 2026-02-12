@@ -93,7 +93,7 @@ protected:
 
 	// 按钮点击处理
 	UFUNCTION()
-		void OnMenuButtonClicked(FName ButtonTag);
+		void OnMenuButtonClicked(const FName ButtonTag);
 
 public:
 	// 暴露给蓝图的属性

@@ -79,6 +79,9 @@ public:
 	UFUNCTION()
 		ASL_WeaponBase* GetCurrentRHWeapon();
 
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "CallLuaByFLuaTable", Category = "UnLua Tutorial"))
+		static void CallLuaByFLuaTable();
+
 protected:
 	/************************************************************************/
 	/*                                  内部调用                                    */

@@ -145,13 +145,13 @@ void UHUD_Inventory::InitializeUI()
         InventoryTileView->SetEntryWidth(100.0f);
         InventoryTileView->SetEntryHeight(100.0f);
         InventoryTileView->SetSelectionMode(ESelectionMode::Single);
-        InventoryTileView->SetItemAlignment(EListItemAlignment::LeftAligned);
-        InventoryTileView->SetOrientation(Orient_Vertical);
+       // InventoryTileView->SetItemAlignment(EListItemAlignment::LeftAligned);
+       // InventoryTileView->SetOrientation(Orient_Vertical);
         InventoryTileView->SetScrollbarVisibility(ESlateVisibility::Visible);
-        InventoryTileView->SetConsumeMouseWheel(EConsumeMouseWheel::WhenScrollingPossible);
+       // InventoryTileView->SetConsumeMouseWheel(EConsumeMouseWheel::WhenScrollingPossible);
         
         // 设置Widget生成类
-        InventoryTileView->SetEntryWidgetClass(SlotWidgetClass);
+        //InventoryTileView->SetEntryWidgetClass(SlotWidgetClass);
     }
 }
 
@@ -177,9 +177,9 @@ void UHUD_Inventory::UpdateInventoryInfo()
     WeightText->SetText(FText::FromString(FString::Printf(TEXT("Weight: %.1f"), TotalWeight)));
 
     // 更新格子使用情况
-    int32 UsedSlots = InventoryComponent->MaxInventorySlots - InventoryComponent->GetEmptySlotCount();
-    SlotCountText->SetText(FText::FromString(FString::Printf(TEXT("Slots: %d/%d"), 
-        UsedSlots, InventoryComponent->MaxInventorySlots)));
+  /*  int32 UsedSlots = InventoryComponent->MaxInventorySlots - InventoryComponent->GetEmptySlotCount();
+	SlotCountText->SetText(FText::FromString(FString::Printf(TEXT("Slots: %d/%d"),
+		UsedSlots, InventoryComponent->MaxInventorySlots)));*/
 }
 
 void UHUD_Inventory::OnInventoryUpdated()
@@ -187,47 +187,47 @@ void UHUD_Inventory::OnInventoryUpdated()
     RefreshInventory();
 }
 
-void UHUD_Inventory::OnSlotClicked(UHUD_InventorySlot* ClickedSlot)
+void UHUD_Inventory::OnSlotClicked(UUI_InventorySlot* ClickedSlot)
 {
     if (!ClickedSlot || !InventoryComponent) return;
 
     // 清除之前选中的格子
     if (SelectedSlot && SelectedSlot != ClickedSlot)
     {
-        SelectedSlot->SetSelected(false);
+        //SelectedSlot->SetSelected(false);
     }
 
     // 设置新的选中格子
     SelectedSlot = ClickedSlot;
-    SelectedSlot->SetSelected(true);
+   // SelectedSlot->SetSelected(true);
 
-    UItemData* ItemData = ClickedSlot->GetItemData();
-    if (ItemData)
-    {
-        // 如果有物品，尝试使用
-        if (ItemData->bCanUse)
-        {
-            InventoryComponent->UseItem(ItemData);
-        }
-    }
+    //UItemData* ItemData = ClickedSlot->GetItemData();
+    //if (ItemData)
+    //{
+    //    // 如果有物品，尝试使用
+    //    if (ItemData->bCanUse)
+    //    {
+    //        InventoryComponent->UseItem(ItemData);
+    //    }
+    //}
 
-    // 拖拽逻辑
-    if (ItemData && !bIsDragging)
-    {
-        StartDrag(ClickedSlot);
-    }
+    //// 拖拽逻辑
+    //if (ItemData && !bIsDragging)
+    //{
+    //    StartDrag(ClickedSlot);
+    //}
 }
 
-void UHUD_Inventory::OnSlotHovered(UHUD_InventorySlot* HoveredSlot)
+void UHUD_Inventory::OnSlotHovered(UUI_InventorySlot* HoveredSlot)
 {
     if (!HoveredSlot || !InventoryComponent) return;
 
-    UItemData* ItemData = HoveredSlot->GetItemData();
-    if (ItemData)
-    {
-        // 这里可以显示物品提示框
-        // 例如：ShowTooltip(ItemData);
-    }
+    //UItemData* ItemData = HoveredSlot->GetItemData();
+    //if (ItemData)
+    //{
+    //    // 这里可以显示物品提示框
+    //    // 例如：ShowTooltip(ItemData);
+    //}
 }
 
 void UHUD_Inventory::OnSortButtonClicked()
@@ -243,12 +243,12 @@ void UHUD_Inventory::OnCloseButtonClicked()
     ToggleInventory();
 }
 
-void UHUD_Inventory::StartDrag(UHUD_InventorySlot* Slot)
+void UHUD_Inventory::StartDrag(UUI_InventorySlot* DragSlot)
 {
-    if (!Slot || bIsDragging) return;
+    if (!DragSlot || bIsDragging) return;
 
     bIsDragging = true;
-    SelectedSlot = Slot;
+    SelectedSlot = DragSlot;
     DragStartPosition = FVector2D::ZeroVector;
 
     // 这里可以开始拖拽视觉效果
@@ -261,16 +261,16 @@ void UHUD_Inventory::StopDrag()
     // 清理拖拽视觉效果
 }
 
-bool UHUD_Inventory::TryDropItem(int32 TargetSlotIndex)
-{
-    if (!SelectedSlot || !InventoryComponent) return false;
-
-    int32 SourceIndex = SelectedSlot->GetSlotIndex();
-    if (SourceIndex == TargetSlotIndex) return false;
-
-    // 交换物品
-    bool bSuccess = InventoryComponent->SwapItems(SourceIndex, TargetSlotIndex);
-    
-    StopDrag();
-    return bSuccess;
-}
+//bool UHUD_Inventory::TryDropItem(int32 TargetSlotIndex)
+//{
+//    if (!SelectedSlot || !InventoryComponent) return false;
+//
+//    int32 SourceIndex = SelectedSlot->GetSlotIndex();
+//    if (SourceIndex == TargetSlotIndex) return false;
+//
+//    // 交换物品
+//    bool bSuccess = InventoryComponent->SwapItems(SourceIndex, TargetSlotIndex);
+//    
+//    StopDrag();
+//    return bSuccess;
+//}

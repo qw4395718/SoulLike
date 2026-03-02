@@ -1,9 +1,9 @@
 #pragma once
 #include "Engine/DataTable.h"
+#include "ItemDataObject.h"
 #include "ItemDataStruct.generated.h"
 
-class EItemRarity;
-class EItemType;
+
 class UTexture2D;
 
 USTRUCT(BlueprintType)

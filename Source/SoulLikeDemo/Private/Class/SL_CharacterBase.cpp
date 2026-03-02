@@ -308,7 +308,7 @@ void ASL_CharacterBase::InitPartmentComponent()
 		TArray<FWeaponData> EquipmentWeaponList;
 
 		for (int i = 0;i< EQUIPMENT_SLOT_NUM*2;i++)
-		{
+		{ 
 			WeaponList.Add(100000+i);
 			ItemList.Add(200000+i);
 		}

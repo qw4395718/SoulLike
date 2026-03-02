@@ -12,6 +12,7 @@
 #include "Components/WrapBoxSlot.h"
 #include "Components/ScrollBox.h"
 #include "Components/WrapBox.h"
+#include "UIManagerSubsystem.h"
 
 void UPop_MainMenu::NativeConstruct()
 {
@@ -131,13 +132,13 @@ void UPop_MainMenu::CreateNewMenuItem(const FMenuButtonInfo& info)
             m_mapButtonWidgets.Add(info.ButtonTag,newMenuItem);
             newMenuItem->SetImageBrush(info.ButtonImg);
             newMenuItem->SetCenterTitle(info.ButtonText);
-            // 添加绑定函数
-            const FName ButtonTag = info.ButtonTag;
-            newMenuItem->OnClicked.AddLambda(this,[this,ButtonTag]()
-			{
-				OnMenuButtonClicked(ButtonTag);
-			}
-			);
+   //         // 添加绑定函数
+   //         const FName ButtonTag = info.ButtonTag;
+   //         newMenuItem->OnClicked.AddLambda(this,[this,ButtonTag]()
+			//{
+			//	OnMenuButtonClicked(ButtonTag);
+			//}
+			//);
         }
     }
 }

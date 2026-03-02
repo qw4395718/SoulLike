@@ -3,6 +3,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SL_WeaponBase.h"
+#include "UnLua.h"
 
 USL_EquipmentComponent::USL_EquipmentComponent()
 {
@@ -30,9 +31,10 @@ void USL_EquipmentComponent::AttackBehaviorResponse(AActor* OwnerActor)
 {
 	RETURN_IF_FALSE(OwnerActor);
 	RETURN_IF_FALSE(CurrentRightHandWeapon);
+
 	//检查是否有右手武器
 	CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_Attack, OwnerActor);
-	
+	CallLuaByFLuaTable();
 }
 
 void USL_EquipmentComponent::DefenceBehaviorResponse(AActor* OwnerActor)
@@ -262,5 +264,24 @@ ASL_WeaponBase* USL_EquipmentComponent::GetCurrentLHWeapon()
 ASL_WeaponBase* USL_EquipmentComponent::GetCurrentRHWeapon()
 {
 	return CurrentRightHandWeapon;
+}
+
+void USL_EquipmentComponent::CallLuaByFLuaTable()
+{
+	UE_LOG(LogTemp, Display, TEXT("[C++]CallLuaByFLuaTable 开始"));
+	UnLua::FLuaEnv Env;
+
+	const auto Require = UnLua::FLuaFunction(&Env, "_G", "require");
+	const auto RetValues1 = Require.Call("Tutorials.08_CppCallLua");
+	check(RetValues1.Num() == 2);
+
+	const auto RetValue = RetValues1[0];
+	const auto LuaTable = UnLua::FLuaTable(&Env, RetValue);
+	const auto RetValues2 = LuaTable.Call("CallMe", 3.3f, 4.4f);
+	check(RetValues2.Num() == 1);
+
+	FString Msg = FString::Printf(TEXT("[C++]收到来自Lua的返回，结果=%f"), RetValues2[0].Value<float>());
+	UE_LOG(LogTemp, Display, TEXT("[C++]CallLuaByFLuaTable 执行%s"), *Msg);
+	UE_LOG(LogTemp, Display, TEXT("[C++]CallLuaByFLuaTable 结束"));
 }
 

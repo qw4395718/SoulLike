@@ -7,6 +7,7 @@
 #include "Fonts/SlateFontInfo.h"
 #include "Fonts/FontMeasure.h"
 #include "GlobalDelegatesManager.h"
+#include "UnLua.h"
 
 
 UHUD_Dialog::UHUD_Dialog(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -15,14 +16,7 @@ UHUD_Dialog::UHUD_Dialog(const FObjectInitializer& ObjectInitializer /*= FObject
 
 }
 
-void UHUD_Dialog::FakeInit()
-{
-	FString tmpName = TEXT("原神");
-	FString tmpContent = TEXT("《原神》是由中国游戏公司米哈游（miHoYo）自主研发的一款开放世界动作角色扮演游戏，于2020年9月正式全球上线，支持iOS、Android、PC、PlayStation等多平台，并计划登陆Nintendo Switch。游戏以精美的画面、丰富的探索内容和深度的角色养成系统闻名，在全球范围内拥有极高的人气。一、游戏核心特色/n开放世界探索/n游戏地图庞大且多样化，包含草原、雪山、沙漠、海洋、奇幻国度等区域，鼓励玩家自由探索。/n世界中隐藏着大量谜题、宝箱、秘境和随机事件，探索奖励丰富。");
-	SetDialogText(tmpName, tmpContent);
-}
-
-void UHUD_Dialog::SetDialogText(const FString& labelText, const FString& descText)
+void UHUD_Dialog::SetDialogText_Implementation(const FString& labelText, const FString& descText)
 {
 	m_pawnName = labelText;
 	m_dialogContent = descText;
@@ -43,13 +37,13 @@ void UHUD_Dialog::SetDialogText(const FString& labelText, const FString& descTex
 	}
 }
 
-void UHUD_Dialog::ShowDialog()
+void UHUD_Dialog::ShowDialog_Implementation()
 {
 	SetVisibility(ESlateVisibility::Visible);
 	AddToViewport();
 }
 
-void UHUD_Dialog::CloseDialog()
+void UHUD_Dialog::CloseDialog_Implementation()
 {
 	RemoveFromParent();
 }
@@ -57,6 +51,7 @@ void UHUD_Dialog::CloseDialog()
 void UHUD_Dialog::NativeConstruct()
 {
 	Super::NativeConstruct();
+
 
 	// 绑定按钮点击事件
 	if (m_clickButton)
@@ -219,7 +214,7 @@ int32 UHUD_Dialog::EstimateLinesForText(const FString& Text) const
 	return FMath::Max(1, FMath::CeilToInt(EstimatedLines));
 }
 
-void UHUD_Dialog::OnClickButtonClicked()
+void UHUD_Dialog::OnClickButtonClicked_Implementation()
 {
 	if (!m_bIsMultiPage)
 	{

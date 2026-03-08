@@ -11,10 +11,6 @@ UHUD_EquipmentBar::UHUD_EquipmentBar(const FObjectInitializer& ObjectInitializer
 
 }
 
-void UHUD_EquipmentBar::FakeInit()
-{
-
-}
 
 void UHUD_EquipmentBar::InitializeEquipmentBar()
 {

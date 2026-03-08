@@ -14,11 +14,33 @@ class UTexture2D;
 class UVerticalBox;
 
 // 交互组件相关数据结构
+USTRUCT(BlueprintType)
 struct FInterActOptionInfo
 {
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32				Index;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D*		OptionIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString			OptionText;
+
+	// 添加构造函数方便 C++ 使用
+	FInterActOptionInfo()
+		: Index(0)
+		, OptionIcon(nullptr)
+		, OptionText(TEXT(""))
+	{}
+
+	FInterActOptionInfo(int32 InIndex, UTexture2D* InIcon, const FString& InText)
+		: Index(InIndex)
+		, OptionIcon(InIcon)
+		, OptionText(InText)
+	{}
+
 };
 
 /**
@@ -34,6 +56,7 @@ public:
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	// 所有数据更新
+	UFUNCTION()
 	void UpdateBatch(const TArray<FInterActOptionInfo>& options);
 
 	// 单项数据更新
@@ -46,8 +69,9 @@ public:
 		void SetTargetOptionSelected(int32 Index);
 
 	// 按钮点击事件
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "HUD_InterActBtnPanel")
 		void OnButtonClicked(int32 Index);
+	virtual void OnButtonClicked_Implementation(int32 Index);
 
 	UFUNCTION(BlueprintCallable)
 		void SetVisible(bool bVisible);
@@ -73,15 +97,15 @@ protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
 	/************************************************************************/
-	// 单元测试相关
-	void FakeInit();
 
 	// 重写原生鼠标滚轮事件
 	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
 	// 鼠标滚动行为处理
-	UFUNCTION(BlueprintCallable, Category="Scroll")
-	void HandleScroll(float wheelDelta);
+	// 鼠标滚动行为处理
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "HUD_InterActBtnPanel")
+		void HandleScroll(float wheelDelta);
+	virtual void HandleScroll_Implementation(float wheelDelta);
 
 	UFUNCTION(BlueprintCallable)
 		void UpdateVisibleRange();

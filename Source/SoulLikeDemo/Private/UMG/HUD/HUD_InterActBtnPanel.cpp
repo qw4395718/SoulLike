@@ -10,7 +10,6 @@
 UHUD_InterActBtnPanel::UHUD_InterActBtnPanel(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
-	FakeInit();
 }
 
 void UHUD_InterActBtnPanel::UpdateBatch(const TArray<FInterActOptionInfo>& options)
@@ -54,7 +53,7 @@ void UHUD_InterActBtnPanel::SetTargetOptionSelected(int32 Index)
 	m_visibleSlots[Index]->SetSelected(true);
 }
 
-void UHUD_InterActBtnPanel::OnButtonClicked(int32 Index)
+void UHUD_InterActBtnPanel::OnButtonClicked_Implementation(int32 Index)
 {
 	SetTargetOptionSelected(Index);
 	// ִ
@@ -111,24 +110,6 @@ void UHUD_InterActBtnPanel::OnClickInterActButtonClicked()
 	}
 }
 
-void UHUD_InterActBtnPanel::FakeInit()
-{
-	TArray<FInterActOptionInfo> test;
-	test.Add(FInterActOptionInfo{ 1,nullptr,L"1" });
-	test.Add(FInterActOptionInfo{ 2,nullptr,L"2" });
-	test.Add(FInterActOptionInfo{ 3,nullptr,L"3" });
-	test.Add(FInterActOptionInfo{ 4,nullptr,L"4" });
-	test.Add(FInterActOptionInfo{ 5,nullptr,L"5" });
-	test.Add(FInterActOptionInfo{ 6,nullptr,L"6" });
-	test.Add(FInterActOptionInfo{ 7,nullptr,L"7" });
-	test.Add(FInterActOptionInfo{ 8,nullptr,L"8" });
-	test.Add(FInterActOptionInfo{ 9,nullptr,L"9" });
-	test.Add(FInterActOptionInfo{ 10,nullptr,L"10" });
-	test.Add(FInterActOptionInfo{ 11,nullptr,L"11" });
-	test.Add(FInterActOptionInfo{ 12,nullptr,L"12" });
-	UpdateBatch(test);
-}
-
 FReply UHUD_InterActBtnPanel::NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	// 
@@ -141,7 +122,7 @@ FReply UHUD_InterActBtnPanel::NativeOnMouseWheel(const FGeometry& InGeometry, co
 	return FReply::Handled();
 }
 
-void UHUD_InterActBtnPanel::HandleScroll(float wheelDelta)
+void UHUD_InterActBtnPanel::HandleScroll_Implementation(float wheelDelta)
 {
 	// 
 	float newScrollOffset = currentScrollOffset + (wheelDelta * scrollSensitivity *(-1));

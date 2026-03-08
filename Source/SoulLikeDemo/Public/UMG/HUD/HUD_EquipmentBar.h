@@ -22,9 +22,6 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	// 单元测试相关
-	UFUNCTION(BlueprintCallable, Category = "EquipmentBarBar")
-		void FakeInit();
 	// 初始化组件
 	UFUNCTION(BlueprintCallable, Category = "EquipmentBarBar")
 		void InitializeEquipmentBar();
@@ -46,8 +43,9 @@ protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
 	// 鼠标滚动行为处理
-	UFUNCTION(BlueprintCallable, Category = "Scroll")
-		void HandleScroll(float wheelDelta);
+	UFUNCTION(BlueprintCallable,BlueprintNativeEvent, Category = "Scroll")
+	void HandleScroll(float wheelDelta);
+	virtual void HandleScroll_Implementation(float wheelDelta);
 
 protected:
 	/************************************************************************/

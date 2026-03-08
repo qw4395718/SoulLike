@@ -25,23 +25,22 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	// 单元测试相关
-	UFUNCTION(BlueprintCallable, Category = "Dialog")
-	void FakeInit();
 
 	/** 设置要显示的文本 */
-	UFUNCTION(BlueprintCallable, Category = "Dialog")
+	UFUNCTION(BlueprintCallable,BlueprintNativeEvent, Category = "Dialog")
 	void SetDialogText(const FString& pawnNameText,const FString& dialogText);
+	virtual void SetDialogText_Implementation(const FString& pawnNameText, const FString& dialogText);
 
 	/** 显示对话框 */
-	UFUNCTION(BlueprintCallable, Category = "Dialog")
+	UFUNCTION(BlueprintCallable,BlueprintNativeEvent, Category = "Dialog")
 	void ShowDialog();
+	virtual void ShowDialog_Implementation();
+
 
 	/** 关闭对话框 */
-	UFUNCTION(BlueprintCallable, Category = "Dialog")
+	UFUNCTION(BlueprintCallable,BlueprintNativeEvent, Category = "Dialog")
 	void CloseDialog();
-
-
+	virtual void CloseDialog_Implementation();
 
 protected:
 	/************************************************************************/
@@ -71,8 +70,10 @@ protected:
 	int32 EstimateLinesForText(const FString& text) const;
 	
 	// 鼠标点击行为响应
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Dialog")
 	void OnClickButtonClicked();
+	virtual void OnClickButtonClicked_Implementation();
+
 
 	// 智能分页（基于宽度）
 	void SmartSplitTextByWidth();

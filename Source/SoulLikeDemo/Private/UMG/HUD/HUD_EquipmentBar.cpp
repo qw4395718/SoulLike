@@ -32,11 +32,11 @@ void UHUD_EquipmentBar::UpdateTargetSlot(EHUDEquipmentSlotType type, FStatusEffe
 	}
 }
 
-void UHUD_EquipmentBar::StartChangeEquipment()
+void UHUD_EquipmentBar::StartChangeEquipment(UWidgetAnimation* Anim)
 {
-	if (m_changeEquipmentAnimation)
+	if (Anim)
 	{
-		PlayAnimation(m_changeEquipmentAnimation);
+		PlayAnimation(Anim);
 	}
 }
 

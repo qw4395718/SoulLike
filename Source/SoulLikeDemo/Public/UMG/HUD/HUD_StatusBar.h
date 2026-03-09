@@ -22,14 +22,20 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	UFUNCTION(BlueprintCallable, Category = "Status Bar")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Status Bar")
 		void AddStatus(FStatusEffectInfo statusInfo);
+		virtual void AddStatus_Implementation(FStatusEffectInfo statusInfo);
 
-	UFUNCTION(BlueprintCallable, Category = "Status Bar")
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Status Bar")
 		void RemoveStatus(int iconIndex);
+		virtual void RemoveStatus_Implementation(int iconIndex);
 
-	UFUNCTION(BlueprintCallable, Category = "Status Bar")
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Status Bar")
 		void UpdateStatus(FStatusEffectInfo statusInfo);
+		virtual void UpdateStatus_Implementation(FStatusEffectInfo statusInfo);
+
 
 	// 为蓝图暴露的动画事件
 	UFUNCTION(BlueprintImplementableEvent, Category = "Status Bar")

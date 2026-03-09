@@ -11,7 +11,7 @@ UHUD_StatusBar::UHUD_StatusBar(const FObjectInitializer& ObjectInitializer /*= F
 {
 }
 
-void UHUD_StatusBar::AddStatus(FStatusEffectInfo statusInfo)
+void UHUD_StatusBar::AddStatus_Implementation(FStatusEffectInfo statusInfo)
 {
 	// 
 	RETURN_IF_TRUE(m_statusIconsContainer == nullptr || m_activeStatusIcons.Contains(statusInfo.IconIndex))
@@ -19,7 +19,7 @@ void UHUD_StatusBar::AddStatus(FStatusEffectInfo statusInfo)
 	CreateNewStatus(statusInfo);
 }
 
-void UHUD_StatusBar::RemoveStatus(int iconIndex)
+void UHUD_StatusBar::RemoveStatus_Implementation(int iconIndex)
 {
 	if (UUserWidget** ppiconWidget = m_activeStatusIcons.Find(iconIndex))
 	{
@@ -41,7 +41,7 @@ void UHUD_StatusBar::RemoveStatus(int iconIndex)
 	}
 }
 
-void UHUD_StatusBar::UpdateStatus(FStatusEffectInfo statusInfo)
+void UHUD_StatusBar::UpdateStatus_Implementation(FStatusEffectInfo statusInfo)
 {
 	if (UUserWidget** ppwaitUpdateSubWidget = m_activeStatusIcons.Find(statusInfo.IconIndex))
 	{

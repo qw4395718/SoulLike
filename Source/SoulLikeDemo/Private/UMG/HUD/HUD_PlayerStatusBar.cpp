@@ -21,7 +21,7 @@ void UHUD_PlayerStatusBar::UpdateProgressInfo(float currnetHealth, float current
 	m_magicProgressBar->UpdateProgressBar(0, 1, currentMagic);
 }
 
-void UHUD_PlayerStatusBar::AddPlayerStatus(TArray<FStatusEffectInfo> addStatusArr)
+void UHUD_PlayerStatusBar::AddPlayerStatus_Implementation(TArray<FStatusEffectInfo> addStatusArr)
 {
 	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
 	for(FStatusEffectInfo info : addStatusArr)
@@ -30,7 +30,7 @@ void UHUD_PlayerStatusBar::AddPlayerStatus(TArray<FStatusEffectInfo> addStatusAr
 	}
 }
 
-void UHUD_PlayerStatusBar::UpdatePlayerStatus(TArray<FStatusEffectInfo> updateStatusArr)
+void UHUD_PlayerStatusBar::UpdatePlayerStatus_Implementation(TArray<FStatusEffectInfo> updateStatusArr)
 {
 	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
 	for(FStatusEffectInfo info : updateStatusArr)
@@ -39,7 +39,7 @@ void UHUD_PlayerStatusBar::UpdatePlayerStatus(TArray<FStatusEffectInfo> updateSt
 	}
 }
 
-void UHUD_PlayerStatusBar::RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr)
+void UHUD_PlayerStatusBar::RemovePlayerStatus_Implementation(TArray<FStatusEffectInfo> removeStatusArr)
 {
 	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
 	for(FStatusEffectInfo info : removeStatusArr)

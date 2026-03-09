@@ -21,4 +21,19 @@ local M = UnLua.Class()
 --function M:Tick(MyGeometry, InDeltaTime)
 --end
 
+function M:AddStatus(statusInfo)
+    self:AddStatus(statusInfo)
+    -- 调度视听效果
+end
+
+function M:RemoveStatus(iconIndex)
+    self:RemoveStatus(iconIndex)
+    -- 调度视听效果
+end
+
+function M:UpdateStatus(statusInfo)
+    self:UpdateStatus(statusInfo)
+    -- 调度视听效果
+end
+
 return M

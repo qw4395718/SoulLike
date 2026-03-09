@@ -20,8 +20,9 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable,BlueprintNativeEvent, Category = "ProgressBar")
 		void UpdateProgressBar(float min, float max, float current);
+		virtual void UpdateProgressBar_Implementation(float min, float max, float current);
 
 protected:
 	/************************************************************************/

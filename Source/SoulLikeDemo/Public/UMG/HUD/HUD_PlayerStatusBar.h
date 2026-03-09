@@ -29,14 +29,20 @@ public:
 		float currentStamina,
 		float currentMagic);
 
-	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
 		void AddPlayerStatus(TArray<FStatusEffectInfo> addStatusArr);
+		virtual void AddPlayerStatus_Implementation(TArray<FStatusEffectInfo> addStatusArr);
 
-	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
 		void UpdatePlayerStatus(TArray<FStatusEffectInfo> updateStatusArr);
+		virtual	void UpdatePlayerStatus_Implementation(TArray<FStatusEffectInfo> updateStatusArr);
 
-	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
 		void RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr);
+		virtual	void RemovePlayerStatus_Implementation(TArray<FStatusEffectInfo> removeStatusArr);
+
 
 protected:
 	/************************************************************************/

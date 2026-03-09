@@ -26,8 +26,8 @@ end
 
 function M:HandleScroll(wheelDelta)
     -- 补充视听效果
-
-    self:HandleScroll(wheelDelta);
+    self:StartChangeEquipment(self.m_changeEquipmentAnimation)
+    self:HandleScroll(wheelDelta)
 end
 
 

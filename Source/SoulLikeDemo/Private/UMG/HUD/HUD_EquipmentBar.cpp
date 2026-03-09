@@ -67,7 +67,7 @@ void UHUD_EquipmentBar::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 	}
 }
 
-void UHUD_EquipmentBar::HandleScroll(float wheelDelta)
+void UHUD_EquipmentBar::HandleScroll_Implementation(float wheelDelta)
 {
 	// 
 	float newScrollOffset = (wheelDelta * scrollSensitivity * (-1));

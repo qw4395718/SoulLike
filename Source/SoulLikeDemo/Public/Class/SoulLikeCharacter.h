@@ -7,13 +7,15 @@
 #include "SoulLikeGameGlobal.h"
 #include "DamageEventDispatcher.h"
 #include "CharacterInfo_IF.h"
+#include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemInterface.h"
 #include "SoulLikeCharacter.generated.h"
 
 class UCombatComponent;
 class UDamageEventDispatcher;
+class ULabAbilitySystemComponent;
 
 UCLASS()
-class SOULLIKEDEMO_API ASoulLikeCharacter : public ACharacter
+class SOULLIKEDEMO_API ASoulLikeCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -33,6 +35,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "SetState")
 		void MoveToLocationAndRotation(FVector LocationPosition, FRotator Rotaion);
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 
 protected:
@@ -78,6 +82,10 @@ public:
 		UCombatComponent* CombatComponent;
 
 protected:
+
+	// GAS能力系统组件
+	UPROPERTY()
+		ULabAbilitySystemComponent* LabAbilitySystemComp;
 
 	// 动画资源-待处决
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")

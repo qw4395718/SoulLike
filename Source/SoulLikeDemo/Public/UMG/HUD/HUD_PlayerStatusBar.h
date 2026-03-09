@@ -30,18 +30,18 @@ public:
 		float currentMagic);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
-		void AddPlayerStatus(TArray<FStatusEffectInfo> addStatusArr);
-		virtual void AddPlayerStatus_Implementation(TArray<FStatusEffectInfo> addStatusArr);
+		void AddPlayerStatus(const TArray<FStatusEffectInfo>& addStatusArr);
+		virtual void AddPlayerStatus_Implementation(const TArray<FStatusEffectInfo>& addStatusArr);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
-		void UpdatePlayerStatus(TArray<FStatusEffectInfo> updateStatusArr);
-		virtual	void UpdatePlayerStatus_Implementation(TArray<FStatusEffectInfo> updateStatusArr);
+		void UpdatePlayerStatus(const TArray<FStatusEffectInfo>& updateStatusArr);
+		virtual	void UpdatePlayerStatus_Implementation(const TArray<FStatusEffectInfo>& updateStatusArr);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
-		void RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr);
-		virtual	void RemovePlayerStatus_Implementation(TArray<FStatusEffectInfo> removeStatusArr);
+		void RemovePlayerStatus(const TArray<FStatusEffectInfo>& removeStatusArr);
+		virtual	void RemovePlayerStatus_Implementation(const TArray<FStatusEffectInfo>& removeStatusArr);
 
 
 protected:

@@ -7,11 +7,12 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include <Engine/DataTable.h>
 #include "WeaponTableInfo.h"
+#include "LabAbilitySystemComponent.h"
 
 // Sets default values
 ASoulLikeCharacter::ASoulLikeCharacter()
 {
-
+	LabAbilitySystemComp = CreateDefaultSubobject<ULabAbilitySystemComponent>(TEXT("AbilitySystem"));
 }
 
 
@@ -144,5 +145,10 @@ void ASoulLikeCharacter::MoveToLocationAndRotation(FVector LocationPosition,FRot
 	this->SetActorLocationAndRotation(LocationPosition, Rotaion, false, nullptr, ETeleportType::TeleportPhysics);
 	// 恢复移动（如果是）
 	this->GetCharacterMovement()->SetMovementMode(MOVE_Walking); // 恢复行走模式
+}
+
+UAbilitySystemComponent* ASoulLikeCharacter::GetAbilitySystemComponent() const
+{
+	return LabAbilitySystemComp;
 }
 

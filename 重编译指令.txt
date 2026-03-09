@@ -1,0 +1,1 @@
+"D:\Software\UnrealEngine\UE_4.26\Engine\Binaries\DotNET\UnrealBuildTool.exe" SoulLikeDemo Win64 Development -Project="D:\Code\SoulLike\SoulLikeDemo.uproject"

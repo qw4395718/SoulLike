@@ -30,7 +30,7 @@ public:
 		void UpdateTargetSlot(EHUDEquipmentSlotType type,FStatusEffectInfo status);
 	// 开始切换装备UI动画
 	UFUNCTION(BlueprintCallable)
-		void StartChangeEquipment();
+		void StartChangeEquipment(UWidgetAnimation* Anim);
 
 protected:
 	/************************************************************************/

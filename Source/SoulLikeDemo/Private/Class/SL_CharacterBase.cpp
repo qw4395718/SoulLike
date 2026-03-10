@@ -3,19 +3,31 @@
 
 #include "SL_CharacterBase.h"
 #include "WeaponAnimNotify_IF.h"
+#include "LabAbilitySystemComponent.h"
+#include <LabHealthAttributeSet.h>
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 
 // Sets default values
 ASL_CharacterBase::ASL_CharacterBase()
 {
-
+	/**
+	 * GAS 相关
+	 */
+	 // ASC
+	LabAbilitySystemComp = CreateDefaultSubobject<ULabAbilitySystemComponent>(TEXT("AbilitySystem"));
+	// AS(Health)
+	HealthSet = CreateDefaultSubobject<ULabHealthAttributeSet>(TEXT("HealthSet"));
+	// 
 }
 
 void ASL_CharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 	InitializeCharacter();
+
+	// 为ASC设置持有者和化身
+	LabAbilitySystemComp->InitAbilityActorInfo(this, this);
 }
 
 void ASL_CharacterBase::Tick(float DeltaTime)
@@ -343,4 +355,9 @@ void ASL_CharacterBase::InitPartmentComponent()
 		MovementCmp->InitMovemenetInfo(true,"");
 	}
 
+}
+
+UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const
+{
+	return LabAbilitySystemComp;
 }

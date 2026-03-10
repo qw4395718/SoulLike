@@ -14,13 +14,17 @@
 #include "CharacterComponent_IF.h"
 #include "WeaponAnimNotify_IF.h"
 #include "AnimNotify_IF.h"
+#include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemInterface.h"
 #include "SL_CharacterBase.generated.h"
 
 // 声明一个自定义日志类别
 DECLARE_LOG_CATEGORY_EXTERN(SL_CharacterBase, Log, All);
 
+class ULabAbilitySystemComponent;
+class ULabHealthAttributeSet;
+
 UCLASS()
-class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,public ICharacterComponent_IF, public IAnimNotify_IF
+class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,public ICharacterComponent_IF, public IAnimNotify_IF, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -137,10 +141,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitPartmentComponent();
 
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
 protected:
 	/************************************************************************/
 	/*                                变量                                      */
 	/************************************************************************/
+	// GAS能力系统组件
+	UPROPERTY()
+		ULabAbilitySystemComponent* LabAbilitySystemComp;
+
+	UPROPERTY()
+		ULabHealthAttributeSet* HealthSet;
+
 	// 先不设计组件管理器，直接创建组件使用
 	// 战斗组件
 	UPROPERTY()

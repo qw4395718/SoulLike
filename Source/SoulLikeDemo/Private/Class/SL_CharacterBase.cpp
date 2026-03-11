@@ -361,3 +361,26 @@ UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const
 {
 	return LabAbilitySystemComp;
 }
+
+void ASL_CharacterBase::GiveAbilityToSelf(TSubclassOf<UGameplayAbility> AbilityClass)
+{
+	if (!AbilityClass || !LabAbilitySystemComp) return;
+
+	// 检查是否有权限（在单人游戏中永远为真）
+	if (HasAuthority())
+	{
+		LabAbilitySystemComp->GiveAbility(
+			FGameplayAbilitySpec(AbilityClass, 1, INDEX_NONE, this)
+		);
+	}
+}
+
+void ASL_CharacterBase::GiveAbilitiesToSelf(const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses)
+{
+	if (!LabAbilitySystemComp) return;
+
+	for (auto AbilityClass : AbilityClasses)
+	{
+		GiveAbilityToSelf(AbilityClass);
+	}
+}

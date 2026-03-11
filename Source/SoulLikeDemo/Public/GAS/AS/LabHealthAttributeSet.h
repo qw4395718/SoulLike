@@ -23,6 +23,7 @@ class SOULLIKEDEMO_API ULabHealthAttributeSet : public UAttributeSet
 	// 宏定义
 	ATTRIBUTE_ACCESSORS(ULabHealthAttributeSet, Health);
 	ATTRIBUTE_ACCESSORS(ULabHealthAttributeSet, MaxHealth);
+	ATTRIBUTE_ACCESSORS(ULabHealthAttributeSet, Damage);
 
 public:
 	// Sets default values for this AttributeSet's properties
@@ -41,13 +42,18 @@ public:
 	/*                               外部变量                                       */
 	/************************************************************************/
     // Current health
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, meta = (HideFromModifiers))
     FGameplayAttributeData Health;
 
 
     // Upper limit for health value
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
     FGameplayAttributeData MaxHealth;
+
+	// Damage value calculated during a GE. Meta attribute.
+	UPROPERTY(VisibleAnywhere)
+		FGameplayAttributeData Damage;
+
 
 	UPROPERTY(BlueprintAssignable)
 	FAttributeChangedEvent OnHealthChanged;

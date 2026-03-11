@@ -22,6 +22,7 @@ DECLARE_LOG_CATEGORY_EXTERN(SL_CharacterBase, Log, All);
 
 class ULabAbilitySystemComponent;
 class ULabHealthAttributeSet;
+class UGameplayAbility;
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,public ICharacterComponent_IF, public IAnimNotify_IF, public IAbilitySystemInterface
@@ -143,6 +144,13 @@ public:
 
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	// 在蓝图中可调用的赋予能力函数
+	UFUNCTION(BlueprintCallable, Category = "GAS")
+		void GiveAbilityToSelf(TSubclassOf<UGameplayAbility> AbilityClass);
+
+	UFUNCTION(BlueprintCallable, Category = "GAS")
+		void GiveAbilitiesToSelf(const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses);
 
 protected:
 	/************************************************************************/

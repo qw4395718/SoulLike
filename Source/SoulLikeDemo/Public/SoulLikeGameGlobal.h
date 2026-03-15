@@ -256,6 +256,15 @@ enum class EWidgetType :uint8
 	EWIDGET_Max
 };
 
+// GAS的能力槽位枚举
+UENUM(BlueprintType)
+enum class EMyAbilitySlotsEnum : uint8
+{
+	PrimaryAbility,
+	SecondaryAbility,
+	UltimateAbility
+};
+
 /************************************************************************/
 /*                              Struct                                         */
 /************************************************************************/

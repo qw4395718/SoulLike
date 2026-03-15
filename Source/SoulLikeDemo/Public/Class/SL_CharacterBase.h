@@ -131,6 +131,12 @@ protected:
 	// 武器动画通知下发
 	void WeaponAnimProcess(int HandType,EWeaponAnimNotifyType NotifyType);
 
+	/************************************************************************/
+	/*                                GAS委托处理                                      */
+	/************************************************************************/
+	// 生命值变动委托
+	void HandleHealthChanged(float OldGHealth,float CurrentHealth);
+
 public:
 	/************************************************************************/
 	/*                               外部调用                                       */
@@ -149,6 +155,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GAS")
 		void GiveAbilityToSelf(TSubclassOf<UGameplayAbility> AbilityClass);
 
+	UFUNCTION(BlueprintCallable, Category = "GAS")
+		void GiveAbility(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID);
+	
+	UFUNCTION(BlueprintCallable, Category = "GAS")
+		FGameplayAbilitySpecHandle GiveAbilityAndActivateOnce(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID);
+	
 	UFUNCTION(BlueprintCallable, Category = "GAS")
 		void GiveAbilitiesToSelf(const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses);
 

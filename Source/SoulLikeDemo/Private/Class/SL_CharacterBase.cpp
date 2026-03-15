@@ -5,20 +5,26 @@
 #include "WeaponAnimNotify_IF.h"
 #include "LabAbilitySystemComponent.h"
 #include <LabHealthAttributeSet.h>
+#include <Abilities/GameplayAbilityTypes.h>
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 
 // Sets default values
 ASL_CharacterBase::ASL_CharacterBase()
 {
-	/**
-	 * GAS 相关
-	 */
-	 // ASC
+	/************************************************************************/
+	/*                                GAS组件相关                                      */
+	/************************************************************************/
+	 // ASC-核心功能组件
 	LabAbilitySystemComp = CreateDefaultSubobject<ULabAbilitySystemComponent>(TEXT("AbilitySystem"));
-	// AS(Health)
+	// AS(CharacterCombatState)
 	HealthSet = CreateDefaultSubobject<ULabHealthAttributeSet>(TEXT("HealthSet"));
-	// 
+
+	/************************************************************************/
+	/*								UI组件                                         */
+	/************************************************************************/
+
+
 }
 
 void ASL_CharacterBase::BeginPlay()
@@ -28,6 +34,17 @@ void ASL_CharacterBase::BeginPlay()
 
 	// 为ASC设置持有者和化身
 	LabAbilitySystemComp->InitAbilityActorInfo(this, this);
+
+
+	/************************************************************************/
+	/*								绑定AS与UMG                                         */
+	/************************************************************************/
+	 // 生命值相关AS
+	if (HealthSet)
+	{
+		HealthSet->OnHealthChanged.AddDynamic(this ,&ASL_CharacterBase::HandleHealthChanged);
+	}
+
 }
 
 void ASL_CharacterBase::Tick(float DeltaTime)
@@ -48,6 +65,19 @@ void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("SwitchEquipmentDown", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentDown);
 	PlayerInputComponent->BindAction("EquipmentLeft", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentLeft);
 	PlayerInputComponent->BindAction("EquipmentRight", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentRight);
+
+	// ASC能力
+	if (!LabAbilitySystemComp)
+		return;
+	FString EnumName = TEXT("EMyAbilitySlotsEnum");
+	FGameplayAbilityInputBinds Binds(
+		"ConfirmTargeting",     // 确认动作名
+		"CancelTargeting",      // 取消动作名
+		EnumName,               // 枚举名称（直接传FString）
+		0,                      // 可选的起始输入ID
+		true                    // 是否尝试将枚举值映射到输入ID
+	);
+	LabAbilitySystemComp->BindAbilityActivationToInputComponent(PlayerInputComponent, Binds);
 }
 
 
@@ -284,6 +314,14 @@ void ASL_CharacterBase::WeaponAnimProcess(int HandType, EWeaponAnimNotifyType We
 	}
 }
 
+void ASL_CharacterBase::HandleHealthChanged(float OldGHealth, float CurrentHealth)
+{
+	if(OldGHealth == CurrentHealth){return;}
+
+	// 通知UI组件
+	// 通知音效组件
+}
+
 void ASL_CharacterBase::InitializeCharacter()
 {
 	//拟造数据,初始化组件
@@ -373,6 +411,35 @@ void ASL_CharacterBase::GiveAbilityToSelf(TSubclassOf<UGameplayAbility> AbilityC
 			FGameplayAbilitySpec(AbilityClass, 1, INDEX_NONE, this)
 		);
 	}
+}
+
+void ASL_CharacterBase::GiveAbility(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID)
+{
+	if (!AbilityClass || !LabAbilitySystemComp) return;
+
+	// 检查是否有权限（在单人游戏中永远为真）
+	if (HasAuthority())
+	{
+		LabAbilitySystemComp->GiveAbility(
+			FGameplayAbilitySpec(AbilityClass, InLevel, InInputID, this)
+		);
+	}
+}
+
+FGameplayAbilitySpecHandle ASL_CharacterBase::GiveAbilityAndActivateOnce(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID)
+{
+	if (!AbilityClass || !LabAbilitySystemComp) return FGameplayAbilitySpecHandle();
+
+	// 检查是否有权限（在单人游戏中永远为真）
+	if (HasAuthority())
+	{
+		FGameplayAbilitySpec temp = FGameplayAbilitySpec(AbilityClass, InLevel, InInputID, this);
+
+		return LabAbilitySystemComp->GiveAbilityAndActivateOnce(
+			temp
+		);
+	}
+	return FGameplayAbilitySpecHandle();
 }
 
 void ASL_CharacterBase::GiveAbilitiesToSelf(const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses)

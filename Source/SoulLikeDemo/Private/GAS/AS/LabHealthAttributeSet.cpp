@@ -25,8 +25,7 @@ void ULabHealthAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
-		const float CurrentHealth = GetHealth();
-		OnHealthChanged.Broadcast(this, CurrentHealth);
+		// 生命值不直接进行修改
 	}
 	else if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
 	{
@@ -44,6 +43,20 @@ void ULabHealthAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		{
 			// Set the new health after clamping to min-max
 			SetHealth(NewHealthValue);
+			const float CurrentHealth = GetHealth();
+			OnHealthChanged.Broadcast(OldHealthValue, CurrentHealth);
+
+			// Calculate 'actual' damage applied that respects min and max health
+			const float DamageNumber = OldHealthValue - NewHealthValue;
+			if (UAbilitySystemComponent* OwningAbilitySystemComponent = GetOwningAbilitySystemComponent())
+			{
+				// Broadcast a 'damage number' gameplay cue on the owning actor. Triggered on server, executes on all clients.
+				const FGameplayTag DamageCueTag = FGameplayTag::RequestGameplayTag(FName("GameplayCue.DamageNumber"), /*ErrorIfNotFound=*/true);
+				FGameplayCueParameters DamageCueParams;
+				DamageCueParams.NormalizedMagnitude = 1.f;
+				DamageCueParams.RawMagnitude = DamageNumber;
+				OwningAbilitySystemComponent->ExecuteGameplayCue(DamageCueTag, DamageCueParams);
+			}
 		}
 
 		// Clear the meta attribute that temporarily held damage

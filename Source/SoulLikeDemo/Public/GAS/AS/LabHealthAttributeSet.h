@@ -12,7 +12,7 @@
         GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
         GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FAttributeChangedEvent, UAttributeSet*, AttributeSet, float, NewValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FAttributeChangedEvent, float, OldValue, float, NewValue);
 
 
 UCLASS()
@@ -39,22 +39,24 @@ protected:
 
 public:
 	/************************************************************************/
-	/*                               外部变量                                       */
+	/*                               外部变量-状态属性(在战斗中变化的属性)                                       */
 	/************************************************************************/
-    // Current health
+	// 状态属性
+    // 当前生命值
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, meta = (HideFromModifiers))
     FGameplayAttributeData Health;
 
-
-    // Upper limit for health value
+    // 最大生命值-后面需要移到次级属性中去
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
     FGameplayAttributeData MaxHealth;
 
-	// Damage value calculated during a GE. Meta attribute.
+	// 发起者结算的攻击伤害
 	UPROPERTY(VisibleAnywhere)
-		FGameplayAttributeData Damage;
+	FGameplayAttributeData Damage;
 
-
+	/************************************************************************/
+	/*	                              属性变更委托                                       */
+	/************************************************************************/
 	UPROPERTY(BlueprintAssignable)
 	FAttributeChangedEvent OnHealthChanged;
 };

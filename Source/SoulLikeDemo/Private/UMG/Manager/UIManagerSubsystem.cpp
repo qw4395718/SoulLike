@@ -29,10 +29,15 @@ void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_InterActPanel,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_InterActPanel.WBP_PU_InterActPanel"));
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_MainMenu,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_MainMenu.WBP_PU_MainMenu"));
 	//RegisterWidgetFromBPPath(EWidgetType::EWIDGET_Inventory,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_NotifyMessage.WBP_PU_NotifyMessage"));
+
+
+	UE_LOG(LogTemp, Log, TEXT("UIManagerSubsystem initialized"));
 }
 
 void UUIManagerSubsystem::Deinitialize()
 {
+	CloseAllWidgets();
+	UE_LOG(LogTemp, Log, TEXT("UIManagerSubsystem deinitialized"));
 	Super::Deinitialize();
 }
 
@@ -113,8 +118,7 @@ void UUIManagerSubsystem::OpenWidget(EWidgetType WidgetType)
 				// 添加到视口
 				Widget->AddToViewport();
 				// 记录信息
-				ActiveWidgets.Add(WidgetType,Widget);
-				
+				ActiveWidgets.Add(WidgetType,Widget);				
 			}
 		}
 	}
@@ -133,6 +137,16 @@ void UUIManagerSubsystem::CloseAllWidgets()
 {
 	ActiveWidgets.Reset();
 	WidgetStack.Reset();
+}
+
+void UUIManagerSubsystem::SetWidgetVisible(EWidgetType WidgetType)
+{
+
+}
+
+void UUIManagerSubsystem::ToggleWidgetVisible(EWidgetType WidgetType)
+{
+
 }
 
 UUserWidget *UUIManagerSubsystem::GetWidget(EWidgetType WidgetType) const
@@ -176,4 +190,12 @@ void UUIManagerSubsystem::SetFocusToWidget(EWidgetType WidgetType)
 FName UUIManagerSubsystem::GetFocusedWidgetName() const
 {
     return FName();
+}
+
+void UUIManagerSubsystem::UpdateHealthUI(float OldHealth, float NewHealth, float MaxHealth)
+{
+	if (UHUD_Main_PC* MainPCUI = Cast<UHUD_Main_PC>(GetWidget(EWidgetType::EWIDGET_PCGameMain)))
+	{
+		MainPCUI->
+	}
 }

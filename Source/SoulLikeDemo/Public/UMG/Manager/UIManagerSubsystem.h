@@ -23,6 +23,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI Manager")
 		void RegisterWidgetFromBPPath(EWidgetType WidgetType,const FString& WidgetClassPathstr);
 
+    /************************************************************************/
+    /*                                通用方法                                      */
+    /************************************************************************/
 	// 注册/注销界面,蓝图调用
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
     void RegisterWidget(EWidgetType WidgetType,TSubclassOf<UUserWidget> WidgetClass);
@@ -31,7 +34,7 @@ public:
     void UnregisterWidget(EWidgetType WidgetType);
 
 	// 打开/关闭界面
-	  UFUNCTION(BlueprintCallable, Category = "UI Manager")
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
     void OpenWidget(EWidgetType WidgetType);
     
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
@@ -39,6 +42,13 @@ public:
     
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
     void CloseAllWidgets();
+
+    // 设置界面可视性
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
+	void SetWidgetVisible(EWidgetType WidgetType);
+
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
+	void ToggleWidgetVisible(EWidgetType WidgetType);
 
 	// 获取界面
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
@@ -60,6 +70,12 @@ public:
     
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
     FName GetFocusedWidgetName() const;
+
+    /************************************************************************/
+    /*                                血量系统相关接口                                      */
+    /************************************************************************/
+	UFUNCTION(BlueprintCallable, Category = "UI_Manager_Health")
+    void UpdateHealthUI(float OldHealth,float NewHealth,float MaxHealth);
 
 private:
     // 存储所有注册的界面-蓝图调用

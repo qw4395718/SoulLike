@@ -20,10 +20,6 @@ ASL_CharacterBase::ASL_CharacterBase()
 	// AS(CharacterCombatState)
 	HealthSet = CreateDefaultSubobject<ULabHealthAttributeSet>(TEXT("HealthSet"));
 
-	/************************************************************************/
-	/*								UI组件                                         */
-	/************************************************************************/
-
 
 }
 

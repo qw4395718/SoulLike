@@ -22,7 +22,8 @@ void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	 /************************************************************************/
 	 /*                             HUDLayer                                         */
 	 /************************************************************************/
-	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PCGameMain, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PC.WBP_HUD_PC"));
+	//RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PCGameMain, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PC.WBP_HUD_PC"));
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PlayerStatus, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PlayerStatusBar.WBP_HUD_PlayerStatusBar"));
 	/************************************************************************/
 	/*                              PopLayer                                        */
 	/************************************************************************/
@@ -192,10 +193,7 @@ FName UUIManagerSubsystem::GetFocusedWidgetName() const
     return FName();
 }
 
-void UUIManagerSubsystem::UpdateHealthUI(float OldHealth, float NewHealth, float MaxHealth)
+void UUIManagerSubsystem::UpdateHealthUI(float NewHealth)
 {
-	if (UHUD_Main_PC* MainPCUI = Cast<UHUD_Main_PC>(GetWidget(EWidgetType::EWIDGET_PCGameMain)))
-	{
-		MainPCUI->
-	}
+	
 }

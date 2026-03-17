@@ -4,6 +4,7 @@
 #include "SL_CharacterBase.h"
 #include "Blueprint/UserWidget.h"
 #include "Engine/World.h"
+#include <UIManagerSubsystem.h>
 
 // 构造函数
 ASL_PlayerControllerBase::ASL_PlayerControllerBase()
@@ -105,42 +106,30 @@ ASL_CharacterBase* ASL_PlayerControllerBase::GetMyPlayerCharacter() const
 }
 
 // 创建血量UI
-void ASL_PlayerControllerBase::CreateHealthUI()
+void ASL_PlayerControllerBase::CreatePlayerStatusUI()
 {
-	// 如果已经创建或没有指定UI类，则返回
-	if (!UIManager)
+	// 检测是否持有有效的UI管理子系统,如无则获取,若获取不到则返回
+	if (!UIManager && !UIManager = UUIManagerSubsystem::Get(this))
 	{
+		UE_LOG(LogTemp, Verbose, TEXT("CreatePlayerStatusUI :Can not Get Valid UUIManagerSubsystem Refence"));
 		return;
 	}
 
 	// 创建UI实例
-	UIManager->OpenWidget(EWidgetType::EWIDGET_PCGameMain);
-	if (HealthUIInstance)
-	{
-		// 添加到视口
-		HealthUIInstance->AddToViewport();
-
-		UE_LOG(LogTemp, Log, TEXT("Health UI created and added to viewport"));
-
-		// 尝试初始化UI
-		OnHealthUINeedsInitialization();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to create Health UI"));
-	}
+	UIManager->OpenWidget(EWidgetType::EWIDGET_PlayerStatus);
+	
 }
 
 // 销毁血量UI
-void ASL_PlayerControllerBase::DestroyHealthUI()
+void ASL_PlayerControllerBase::DestroyPlayerStatusUI()
 {
-	if (HealthUIInstance)
+	// 检测是否持有有效的UI管理子系统,如无则获取,若获取不到则返回
+	if (!UIManager && !UIManager = UUIManagerSubsystem::Get(this))
 	{
-		HealthUIInstance->RemoveFromParent();
-		HealthUIInstance = nullptr;
-
-		UE_LOG(LogTemp, Log, TEXT("Health UI destroyed"));
+		UE_LOG(LogTemp, Verbose, TEXT("DestroyPlayerStatusUI :Can not Get Valid UUIManagerSubsystem Refence"));
+		return;
 	}
+	UIManager->CloseWidget(EWidgetType::EWIDGET_PlayerStatus);
 }
 
 // 当角色准备好时初始化UI

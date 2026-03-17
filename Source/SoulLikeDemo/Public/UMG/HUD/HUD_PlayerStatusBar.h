@@ -10,6 +10,18 @@
 class UHUD_ProgressBar;
 class UHUD_StatusBar;
 class UTextBlock;
+
+// 玩家状态界面组件类型
+UENUM(BlueprintType)
+enum class EPlayerStatusAttributeType :uint8
+{
+	EPlayerStatusAttribute_None,
+	EPlayerStatusAttribute_Health,
+	EPlayerStatusAttribute_Magic,
+	EPlayerStatusAttribute_Stamin,
+	EPlayerStatusAttribute_Max
+};
+
 /**
  * 
  */
@@ -22,27 +34,19 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
-
-	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
-		void UpdateProgressInfo(
-		float currnetHealth,
-		float currentStamina,
-		float currentMagic);
-
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
-		void AddPlayerStatus(const TArray<FStatusEffectInfo>& addStatusArr);
-		virtual void AddPlayerStatus_Implementation(const TArray<FStatusEffectInfo>& addStatusArr);
+		void SetProgressBarLimit(EPlayerStatusAttributeType AttributeType, float Min, float Max);
+		virtual void SetProgressBarLimit_Implementation(EPlayerStatusAttributeType AttributeType, float Min, float Max);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
-		void UpdatePlayerStatus(const TArray<FStatusEffectInfo>& updateStatusArr);
-		virtual	void UpdatePlayerStatus_Implementation(const TArray<FStatusEffectInfo>& updateStatusArr);
+		void UpdateProgressInfo(EPlayerStatusAttributeType AttributeType,float CurrentValue);
+		virtual void UpdateProgressInfo_Implementation(EPlayerStatusAttributeType AttributeType, float CurrentValue);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
-		void RemovePlayerStatus(const TArray<FStatusEffectInfo>& removeStatusArr);
-		virtual	void RemovePlayerStatus_Implementation(const TArray<FStatusEffectInfo>& removeStatusArr);
-
+		void ChangePlayerStatus(EPawnStatusOperation OperationType,TArray<FStatusEffectInfo>& ChangeStatusArr);
+		virtual void ChangePlayerStatus_Implementation(EPawnStatusOperation OperationType,const TArray<FStatusEffectInfo>& StatusArr);
 
 protected:
 	/************************************************************************/

@@ -14,36 +14,61 @@ UHUD_BossStatusBar::UHUD_BossStatusBar(const FObjectInitializer& ObjectInitializ
 
 }
 
-void UHUD_BossStatusBar::UpdateProgressInfo(float currnetHealthPercent)
+void UHUD_BossStatusBar::SetBossProgressBarLimit_Implementation(EBossStatusAttributeType AttributeType, float Min, float Max)
 {
-	RETURN_IF_TRUE(m_healthProgressBar == nullptr);
-	m_healthProgressBar->UpdateProgressBar(0, 1, currnetHealthPercent);
-}
-
-void UHUD_BossStatusBar::AddBossStatus(TArray<FStatusEffectInfo> addStatusArr)
-{
-	RETURN_IF_TRUE(m_bossStatusBar == nullptr);
-	for(FStatusEffectInfo Info : addStatusArr)
+	switch (AttributeType)
 	{
-		m_bossStatusBar->AddStatus(Info);
+		case EBossStatusAttributeType::EBossStatusAttribute_Health:
+		{
+			RETURN_IF_TRUE(m_healthProgressBar == nullptr);
+			m_healthProgressBar->SetProgressBarLimit(Min, Max);
+		}break;
+		default:break;
 	}
 }
 
-void UHUD_BossStatusBar::UpdateBossStatus(TArray<FStatusEffectInfo> updateStatusArr)
+
+void UHUD_BossStatusBar::UpdateBossProgressInfo_Implementation(EBossStatusAttributeType AttributeType, float CurrentValue)
 {
-	RETURN_IF_TRUE(m_bossStatusBar == nullptr);
-	for(FStatusEffectInfo Info : updateStatusArr)
+	switch (AttributeType)
 	{
-		m_bossStatusBar->UpdateStatus(Info);
+		case EBossStatusAttributeType::EBossStatusAttribute_Health:
+		{
+			RETURN_IF_TRUE(m_healthProgressBar == nullptr);
+			m_healthProgressBar->UpdateProgressBar(CurrentValue);
+		}break;
+		default:break;
 	}
 }
 
-void UHUD_BossStatusBar::RemoveBossStatus(TArray<FStatusEffectInfo> removeStatusArr)
+void UHUD_BossStatusBar::ChangeBossStatus_Implementation(EPawnStatusOperation OperationType, const TArray<FStatusEffectInfo>& ChangeStatusArr)
 {
 	RETURN_IF_TRUE(m_bossStatusBar == nullptr);
-	for(FStatusEffectInfo Info : removeStatusArr)
+
+	switch (OperationType)
 	{
-		m_bossStatusBar->RemoveStatus(Info.IconIndex);
+		case EPawnStatusOperation::EPawnStatusOperation_Add:
+		{
+			for (FStatusEffectInfo info : ChangeStatusArr)
+			{
+				m_bossStatusBar->AddStatus(info);
+			}
+		}break;
+		case EPawnStatusOperation::EPawnStatusOperation_Update:
+		{
+			for (FStatusEffectInfo info : ChangeStatusArr)
+			{
+				m_bossStatusBar->AddStatus(info);
+			}
+		}break;
+		case EPawnStatusOperation::EPawnStatusOperation_Remove:
+		{
+			for (FStatusEffectInfo info : ChangeStatusArr)
+			{
+				m_bossStatusBar->AddStatus(info);
+			}
+		}break;
+		default:break;
 	}
 }
 

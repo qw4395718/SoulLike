@@ -248,7 +248,8 @@ UENUM(BlueprintType)
 enum class EWidgetType :uint8
 {
 	EWIDGET_None,
-	EWIDGET_PCGameMain,
+	EWIDGET_PlayerStatus,
+	EWIDGET_BossStatus,
 	EWIDGET_MainMenu,
 	EWIDGET_InterActPanel,
 	EWIDGET_NPCDialog,
@@ -264,6 +265,17 @@ enum class EMyAbilitySlotsEnum : uint8
 	SecondaryAbility,
 	UltimateAbility
 };
+
+UENUM(BlueprintType)
+enum class EPawnStatusOperation :uint8
+{
+	EPawnStatusOperation_None,
+	EPawnStatusOperation_Add,
+	EPawnStatusOperation_Update,
+	EPawnStatusOperation_Remove,
+	EPawnStatusOperation_Max
+};
+
 
 /************************************************************************/
 /*                              Struct                                         */

@@ -75,7 +75,7 @@ public:
     /*                                血量系统相关接口                                      */
     /************************************************************************/
 	UFUNCTION(BlueprintCallable, Category = "UI_Manager_Health")
-    void UpdateHealthUI(float OldHealth,float NewHealth,float MaxHealth);
+    void UpdateHealthUI(float OldHealth);
 
 private:
     // 存储所有注册的界面-蓝图调用

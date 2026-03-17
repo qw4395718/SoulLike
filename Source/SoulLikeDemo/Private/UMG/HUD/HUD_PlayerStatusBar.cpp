@@ -13,37 +13,80 @@ UHUD_PlayerStatusBar::UHUD_PlayerStatusBar(const FObjectInitializer& ObjectIniti
 
 }
 
-void UHUD_PlayerStatusBar::UpdateProgressInfo(float currnetHealth, float currentStamina, float currentMagic)
+void UHUD_PlayerStatusBar::SetProgressBarLimit_Implementation(EPlayerStatusAttributeType AttributeType, float Min, float Max)
 {
-	RETURN_IF_TRUE(m_healthProgressBar == nullptr || m_staminProgressBar == nullptr || m_magicProgressBar == nullptr);
-	m_healthProgressBar->UpdateProgressBar(0, 1, currnetHealth);
-	m_staminProgressBar->UpdateProgressBar(0, 1, currentStamina);
-	m_magicProgressBar->UpdateProgressBar(0, 1, currentMagic);
-}
-
-void UHUD_PlayerStatusBar::AddPlayerStatus_Implementation(const TArray<FStatusEffectInfo>& addStatusArr)
-{
-	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
-	for(FStatusEffectInfo info : addStatusArr)
+	switch (AttributeType)
 	{
-		m_playerStatusBar->AddStatus(info);
+	case EPlayerStatusAttributeType::EPlayerStatusAttribute_Health:
+	{
+		RETURN_IF_TRUE(m_healthProgressBar == nullptr);
+		m_healthProgressBar->SetProgressBarLimit(Min,Max);
+	}break;
+	case EPlayerStatusAttributeType::EPlayerStatusAttribute_Magic:
+	{
+		RETURN_IF_TRUE(m_magicProgressBar == nullptr);
+		m_magicProgressBar->SetProgressBarLimit(Min, Max);
+	}break;
+	case EPlayerStatusAttributeType::EPlayerStatusAttribute_Stamin:
+	{
+		RETURN_IF_TRUE(m_staminProgressBar == nullptr);
+		m_staminProgressBar->SetProgressBarLimit(Min, Max);
+	}break;
+	default:break;
 	}
 }
 
-void UHUD_PlayerStatusBar::UpdatePlayerStatus_Implementation(const TArray<FStatusEffectInfo>& updateStatusArr)
+void UHUD_PlayerStatusBar::UpdateProgressInfo_Implementation(EPlayerStatusAttributeType AttributeType, float CurrentValue)
 {
-	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
-	for(FStatusEffectInfo info : updateStatusArr)
+	switch (AttributeType)
 	{
-		m_playerStatusBar->UpdateStatus(info);
+		case EPlayerStatusAttributeType::EPlayerStatusAttribute_Health:
+		{
+			RETURN_IF_TRUE(m_healthProgressBar == nullptr);
+			m_healthProgressBar->UpdateProgressBar(CurrentValue);
+		}break;
+		case EPlayerStatusAttributeType::EPlayerStatusAttribute_Magic:
+		{
+			RETURN_IF_TRUE(m_magicProgressBar == nullptr);
+			m_magicProgressBar->UpdateProgressBar(CurrentValue);
+		}break;
+		case EPlayerStatusAttributeType::EPlayerStatusAttribute_Stamin:
+		{
+			RETURN_IF_TRUE(m_staminProgressBar == nullptr);
+			m_staminProgressBar->UpdateProgressBar(CurrentValue);
+		}break;
+		default:break;
 	}
 }
 
-void UHUD_PlayerStatusBar::RemovePlayerStatus_Implementation(const TArray<FStatusEffectInfo>& removeStatusArr)
+void UHUD_PlayerStatusBar::ChangePlayerStatus_Implementation(EPawnStatusOperation OperationType, const TArray<FStatusEffectInfo>& ChangeStatusArr)
 {
 	RETURN_IF_TRUE(m_playerStatusBar == nullptr);
-	for(FStatusEffectInfo info : removeStatusArr)
+
+	switch (OperationType)
 	{
-		m_playerStatusBar->RemoveStatus(info.IconIndex);
+		case EPawnStatusOperation::EPawnStatusOperation_Add:
+		{
+			for (FStatusEffectInfo info : ChangeStatusArr)
+			{
+				m_playerStatusBar->AddStatus(info);
+			}
+		}break;
+		case EPawnStatusOperation::EPawnStatusOperation_Update:
+		{
+			for (FStatusEffectInfo info : ChangeStatusArr)
+			{
+				m_playerStatusBar->AddStatus(info);
+			}
+		}break;
+		case EPawnStatusOperation::EPawnStatusOperation_Remove:
+		{
+			for (FStatusEffectInfo info : ChangeStatusArr)
+			{
+				m_playerStatusBar->AddStatus(info);
+			}
+		}break;
+		default:break;
 	}
 }
+

@@ -23,23 +23,7 @@ public:
 	/* 外部调用                                                                     */
 	/************************************************************************/
 
-	UFUNCTION(BlueprintCallable, Category = "Main PC")
-		void UpdateProgressInfo(
-			float currnetHealth,
-			float currentStamina,
-			float currentMagic);
 
-	UFUNCTION(BlueprintCallable, Category = "Main PC")
-		void AddPlayerStatus(TArray<FStatusEffectInfo> addStatusArr);
-
-	UFUNCTION(BlueprintCallable, Category = "Main PC")
-		void UpdatePlayerStatus(TArray<FStatusEffectInfo> updateStatusArr);
-
-	UFUNCTION(BlueprintCallable, Category = "Main PC")
-		void RemovePlayerStatus(TArray<FStatusEffectInfo> removeStatusArr);
-
-	UFUNCTION(BlueprintCallable, Category = "Main PC")
-		void UpdateTargetSlot(EHUDEquipmentSlotType type, FStatusEffectInfo status);
 
 protected:
 	/************************************************************************/
@@ -50,12 +34,7 @@ protected:
 	/************************************************************************/
 	/* 内部变量                                                                     */
 	/************************************************************************/
-	// 控件引用-暴露给外部
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UHUD_PlayerStatusBar* m_playerStatusBar;
 
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UHUD_EquipmentBar* m_playerEquipmentBar;
 
 };
 

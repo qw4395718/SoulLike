@@ -21,7 +21,7 @@ public:
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "ProgressBar")
-		void SetProgressBarLimit(float min, float max, float current);
+		void SetProgressBarLimit(float min, float max);
 		virtual void SetProgressBarLimit_Implementation(float min, float max);
 
 	UFUNCTION(BlueprintCallable,BlueprintNativeEvent, Category = "ProgressBar")

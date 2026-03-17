@@ -46,26 +46,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Player")
 		class ASL_CharacterBase* GetMyPlayerCharacter() const;
 
-	// 创建并显示血量UI
+	// 创建玩家状态UI
 	UFUNCTION(BlueprintCallable, Category = "UI")
-		void CreateHealthUI();
+		void CreatePlayerStatusUI();
 
-	// 销毁血量UI
+	// 销毁玩家状态UI
 	UFUNCTION(BlueprintCallable, Category = "UI")
-		void DestroyHealthUI();
+		void DestroyPlayerStatusUI();
 
 protected:
-	// 血量UI类
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
-		TSubclassOf<class UUserWidget> HealthUIClass;
 
-	// 血量UI实例
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
-		class UUserWidget* HealthUIInstance;
-
-	// 当角色准备好时初始化UI
-	UFUNCTION()
-		void OnHealthUINeedsInitialization();
 
 private:
 	// 是否已经创建UI

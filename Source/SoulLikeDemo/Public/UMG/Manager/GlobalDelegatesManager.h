@@ -20,13 +20,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Global Delegates", meta = (WorldContext = "WorldContextObject"))
 		static UGlobalDelegatesManager* Get(const UObject* WorldContextObject);
 
-	/**
-	 * 委托实例
-	 */ 
+	/************************************************************************/
+	/*                              委托实例                                        */
+	/************************************************************************/
 	// 交互按钮行为委托
 		FOnClickInterActBtnToDialog OnClickInterActBtnToDialog;
 	// 菜单按钮行为委托
 		FOnClickInterMainMenuButton OnClickInterMainMenuButton;
+	// 血量变动响应委托
+		
 
 	/**
 	 * 委托响应函数

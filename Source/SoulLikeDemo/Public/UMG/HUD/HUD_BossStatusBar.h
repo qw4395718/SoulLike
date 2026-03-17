@@ -12,6 +12,17 @@ class UHUD_ProgressBar;
 class UHUD_StatusBar;
 class UTextBlock;
 
+// 玩家状态界面组件类型
+UENUM(BlueprintType)
+enum class EBossStatusAttributeType :uint8
+{
+	EBossStatusAttribute_None,
+	EBossStatusAttribute_Health,
+	EBossStatusAttribute_Magic,
+	EBossStatusAttribute_Stamin,
+	EBossStatusAttribute_Max
+};
+
 /**
  * 
  */
@@ -25,18 +36,20 @@ public:
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	
-	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void UpdateProgressInfo(
-		float currnetHealthPercent);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent,Category = "Boss StatusBar")
+		void SetBossProgressBarLimit(EBossStatusAttributeType AttributeType, float Min, float Max);
+		virtual void SetBossProgressBarLimit_Implementation(EBossStatusAttributeType AttributeType, float Min, float Max);
 
-	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void AddBossStatus(TArray<FStatusEffectInfo> addStatusArr);
 
-	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void UpdateBossStatus(TArray<FStatusEffectInfo> updateStatusArr);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent,Category = "Player StatusBar")
+		void UpdateBossProgressInfo(EBossStatusAttributeType AttributeType, float CurrentValue);
+		virtual void UpdateBossProgressInfo_Implementation(EBossStatusAttributeType AttributeType, float CurrentValue);
 
-	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
-		void RemoveBossStatus(TArray<FStatusEffectInfo> removeStatusArr);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
+		void ChangeBossStatus(EPawnStatusOperation OperationType, TArray<FStatusEffectInfo>& ChangeStatusArr);
+		virtual void ChangeBossStatus_Implementation(EPawnStatusOperation OperationType, const TArray<FStatusEffectInfo>& ChangeStatusArr);
+
 
 	UFUNCTION(BlueprintCallable, Category = "Boss StatusBar")
 		void SetBossName(FString bossName);

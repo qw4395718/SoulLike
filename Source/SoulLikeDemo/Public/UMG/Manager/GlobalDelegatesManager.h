@@ -8,6 +8,8 @@
 // 前向声明
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnClickInterActBtnToDialog, const FString&, const FString&);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnClickInterMainMenuButton, const int);
+// 血量变动委托
+DECLARE_MULTICAST_DELEGATE_FiveParams(FAttributeHealthChangedEvent,AActor*, float, float, float, float);
 
 UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UGlobalDelegatesManager : public UGameInstanceSubsystem
@@ -28,7 +30,7 @@ public:
 	// 菜单按钮行为委托
 		FOnClickInterMainMenuButton OnClickInterMainMenuButton;
 	// 血量变动响应委托
-		
+		FAttributeHealthChangedEvent OnAttributeHealthChanged;
 
 	/**
 	 * 委托响应函数

@@ -5,12 +5,32 @@
 #include "SoulLikeGameGlobal.h"
 #include "HUD_ProgressBar.h"
 #include "HUD_StatusBar.h"
+#include <GlobalDelegatesManager.h>
 
 
 UHUD_PlayerStatusBar::UHUD_PlayerStatusBar(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
+	BindGlobalDelegatesEvent();
+}
 
+void UHUD_PlayerStatusBar::BindGlobalDelegatesEvent()
+{
+	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
+	{
+		EPlayerStatusAttributeType targetAttributeType = EPlayerStatusAttributeType::EPlayerStatusAttribute_Health;
+
+		// 使用AddLambda替代AddDynamic
+		globalDelegatesManager->OnAttributeHealthChanged.AddLambda([this, targetAttributeType](AActor* TargetPlayer, float OldHealth, float NewHealth, float MinHealth, float MaxHealth)
+			{
+				// 检测是否为该目标
+				if (TargetPlayer && GetOwningPlayer() && TargetPlayer == GetOwningPlayer()->GetPawn())
+				{
+					SetProgressBarLimit(targetAttributeType, MinHealth, MaxHealth);
+					UpdateProgressInfo(targetAttributeType, OldHealth, NewHealth);
+				}
+			});
+	}
 }
 
 void UHUD_PlayerStatusBar::SetProgressBarLimit_Implementation(EPlayerStatusAttributeType AttributeType, float Min, float Max)
@@ -36,7 +56,7 @@ void UHUD_PlayerStatusBar::SetProgressBarLimit_Implementation(EPlayerStatusAttri
 	}
 }
 
-void UHUD_PlayerStatusBar::UpdateProgressInfo_Implementation(EPlayerStatusAttributeType AttributeType, float CurrentValue)
+void UHUD_PlayerStatusBar::UpdateProgressInfo_Implementation(EPlayerStatusAttributeType AttributeType, float OldValue, float CurrentValue)
 {
 	switch (AttributeType)
 	{

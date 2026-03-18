@@ -4,7 +4,7 @@
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AttributeSet.h"
 #include "AttributeSet.h"
 #include "LabAbilitySystemComponent.h"
-#include "LabHealthAttributeSet.generated.h"
+#include "LabStatusAttributeSet.generated.h"
 
 #define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
         GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
@@ -12,22 +12,38 @@
         GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
         GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FAttributeChangedEvent, float, OldValue, float, NewValue);
 
 
 UCLASS()
-class SOULLIKEDEMO_API ULabHealthAttributeSet : public UAttributeSet
+class SOULLIKEDEMO_API ULabStatusAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 
 	// 宏定义
-	ATTRIBUTE_ACCESSORS(ULabHealthAttributeSet, Health);
-	ATTRIBUTE_ACCESSORS(ULabHealthAttributeSet, MaxHealth);
-	ATTRIBUTE_ACCESSORS(ULabHealthAttributeSet, Damage);
+	ATTRIBUTE_ACCESSORS(ULabStatusAttributeSet, Health);
+	ATTRIBUTE_ACCESSORS(ULabStatusAttributeSet, MaxHealth);
+	ATTRIBUTE_ACCESSORS(ULabStatusAttributeSet, Damage);
 
 public:
 	// Sets default values for this AttributeSet's properties
-    ULabHealthAttributeSet();
+    ULabStatusAttributeSet();
+
+	
+	/************************************************************************/
+	/*                               外部函数                                       */
+	/************************************************************************/
+	// 设置属性持有人
+	void SetOwningActor(AActor* pOwnActor);
+	// 玩家状态属性初始化
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "StatusAttributeSet")
+	void InitStatusAS();
+	virtual void InitStatusAS_Implementation();
+	// 玩家状态属性-血量信息初始化
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "StatusAttributeSet")
+		void InitHealthAS(float MinValue, float MaxValue);
+	virtual void InitHealthAS_Implementation(float MinValue, float MaxValue);;
+
+	
 
 protected:
 	/************************************************************************/
@@ -54,9 +70,11 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	FGameplayAttributeData Damage;
 
+private:
 	/************************************************************************/
-	/*	                              属性变更委托                                       */
+	/*                               内部变量                                      */
 	/************************************************************************/
-	UPROPERTY(BlueprintAssignable)
-	FAttributeChangedEvent OnHealthChanged;
+	UPROPERTY()
+	AActor* OwningActor;
+
 };

@@ -27,9 +27,10 @@ void ASL_PlayerControllerBase::BeginPlay()
 
 	// 获取子系统
 	UIManager = UUIManagerSubsystem::Get(this);
+	
+	// 创建通用UI(玩家状态栏,地图等)
+	CreatePlayerStatusUI();
 
-	// 创建血量UI
-	CreateHealthUI();
 }
 
 // 当控制器控制一个Pawn时调用
@@ -42,8 +43,6 @@ void ASL_PlayerControllerBase::OnPossess(APawn* InPawn)
 	{
 		UE_LOG(LogTemp, Log, TEXT("PlayerController possessed: %s"), *MyCharacter->GetName());
 
-		// 当角色被控制时，初始化血量UI
-		OnHealthUINeedsInitialization();
 	}
 }
 
@@ -105,11 +104,16 @@ ASL_CharacterBase* ASL_PlayerControllerBase::GetMyPlayerCharacter() const
 	return Cast<ASL_CharacterBase>(GetPawn());
 }
 
-// 创建血量UI
+/************************************************************************/
+/*                               界面通用UI-玩家状态UI                                       */
+/************************************************************************/
+
+// 创建玩家状态UI
 void ASL_PlayerControllerBase::CreatePlayerStatusUI()
 {
 	// 检测是否持有有效的UI管理子系统,如无则获取,若获取不到则返回
-	if (!UIManager && !UIManager = UUIManagerSubsystem::Get(this))
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager == nullptr)
 	{
 		UE_LOG(LogTemp, Verbose, TEXT("CreatePlayerStatusUI :Can not Get Valid UUIManagerSubsystem Refence"));
 		return;
@@ -117,64 +121,22 @@ void ASL_PlayerControllerBase::CreatePlayerStatusUI()
 
 	// 创建UI实例
 	UIManager->OpenWidget(EWidgetType::EWIDGET_PlayerStatus);
-	
+	// 获取玩家属性进行初始化
+	UUserWidget* playerStatus = UIManager->GetWidget(EWidgetType::EWIDGET_PlayerStatus);
+	if (playerStatus != nullptr)
+	{
+		//playerStatus->
+	}
 }
 
 // 销毁血量UI
 void ASL_PlayerControllerBase::DestroyPlayerStatusUI()
 {
 	// 检测是否持有有效的UI管理子系统,如无则获取,若获取不到则返回
-	if (!UIManager && !UIManager = UUIManagerSubsystem::Get(this))
+	if (UIManager == nullptr && (UIManager = UUIManagerSubsystem::Get(this)) == nullptr)
 	{
 		UE_LOG(LogTemp, Verbose, TEXT("DestroyPlayerStatusUI :Can not Get Valid UUIManagerSubsystem Refence"));
 		return;
 	}
 	UIManager->CloseWidget(EWidgetType::EWIDGET_PlayerStatus);
-}
-
-// 当角色准备好时初始化UI
-void ASL_PlayerControllerBase::OnHealthUINeedsInitialization()
-{
-	// 确保UI存在
-	if (!HealthUIInstance)
-	{
-		return;
-	}
-
-	// 获取当前角色
-	ASL_CharacterBase* MyCharacter = GetMyPlayerCharacter();
-	if (!MyCharacter)
-	{
-		// 角色不存在，等待后续调用
-		UE_LOG(LogTemp, Verbose, TEXT("Health UI initialization deferred: no character possessed"));
-		return;
-	}
-
-	// 如果UI实现了自定义初始化函数，调用它
-	// 这里假设你的UMG蓝图有一个名为"InitializeWithPlayer"的函数
-	FName InitFunctionName = FName(TEXT("InitializeWithPlayer"));
-	UFunction* InitFunction = HealthUIInstance->FindFunction(InitFunctionName);
-
-	if (InitFunction)
-	{
-		// 准备参数
-		struct FInitializeWithPlayerParams
-		{
-			ASL_CharacterBase* PlayerCharacter;
-		};
-
-		FInitializeWithPlayerParams Params;
-		Params.PlayerCharacter = MyCharacter;
-
-		// 调用初始化函数
-		HealthUIInstance->ProcessEvent(InitFunction, &Params);
-
-		UE_LOG(LogTemp, Log, TEXT("Health UI initialized with player: %s"), *MyCharacter->GetName());
-		bIsUIInitialized = true;
-	}
-	else
-	{
-		// 如果UMG没有实现该函数，可以尝试其他方式
-		UE_LOG(LogTemp, Warning, TEXT("Health UI doesn't have InitializeWithPlayer function"));
-	}
 }

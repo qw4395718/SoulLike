@@ -21,7 +21,7 @@
 DECLARE_LOG_CATEGORY_EXTERN(SL_CharacterBase, Log, All);
 
 class ULabAbilitySystemComponent;
-class ULabHealthAttributeSet;
+class ULabStatusAttributeSet;
 class UGameplayAbility;
 
 UCLASS()
@@ -81,6 +81,7 @@ public:
 	// 动画(状态)通知响应
 	UFUNCTION()
 		void AnimNotifyResponse(int NotifyType) override;
+
 
 protected:
 	/************************************************************************/
@@ -173,7 +174,7 @@ protected:
 		ULabAbilitySystemComponent* LabAbilitySystemComp;
 
 	UPROPERTY()
-		ULabHealthAttributeSet* HealthSet;
+		ULabStatusAttributeSet* PlayerStatusSet;
 
 	// 先不设计组件管理器，直接创建组件使用
 	// 战斗组件

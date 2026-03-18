@@ -34,14 +34,18 @@ public:
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
+	// 绑定委托
+	UFUNCTION()
+	void BindGlobalDelegatesEvent();
+
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
 		void SetProgressBarLimit(EPlayerStatusAttributeType AttributeType, float Min, float Max);
 		virtual void SetProgressBarLimit_Implementation(EPlayerStatusAttributeType AttributeType, float Min, float Max);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
-		void UpdateProgressInfo(EPlayerStatusAttributeType AttributeType,float CurrentValue);
-		virtual void UpdateProgressInfo_Implementation(EPlayerStatusAttributeType AttributeType, float CurrentValue);
+		void UpdateProgressInfo(EPlayerStatusAttributeType AttributeType, float OldValue,float CurrentValue);
+		virtual void UpdateProgressInfo_Implementation(EPlayerStatusAttributeType AttributeType, float OldValue, float CurrentValue);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")

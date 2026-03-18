@@ -4,7 +4,7 @@
 #include "SL_CharacterBase.h"
 #include "WeaponAnimNotify_IF.h"
 #include "LabAbilitySystemComponent.h"
-#include <LabHealthAttributeSet.h>
+#include <LabStatusAttributeSet.h>
 #include <Abilities/GameplayAbilityTypes.h>
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
@@ -18,7 +18,7 @@ ASL_CharacterBase::ASL_CharacterBase()
 	 // ASC-核心功能组件
 	LabAbilitySystemComp = CreateDefaultSubobject<ULabAbilitySystemComponent>(TEXT("AbilitySystem"));
 	// AS(CharacterCombatState)
-	HealthSet = CreateDefaultSubobject<ULabHealthAttributeSet>(TEXT("HealthSet"));
+	PlayerStatusSet = CreateDefaultSubobject<ULabStatusAttributeSet>(TEXT("HealthSet"));
 
 
 }
@@ -29,17 +29,17 @@ void ASL_CharacterBase::BeginPlay()
 	InitializeCharacter();
 
 	// 为ASC设置持有者和化身
-	LabAbilitySystemComp->InitAbilityActorInfo(this, this);
-
-
-	/************************************************************************/
-	/*								绑定AS与UMG                                         */
-	/************************************************************************/
-	 // 生命值相关AS
-	if (HealthSet)
+	if (LabAbilitySystemComp)
 	{
-		HealthSet->OnHealthChanged.AddDynamic(this ,&ASL_CharacterBase::HandleHealthChanged);
+		LabAbilitySystemComp->InitAbilityActorInfo(this, this);
 	}
+
+	if (PlayerStatusSet)
+	{
+		PlayerStatusSet->SetOwningActor(this);
+		PlayerStatusSet->InitStatusAS();
+	}
+	
 
 }
 
@@ -119,6 +119,7 @@ void ASL_CharacterBase::AnimNotifyResponse(int NotifyType)
 	RETURN_IF_TRUE(NotifyType <= int(EAnimNotifyType::EAnimNotify_Min) || NotifyType >= int(EAnimNotifyType::EAnimNotify_Max));
 	WeaponAnimProcess(CheckAnimNotifyToHand(EAnimNotifyType(NotifyType)), TranslteAnimNotifyToWeapon(EAnimNotifyType(NotifyType)));
 }
+
 
 void ASL_CharacterBase::PerformAttack()
 {	

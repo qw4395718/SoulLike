@@ -23,6 +23,7 @@ DECLARE_LOG_CATEGORY_EXTERN(SL_CharacterBase, Log, All);
 class ULabAbilitySystemComponent;
 class ULabStatusAttributeSet;
 class UGameplayAbility;
+class UWidgetComponent;
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,public ICharacterComponent_IF, public IAnimNotify_IF, public IAbilitySystemInterface
@@ -33,7 +34,7 @@ class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,public ICharacterC
 
 public:
 	// Sets default values for this character's properties
-	ASL_CharacterBase();
+	ASL_CharacterBase(const FObjectInitializer& ObjectInitializer);
 
 protected:
 	/************************************************************************/
@@ -135,8 +136,7 @@ protected:
 	/************************************************************************/
 	/*                                GAS委托处理                                      */
 	/************************************************************************/
-	// 生命值变动委托
-	void HandleHealthChanged(float OldGHealth,float CurrentHealth);
+
 
 public:
 	/************************************************************************/
@@ -198,4 +198,7 @@ protected:
 
 	UPROPERTY()
 		USL_MovementComponent* MovementCmp;
+
+	UPROPERTY()
+		UWidgetComponent* ScreenWidgetCmp;
 };

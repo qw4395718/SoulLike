@@ -6,11 +6,13 @@
 #include "LabAbilitySystemComponent.h"
 #include <LabStatusAttributeSet.h>
 #include <Abilities/GameplayAbilityTypes.h>
+#include <Components/WidgetComponent.h>
+#include <UIManagerSubsystem.h>
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 
-// Sets default values
-ASL_CharacterBase::ASL_CharacterBase()
+ASL_CharacterBase::ASL_CharacterBase(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	/************************************************************************/
 	/*                                GAS组件相关                                      */
@@ -19,13 +21,26 @@ ASL_CharacterBase::ASL_CharacterBase()
 	LabAbilitySystemComp = CreateDefaultSubobject<ULabAbilitySystemComponent>(TEXT("AbilitySystem"));
 	// AS(CharacterCombatState)
 	PlayerStatusSet = CreateDefaultSubobject<ULabStatusAttributeSet>(TEXT("HealthSet"));
+	// 
+	ScreenWidgetCmp = CreateDefaultSubobject<UWidgetComponent>(TEXT("ScreenWidgetCmp"));
+	ScreenWidgetCmp->SetupAttachment(GetMesh()); // 挂在骨骼上
+	ScreenWidgetCmp->SetWidgetSpace(EWidgetSpace::World);
+	ScreenWidgetCmp->SetDrawSize(FVector2D(200, 50));
+	ScreenWidgetCmp->SetRelativeLocation(FVector(0, 0, 150)); // 头部偏移
 
+	// 设置组件标签（重要！用于查找）
+	ScreenWidgetCmp->ComponentTags.Add(FName("HeadUI"));
 
+	// 默认不激活Widget，等UIManager来设置
+	ScreenWidgetCmp->SetWidget(nullptr);
+	ScreenWidgetCmp->SetVisibility(false);
+	
 }
 
 void ASL_CharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+	// 初始化角色(包含组件)
 	InitializeCharacter();
 
 	// 为ASC设置持有者和化身
@@ -39,7 +54,20 @@ void ASL_CharacterBase::BeginPlay()
 		PlayerStatusSet->SetOwningActor(this);
 		PlayerStatusSet->InitStatusAS();
 	}
+
+
 	
+	if (IsLocallyControlled())
+	{// 非自身SL_CharacterBase实例
+		if (UUIManagerSubsystem* pUIManagerSystem = UUIManagerSubsystem::Get(this))
+		{
+			// 创建结构体
+			FUICreateParams createParam;
+			createParam.Type = EWidgetType::EWIDGET_PawnStatusInScreen;
+			createParam.TargetActor = this;
+			//pUIManagerSystem->OpenWidget(createParam);
+		}
+	}
 
 }
 
@@ -311,14 +339,6 @@ void ASL_CharacterBase::WeaponAnimProcess(int HandType, EWeaponAnimNotifyType We
 	}
 }
 
-void ASL_CharacterBase::HandleHealthChanged(float OldGHealth, float CurrentHealth)
-{
-	if(OldGHealth == CurrentHealth){return;}
-
-	// 通知UI组件
-	// 通知音效组件
-}
-
 void ASL_CharacterBase::InitializeCharacter()
 {
 	//拟造数据,初始化组件
@@ -390,6 +410,7 @@ void ASL_CharacterBase::InitPartmentComponent()
 		MovementCmp->InitMovemenetInfo(true,"");
 	}
 
+	
 }
 
 UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const

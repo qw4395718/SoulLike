@@ -249,6 +249,7 @@ enum class EWidgetType :uint8
 {
 	EWIDGET_None,
 	EWIDGET_PlayerStatus,
+	EWIDGET_PawnStatusInScreen,
 	EWIDGET_BossStatus,
 	EWIDGET_MainMenu,
 	EWIDGET_InterActPanel,

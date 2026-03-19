@@ -118,9 +118,11 @@ void ASL_PlayerControllerBase::CreatePlayerStatusUI()
 		UE_LOG(LogTemp, Verbose, TEXT("CreatePlayerStatusUI :Can not Get Valid UUIManagerSubsystem Refence"));
 		return;
 	}
-
+	// 创建参数
+	FUICreateParams createParam;
+	createParam.Type = EWidgetType::EWIDGET_PlayerStatus;
 	// 创建UI实例
-	UIManager->OpenWidget(EWidgetType::EWIDGET_PlayerStatus);
+	UIManager->OpenWidget(createParam);
 	// 获取玩家属性进行初始化
 	UUserWidget* playerStatus = UIManager->GetWidget(EWidgetType::EWIDGET_PlayerStatus);
 	if (playerStatus != nullptr)

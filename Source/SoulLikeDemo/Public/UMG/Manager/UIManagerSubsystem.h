@@ -6,6 +6,59 @@
 #include "SoulLikeGameGlobal.h"
 #include "UIManagerSubsystem.generated.h"
 
+// UI创建参数基结构（可根据需求扩展）
+USTRUCT(BlueprintType)
+struct FUICreateParams
+{
+	GENERATED_BODY()
+
+		// 1. 基础信息：所有UI都可能需要
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EWidgetType Type; // 你原来的枚举
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UObject* WorldContextObject = nullptr; // 用于获取世界
+
+		// 2. 玩家专属的屏幕UI（旧系统）可能不需要额外参数
+
+		// 3. 世界空间UI专用参数
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		AActor* TargetActor = nullptr; // 要跟随的玩家角色
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FVector WorldOffset = FVector(0, 0, 150); // 头部偏移量，可配置
+
+		// 4. 动态销毁参数（用于解决你的问题2）
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bEnableDistanceCulling = true; // 是否根据距离销毁
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float DestroyDistance = 3000.0f; // 销毁距离
+
+		// 构造函数方便快速创建
+	FUICreateParams() {}
+
+	static FUICreateParams ForScreen(EWidgetType InType, UObject* WorldContext)
+	{
+		FUICreateParams Params;
+		Params.Type = InType;
+		Params.WorldContextObject = WorldContext;
+		return Params;
+	}
+
+	static FUICreateParams ForWorldActor(EWidgetType InType, AActor* InTargetActor, float InDestroyDistance = 3000.0f)
+	{
+		FUICreateParams Params;
+		Params.Type = InType;
+		Params.TargetActor = InTargetActor;
+		Params.WorldContextObject = InTargetActor;
+		Params.bEnableDistanceCulling = true;
+		Params.DestroyDistance = InDestroyDistance;
+		// 可以在这里根据Type自动设置偏移，比如血量条默认在头顶
+		return Params;
+	}
+};
+
 UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UUIManagerSubsystem : public UGameInstanceSubsystem
 {
@@ -35,9 +88,15 @@ public:
 
 	// 打开/关闭界面
 	UFUNCTION(BlueprintCallable, Category = "UI Manager")
-    void OpenWidget(EWidgetType WidgetType);
+	void OpenWidget(const FUICreateParams& CreateParam);
     
-    UFUNCTION(BlueprintCallable, Category = "UI Manager")
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
+	void OpenScreenWidget(EWidgetType WidgetType);
+
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
+	void OpenWorldWidgetWithActor(const FUICreateParams& CreateParam);
+
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
     void CloseWidget(EWidgetType WidgetType);
     
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
@@ -56,6 +115,9 @@ public:
     
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
     bool IsWidgetOpen(EWidgetType WidgetType) const;
+
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
+	bool IsWorldWidget(EWidgetType WidgetType) const;
     
     // 页面栈管理
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
@@ -82,9 +144,13 @@ private:
     UPROPERTY()
     TMap<EWidgetType, TSubclassOf<UUserWidget>> RegisteredWidgets;
     
-    // 活动界面（当前打开的）
+    // 屏幕空间-活动界面（当前打开的）
     UPROPERTY()
     TMap<EWidgetType, UUserWidget*> ActiveWidgets;
+
+    // 世界空间-活动界面(FString key = ActorName + EWidgetType)
+	UPROPERTY()
+	TMap<FString, UUserWidget*> ActiveWorldWidgets;
     
     // 页面栈
     UPROPERTY()

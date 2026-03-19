@@ -37,7 +37,10 @@ void UPop_MainMenu::OnMenuButtonClicked(const FName ButtonTag)
         {
             if(buttonInfo.ButtonTag == ButtonTag)
             {
-                UIManager->OpenWidget(buttonInfo.linkWidgetIndex);
+				// 创建参数
+				FUICreateParams createParam;
+				createParam.Type = buttonInfo.linkWidgetIndex;
+                UIManager->OpenWidget(createParam);
                 return;
             }
         }

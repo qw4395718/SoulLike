@@ -35,7 +35,7 @@ void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	/************************************************************************/
 	/*                             Screen                                         */
 	/************************************************************************/
-	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PawnStatusInScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_HUD_PlayerStatusBar.WBP_HUD_PlayerStatusBar"));
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PawnStatusInScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PlayerStatusBar.WBP_HUD_PlayerStatusBar"));
 
 
 	UE_LOG(LogTemp, Log, TEXT("UIManagerSubsystem initialized"));
@@ -161,7 +161,7 @@ void UUIManagerSubsystem::OpenWorldWidgetWithActor(const FUICreateParams& Create
 					for (UWidgetComponent* Comp : WidgetComponents)
 					{
 						// 通过组件标签识别（推荐）
-						if (Comp->ComponentHasTag(FName("HeadUI")) && 
+						if (Comp->ComponentHasTag(FName("HeadUI")) &&
 							Comp->IsRegistered())
 						{
 							// 添加到指定区域

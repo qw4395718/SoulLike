@@ -24,8 +24,8 @@ ASL_CharacterBase::ASL_CharacterBase(const FObjectInitializer& ObjectInitializer
 	// 
 	ScreenWidgetCmp = CreateDefaultSubobject<UWidgetComponent>(TEXT("ScreenWidgetCmp"));
 	ScreenWidgetCmp->SetupAttachment(GetMesh()); // 挂在骨骼上
-	ScreenWidgetCmp->SetWidgetSpace(EWidgetSpace::World);
-	ScreenWidgetCmp->SetDrawSize(FVector2D(200, 50));
+	ScreenWidgetCmp->SetWidgetSpace(EWidgetSpace::Screen);
+	ScreenWidgetCmp->SetDrawSize(FVector2D(200, 30));
 	ScreenWidgetCmp->SetRelativeLocation(FVector(0, 0, 150)); // 头部偏移
 
 	// 设置组件标签（重要！用于查找）
@@ -34,7 +34,8 @@ ASL_CharacterBase::ASL_CharacterBase(const FObjectInitializer& ObjectInitializer
 	// 默认不激活Widget，等UIManager来设置
 	ScreenWidgetCmp->SetWidget(nullptr);
 	ScreenWidgetCmp->SetVisibility(false);
-	
+
+
 }
 
 void ASL_CharacterBase::BeginPlay()
@@ -65,7 +66,8 @@ void ASL_CharacterBase::BeginPlay()
 			FUICreateParams createParam;
 			createParam.Type = EWidgetType::EWIDGET_PawnStatusInScreen;
 			createParam.TargetActor = this;
-			//pUIManagerSystem->OpenWidget(createParam);
+
+			pUIManagerSystem->OpenWidget(createParam);
 		}
 	}
 

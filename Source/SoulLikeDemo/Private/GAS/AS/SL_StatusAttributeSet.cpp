@@ -1,27 +1,27 @@
-#include <LabStatusAttributeSet.h>
+#include <SL_StatusAttributeSet.h>
 #include "Net/UnrealNetwork.h"
 #include <GameplayEffectExtension.h>
 #include <GlobalDelegatesManager.h>
 #include <SL_Macros.h>
 
-ULabStatusAttributeSet::ULabStatusAttributeSet()
+USL_StatusAttributeSet::USL_StatusAttributeSet()
 {
 
 }
 
-void ULabStatusAttributeSet::SetOwningActor(AActor* pOwnActor)
+void USL_StatusAttributeSet::SetOwningActor(AActor* pOwnActor)
 {
 	RETURN_IF_TRUE(pOwnActor == nullptr);
 	OwningActor = pOwnActor;
 }
 
-void ULabStatusAttributeSet::InitStatusAS_Implementation()
+void USL_StatusAttributeSet::InitStatusAS_Implementation()
 {
 	// 由Unlua提供覆盖,C++中仅提供默认设置
 	InitHealthAS(0.0f,100.0f);
 }
 
-void ULabStatusAttributeSet::InitHealthAS_Implementation(float MinValue, float MaxValue)
+void USL_StatusAttributeSet::InitHealthAS_Implementation(float MinValue, float MaxValue)
 {
 	InitHealth(MaxValue);
 	InitMaxHealth(MaxValue);
@@ -32,7 +32,7 @@ void ULabStatusAttributeSet::InitHealthAS_Implementation(float MinValue, float M
 	}
 }
 
-void ULabStatusAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
+void USL_StatusAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	UE_LOG(LogTemp, Warning, TEXT("PreChange: Attribute '%s'"), *Attribute.AttributeName);
 	if (Attribute == GetHealthAttribute())
@@ -42,7 +42,7 @@ void ULabStatusAttributeSet::PreAttributeChange(const FGameplayAttribute& Attrib
 	Super::PreAttributeChange(Attribute, NewValue);
 }
 
-void ULabStatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
 	UE_LOG(LogTemp, Warning, TEXT("PostChange: Attribute -> %.2f"), Data.EvaluatedData.Magnitude);
@@ -94,9 +94,9 @@ void ULabStatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 }
 
 
-void ULabStatusAttributeSet::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+void USL_StatusAttributeSet::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ULabStatusAttributeSet, MaxHealth);
-	DOREPLIFETIME(ULabStatusAttributeSet, Health);
+	DOREPLIFETIME(USL_StatusAttributeSet, MaxHealth);
+	DOREPLIFETIME(USL_StatusAttributeSet, Health);
 }

@@ -3,8 +3,8 @@
 
 #include "SL_CharacterBase.h"
 #include "WeaponAnimNotify_IF.h"
-#include "LabAbilitySystemComponent.h"
-#include <LabStatusAttributeSet.h>
+#include "SL_AbilitySystemComponent.h"
+#include <SL_StatusAttributeSet.h>
 #include <Abilities/GameplayAbilityTypes.h>
 #include <Components/WidgetComponent.h>
 #include <UIManagerSubsystem.h>
@@ -18,15 +18,15 @@ ASL_CharacterBase::ASL_CharacterBase(const FObjectInitializer& ObjectInitializer
 	/*                                GAS组件相关                                      */
 	/************************************************************************/
 	 // ASC-核心功能组件
-	LabAbilitySystemComp = CreateDefaultSubobject<ULabAbilitySystemComponent>(TEXT("AbilitySystem"));
+	LabAbilitySystemComp = CreateDefaultSubobject<USL_AbilitySystemComponent>(TEXT("AbilitySystem"));
 	// AS(CharacterCombatState)
-	PlayerStatusSet = CreateDefaultSubobject<ULabStatusAttributeSet>(TEXT("HealthSet"));
+	PlayerStatusSet = CreateDefaultSubobject<USL_StatusAttributeSet>(TEXT("HealthSet"));
 	// 
 	ScreenWidgetCmp = CreateDefaultSubobject<UWidgetComponent>(TEXT("ScreenWidgetCmp"));
 	ScreenWidgetCmp->SetupAttachment(GetMesh()); // 挂在骨骼上
 	ScreenWidgetCmp->SetWidgetSpace(EWidgetSpace::Screen);
 	ScreenWidgetCmp->SetDrawSize(FVector2D(200, 30));
-	ScreenWidgetCmp->SetRelativeLocation(FVector(0, 0, 150)); // 头部偏移
+	ScreenWidgetCmp->SetRelativeLocation(FVector(0, 0, 180)); // 头部偏移
 
 	// 设置组件标签（重要！用于查找）
 	ScreenWidgetCmp->ComponentTags.Add(FName("HeadUI"));
@@ -58,7 +58,7 @@ void ASL_CharacterBase::BeginPlay()
 
 
 	
-	if (IsLocallyControlled())
+	if (!IsPlayerControlled())
 	{// 非自身SL_CharacterBase实例
 		if (UUIManagerSubsystem* pUIManagerSystem = UUIManagerSubsystem::Get(this))
 		{

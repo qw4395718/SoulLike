@@ -20,8 +20,8 @@
 // 声明一个自定义日志类别
 DECLARE_LOG_CATEGORY_EXTERN(SL_CharacterBase, Log, All);
 
-class ULabAbilitySystemComponent;
-class ULabStatusAttributeSet;
+class USL_AbilitySystemComponent;
+class USL_StatusAttributeSet;
 class UGameplayAbility;
 class UWidgetComponent;
 
@@ -171,10 +171,10 @@ protected:
 	/************************************************************************/
 	// GAS能力系统组件
 	UPROPERTY()
-		ULabAbilitySystemComponent* LabAbilitySystemComp;
+		USL_AbilitySystemComponent* LabAbilitySystemComp;
 
 	UPROPERTY()
-		ULabStatusAttributeSet* PlayerStatusSet;
+		USL_StatusAttributeSet* PlayerStatusSet;
 
 	// 先不设计组件管理器，直接创建组件使用
 	// 战斗组件

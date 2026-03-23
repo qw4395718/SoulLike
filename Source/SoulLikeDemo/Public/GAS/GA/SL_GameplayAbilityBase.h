@@ -1,0 +1,63 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Abilities/GameplayAbility.h"
+#include "SL_GameplayAbilityBase.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAbilityActivatedDelegate,
+UGameplayAbility*, Ability,
+FGameplayAbilitySpecHandle, Handle,
+const FGameplayAbilityActorInfo& , ActorInfo);
+
+UCLASS()
+class SOULLIKEDEMO_API USL_GameplayAbilityBase : public UGameplayAbility
+{
+	GENERATED_BODY()
+
+public:
+	USL_GameplayAbilityBase();
+
+	// 技能对应的Lua文件路径
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lua")
+		FString LuaFilePath;
+
+	// 技能配置数据
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Config")
+		float ManaCost = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Config")
+		float CooldownDuration = 2.0f;
+
+	// 事件委托，用于通知Lua
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+		FOnAbilityActivatedDelegate OnAbilityActivated;
+
+	// 重写GAS生命周期函数
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+		const FGameplayAbilityActorInfo* ActorInfo,
+		const FGameplayAbilityActivationInfo ActivationInfo,
+		const FGameplayEventData* TriggerEventData) override;
+
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle,
+		const FGameplayAbilityActorInfo* ActorInfo,
+		const FGameplayAbilityActivationInfo ActivationInfo,
+		bool bReplicateEndAbility,
+		bool bWasCancelled) override;
+
+	// 供Lua调用的接口
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		void PlayMontageForAbility(UAnimMontage* Montage, const FGameplayAbilityActivationInfo ActivationInfo, float PlayRate = 1.0f);
+
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		void ApplyEffectToTarget(TSubclassOf<UGameplayEffect> EffectClass, AActor* Target, float Level = 1.0f);
+
+protected:
+	UFUNCTION()
+		void OnMontageCompleted();
+
+	UFUNCTION()
+		void OnMontageInterrupted();
+
+	FGameplayAbilitySpecHandle CurrentHandle;
+	const FGameplayAbilityActorInfo* CurrentActorInfo;
+};

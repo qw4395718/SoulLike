@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include <Components/WidgetComponent.h>
+#include <HUD_PawnStatusBarInScreen.h>
 
 void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -35,7 +36,7 @@ void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	/************************************************************************/
 	/*                             Screen                                         */
 	/************************************************************************/
-	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PawnStatusInScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PlayerStatusBar.WBP_HUD_PlayerStatusBar"));
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PawnStatusInScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PawnStatusInScreen.WBP_HUD_PawnStatusInScreen"));
 
 
 	UE_LOG(LogTemp, Log, TEXT("UIManagerSubsystem initialized"));
@@ -167,6 +168,11 @@ void UUIManagerSubsystem::OpenWorldWidgetWithActor(const FUICreateParams& Create
 							// 添加到指定区域
 							Comp->SetWidget(Widget);
 							Comp->SetVisibility(true);
+							// 记录数据来源
+							if (IScreenWidget_IF* ScreenWidgetTarget = Cast<IScreenWidget_IF>(Widget))
+							{
+								ScreenWidgetTarget->SetOwningPawn(CreateParam.TargetActor);
+							}
 							// 记录信息
 							FString Key = CreateParam.TargetActor->GetName() + FString::FromInt(INT(CreateParam.Type));
 							ActiveWorldWidgets.Add(Key, Widget);

@@ -2,9 +2,9 @@
 
 #pragma once
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemComponent.h"
-#include "LabAbilitySystemComponent.generated.h"
+#include "SL_AbilitySystemComponent.generated.h"
 UCLASS()
-class SOULLIKEDEMO_API ULabAbilitySystemComponent : public UAbilitySystemComponent
+class SOULLIKEDEMO_API USL_AbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
 };

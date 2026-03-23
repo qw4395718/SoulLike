@@ -3,8 +3,8 @@
 #pragma once
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AttributeSet.h"
 #include "AttributeSet.h"
-#include "LabAbilitySystemComponent.h"
-#include "LabStatusAttributeSet.generated.h"
+#include "SL_AbilitySystemComponent.h"
+#include "SL_StatusAttributeSet.generated.h"
 
 #define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
         GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
@@ -15,18 +15,18 @@
 
 
 UCLASS()
-class SOULLIKEDEMO_API ULabStatusAttributeSet : public UAttributeSet
+class SOULLIKEDEMO_API USL_StatusAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 
 	// ∫Í∂®“Â
-	ATTRIBUTE_ACCESSORS(ULabStatusAttributeSet, Health);
-	ATTRIBUTE_ACCESSORS(ULabStatusAttributeSet, MaxHealth);
-	ATTRIBUTE_ACCESSORS(ULabStatusAttributeSet, Damage);
+	ATTRIBUTE_ACCESSORS(USL_StatusAttributeSet, Health);
+	ATTRIBUTE_ACCESSORS(USL_StatusAttributeSet, MaxHealth);
+	ATTRIBUTE_ACCESSORS(USL_StatusAttributeSet, Damage);
 
 public:
 	// Sets default values for this AttributeSet's properties
-    ULabStatusAttributeSet();
+    USL_StatusAttributeSet();
 
 	
 	/************************************************************************/

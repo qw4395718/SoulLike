@@ -6,11 +6,13 @@
 #include "HUD_ProgressBar.h"
 #include "HUD_StatusBar.h"
 #include <GlobalDelegatesManager.h>
+#include <Components/TextBlock.h>
 
 
 UHUD_PawnStatusBarInScreen::UHUD_PawnStatusBarInScreen(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
+	OwningPawn = nullptr;
 	BindGlobalDelegatesEvent();
 }
 
@@ -24,7 +26,7 @@ void UHUD_PawnStatusBarInScreen::BindGlobalDelegatesEvent()
 		globalDelegatesManager->OnAttributeHealthChanged.AddLambda([this, targetAttributeType](AActor* TargetPlayer, float OldHealth, float NewHealth, float MinHealth, float MaxHealth)
 			{
 				// 检测是否为该目标
-				if (TargetPlayer && GetOwningPlayer() && TargetPlayer == GetOwningPlayer()->GetPawn())
+				if (TargetPlayer && OwningPawn && TargetPlayer == OwningPawn)
 				{
 					SetProgressBarLimit(targetAttributeType, MinHealth, MaxHealth);
 					UpdateProgressInfo(targetAttributeType, OldHealth, NewHealth);
@@ -42,16 +44,6 @@ void UHUD_PawnStatusBarInScreen::SetProgressBarLimit_Implementation(EPlayerStatu
 		RETURN_IF_TRUE(m_healthProgressBar == nullptr);
 		m_healthProgressBar->SetProgressBarLimit(Min,Max);
 	}break;
-	case EPlayerStatusAttributeType::EPlayerStatusAttribute_Magic:
-	{
-		RETURN_IF_TRUE(m_magicProgressBar == nullptr);
-		m_magicProgressBar->SetProgressBarLimit(Min, Max);
-	}break;
-	case EPlayerStatusAttributeType::EPlayerStatusAttribute_Stamin:
-	{
-		RETURN_IF_TRUE(m_staminProgressBar == nullptr);
-		m_staminProgressBar->SetProgressBarLimit(Min, Max);
-	}break;
 	default:break;
 	}
 }
@@ -63,17 +55,11 @@ void UHUD_PawnStatusBarInScreen::UpdateProgressInfo_Implementation(EPlayerStatus
 		case EPlayerStatusAttributeType::EPlayerStatusAttribute_Health:
 		{
 			RETURN_IF_TRUE(m_healthProgressBar == nullptr);
+			float LimitMin,LimitMax;
+			m_healthProgressBar->GetProgressBarLimit(LimitMin, LimitMax);
 			m_healthProgressBar->UpdateProgressBar(CurrentValue);
-		}break;
-		case EPlayerStatusAttributeType::EPlayerStatusAttribute_Magic:
-		{
-			RETURN_IF_TRUE(m_magicProgressBar == nullptr);
-			m_magicProgressBar->UpdateProgressBar(CurrentValue);
-		}break;
-		case EPlayerStatusAttributeType::EPlayerStatusAttribute_Stamin:
-		{
-			RETURN_IF_TRUE(m_staminProgressBar == nullptr);
-			m_staminProgressBar->UpdateProgressBar(CurrentValue);
+			FString PGstr = FString::Printf(TEXT("%.0f/%.0f"), CurrentValue, LimitMax);
+			Text_HealthPG->SetText(FText::FromString(PGstr));
 		}break;
 		default:break;
 	}
@@ -108,5 +94,10 @@ void UHUD_PawnStatusBarInScreen::ChangePlayerStatus_Implementation(EPawnStatusOp
 		}break;
 		default:break;
 	}
+}
+
+void UHUD_PawnStatusBarInScreen::SetOwningPawn(AActor* OwnPawn)
+{
+	OwningPawn = OwnPawn;
 }
 

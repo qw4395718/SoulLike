@@ -28,6 +28,10 @@ public:
 		void UpdateProgressBar(float current);
 		virtual void UpdateProgressBar_Implementation(float current);
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "ProgressBar")
+	void GetProgressBarLimit(float& min, float& max);
+	virtual void GetProgressBarLimit_Implementation(float& min, float& max);
+
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */

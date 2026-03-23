@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "SoulLikeGameGlobal.h"
 #include "HUD_PlayerStatusBar.h"
+#include <ScreenWidget_IF.h>
 #include "HUD_PawnStatusBarInScreen.generated.h"
 
 class UHUD_ProgressBar;
@@ -16,7 +17,7 @@ class UTextBlock;
  * 
  */
 UCLASS()
-class SOULLIKEDEMO_API UHUD_PawnStatusBarInScreen : public UUserWidget
+class SOULLIKEDEMO_API UHUD_PawnStatusBarInScreen : public UUserWidget,public IScreenWidget_IF
 {
 	GENERATED_BODY()
 public:
@@ -42,6 +43,12 @@ public:
 		void ChangePlayerStatus(EPawnStatusOperation OperationType,TArray<FStatusEffectInfo>& ChangeStatusArr);
 		virtual void ChangePlayerStatus_Implementation(EPawnStatusOperation OperationType,const TArray<FStatusEffectInfo>& StatusArr);
 
+	/************************************************************************/
+	/*                                    接口实现                                  */
+	/************************************************************************/
+	UFUNCTION(BlueprintCallable, Category = "Player StatusBar")
+	void SetOwningPawn(AActor* OwnPawn) override;
+
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
@@ -53,25 +60,17 @@ protected:
 	/************************************************************************/
 	// 控件引用
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UHUD_ProgressBar* m_healthProgressBar;
+	UHUD_ProgressBar* m_healthProgressBar;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UHUD_ProgressBar* m_staminProgressBar;
+	UHUD_StatusBar* m_playerStatusBar;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UHUD_ProgressBar* m_magicProgressBar;
+	UTextBlock* m_healthText;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UHUD_StatusBar* m_playerStatusBar;
+	UTextBlock *Text_HealthPG;
 
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UTextBlock* m_healthText;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UTextBlock* m_staminText;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UTextBlock* m_magicText;
-
+	AActor* OwningPawn;
 };
 

@@ -37,3 +37,9 @@ void UHUD_ProgressBar::UpdateProgressBar_Implementation(float current)
 	m_progressBar->SetPercent(m_currentProgressBarPercent);
 }
 
+void UHUD_ProgressBar::GetProgressBarLimit_Implementation(float& min, float& max)
+{
+	min = m_progressPercentMin;
+	max = m_progressPercentMax;
+}
+

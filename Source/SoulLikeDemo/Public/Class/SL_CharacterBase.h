@@ -171,7 +171,7 @@ protected:
 	/************************************************************************/
 	// GAS能力系统组件
 	UPROPERTY()
-		USL_AbilitySystemComponent* LabAbilitySystemComp;
+		USL_AbilitySystemComponent* AbilitySystemComp;
 
 	UPROPERTY()
 		USL_StatusAttributeSet* PlayerStatusSet;

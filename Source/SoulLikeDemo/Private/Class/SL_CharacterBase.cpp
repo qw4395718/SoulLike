@@ -18,7 +18,7 @@ ASL_CharacterBase::ASL_CharacterBase(const FObjectInitializer& ObjectInitializer
 	/*                                GAS组件相关                                      */
 	/************************************************************************/
 	 // ASC-核心功能组件
-	LabAbilitySystemComp = CreateDefaultSubobject<USL_AbilitySystemComponent>(TEXT("AbilitySystem"));
+	AbilitySystemComp = CreateDefaultSubobject<USL_AbilitySystemComponent>(TEXT("AbilitySystem"));
 	// AS(CharacterCombatState)
 	PlayerStatusSet = CreateDefaultSubobject<USL_StatusAttributeSet>(TEXT("HealthSet"));
 	// 
@@ -45,9 +45,9 @@ void ASL_CharacterBase::BeginPlay()
 	InitializeCharacter();
 
 	// 为ASC设置持有者和化身
-	if (LabAbilitySystemComp)
+	if (AbilitySystemComp)
 	{
-		LabAbilitySystemComp->InitAbilityActorInfo(this, this);
+		AbilitySystemComp->InitAbilityActorInfo(this, this);
 	}
 
 	if (PlayerStatusSet)
@@ -93,7 +93,7 @@ void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("EquipmentRight", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentRight);
 
 	// ASC能力
-	if (!LabAbilitySystemComp)
+	if (!AbilitySystemComp)
 		return;
 	FString EnumName = TEXT("EMyAbilitySlotsEnum");
 	FGameplayAbilityInputBinds Binds(
@@ -103,7 +103,7 @@ void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		0,                      // 可选的起始输入ID
 		true                    // 是否尝试将枚举值映射到输入ID
 	);
-	LabAbilitySystemComp->BindAbilityActivationToInputComponent(PlayerInputComponent, Binds);
+	AbilitySystemComp->BindAbilityActivationToInputComponent(PlayerInputComponent, Binds);
 }
 
 
@@ -417,17 +417,17 @@ void ASL_CharacterBase::InitPartmentComponent()
 
 UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const
 {
-	return LabAbilitySystemComp;
+	return AbilitySystemComp;
 }
 
 void ASL_CharacterBase::GiveAbilityToSelf(TSubclassOf<UGameplayAbility> AbilityClass)
 {
-	if (!AbilityClass || !LabAbilitySystemComp) return;
+	if (!AbilityClass || !AbilitySystemComp) return;
 
 	// 检查是否有权限（在单人游戏中永远为真）
 	if (HasAuthority())
 	{
-		LabAbilitySystemComp->GiveAbility(
+		AbilitySystemComp->GiveAbility(
 			FGameplayAbilitySpec(AbilityClass, 1, INDEX_NONE, this)
 		);
 	}
@@ -435,12 +435,12 @@ void ASL_CharacterBase::GiveAbilityToSelf(TSubclassOf<UGameplayAbility> AbilityC
 
 void ASL_CharacterBase::GiveAbility(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID)
 {
-	if (!AbilityClass || !LabAbilitySystemComp) return;
+	if (!AbilityClass || !AbilitySystemComp) return;
 
 	// 检查是否有权限（在单人游戏中永远为真）
 	if (HasAuthority())
 	{
-		LabAbilitySystemComp->GiveAbility(
+		AbilitySystemComp->GiveAbility(
 			FGameplayAbilitySpec(AbilityClass, InLevel, InInputID, this)
 		);
 	}
@@ -448,14 +448,14 @@ void ASL_CharacterBase::GiveAbility(TSubclassOf<UGameplayAbility> AbilityClass, 
 
 FGameplayAbilitySpecHandle ASL_CharacterBase::GiveAbilityAndActivateOnce(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID)
 {
-	if (!AbilityClass || !LabAbilitySystemComp) return FGameplayAbilitySpecHandle();
+	if (!AbilityClass || !AbilitySystemComp) return FGameplayAbilitySpecHandle();
 
 	// 检查是否有权限（在单人游戏中永远为真）
 	if (HasAuthority())
 	{
 		FGameplayAbilitySpec temp = FGameplayAbilitySpec(AbilityClass, InLevel, InInputID, this);
 
-		return LabAbilitySystemComp->GiveAbilityAndActivateOnce(
+		return AbilitySystemComp->GiveAbilityAndActivateOnce(
 			temp
 		);
 	}
@@ -464,7 +464,7 @@ FGameplayAbilitySpecHandle ASL_CharacterBase::GiveAbilityAndActivateOnce(TSubcla
 
 void ASL_CharacterBase::GiveAbilitiesToSelf(const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses)
 {
-	if (!LabAbilitySystemComp) return;
+	if (!AbilitySystemComp) return;
 
 	for (auto AbilityClass : AbilityClasses)
 	{

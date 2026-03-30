@@ -83,6 +83,9 @@ public:
 	UFUNCTION()
 		void AnimNotifyResponse(int NotifyType) override;
 
+	/************************************************************************/
+	/*                               Unlua相关                                      */
+	/************************************************************************/
 
 protected:
 	/************************************************************************/
@@ -149,21 +152,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitPartmentComponent();
 
-
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
-	// 在蓝图中可调用的赋予能力函数
-	UFUNCTION(BlueprintCallable, Category = "GAS")
-		void GiveAbilityToSelf(TSubclassOf<UGameplayAbility> AbilityClass);
-
-	UFUNCTION(BlueprintCallable, Category = "GAS")
-		void GiveAbility(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID);
-	
-	UFUNCTION(BlueprintCallable, Category = "GAS")
-		FGameplayAbilitySpecHandle GiveAbilityAndActivateOnce(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID);
-	
-	UFUNCTION(BlueprintCallable, Category = "GAS")
-		void GiveAbilitiesToSelf(const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses);
 
 protected:
 	/************************************************************************/

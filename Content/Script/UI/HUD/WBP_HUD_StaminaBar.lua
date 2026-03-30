@@ -23,7 +23,7 @@ local M = UnLua.Class()
 
 function M:UpdateProgressBar(min,max,current)
     self:UpdateProgressBar(min,max,current)
-    if(current != self.m_currentProgressBarPercent)
+    if(current ~= self.m_currentProgressBarPercent)
     then
         if(current >= max) then
             --精力恢复满的视觉效果

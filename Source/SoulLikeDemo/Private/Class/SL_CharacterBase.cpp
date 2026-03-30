@@ -71,6 +71,7 @@ void ASL_CharacterBase::BeginPlay()
 		}
 	}
 
+	UE_LOG(SL_CharacterBase, Display, TEXT("ZYF_C++_ASL_CharacterBase::BeginPlay()"))
 }
 
 void ASL_CharacterBase::Tick(float DeltaTime)
@@ -149,7 +150,6 @@ void ASL_CharacterBase::AnimNotifyResponse(int NotifyType)
 	RETURN_IF_TRUE(NotifyType <= int(EAnimNotifyType::EAnimNotify_Min) || NotifyType >= int(EAnimNotifyType::EAnimNotify_Max));
 	WeaponAnimProcess(CheckAnimNotifyToHand(EAnimNotifyType(NotifyType)), TranslteAnimNotifyToWeapon(EAnimNotifyType(NotifyType)));
 }
-
 
 void ASL_CharacterBase::PerformAttack()
 {	
@@ -411,8 +411,6 @@ void ASL_CharacterBase::InitPartmentComponent()
 		MovementCmp = NewObject<USL_MovementComponent>(this);
 		MovementCmp->InitMovemenetInfo(true,"");
 	}
-
-	
 }
 
 UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const
@@ -420,54 +418,4 @@ UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComp;
 }
 
-void ASL_CharacterBase::GiveAbilityToSelf(TSubclassOf<UGameplayAbility> AbilityClass)
-{
-	if (!AbilityClass || !AbilitySystemComp) return;
 
-	// 检查是否有权限（在单人游戏中永远为真）
-	if (HasAuthority())
-	{
-		AbilitySystemComp->GiveAbility(
-			FGameplayAbilitySpec(AbilityClass, 1, INDEX_NONE, this)
-		);
-	}
-}
-
-void ASL_CharacterBase::GiveAbility(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID)
-{
-	if (!AbilityClass || !AbilitySystemComp) return;
-
-	// 检查是否有权限（在单人游戏中永远为真）
-	if (HasAuthority())
-	{
-		AbilitySystemComp->GiveAbility(
-			FGameplayAbilitySpec(AbilityClass, InLevel, InInputID, this)
-		);
-	}
-}
-
-FGameplayAbilitySpecHandle ASL_CharacterBase::GiveAbilityAndActivateOnce(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID)
-{
-	if (!AbilityClass || !AbilitySystemComp) return FGameplayAbilitySpecHandle();
-
-	// 检查是否有权限（在单人游戏中永远为真）
-	if (HasAuthority())
-	{
-		FGameplayAbilitySpec temp = FGameplayAbilitySpec(AbilityClass, InLevel, InInputID, this);
-
-		return AbilitySystemComp->GiveAbilityAndActivateOnce(
-			temp
-		);
-	}
-	return FGameplayAbilitySpecHandle();
-}
-
-void ASL_CharacterBase::GiveAbilitiesToSelf(const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses)
-{
-	if (!AbilitySystemComp) return;
-
-	for (auto AbilityClass : AbilityClasses)
-	{
-		GiveAbilityToSelf(AbilityClass);
-	}
-}

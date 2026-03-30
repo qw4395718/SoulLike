@@ -35,19 +35,20 @@ local M = UnLua.Class()
 
 function M:ReceiveBeginPlay()
     -- 获取技能管理器
-    self:ReceiveBeginPlay()
-    -- local AbilityMgr = require("GAS.AbilityManager")
+    self.Overridden.ReceiveBeginPlay(self)
+    print("ZYF_SoulLike_Base_CharacterBP_C_Unlua_BeginPlay 1")
+    local AbilityMgr = require("GAS.AbilityManager")
     
-    -- -- 给予火球术技能
-    -- local FireballHandle = AbilityMgr:GrantAbility(
-    --     self,
-    --     "/Game/SoulLikeDemo/GAS/GA/GA_Fireball.GA_Fireball_C",
-    --     1
-    -- )
+    -- 给予火球术技能
+    local FireballHandle = AbilityMgr:GrantAbility(
+        self,
+        "/Game/SoulLikeDemo/GAS/GA/GA_Fireball.GA_Fireball_C",
+        0
+    )
     
-    -- -- 保存技能句柄
-    -- self.FireballHandle = FireballHandle
-    print("ZYF_SoulLike_Base_CharacterBP_C_BeginPlay")
+    -- 保存技能句柄
+    self.FireballHandle = FireballHandle
+    print("ZYF_SoulLike_Base_CharacterBP_C_Unlua_BeginPlay")
 end
 
 -- 输入回调：按下技能键

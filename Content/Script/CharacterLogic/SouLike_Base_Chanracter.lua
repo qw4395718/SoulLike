@@ -43,7 +43,8 @@ function M:ReceiveBeginPlay()
     local FireballHandle = AbilityMgr:GrantAbility(
         self,
         "/Game/SoulLikeDemo/GAS/GA/GA_Fireball.GA_Fireball_C",
-        0
+        0,
+        "GAS.GA.Fireball"
     )
     
     -- 保存技能句柄

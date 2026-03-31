@@ -7,7 +7,7 @@ function AbilityManager:Initialize()
 end
 
 -- 给予角色技能
-function AbilityManager:GrantAbility(Character, AbilityClassPath, AbilityLevel)
+function AbilityManager:GrantAbility(Character, AbilityClassPath, AbilityLevel, LuaFilePath)
     print("ZYF_GrantAbility_0")
     if not Character or not Character.AbilitySystemComp then
         return nil
@@ -23,14 +23,7 @@ function AbilityManager:GrantAbility(Character, AbilityClassPath, AbilityLevel)
     end
     
     print("ZYF_GrantAbility_2")
-    -- UE4.26的GiveAbility方式
-    -- local Spec = UE.FGameplayAbilitySpec()
-    -- Spec.Ability = AbilityClass
-    -- Spec.Level = AbilityLevel
-    -- Spec.InputID = 0
-    -- Spec.SourceObject = Character
-    
-    -- local Handle = ASC:GiveAbility(Spec)
+
     local Handle = ASC:GiveAbilityForBP(
             AbilityClass,  -- 直接传Class
             AbilityLevel or 1,
@@ -46,24 +39,24 @@ function AbilityManager:GrantAbility(Character, AbilityClassPath, AbilityLevel)
         print("ZYF_GrantAbility_3")
         for i = 1, AbilityInstances:Length() do
             local AbilityInstance = AbilityInstances:Get(i)
-            print("ZYF_GrantAbility_4")
-            --if AbilityInstance and AbilityInstance.Ability and AbilityInstance.Ability == AbilityClass then
-            if AbilityInstance and AbilityInstance.Ability then
+            print("ZYF_GrantAbility_4_0" .. AbilityInstance.Ability:GetName())
+            print("ZYF_GrantAbility_4_1" .. AbilityClass:GetName())
+            if AbilityInstance and AbilityInstance.Ability and AbilityInstance.Ability:GetClass() == AbilityClass then
                 -- 加载对应的Lua文件
-                print("ZYF_GrantAbility_5")
-                if AbilityInstance.LuaFilePath and AbilityInstance.LuaFilePath ~= "" then
-                    local AbilityLogic = require(AbilityInstance.LuaFilePath)
+                if LuaFilePath ~= "" then
+                    local AbilityLogic = require(LuaFilePath)
                     print("ZYF_GrantAbility_6")
                     if AbilityLogic then
                         -- 绑定委托
                         print("ZYF_GrantAbility_7")
-                        AbilityInstance.OnAbilityActivated:Add(
-                            function(Ability, Handle, ActorInfo)
-                                if AbilityLogic.OnAbilityActivated then
-                                    AbilityLogic:OnAbilityActivated(Ability, Handle, ActorInfo)
-                                end
-                            end
-                        )
+                        AbilityInstance.Ability.OnAbilityActivated:Add(AbilityLogic,AbilityLogic.OnAbilityActivated)
+                        -- AbilityInstance.Ability.OnAbilityActivated:Add(
+                        --     function(Ability, Handle, ActorInfo)
+                        --         if AbilityLogic.OnAbilityActivated then
+                        --             AbilityLogic:OnAbilityActivated(Ability, Handle, ActorInfo)
+                        --         end
+                        --     end
+                        -- )
                     end
                 end
                 break

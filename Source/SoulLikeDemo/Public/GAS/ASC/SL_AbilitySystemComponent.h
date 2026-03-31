@@ -3,6 +3,8 @@
 #pragma once
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemComponent.h"
 #include "SL_AbilitySystemComponent.generated.h"
+
+// ÉêÃ÷Î¯ÍÐ
 UCLASS()
 class SOULLIKEDEMO_API USL_AbilitySystemComponent : public UAbilitySystemComponent
 {

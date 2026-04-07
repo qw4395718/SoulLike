@@ -33,7 +33,7 @@ function AbilityManager:GrantAbility(Character, AbilityClassPath, AbilityLevel, 
     
     print("ZYF_GrantAbility_2_1" .. Handle.Handle)
     -- 绑定Lua逻辑
-    if Handle.Handle ~= 0 then
+    if Handle.Handle then
         -- 获取技能实例（UE4.26方式）
         local AbilityInstances = ASC:GetActivatableAbilitiesForBP()
         print("ZYF_GrantAbility_3")
@@ -47,16 +47,13 @@ function AbilityManager:GrantAbility(Character, AbilityClassPath, AbilityLevel, 
                     local AbilityLogic = require(LuaFilePath)
                     print("ZYF_GrantAbility_6")
                     if AbilityLogic then
+                        --local AbilityObj = AbilityInstance.Ability
                         -- 绑定委托
                         print("ZYF_GrantAbility_7")
-                        AbilityInstance.Ability.OnAbilityActivated:Add(AbilityLogic,AbilityLogic.OnAbilityActivated)
-                        -- AbilityInstance.Ability.OnAbilityActivated:Add(
-                        --     function(Ability, Handle, ActorInfo)
-                        --         if AbilityLogic.OnAbilityActivated then
-                        --             AbilityLogic:OnAbilityActivated(Ability, Handle, ActorInfo)
-                        --         end
-                        --     end
-                        -- )
+                        AbilityInstance.Ability.OnAbilityActivated:Add(Character,AbilityLogic.OnAbilityActivated);
+                        print("After binding, IsBound = ", AbilityInstance.Ability.OnAbilityActivated:IsBound())
+                        print("OnAbilityActivated Address: " .. tostring(AbilityInstance.Ability.OnAbilityActivated))
+                        self:ActivateAbility(Character, Handle)  -- 激活技能
                     end
                 end
                 break
@@ -74,7 +71,7 @@ function AbilityManager:ActivateAbility(Character, Handle)
     end
     
     local ASC = Character.AbilitySystemComp
-    return ASC:TryActivateAbility(Handle)
+    return ASC:TryActivateAbilityByHandle(Handle)
 end
 
 -- 移除技能
@@ -84,7 +81,7 @@ function AbilityManager:RemoveAbility(Character, Handle)
     end
     
     local ASC = Character.AbilitySystemComp
-    ASC:ClearAbility(Handle)
+    ASC:ClearAbilityByHandle(Handle)
 end
 
 return AbilityManager

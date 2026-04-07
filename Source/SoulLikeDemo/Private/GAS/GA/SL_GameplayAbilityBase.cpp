@@ -20,6 +20,8 @@ void USL_GameplayAbilityBase::ActivateAbility(const FGameplayAbilitySpecHandle H
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("OnAbilityActivated Address (this): 0x%p"), &OnAbilityActivated);
+
 	CurrentHandle = Handle;
 	CurrentActorInfo = ActorInfo;
 

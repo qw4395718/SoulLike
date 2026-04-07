@@ -17,3 +17,26 @@ FGameplayAbilitySpecHandle USL_AbilitySystemComponent::GiveAbilityAndActivateOnc
 	FGameplayAbilitySpec Spec(AbilityClass, InLevel, InInputID, SourceObject);
 	return GiveAbilityAndActivateOnce(Spec);
 }
+
+TArray<FGameplayAbilitySpec>& USL_AbilitySystemComponent::GetActivatableAbilitiesForBP()
+{
+	return ActivatableAbilities.Items;
+}
+
+bool USL_AbilitySystemComponent::TryActivateAbilityByHandle(FGameplayAbilitySpecHandle Handle)
+{
+	// 1. 检查Handle是否有效
+	if (!Handle.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TryActivateAbilityByHandle: Invalid Handle"));
+		return false;
+	}
+
+	return Super::TryActivateAbility(Handle);
+
+}
+
+void USL_AbilitySystemComponent::ClearAbilityByHandle(FGameplayAbilitySpecHandle Handle)
+{
+	Super::ClearAbility(Handle);
+}

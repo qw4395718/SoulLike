@@ -49,13 +49,14 @@ function M:ReceiveBeginPlay()
     
     -- 保存技能句柄
     self.FireballHandle = FireballHandle
+
     print("ZYF_SoulLike_Base_CharacterBP_C_Unlua_BeginPlay")
 end
 
 -- 输入回调：按下技能键
 function M:OnFireballPressed()
     local AbilityMgr = require("GAS.AbilityManager")
-    AbilityMgr:ActivateAbility(self, self.FireballHandle)
+    AbilityMgr:ActivateAbility(self, self.FireballHandle.Handle)
 end
 
 return M

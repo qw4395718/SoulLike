@@ -22,9 +22,12 @@ public:
 		FGameplayAbilitySpecHandle GiveAbilityAndActivateOnceForBP(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID, UObject* SourceObject);
 
 	UFUNCTION(BlueprintCallable, Category = "GAS")
-		TArray<FGameplayAbilitySpec>& GetActivatableAbilitiesForBP()
-	{
-		return ActivatableAbilities.Items;
-	}
+		TArray<FGameplayAbilitySpec>& GetActivatableAbilitiesForBP();
+
+	UFUNCTION(BlueprintCallable, Category = "GAS")
+		bool TryActivateAbilityByHandle(FGameplayAbilitySpecHandle Handle);
+
+	UFUNCTION(BlueprintCallable, Category = "GAS")
+		void ClearAbilityByHandle(FGameplayAbilitySpecHandle Handle);
 
 };

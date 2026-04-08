@@ -20,30 +20,12 @@ void USL_GameplayAbilityBase::ActivateAbility(const FGameplayAbilitySpecHandle H
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("OnAbilityActivated Address (this): 0x%p"), &OnAbilityActivated);
-
-	CurrentHandle = Handle;
-	CurrentActorInfo = ActorInfo;
-
-	// 触发Lua事件
-	if (OnAbilityActivated.IsBound())
-	{
-		OnAbilityActivated.Broadcast(this, Handle, *ActorInfo);
-	}
-	else
-	{
-		// 如果没有绑定Lua，执行默认行为
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-	}
+	OnAbilityActivatedForLua(Handle, *ActorInfo, ActivationInfo);
 }
 
-void USL_GameplayAbilityBase::EndAbility(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo,
-	const FGameplayAbilityActivationInfo ActivationInfo,
-	bool bReplicateEndAbility,
-	bool bWasCancelled)
+void USL_GameplayAbilityBase::EndAbilityForBP(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo& ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+	EndAbility(Handle, &ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void USL_GameplayAbilityBase::PlayMontageForAbility(UAnimMontage* Montage, const FGameplayAbilityActivationInfo ActivationInfo, float PlayRate)

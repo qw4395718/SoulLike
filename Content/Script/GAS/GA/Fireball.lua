@@ -15,31 +15,31 @@ Fireball.Config = {
 }
 
 -- 技能激活时的回调
-function Fireball:OnAbilityActivated(Ability, Handle, ActorInfo)
+function Fireball:OnAbilityActivatedForLua(Handle, ActorInfo,ActivationInfo)
     print("Fireball ability activated in UE4.26!")
     
-    -- 获取施法者
-    local Caster = ActorInfo:GetAvatarActor()
-    if not Caster then
-        self:EndAbility(Ability, Handle, ActorInfo)
-        return
-    end
+    -- -- 获取施法者
+    -- local Caster = ActorInfo:GetAvatarActor()
+    -- if not Caster then
+    --     self:EndAbility(Handle, ActorInfo,ActivationInfo,true,true)
+    --     return
+    -- end
     
-    -- 检查并消耗魔法值
-    if not Ability:ConsumeManaForAbility() then
-        print("Not enough mana!")
-        self:EndAbility(Ability, Handle, ActorInfo)
-        return
-    end
+    -- -- 检查并消耗魔法值
+    -- if not Ability:ConsumeManaForAbility() then
+    --     print("Not enough mana!")
+    --     self:EndAbility(Handle, ActorInfo,ActivationInfo,true,true)
+    --     return
+    -- end
     
-    -- 播放施法动画
-    self:PlayCastAnimation(Ability, Caster)
+    -- -- 播放施法动画
+    -- self:PlayCastAnimation(Ability, Caster)
     
-    -- 获取目标（简化：获取前方1000单位的目标）
-    local Target = self:GetTargetInFront(Caster)
+    -- -- 获取目标（简化：获取前方1000单位的目标）
+    -- local Target = self:GetTargetInFront(Caster)
     
-    -- 延迟生成火球（配合动画）
-    self:ScheduleFireballSpawn(Ability, Caster, Target, 0.3)
+    -- -- 延迟生成火球（配合动画）
+    -- self:ScheduleFireballSpawn(Ability, Caster, Target, 0.3)
 end
 
 -- 播放施法动画

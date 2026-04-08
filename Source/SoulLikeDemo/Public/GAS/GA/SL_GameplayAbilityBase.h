@@ -4,10 +4,10 @@
 #include "Abilities/GameplayAbility.h"
 #include "SL_GameplayAbilityBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAbilityActivatedDelegate,
-UGameplayAbility*, Ability,
-FGameplayAbilitySpecHandle, Handle,
-const FGameplayAbilityActorInfo& , ActorInfo);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAbilityActivatedDelegate,
+//UGameplayAbility*, Ability,
+//FGameplayAbilitySpecHandle, Handle,
+//const FGameplayAbilityActorInfo& , ActorInfo);
 
 UCLASS()
 class SOULLIKEDEMO_API USL_GameplayAbilityBase : public UGameplayAbility
@@ -28,21 +28,27 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Config")
 		float CooldownDuration = 2.0f;
 
-	// 事件委托，用于通知Lua
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-		FOnAbilityActivatedDelegate OnAbilityActivated;
+	//// 事件委托，用于通知Lua
+	//UPROPERTY(BlueprintAssignable, Category = "Events")
+	//	FOnAbilityActivatedDelegate OnAbilityActivated;
 
-	// 重写GAS生命周期函数
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ability")
+	void OnAbilityActivatedForLua(const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo& ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo);
+
+	// 重载GA的Activate响应函数
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo,
 		const FGameplayEventData* TriggerEventData) override;
 
-	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle,
-		const FGameplayAbilityActorInfo* ActorInfo,
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+	void EndAbilityForBP(const FGameplayAbilitySpecHandle Handle,
+		const FGameplayAbilityActorInfo& ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo,
 		bool bReplicateEndAbility,
-		bool bWasCancelled) override;
+		bool bWasCancelled);
 
 	// 供Lua调用的接口
 	UFUNCTION(BlueprintCallable, Category = "Ability")

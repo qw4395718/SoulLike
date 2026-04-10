@@ -15,10 +15,13 @@ void USL_GameplayAbilityBase::ActivateAbility(const FGameplayAbilitySpecHandle H
 	const FGameplayEventData* TriggerEventData)
 {
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
-	{
+	{// 检查消耗等行为是否受限
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
+
+	CurrentHandle = Handle;
+	CurrentActorInfo = ActorInfo;
 
 	OnAbilityActivatedForLua(Handle, *ActorInfo, ActivationInfo);
 }
@@ -39,7 +42,7 @@ void USL_GameplayAbilityBase::PlayMontageForAbility(UAnimMontage* Montage, const
 		// 绑定蒙太奇完成事件
 		//FOnMontageCompleteDelegate CompleteDelegate;
 		//CompleteDelegate.BindUObject(this, &USL_GameplayAbilityBase::OnMontageCompleted);
-		ASC->PlayMontage(this, ActivationInfo, Montage, PlayRate, NAME_None, 1.0f);
+		ASC->PlayMontage(this, ActivationInfo, Montage, PlayRate, NAME_None, PlayRate);
 	}
 }
 

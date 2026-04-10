@@ -10,7 +10,8 @@ Fireball.Config = {
     ProjectileSpeed = 2000,
     FireEffectPath = "/Game/Effects/Fireball/Fireball_Effect.Fireball_Effect",
     HitEffectPath = "/Game/Effects/Fireball/Explosion_Effect.Explosion_Effect",
-    MontagePath = "/Game/Animations/Magic_Cast_Montage.Magic_Cast_Montage",
+    --MontagePath = "/Game/Animations/Magic_Cast_Montage.Magic_Cast_Montage",
+    MontagePath = "/Game/SoulLikeDemo/Anim/AM_Character_Executed.AM_Character_Executed",
     SoundPath = "/Game/Sounds/Fireball_Cast.Fireball_Cast"
 }
 
@@ -18,22 +19,15 @@ Fireball.Config = {
 function Fireball:OnAbilityActivatedForLua(Handle, ActorInfo,ActivationInfo)
     print("Fireball ability activated in UE4.26!")
     
-    -- -- 获取施法者
-    -- local Caster = ActorInfo:GetAvatarActor()
-    -- if not Caster then
-    --     self:EndAbility(Handle, ActorInfo,ActivationInfo,true,true)
-    --     return
-    -- end
+    -- 获取施法者
+    local Caster = ActorInfo.AvatarActor
+    if not Caster then
+        self:EndAbility(Handle, ActorInfo,ActivationInfo)
+        return
+    end
     
-    -- -- 检查并消耗魔法值
-    -- if not Ability:ConsumeManaForAbility() then
-    --     print("Not enough mana!")
-    --     self:EndAbility(Handle, ActorInfo,ActivationInfo,true,true)
-    --     return
-    -- end
-    
-    -- -- 播放施法动画
-    -- self:PlayCastAnimation(Ability, Caster)
+    -- 播放施法动画
+    self:PlayCastAnimation(ActorInfo)
     
     -- -- 获取目标（简化：获取前方1000单位的目标）
     -- local Target = self:GetTargetInFront(Caster)
@@ -43,11 +37,13 @@ function Fireball:OnAbilityActivatedForLua(Handle, ActorInfo,ActivationInfo)
 end
 
 -- 播放施法动画
-function Fireball:PlayCastAnimation(Ability, Caster)
+function Fireball:PlayCastAnimation(ActorInfo)
     -- 加载蒙太奇
+    print("PlayCastAnimation And Sound in UE4.26!")
     local Montage = UE.LoadObject(self.Config.MontagePath)
-    if Montage and Ability.PlayMontageForAbility then
-        Ability:PlayMontageForAbility(Montage, 1.0)
+    print("Montage: PlayMontageForAbility", self.Config.MontagePath, Montage, self.PlayMontageForAbility)
+    if Montage and self.PlayMontageForAbility then
+        self:PlayMontageForAbility(Montage,ActorInfo, 1.0)
     end
     
     -- 播放施法音效

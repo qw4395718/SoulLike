@@ -55,7 +55,7 @@ void USL_GameplayAbilityBase::ApplyEffectToTarget(TSubclassOf<UGameplayEffect> E
 	if (IAbilitySystemInterface* TargetASC_IF = Cast<IAbilitySystemInterface>(Target))
 	{
 		// 从接口获取目标的 AbilitySystemComponent
-		UAbilitySystemComponent* TargetASC = TargetASC_IF->GetAbilitySystemComponent(); // 假设接口有这个方法
+		UAbilitySystemComponent* TargetASC = TargetASC_IF->GetAbilitySystemComponent();
 		if (!TargetASC)
 			return;
 

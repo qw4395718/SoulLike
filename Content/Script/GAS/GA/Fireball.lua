@@ -8,10 +8,11 @@ Fireball.Config = {
     Cooldown = 3.0,
     CastRange = 1000,
     ProjectileSpeed = 2000,
+    ProjectilePath = "/Game/SoulLikeDemo/Blueprints/Actor/BP_FireballProjectile.BP_FireballProjectile_C",
+    GameAbilityEffectPath = "/Game/SoulLikeDemo/GAS/GE/GE_FireDamage.GE_FireDamage",
     FireEffectPath = "/Game/Effects/Fireball/Fireball_Effect.Fireball_Effect",
     HitEffectPath = "/Game/Effects/Fireball/Explosion_Effect.Explosion_Effect",
-    --MontagePath = "/Game/Animations/Magic_Cast_Montage.Magic_Cast_Montage",
-    MontagePath = "/Game/SoulLikeDemo/Anim/AM_Character_Executed.AM_Character_Executed",
+    MontagePath = "/Game/Animations/Magic_Cast_Montage.Magic_Cast_Montage",
     SoundPath = "/Game/Sounds/Fireball_Cast.Fireball_Cast"
 }
 
@@ -22,18 +23,18 @@ function Fireball:OnAbilityActivatedForLua(Handle, ActorInfo,ActivationInfo)
     -- 获取施法者
     local Caster = ActorInfo.AvatarActor
     if not Caster then
-        self:EndAbility(Handle, ActorInfo,ActivationInfo)
+        self:EndAbilityForBP(Handle, ActorInfo,ActivationInfo,true, false)
         return
     end
     
     -- 播放施法动画
     self:PlayCastAnimation(ActorInfo)
     
-    -- -- 获取目标（简化：获取前方1000单位的目标）
-    -- local Target = self:GetTargetInFront(Caster)
+    -- 获取目标（简化：获取前方1000单位的目标）
+    local Target = self:GetTargetInFront(Caster)
     
-    -- -- 延迟生成火球（配合动画）
-    -- self:ScheduleFireballSpawn(Ability, Caster, Target, 0.3)
+    -- 延迟生成火球（配合动画）
+    self:ScheduleFireballSpawn(Handle,ActorInfo,ActivationInfo, Caster, Target, 0.3)
 end
 
 -- 播放施法动画
@@ -41,7 +42,6 @@ function Fireball:PlayCastAnimation(ActorInfo)
     -- 加载蒙太奇
     print("PlayCastAnimation And Sound in UE4.26!")
     local Montage = UE.LoadObject(self.Config.MontagePath)
-    print("Montage: PlayMontageForAbility", self.Config.MontagePath, Montage, self.PlayMontageForAbility)
     if Montage and self.PlayMontageForAbility then
         self:PlayMontageForAbility(Montage,ActorInfo, 1.0)
     end
@@ -84,42 +84,48 @@ function Fireball:GetTargetInFront(Caster)
 end
 
 -- 延迟生成火球
-function Fireball:ScheduleFireballSpawn(Ability, Caster, Target, Delay)
-    local World = Caster:GetWorld()
-    if not World then return end
+function Fireball:ScheduleFireballSpawn(Handle,ActorInfo,ActivationInfo, Caster, Target, Delay)
     
     -- UE4.26的Timer用法
     local TimerDelegate = function()
-        self:SpawnFireball(Ability, Caster, Target)
+        self:SpawnFireball(Handle,ActorInfo,ActivationInfo, Caster, Target)
     end
     
-    World:GetTimerManager():SetTimer(nil, TimerDelegate, Delay, false)
+    UE.UKismetSystemLibrary.K2_SetTimerDelegate({self, TimerDelegate}, Delay, false)
 end
 
 -- 生成火球
-function Fireball:SpawnFireball(Ability, Caster, Target)
+function Fireball:SpawnFireball(Handle,ActorInfo,ActivationInfo, Caster, Target)
     -- 加载火球蓝图类
-    local FireballClass = UE.UClass.Load("/Game/Blueprints/BP_FireballProjectile.BP_FireballProjectile_C")
+    local FireballClass = UE.UClass.Load(self.Config.ProjectilePath)
     if not FireballClass then
         print("Failed to load Fireball class!")
-        self:EndAbility(Ability, nil, nil)
+        self:EndAbilityForBP(Handle, ActorInfo, ActivationInfo,true, false)
         return
     end
     
-    local SpawnLocation = Caster:K2_GetActorLocation() + Caster:GetActorForwardVector() * 100
-    local SpawnRotation = Caster:GetActorRotation()
     
+
+    local SpawnLocation = Caster:K2_GetActorLocation() --+ Caster:GetActorForwardVector() * 100
+    local SpawnRotation = Caster:K2_GetActorRotation()
+    local Transform = Caster:GetTransform()
+    local AlwaysSpawn = UE.ESpawnActorCollisionHandlingMethod.AlwaysSpawn
+
+    
+    print("Spawning Fireball Info " ,"FireballClass" , FireballClass,"Caster:", Caster:GetName() , " SpawnLocation:" , SpawnLocation , " SpawnRotation:" , SpawnRotation)
     -- UE4.26的SpawnActor方式
     local Projectile = Caster:GetWorld():SpawnActor(
         FireballClass,
-        SpawnLocation,
-        SpawnRotation,
-        UE.FSpawnActorParameters()
+        Transform,
+        AlwaysSpawn,
+        self,
+        self,
+        ""
     )
     
     if Projectile then
         -- 加载伤害效果
-        local EffectClass = UE.UClass.Load("/Game/Blueprints/GE_FireDamage.GE_FireDamage_C")
+        local EffectClass = UE.UClass.Load(self.Config.GameAbilityEffectPath)
         
         -- 存储技能信息到Projectile（使用Lua表）
         Projectile.Damage = self.Config.Damage
@@ -128,9 +134,15 @@ function Fireball:SpawnFireball(Ability, Caster, Target)
         
         -- 发射火球
         if Projectile.Launch then
-            local Direction = (Target:K2_GetActorLocation() - SpawnLocation):GetSafeNormal()
-            Projectile:Launch(Direction, self.Config.ProjectileSpeed)
+            if Target then
+                local Direction = (Target:K2_GetActorLocation() - SpawnLocation):GetSafeNormal()
+                Projectile:Launch(Direction, self.Config.ProjectileSpeed)
+            else
+                print("向前 发射火球！")
+                Projectile:Launch(Caster:GetActorForwardVector(), self.Config.ProjectileSpeed)
+            end
         end
+        
         
         -- 播放火球特效
         self:PlayFireballEffect(Projectile)
@@ -139,7 +151,7 @@ function Fireball:SpawnFireball(Ability, Caster, Target)
     end
     
     -- 技能结束
-    self:EndAbility(Ability, nil, nil)
+    self:EndAbilityForBP(Handle, ActorInfo, ActivationInfo,true, false)
 end
 
 -- 播放火球特效
@@ -153,13 +165,6 @@ function Fireball:PlayFireballEffect(Projectile)
             ParticleComponent:SetTemplate(Effect)
             ParticleComponent:Activate()
         end
-    end
-end
-
--- 结束技能
-function Fireball:EndAbility(Ability, Handle, ActorInfo)
-    if Ability and Ability.EndAbility then
-        Ability:EndAbility(Handle, ActorInfo, true, false)
     end
 end
 

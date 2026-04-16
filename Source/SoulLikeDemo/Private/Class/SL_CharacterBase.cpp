@@ -20,7 +20,7 @@ ASL_CharacterBase::ASL_CharacterBase(const FObjectInitializer& ObjectInitializer
 	 // ASC-核心功能组件
 	AbilitySystemComp = CreateDefaultSubobject<USL_AbilitySystemComponent>(TEXT("AbilitySystem"));
 	// AS(CharacterCombatState)
-	PlayerStatusSet = CreateDefaultSubobject<USL_StatusAttributeSet>(TEXT("HealthSet"));
+	StatusAttributeSet = CreateDefaultSubobject<USL_StatusAttributeSet>(TEXT("StatusSet"));
 	// 
 	ScreenWidgetCmp = CreateDefaultSubobject<UWidgetComponent>(TEXT("ScreenWidgetCmp"));
 	ScreenWidgetCmp->SetupAttachment(GetMesh()); // 挂在骨骼上
@@ -50,13 +50,11 @@ void ASL_CharacterBase::BeginPlay()
 		AbilitySystemComp->InitAbilityActorInfo(this, this);
 	}
 
-	if (PlayerStatusSet)
+	if (StatusAttributeSet)
 	{
-		PlayerStatusSet->SetOwningActor(this);
-		PlayerStatusSet->InitStatusAS();
+		StatusAttributeSet->SetOwningActor(this);
+		StatusAttributeSet->InitStatusAS();
 	}
-
-
 	
 	if (!IsPlayerControlled())
 	{// 非自身SL_CharacterBase实例
@@ -71,7 +69,7 @@ void ASL_CharacterBase::BeginPlay()
 		}
 	}
 
-	UE_LOG(SL_CharacterBase, Display, TEXT("ZYF_C++_ASL_CharacterBase::BeginPlay()"))
+	UE_LOG(SL_CharacterBase, Display, TEXT("ZYF_C++_ASL_CharacterBase::BeginPlay()"));
 }
 
 void ASL_CharacterBase::Tick(float DeltaTime)
@@ -106,7 +104,6 @@ void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	);
 	AbilitySystemComp->BindAbilityActivationToInputComponent(PlayerInputComponent, Binds);
 }
-
 
 
 UActorComponent* ASL_CharacterBase::GetCombatantComponent()

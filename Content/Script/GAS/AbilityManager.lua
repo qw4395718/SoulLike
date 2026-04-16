@@ -32,7 +32,7 @@ function AbilityManager:GrantAbility(Character, AbilityClassPath, AbilityLevel, 
         )
     
     print("ZYF_GrantAbility_2_1" .. Handle.Handle)
-    self:ActivateAbility(Character, Handle)
+    --self:ActivateAbility(Character, Handle)
     return Handle
 end
 

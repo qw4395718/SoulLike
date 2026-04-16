@@ -53,6 +53,7 @@ protected:
     virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
 
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 public:
 	/************************************************************************/
 	/*                               外部变量-状态属性(在战斗中变化的属性)                                       */

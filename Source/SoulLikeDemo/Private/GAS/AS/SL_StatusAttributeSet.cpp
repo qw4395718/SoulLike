@@ -4,9 +4,8 @@
 #include <GlobalDelegatesManager.h>
 #include <SL_Macros.h>
 
-USL_StatusAttributeSet::USL_StatusAttributeSet()
+USL_StatusAttributeSet::USL_StatusAttributeSet() 
 {
-
 }
 
 void USL_StatusAttributeSet::SetOwningActor(AActor* pOwnActor)

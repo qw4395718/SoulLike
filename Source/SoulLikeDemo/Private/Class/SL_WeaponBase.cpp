@@ -38,6 +38,10 @@ ASL_WeaponBase::ASL_WeaponBase()
 	WeaponComponentMap.Reset();
 	WeaponLoadComponentInfoMap.Reset();
 	WeaponEquipInfo = EWeaponEquipState::No_Equip;
+
+	// 开启网络复制
+	bReplicates = true;
+	SetReplicateMovement(true);
 }
 
 void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
@@ -156,28 +160,28 @@ void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
 void ASL_WeaponBase::Attack(AActor* OwnerActor)
 {
 	// 加入连段逻辑
-	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_Attack,TEXT("Default"));
+	// PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_Attack,TEXT("Default"));
 }
 
 void ASL_WeaponBase::Defence(AActor* OwnerActor)
 {
-	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_Defence, TEXT("Default"));
+	// PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_Defence, TEXT("Default"));
 }
 
 void ASL_WeaponBase::ComboSkill(AActor* OwnerActor)
 {
 	// 加入连段逻辑
-	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_ComboSkill, TEXT("Default"));
+	// PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_ComboSkill, TEXT("Default"));
 }
 
 void ASL_WeaponBase::Execute(AActor* OwnerActor)
 {
-	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_Execute, TEXT("Default"));
+	// PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_Execute, TEXT("Default"));
 }
 
 void ASL_WeaponBase::BackStab(AActor* OwnerActor)
 {
-	PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_BackStab, TEXT("Default"));
+	// PlayWeaponMentage(OwnerActor, EWeaponModeTyoe::WEAPONMODE_BackStab, TEXT("Default"));
 }
 
 void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo,AActor* OwnerActor)
@@ -232,20 +236,67 @@ bool ASL_WeaponBase::IsLoadBackStabMod()
 {
 	return bool(*WeaponLoadComponentInfoMap.Find(EWeaponComponentType::BackStab));
 }
-
 bool ASL_WeaponBase::PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* OwnerActor)
+{
+	if (!OwnerActor) return false;
+
+	// 客户端：请求服务器
+	if (OwnerActor->GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		Server_PerformWeaponAction(ActionType, OwnerActor);
+		return true;
+	}
+
+	// 服务器：直接执行（Authority 但没有 AutonomousProxy 时，即纯服务器或 AI）
+	if (OwnerActor->HasAuthority())
+	{
+		ExecuteWeaponActionInternal(ActionType, OwnerActor);
+	}
+
+	return true;
+}
+
+// 新增：实际执行逻辑的函数（不包含 RPC 调用）
+void ASL_WeaponBase::ExecuteWeaponActionInternal(EWeaponModeTyoe ActionType, AActor* OwnerActor)
 {
 	switch (ActionType)
 	{
-	case EWeaponModeTyoe::WEAPONMODE_Attack: { Attack(OwnerActor); };break;
-	case EWeaponModeTyoe::WEAPONMODE_Defence: { Defence(OwnerActor); } ; break;
-	case EWeaponModeTyoe::WEAPONMODE_ComboSkill: { ComboSkill(OwnerActor); } ; break;
-	case EWeaponModeTyoe::WEAPONMODE_Execute: { Execute(OwnerActor); } ; break;
-	case EWeaponModeTyoe::WEAPONMODE_BackStab: { BackStab(OwnerActor); } ; break;
-		default:break;
+	case EWeaponModeTyoe::WEAPONMODE_Attack:
+		Attack(OwnerActor);
+		break;
+	case EWeaponModeTyoe::WEAPONMODE_Defence:
+		Defence(OwnerActor);
+		break;
+	case EWeaponModeTyoe::WEAPONMODE_ComboSkill:
+		ComboSkill(OwnerActor);
+		break;
+	case EWeaponModeTyoe::WEAPONMODE_Execute:
+		Execute(OwnerActor);
+		break;
+	case EWeaponModeTyoe::WEAPONMODE_BackStab:
+		BackStab(OwnerActor);
+		break;
+	default:
+		break;
 	}
-	return true;
 
+	// 广播动画
+	Multicast_PlayWeaponMentage(OwnerActor, ActionType, TEXT("Default"));
+}
+
+void ASL_WeaponBase::Server_PerformWeaponAction_Implementation(EWeaponModeTyoe ActionType, AActor* OwnerActor)
+{
+	if (!OwnerActor) return;
+
+	// 可以在这里添加反作弊验证
+
+	ExecuteWeaponActionInternal(ActionType, OwnerActor);
+}
+
+void ASL_WeaponBase::Multicast_PlayWeaponMentage_Implementation(AActor* OwnerActor, EWeaponModeTyoe MentageType, FName MentageSectionName)
+{
+	PlayWeaponMentage(OwnerActor, MentageType, MentageSectionName);
+	UE_LOG(LogTemp, Display, TEXT("Multicast_PlayWeaponMentage_Implementation Exec"));
 }
 
 void ASL_WeaponBase::LoadWeaponMeshAsync(const FString WeaponMeshName)

@@ -4,12 +4,16 @@
 USL_AbilitySystemComponent::USL_AbilitySystemComponent()
 	: Super()
 {
-
+	SetIsReplicatedByDefault(true);
 }
 
 FGameplayAbilitySpecHandle USL_AbilitySystemComponent::GiveAbilityForBP(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID, UObject* SourceObject)
 {
-	return GiveAbility(FGameplayAbilitySpec(AbilityClass, InLevel, InInputID, SourceObject));
+	if (GetOwnerActor()->HasAuthority())
+	{
+		return GiveAbility(FGameplayAbilitySpec(AbilityClass, InLevel, InInputID, SourceObject));
+	}
+	return FGameplayAbilitySpecHandle();
 }
 
 FGameplayAbilitySpecHandle USL_AbilitySystemComponent::GiveAbilityAndActivateOnceForBP(TSubclassOf<UGameplayAbility> AbilityClass, int32 InLevel, int32 InInputID, UObject* SourceObject)

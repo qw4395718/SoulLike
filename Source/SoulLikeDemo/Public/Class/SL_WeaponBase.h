@@ -63,6 +63,19 @@ public:
 	// 执行武器行为
 	UFUNCTION()
 		bool PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* OwnerActor);
+
+
+	UFUNCTION()
+	void ExecuteWeaponActionInternal(EWeaponModeTyoe ActionType, AActor* OwnerActor);
+	/************************************************************************/
+	/*                                网络同步                                   */
+	/************************************************************************/
+	UFUNCTION(Server, Reliable)
+		void Server_PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* OwnerActor);
+
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_PlayWeaponMentage(AActor* OwnerActor, EWeaponModeTyoe MentageType, FName MentageSectionName);
+
 protected:
 	/************************************************************************/
 	/*                               继承实现                                       */

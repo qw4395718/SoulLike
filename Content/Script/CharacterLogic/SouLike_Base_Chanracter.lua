@@ -33,25 +33,31 @@ local M = UnLua.Class()
 -- function M:ReceiveActorEndOverlap(OtherActor)
 -- end
 
-function M:ReceiveBeginPlay()
-    -- 获取技能管理器
-    self.Overridden.ReceiveBeginPlay(self)
-    print("ZYF_SoulLike_Base_CharacterBP_C_Unlua_BeginPlay 1")
-    local AbilityMgr = require("GAS.AbilityManager")
+-- function M:ReceiveBeginPlay()
+--     -- 获取技能管理器
+--     self.Overridden.ReceiveBeginPlay(self)
+--     print("ZYF_SoulLike_Base_CharacterBP_C_Unlua_BeginPlay 1")
+--     local AbilityMgr = require("GAS.AbilityManager")
     
-    -- 给予火球术技能
-    local FireballHandle = AbilityMgr:GrantAbility(
-        self,
-        "/Game/SoulLikeDemo/GAS/GA/GA_Fireball.GA_Fireball_C",
-        0,
-        "GAS.GA.Fireball"
-    )
-    
-    -- 保存技能句柄
-    self.FireballHandle = FireballHandle
+--     -- 检查是否为权威数据
+--     if not self:IsAuthority() then
+--         print("Not authority, skipping ability grant.")
+--         return
 
-    print("ZYF_SoulLike_Base_CharacterBP_C_Unlua_BeginPlay")
-end
+--     end
+--     -- 给予火球术技能
+--     local FireballHandle = AbilityMgr:GrantAbility(
+--         self,
+--         "/Game/SoulLikeDemo/GAS/GA/GA_Fireball.GA_Fireball_C",
+--         0,
+--         "GAS.GA.Fireball"
+--     )
+    
+--     -- 保存技能句柄
+--     self.FireballHandle = FireballHandle
+
+--     print("ZYF_SoulLike_Base_CharacterBP_C_Unlua_BeginPlay")
+-- end
 
 -- 输入回调：按下技能键
 function M:OnFireballPressed()

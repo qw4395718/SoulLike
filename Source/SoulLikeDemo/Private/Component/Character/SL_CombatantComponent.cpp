@@ -273,6 +273,7 @@ void USL_CombatantComponent::MoveToLocationAndRotation(FVector LocationPosition,
 	}
 }
 
+
 void USL_CombatantComponent::InitCombatComponentInfo(AActor* OwnerActor, FString OwnerMentagePath, int OwnerTeamID, bool OwnerCanBackStab)
 {
 	ActorOwner = OwnerActor;

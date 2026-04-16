@@ -21,8 +21,8 @@ local M = UnLua.Class()
 --function M:Tick(MyGeometry, InDeltaTime)
 --end
 
-function M:UpdateProgressBar(min,max,current)
-    self:UpdateProgressBar(min,max,current)
+function M:UpdateProgressInfo(min,max,current)
+    self:UpdateProgressInfo(min,max,current)
     if(current ~= self.m_currentProgressBarPercent)
     then
         if(current >= max) then

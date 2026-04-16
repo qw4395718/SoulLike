@@ -164,6 +164,8 @@ protected:
 		USL_AbilitySystemComponent* AbilitySystemComp;
 
 	UPROPERTY()
+		USL_StatusAttributeSet* StatusAttributeSet;
+	UPROPERTY()
 		USL_StatusAttributeSet* PlayerStatusSet;
 
 	// 先不设计组件管理器，直接创建组件使用

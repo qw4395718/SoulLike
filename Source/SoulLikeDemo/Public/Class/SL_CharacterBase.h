@@ -155,6 +155,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	FString GetNetworkGUIDString(AActor* InActor);
 protected:
 	/************************************************************************/
 	/*                                变量                                      */
@@ -165,6 +166,7 @@ protected:
 
 	UPROPERTY()
 		USL_StatusAttributeSet* StatusAttributeSet;
+
 	UPROPERTY()
 		USL_StatusAttributeSet* PlayerStatusSet;
 

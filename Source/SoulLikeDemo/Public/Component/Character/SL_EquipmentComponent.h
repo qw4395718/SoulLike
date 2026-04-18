@@ -15,7 +15,7 @@
 const INT EQUIPMENT_SLOT_NUM  = 5;
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SOULLIKEDEMO_API USL_EquipmentComponent : public UActorComponent,public IWeaponBehavior_IF
 {
 	GENERATED_BODY()

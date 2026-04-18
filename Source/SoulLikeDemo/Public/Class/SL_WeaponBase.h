@@ -76,6 +76,12 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_PlayWeaponMentage(AActor* OwnerActor, EWeaponModeTyoe MentageType, FName MentageSectionName);
 
+	UFUNCTION()
+		void OnRep_WeaponConfig();
+
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+
+
 protected:
 	/************************************************************************/
 	/*                               继承实现                                       */
@@ -105,6 +111,8 @@ protected:
 	// 播放武器蒙太奇
 	void PlayWeaponMentage(AActor* OwnerActor,EWeaponModeTyoe MentageType,FName MentageSectionName);
 
+	FString GetNetworkGUIDString(AActor* InActor);
+
 	// 攻击行为响应
 	void Attack(AActor* OwnerActor);
 
@@ -119,6 +127,7 @@ protected:
 
 	// 背刺行为响应
 	void BackStab(AActor* OwnerActor);
+
 protected:
 	/************************************************************************/
 	/*内部变量                                                                     */
@@ -127,6 +136,9 @@ protected:
 	// 武器ID
 	UPROPERTY()
 		uint32 WeaponID;
+
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponConfig)
+		FWeaponData WeaponConfig;
 
 	// 异步加载骨骼网格体模型
 		TSoftObjectPtr<USkeletalMesh> SoftMeshReference;

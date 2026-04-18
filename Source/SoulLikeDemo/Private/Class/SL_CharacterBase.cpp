@@ -8,6 +8,7 @@
 #include <Abilities/GameplayAbilityTypes.h>
 #include <Components/WidgetComponent.h>
 #include <UIManagerSubsystem.h>
+#include <Engine/PackageMapClient.h>
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 
@@ -70,6 +71,12 @@ void ASL_CharacterBase::BeginPlay()
 	}
 
 	UE_LOG(SL_CharacterBase, Display, TEXT("ZYF_C++_ASL_CharacterBase::BeginPlay()"));
+
+	UE_LOG(LogTemp, Warning, TEXT("Character %s BeginPlay: Role=%d, HasAuthority=%d, GUID=%s"),
+		*GetName(),
+		(int)GetLocalRole(),
+		HasAuthority(),
+		*GetNetworkGUIDString(this));
 }
 
 void ASL_CharacterBase::Tick(float DeltaTime)
@@ -150,6 +157,11 @@ void ASL_CharacterBase::AnimNotifyResponse(int NotifyType)
 
 void ASL_CharacterBase::PerformAttack()
 {	
+	UE_LOG(LogTemp, Warning, TEXT("Character %s BeginPlay: Role=%d, HasAuthority=%d NetworkGUID: %s"),
+		*GetName(),
+		(int)GetLocalRole(),
+		HasAuthority(),
+		*GetNetworkGUIDString(this));
 	if (CombatCmp)
 	{
 		CombatCmp->PerformAttack();
@@ -373,16 +385,16 @@ void ASL_CharacterBase::InitPartmentComponent()
 		TMap<EArrowKeyType, int> ActiveList;
 		TArray<FWeaponData> EquipmentWeaponList;
 
-		for (int i = 0;i< EQUIPMENT_SLOT_NUM*2;i++)
+		for (int i = 0;i< 1/*EQUIPMENT_SLOT_NUM*2*/;i++)
 		{ 
 			WeaponList.Add(100000+i);
 			ItemList.Add(200000+i);
 		}
 		
-		ActiveList.Add(EArrowKeyType::ARROWKEY_Left,0);
+		//ActiveList.Add(EArrowKeyType::ARROWKEY_Left,0);
 		ActiveList.Add(EArrowKeyType::ARROWKEY_Right, 0);
-		ActiveList.Add(EArrowKeyType::ARROWKEY_Up, 0);
-		ActiveList.Add(EArrowKeyType::ARROWKEY_Down, 0);
+		//ActiveList.Add(EArrowKeyType::ARROWKEY_Up, 0);
+		//ActiveList.Add(EArrowKeyType::ARROWKEY_Down, 0);
 		InventoryCmp->InitEquipmentInfo(WeaponList, ItemList, ActiveList);
 		InventoryCmp->GetEquipmentInfoList(EquipmentWeaponList);
 		if (EquipmentCmp != nullptr)
@@ -414,5 +426,43 @@ UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComp;
 }
+
+FString ASL_CharacterBase::GetNetworkGUIDString(AActor* InActor)
+{
+	if(InActor == nullptr){return TEXT("InActor InValid"); }
+	UNetDriver* NetDriver = InActor->GetWorld()->GetNetDriver();
+	if (InActor->GetLocalRole() == ROLE_Authority)
+	{
+		// 服务器端：遍历 ClientConnections
+		for (UNetConnection* NetConnection : NetDriver->ClientConnections)
+		{
+			// 找到拥有此 Actor 的那个连接
+			if (UPackageMapClient* PackageMapClient = Cast<UPackageMapClient>(NetConnection->PackageMap))
+			{
+				FNetworkGUID NetGUID = PackageMapClient->GetNetGUIDFromObject(InActor);
+				if (NetGUID.IsValid())
+				{
+					return NetGUID.ToString();
+				}
+			}
+		}
+	}
+	else
+	{
+		// 客户端端：使用 ServerConnection
+		UPackageMapClient* PackageMap = Cast<UPackageMapClient>(NetDriver->ServerConnection->PackageMap);
+
+		FNetworkGUID NetGUID = PackageMap->GetNetGUIDFromObject(InActor);
+		if (NetGUID.IsValid())
+		{
+			return NetGUID.ToString();
+		}
+		
+	}
+
+	return TEXT("Invalid GUID");
+}
+
+
 
 

@@ -3,6 +3,7 @@
 #include <GameplayEffectExtension.h>
 #include <GlobalDelegatesManager.h>
 #include <SL_Macros.h>
+#include <SL_CharacterBase.h>
 
 USL_StatusAttributeSet::USL_StatusAttributeSet() 
 {
@@ -28,6 +29,31 @@ void USL_StatusAttributeSet::InitHealthAS_Implementation(float MinValue, float M
 	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 	{
 		globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, MaxValue, MaxValue, MinValue, MaxValue);
+	}
+}
+
+void USL_StatusAttributeSet::OnRep_CurrentHealth()
+{
+	if (OwningActor != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnRep_CurrentHealth: OwningActor:%s Role:%d Attribute -> %.2f"), *(OwningActor->GetName()), (int)(OwningActor->GetLocalRole()), Health.GetCurrentValue());
+		if (ASL_CharacterBase* actor = Cast<ASL_CharacterBase>(OwningActor))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OnRep_CurrentHealth: OwningActorNGUID:%s "), *(actor->GetNetworkGUIDString(actor)));
+		}
+		const float DamageValue = GetDamage();
+		const float OldHealthValue = GetHealth();
+		const float MinHealthValue = 0.0f;
+		const float MaxHealthValue = GetMaxHealth();
+		const float NewHealthValue = FMath::Clamp(OldHealthValue - DamageValue, MinHealthValue, MaxHealthValue);
+
+		SetHealth(NewHealthValue);
+		const float CurrentHealth = GetHealth();
+		// 添加到全局委托的响应
+		if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
+		{
+			globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldHealthValue, CurrentHealth, MinHealthValue, MaxHealthValue);
+		}
 	}
 }
 

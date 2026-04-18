@@ -43,6 +43,8 @@ public:
 		void InitHealthAS(float MinValue, float MaxValue);
 	virtual void InitHealthAS_Implementation(float MinValue, float MaxValue);;
 
+	UFUNCTION()
+		void OnRep_CurrentHealth();
 	
 
 protected:
@@ -60,7 +62,7 @@ public:
 	/************************************************************************/
 	// 状态属性
     // 当前生命值
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, meta = (HideFromModifiers))
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth, meta = (HideFromModifiers))
     FGameplayAttributeData Health;
 
     // 最大生命值-后面需要移到次级属性中去

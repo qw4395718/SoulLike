@@ -34,7 +34,6 @@ void USL_EquipmentComponent::AttackBehaviorResponse(AActor* OwnerActor)
 
 	//检查是否有右手武器
 	CurrentRightHandWeapon->PerformWeaponAction(EWeaponModeTyoe::WEAPONMODE_Attack, OwnerActor);
-	CallLuaByFLuaTable();
 }
 
 void USL_EquipmentComponent::DefenceBehaviorResponse(AActor* OwnerActor)
@@ -96,27 +95,29 @@ void USL_EquipmentComponent::BackStabBehaviorResponse(AActor* OwnerActor)
 void USL_EquipmentComponent::InitEquipmentComponent(const TArray<FWeaponData> WeaponList, const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex,AActor* OwnerActor)
 {
 	// 检测武器数组与Item数组是否符合要求
-	check(WeaponList.Num() == EQUIPMENT_SLOT_NUM*2 && ItemList.Num() == EQUIPMENT_SLOT_NUM*2 && OwnerActor != nullptr)
+	check(/*WeaponList.Num() == EQUIPMENT_SLOT_NUM*2 && ItemList.Num() == EQUIPMENT_SLOT_NUM*2 &&*/ OwnerActor != nullptr)
 	// 持有者信息初始化
 	/*Owning = OwnerActor;*/
 	// 执行武器数组初始化
-	for (int i = 0; i < EQUIPMENT_SLOT_NUM*2; i++)
+	if(!OwnerActor->HasAuthority()){return;}
+	for (int i = 0; i < WeaponList.Num(); i++)
 	{
 		ASL_WeaponBase* NewWeapon = GetWorld()->SpawnActor<ASL_WeaponBase>(ASL_WeaponBase::StaticClass(),FTransform());
 		NewWeapon->InitWeaponInfo(WeaponList[i], OwnerActor);
 		NewWeapon->InActiveWeapon();
 		if (i < EQUIPMENT_SLOT_NUM)
 		{
-			LeftHandEquipmentInfoList[i] = NewWeapon;
+			RightHandEquipmentInfoList[i] = NewWeapon;
+			//LeftHandEquipmentInfoList[i] = NewWeapon;
 		}
 		else
 		{
-			RightHandEquipmentInfoList[i- EQUIPMENT_SLOT_NUM] = NewWeapon;
+			//RightHandEquipmentInfoList[i - EQUIPMENT_SLOT_NUM] = NewWeapon;
 		}
 		
 	}
 	// 执行道具数组初始化
-	for (int i = 0; i < EQUIPMENT_SLOT_NUM *2; i++)
+	for (int i = 0; i < ItemList.Num(); i++)
 	{
 		if (i < EQUIPMENT_SLOT_NUM)
 		{

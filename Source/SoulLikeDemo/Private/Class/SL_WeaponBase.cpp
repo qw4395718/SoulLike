@@ -8,6 +8,8 @@
 #include "Engine/AssetManager.h"
 #include "WeaponMeleeAttackComponent.h"
 #include "WeaponParryComponent.h"
+#include <Engine/PackageMapClient.h>
+#include <Net/UnrealNetwork.h>
 
 ASL_WeaponBase::ASL_WeaponBase()
 {
@@ -41,7 +43,6 @@ ASL_WeaponBase::ASL_WeaponBase()
 
 	// 开启网络复制
 	bReplicates = true;
-	SetReplicateMovement(true);
 }
 
 void ASL_WeaponBase::WeaponAnimNotifyResponse(int NotifyType)
@@ -188,6 +189,7 @@ void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo,AActor* OwnerA
 {
 	// 初始化持有者信息和插槽信息
 	Owning = OwnerActor;
+	WeaponConfig = WeaponInfo;
 	WeaponOnwerSocketName = WeaponInfo.SocketName;
 	// 加载武器模型
 	LoadWeaponMeshAsync(WeaponInfo.Mesh);
@@ -208,6 +210,12 @@ void ASL_WeaponBase::InitWeaponInfo(const FWeaponData& WeaponInfo,AActor* OwnerA
 
 	// 初始化武器中央管理组件
 	WeaponComboCoordinatorComp->InitComboCoordinatorComponet(WeaponInfo.ComboCoordinatorInfoMap);
+
+	UE_LOG(LogTemp, Warning, TEXT("=== InitWeaponInfo ==="));
+	UE_LOG(LogTemp, Warning, TEXT("Weapon: %s OwnerActorNetworkGUID: %s MulticastFunction called on %s"), *GetName(), *GetNetworkGUIDString(this), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"));
+	UE_LOG(LogTemp, Warning, TEXT("Weapon Owner: %s"), GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+	UE_LOG(LogTemp, Warning, TEXT("Param OwnerActor: %s"), OwnerActor ? *OwnerActor->GetName() : TEXT("NULL"));
+	UE_LOG(LogTemp, Warning, TEXT("WeaponMentageMap.Num: %d"), WeaponMentageMap.Num());
 }
 
 void ASL_WeaponBase::ActiveWeapon()
@@ -295,8 +303,28 @@ void ASL_WeaponBase::Server_PerformWeaponAction_Implementation(EWeaponModeTyoe A
 
 void ASL_WeaponBase::Multicast_PlayWeaponMentage_Implementation(AActor* OwnerActor, EWeaponModeTyoe MentageType, FName MentageSectionName)
 {
+	UE_LOG(LogTemp, Warning, TEXT("=== Multicast Received ==="));
+	UE_LOG(LogTemp, Warning, TEXT("Weapon: %s OwnerActorNetworkGUID: %s MulticastFunction called on %s"), *GetName(), *GetNetworkGUIDString(this), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"));
+	UE_LOG(LogTemp, Warning, TEXT("Weapon Owner: %s"), GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+	UE_LOG(LogTemp, Warning, TEXT("Param OwnerActor: %s"), OwnerActor ? *OwnerActor->GetName() : TEXT("NULL"));
+	UE_LOG(LogTemp, Warning, TEXT("WeaponMentageMap.Num: %d"), WeaponMentageMap.Num());
+
 	PlayWeaponMentage(OwnerActor, MentageType, MentageSectionName);
-	UE_LOG(LogTemp, Display, TEXT("Multicast_PlayWeaponMentage_Implementation Exec"));
+}
+
+void ASL_WeaponBase::OnRep_WeaponConfig()
+{
+	if (!HasAuthority() && WeaponConfig.Mesh != "" && WeaponMentageMap.Num() == 0)
+	{
+		InitWeaponInfo(WeaponConfig, Owning.Get());
+	}
+}
+
+
+void ASL_WeaponBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASL_WeaponBase, WeaponConfig);
 }
 
 void ASL_WeaponBase::LoadWeaponMeshAsync(const FString WeaponMeshName)
@@ -350,6 +378,10 @@ void ASL_WeaponBase::LoadWeaponMentageAsync(EWeaponModeTyoe MentageType, const F
 	if (Montage)
 	{
 		WeaponMentageMap.FindOrAdd(MentageType) = Montage;
+	}
+	else
+	{
+		return;
 	}
 
 }
@@ -471,4 +503,40 @@ void ASL_WeaponBase::PlayWeaponMentage(AActor* OwnerActor, EWeaponModeTyoe Menta
 			}
 		}
 	}
+}
+
+FString ASL_WeaponBase::GetNetworkGUIDString(AActor* InActor)
+{
+	if (InActor == nullptr) { return TEXT("InActor InValid"); }
+	UNetDriver* NetDriver = InActor->GetWorld()->GetNetDriver();
+	if (InActor->GetLocalRole() == ROLE_Authority)
+	{
+		// 服务器端：遍历 ClientConnections
+		for (UNetConnection* NetConnection : NetDriver->ClientConnections)
+		{
+			// 找到拥有此 Actor 的那个连接
+			if (UPackageMapClient* PackageMapClient = Cast<UPackageMapClient>(NetConnection->PackageMap))
+			{
+				FNetworkGUID NetGUID = PackageMapClient->GetNetGUIDFromObject(InActor);
+				if (NetGUID.IsValid())
+				{
+					return NetGUID.ToString();
+				}
+			}
+		}
+	}
+	else
+	{
+		// 客户端端：使用 ServerConnection
+		UPackageMapClient* PackageMap = Cast<UPackageMapClient>(NetDriver->ServerConnection->PackageMap);
+
+		FNetworkGUID NetGUID = PackageMap->GetNetGUIDFromObject(InActor);
+		if (NetGUID.IsValid())
+		{
+			return NetGUID.ToString();
+		}
+
+	}
+
+	return TEXT("Invalid GUID");
 }

@@ -1,10 +1,10 @@
-#include "SL_GameplayAbilityBase.h"
+ï»¿#include "SL_GameplayAbilityBase.h"
 #include "SL_CharacterBase.h"
 #include "SL_AbilitySystemComponent.h"
 
 USL_GameplayAbilityBase::USL_GameplayAbilityBase()
 {
-	// Ä¬ÈÏÖ§³ÖÍøÂç
+	// é»˜è®¤æ”¯æŒç½‘ç»œ
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 }
@@ -15,8 +15,8 @@ void USL_GameplayAbilityBase::ActivateAbility(const FGameplayAbilitySpecHandle H
 	const FGameplayEventData* TriggerEventData)
 {
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
-	{// ¼ì²éÏûºÄµÈĞĞÎªÊÇ·ñÊÜÏŞ
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+	{// æ£€æŸ¥æ¶ˆè€—ç­‰è¡Œä¸ºæ˜¯å¦å—é™
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
 
@@ -39,7 +39,7 @@ void USL_GameplayAbilityBase::PlayMontageForAbility(UAnimMontage* Montage, const
 	UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
 	if (ASC)
 	{
-		// °ó¶¨ÃÉÌ«ÆæÍê³ÉÊÂ¼ş
+		// ç»‘å®šè’™å¤ªå¥‡å®Œæˆäº‹ä»¶
 		//FOnMontageCompleteDelegate CompleteDelegate;
 		//CompleteDelegate.BindUObject(this, &USL_GameplayAbilityBase::OnMontageCompleted);
 		ASC->PlayMontage(this, ActivationInfo, Montage, PlayRate, NAME_None, PlayRate);
@@ -54,27 +54,30 @@ void USL_GameplayAbilityBase::ApplyEffectToTarget(TSubclassOf<UGameplayEffect> E
 	UAbilitySystemComponent* ASCSource = CurrentActorInfo->AbilitySystemComponent.Get();
 	if (IAbilitySystemInterface* TargetASC_IF = Cast<IAbilitySystemInterface>(Target))
 	{
-		// ´Ó½Ó¿Ú»ñÈ¡Ä¿±êµÄ AbilitySystemComponent
+		// ä»æ¥å£è·å–ç›®æ ‡çš„ AbilitySystemComponent
 		UAbilitySystemComponent* TargetASC = TargetASC_IF->GetAbilitySystemComponent();
 		if (!TargetASC)
 			return;
 
+		// åˆ›å»ºé¢„æµ‹çª—å£ï¼Œå°†åç»­æ“ä½œä¸å½“å‰PredictionKeyç»‘å®š
+		FScopedPredictionWindow ScopedWindow(ASCSource, true);
+
 		FGameplayEffectSpecHandle SpecHandle = ASCSource->MakeOutgoingSpec(EffectClass, Level, ASCSource->MakeEffectContext());
 		if (SpecHandle.IsValid())
 		{
-			ASCSource->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data, TargetASC);
+			ASCSource->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data, TargetASC, FPredictionKey(ScopedWindow.ScopedPredictionKey));
 		}
 	}
 }
 
 void USL_GameplayAbilityBase::OnMontageCompleted()
 {
-	// ÃÉÌ«Ææ²¥·ÅÍê³É£¬½áÊø¼¼ÄÜ
+	// è’™å¤ªå¥‡æ’­æ”¾å®Œæˆï¼Œç»“æŸæŠ€èƒ½
 	EndAbility(CurrentHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
 void USL_GameplayAbilityBase::OnMontageInterrupted()
 {
-	// ÃÉÌ«Ææ±»´ò¶Ï£¬È¡Ïû¼¼ÄÜ
+	// è’™å¤ªå¥‡è¢«æ‰“æ–­ï¼Œå–æ¶ˆæŠ€èƒ½
 	EndAbility(CurrentHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }

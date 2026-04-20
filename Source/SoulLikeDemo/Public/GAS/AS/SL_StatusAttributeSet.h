@@ -62,7 +62,7 @@ public:
 	/************************************************************************/
 	// 状态属性
     // 当前生命值
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth, meta = (HideFromModifiers))
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth/*, meta = (HideFromModifiers)*/)
     FGameplayAttributeData Health;
 
     // 最大生命值-后面需要移到次级属性中去

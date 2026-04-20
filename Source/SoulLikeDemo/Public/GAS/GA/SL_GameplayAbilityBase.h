@@ -65,5 +65,6 @@ protected:
 		void OnMontageInterrupted();
 
 	FGameplayAbilitySpecHandle CurrentHandle;
+
 	const FGameplayAbilityActorInfo* CurrentActorInfo;
 };

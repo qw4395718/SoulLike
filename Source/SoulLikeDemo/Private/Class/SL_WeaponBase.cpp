@@ -509,6 +509,7 @@ FString ASL_WeaponBase::GetNetworkGUIDString(AActor* InActor)
 {
 	if (InActor == nullptr) { return TEXT("InActor InValid"); }
 	UNetDriver* NetDriver = InActor->GetWorld()->GetNetDriver();
+	if (NetDriver == nullptr) { return TEXT("InActor NetDriver"); }
 	if (InActor->GetLocalRole() == ROLE_Authority)
 	{
 		// 服务器端：遍历 ClientConnections

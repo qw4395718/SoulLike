@@ -2,20 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
-#include "SL_GameplayAbilityBase.generated.h"
-
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAbilityActivatedDelegate,
-//UGameplayAbility*, Ability,
-//FGameplayAbilitySpecHandle, Handle,
-//const FGameplayAbilityActorInfo& , ActorInfo);
+#include "SL_GameplayAbilityComboBase.generated.h"
 
 UCLASS()
-class SOULLIKEDEMO_API USL_GameplayAbilityBase : public UGameplayAbility
+class SOULLIKEDEMO_API USL_GameplayAbilityComboBase : public UGameplayAbility
 {
 	GENERATED_BODY()
 
 public:
-	USL_GameplayAbilityBase();
+	USL_GameplayAbilityComboBase();
 
 	// 技能对应的Lua文件路径
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lua")
@@ -55,7 +50,7 @@ public:
 		void PlayMontageForAbility(UAnimMontage* Montage, const FGameplayAbilityActivationInfo ActivationInfo, float PlayRate = 1.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "Ability")
-		void ApplyEffectToTarget(TSubclassOf<UGameplayEffect> EffectClass, AActor* Target, float Level = 1.0f);
+		void ApplyEffectToTarget(TSubclassOf<UGameplayEffect> EffectClass, const AActor* const Target, float Level = 1.0f);
 
 protected:
 	UFUNCTION()
@@ -67,4 +62,10 @@ protected:
 	FGameplayAbilitySpecHandle CurrentHandle;
 
 	const FGameplayAbilityActorInfo* CurrentActorInfo;
+
+	UPROPERTY()
+	TSubclassOf<UGameplayEffect> AcitvateEffectClass;
+
+	UPROPERTY()
+		float AcitvateEffectLevel;
 };

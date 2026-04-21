@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+自动检测代码文件编码，若为GB2312则转换为UTF-8 with BOM
+用法: python convert_gb2312_to_utf8bom.py [目录路径]
+"""
+
+import os
+import sys
+import chardet
+
+# 需要处理的文件扩展名（可根据需要修改）
+TARGET_EXTENSIONS = {'.c', '.cpp', '.h', '.hpp', '.java', '.py', '.js', '.html', '.css', '.txt', '.csv', '.xml', '.json', '.properties'}
+
+def is_target_file(filename):
+    """判断是否为需要处理的代码文件"""
+    ext = os.path.splitext(filename)[1].lower()
+    return ext in TARGET_EXTENSIONS
+
+def detect_encoding(file_path):
+    """检测文件编码，返回编码名称和置信度"""
+    with open(file_path, 'rb') as f:
+        raw_data = f.read()
+        # 只读取足够的内容进行检测，提高性能
+        if len(raw_data) > 1024 * 1024:  # 如果文件大于1MB，只检测前1MB
+            raw_data = raw_data[:1024 * 1024]
+        result = chardet.detect(raw_data)
+        return result['encoding'], result['confidence']
+
+def convert_to_utf8bom(file_path):
+    """将GB2312编码的文件转换为UTF-8 with BOM"""
+    try:
+        # 检测编码
+        encoding, confidence = detect_encoding(file_path)
+        
+        # 检查是否为GB2312或其别名（GBK、GB18030等）
+        is_gb_family = encoding and encoding.upper() in ('GB2312', 'GBK', 'GB18030', 'GB-2312', 'GBK', 'GB18030')
+        
+        if not is_gb_family:
+            return False, f"不是GB2312系列编码 (检测到: {encoding}, 置信度: {confidence:.2f})"
+        
+        # 读取原文件内容
+        with open(file_path, 'r', encoding=encoding, errors='replace') as f:
+            content = f.read()
+        
+        # 写入UTF-8 with BOM格式
+        with open(file_path, 'w', encoding='utf-8-sig') as f:
+            f.write(content)
+        
+        return True, f"已转换 (原编码: {encoding}, 置信度: {confidence:.2f})"
+    
+    except Exception as e:
+        return False, f"转换失败: {str(e)}"
+
+def process_directory(root_dir):
+    """处理目录下的所有目标文件"""
+    converted_count = 0
+    skipped_count = 0
+    error_count = 0
+    
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        for filename in filenames:
+            if not is_target_file(filename):
+                continue
+            
+            file_path = os.path.join(dirpath, filename)
+            success, message = convert_to_utf8bom(file_path)
+            
+            if success:
+                print(f"✓ {file_path}\n  {message}")
+                converted_count += 1
+            elif "不是GB2312系列编码" in message:
+                # 跳过非GB2312文件，不打印详细信息以减少输出
+                skipped_count += 1
+                if '--verbose' in sys.argv:
+                    print(f"○ {file_path}\n  {message}")
+            else:
+                print(f"✗ {file_path}\n  {message}")
+                error_count += 1
+    
+    # 打印统计信息
+    print("\n" + "="*60)
+    print(f"处理完成！")
+    print(f"  转换文件数: {converted_count}")
+    print(f"  跳过文件数: {skipped_count}")
+    print(f"  错误文件数: {error_count}")
+    print("="*60)
+
+def main():
+    # 确定要处理的目录
+    if len(sys.argv) > 1:
+        target_dir = sys.argv[1]
+        # 过滤掉 --verbose 参数
+        if target_dir == '--verbose':
+            target_dir = '.'
+    else:
+        target_dir = '.'
+    
+    if not os.path.isdir(target_dir):
+        print(f"错误：'{target_dir}' 不是一个有效的目录")
+        sys.exit(1)
+    
+    print(f"开始处理目录: {os.path.abspath(target_dir)}")
+    print(f"目标文件扩展名: {', '.join(sorted(TARGET_EXTENSIONS))}")
+    print("-"*60)
+    
+    process_directory(target_dir)
+
+if __name__ == "__main__":
+    main()

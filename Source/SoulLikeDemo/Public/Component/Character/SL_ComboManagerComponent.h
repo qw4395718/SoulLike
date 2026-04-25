@@ -10,38 +10,6 @@
 #include <GameplayTagContainer.h>
 #include "SL_ComboManagerComponent.generated.h"
 
-class UGameplayAbility;
-
-UENUM(BlueprintType)
-enum class EComboInputActionType :uint8
-{
-	EComboInputAction_Min			UMETA(DisplayName = "None"),
-	EComboInputAction_Light			UMETA(DisplayName = "Light"),
-	EComboInputAction_Height		UMETA(DisplayName = "Height"),
-	EComboInputAction_Special		UMETA(DisplayName = "Special"),
-	EComboInputAction_Max			UMETA(DisplayName = "Light"),
-};
-
-
-USTRUCT(BlueprintType)
-struct FComboInfo
-{
-	GENERATED_BODY()
-
-	// 当前连击所需要的Tag窗口名
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FGameplayTag	ActiveRequireWindowTag;
-
-	// 连击所绑定的输入按键
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EComboInputActionType	InputActionType;
-
-	// 连击所属GA
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UGameplayAbility> NextAbilityClass;
-};
-
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SOULLIKEDEMO_API USL_ComboManagerComponent : public UActorComponent 
 {
@@ -63,18 +31,18 @@ public:
 	/************************************************************************/
 	// 委托-响应输入
 	UFUNCTION()
-	void HandleInputPressed(EComboInputActionType InputType);
+		void HandleInputPressed(EComboInputActionType InputType);
 
 protected:
 	/************************************************************************/
 	/*                              内部调用                                        */
 	/************************************************************************/
+	// 获取角色ASC
+	UAbilitySystemComponent* GetOwnerASC() const;
 
 protected:
 	/************************************************************************/
 	/*                              内部变量                                        */
 	/************************************************************************/
-	// 连击系统相关数据
-	TMap<FGameplayTag, TMap<EComboInputActionType, FComboInfo>> ComboInfoMap;
 	
 };

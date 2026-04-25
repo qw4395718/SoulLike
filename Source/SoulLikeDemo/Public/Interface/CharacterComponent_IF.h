@@ -44,4 +44,7 @@ public:
 
 	UFUNCTION()
 		virtual UActorComponent* GetStateComponent() = 0;
+
+	UFUNCTION()
+		virtual UActorComponent* GetComboManagerComponent() = 0;
 };

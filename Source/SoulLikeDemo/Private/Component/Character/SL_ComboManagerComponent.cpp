@@ -5,12 +5,15 @@
 #include <AbilitySystemComponent.h>
 #include <AbilitySystemInterface.h>
 #include <GameplayTagContainer.h>
+#include <DataTableManager.h>
+#include <ComboInfoTable.h>
 
 USL_ComboManagerComponent::USL_ComboManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
 }
+
 
 void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputType)
 {
@@ -20,20 +23,18 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 	{
 		// 从接口获取目标的 AbilitySystemComponent
 		UAbilitySystemComponent* ASC = ASC_IF->GetAbilitySystemComponent();
-		if (!ASC)
-			return;
+		RETURN_IF_TRUE(ASC == nullptr);
+
 		ASC->GetOwnedGameplayTags(currentTags);
 
-		// 遍历ComboInfoMap
-		for (const auto& pair : ComboInfoMap)
+		if (UDataTableManager* tableManager = UDataTableManager::Get(this))
 		{
-			if (currentTags.HasTag(pair.Key))
+			if (UComboInfoTable* comboInfoTable = Cast<UComboInfoTable>(tableManager->GetDataTable(EDataTableType::DT_ComboInfo)))
 			{
-				const auto& subPair = pair.Value;
-				if (subPair.Contains(InputType))
+				FComboInfo nextComboInfo{};
+				if (comboInfoTable->FindNextComboInfo(currentTags, InputType, nextComboInfo))
 				{
-					// 执行对应的GA
-					ASC->TryActivateAbilityByClass(subPair[InputType].NextAbilityClass);
+					ASC->TryActivateAbilityByClass(nextComboInfo.NextAbilityClass);
 					return;
 				}
 			}

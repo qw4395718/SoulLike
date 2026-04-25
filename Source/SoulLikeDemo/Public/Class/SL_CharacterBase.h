@@ -24,6 +24,7 @@ class USL_AbilitySystemComponent;
 class USL_StatusAttributeSet;
 class UGameplayAbility;
 class UWidgetComponent;
+class USL_ComboManagerComponent;
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,public ICharacterComponent_IF, public IAnimNotify_IF, public IAbilitySystemInterface
@@ -74,6 +75,9 @@ public:
 
 	UFUNCTION()
 		UActorComponent* GetStateComponent() override;
+
+	UFUNCTION()
+		UActorComponent* GetComboManagerComponent() override;
 
 	/************************************************************************/
 	/*                               接口实现(IAnimNotify_IF)                                       */
@@ -195,4 +199,7 @@ protected:
 
 	UPROPERTY()
 		UWidgetComponent* ScreenWidgetCmp;
+
+	UPROPERTY()
+		USL_ComboManagerComponent* ComboManagerCmp;
 };

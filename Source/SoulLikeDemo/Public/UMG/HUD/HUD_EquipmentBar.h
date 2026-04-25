@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "SoulLikeGameGlobal.h"
+#include "StatusEffectInfo.h"
 #include "HUD_EquipmentBar.generated.h"
 
 class UHUD_ItemIcon;

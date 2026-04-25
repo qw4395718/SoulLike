@@ -9,6 +9,8 @@
 #include <Components/WidgetComponent.h>
 #include <UIManagerSubsystem.h>
 #include <Engine/PackageMapClient.h>
+#include <GameplayTagContainer.h>
+#include <SL_ComboManagerComponent.h>
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 
@@ -146,6 +148,11 @@ UActorComponent* ASL_CharacterBase::GetStaminaComponent()
 UActorComponent* ASL_CharacterBase::GetStateComponent()
 {
 	return StateCmp;
+}
+
+UActorComponent* ASL_CharacterBase::GetComboManagerComponent()
+{
+	return ComboManagerCmp;
 }
 
 void ASL_CharacterBase::AnimNotifyResponse(int NotifyType)
@@ -419,6 +426,11 @@ void ASL_CharacterBase::InitPartmentComponent()
 	{
 		MovementCmp = NewObject<USL_MovementComponent>(this);
 		MovementCmp->InitMovemenetInfo(true,"");
+	}
+
+	if (ComboManagerCmp == nullptr && true)
+	{
+		ComboManagerCmp = NewObject<USL_ComboManagerComponent>(this);
 	}
 }
 

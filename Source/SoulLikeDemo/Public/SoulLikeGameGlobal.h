@@ -1,5 +1,11 @@
 #pragma once
+#include "CoreMinimal.h"
 #include "SL_Macros.h"
+#include <GameplayTagContainer.h>
+#include <Engine/DataTable.h>
+#include "SoulLikeGameGlobal.generated.h"
+
+class UGameplayAbility;
 
 /************************************************************************/
 /*                              Const                                         */
@@ -7,25 +13,25 @@
 #define UNLUA_INCLUDED
 
 // 角色配置-背刺距离限制
-const INT BACKSTAB_DISTANCE_THRESHOLD = 150;
+const int BACKSTAB_DISTANCE_THRESHOLD = 150;
 
 // 角色配置-背刺角度限制
-const INT BACKSTAB_ANGLE_THRESHOLD = 30;
+const int BACKSTAB_ANGLE_THRESHOLD = 30;
 
 // 角色配置-处决距离限制
-const INT EXECUTE_DISTANCE_THRESHOLD = 150;
+const int EXECUTE_DISTANCE_THRESHOLD = 150;
 
 // 特殊攻击(背刺,处决)检测半径
-const INT DETECTION_RADIUS = 150;
+const int DETECTION_RADIUS = 150;
 
 // 装备栏单栏的槽位数量
-const INT EQUIPMENT_SINGLE_CAPACITY = 4;
+const int EQUIPMENT_SINGLE_CAPACITY = 4;
 
 // 仓库分栏类型数量
-const INT INVENTORYTYPE_NUM = 12;
+const int INVENTORYTYPE_NUM = 12;
 
 // 仓库单栏类型容纳数量
-const INT INVENTORY_SINGLE_CAPACITY = 100;
+const int INVENTORY_SINGLE_CAPACITY = 100;
 
 // 减伤最大上限
 const float REDUCE_DAMAGE_PERCENTAGE = 0.9f;
@@ -34,10 +40,10 @@ const float REDUCE_DAMAGE_PERCENTAGE = 0.9f;
 const float REDUCE_STAMINACOST_PERCENTAGE = 0.5f;
 
 // 对话选项栏最大缓存交互控件个数
-const INT INTERACT_BTN_MAX = 5;
+const int INTERACT_BTN_MAX = 5;
 
 // 对话选项栏控件高度
-const INT INTERACT_BTN_HEIGHT = 40;
+const int INTERACT_BTN_HEIGHT = 40;
 
 /************************************************************************/
 /*                              Enum                                         */
@@ -277,6 +283,16 @@ enum class EPawnStatusOperation :uint8
 	EPawnStatusOperation_Max
 };
 
+UENUM(BlueprintType)
+enum class EComboInputActionType :uint8
+{
+	EComboInputAction_None			UMETA(DisplayName = "None"),
+	EComboInputAction_Light			UMETA(DisplayName = "Light"),
+	EComboInputAction_Height		UMETA(DisplayName = "Height"),
+	EComboInputAction_Special		UMETA(DisplayName = "Special"),
+	EComboInputAction_Max			UMETA(Hidden),
+};
+
 
 /************************************************************************/
 /*                              Struct                                         */
@@ -325,4 +341,22 @@ struct FStatusIconInfo
 	int32 TotalTime;
 	int32 ElapsedTime;
 };
+USTRUCT(BlueprintType)
+struct FComboInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	// 当前连击所需要的Tag窗口名
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FGameplayTag	ActiveRequireWindowTag;
+
+	// 连击所绑定的输入按键
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		EComboInputActionType	InputActionType;
+
+	// 连击所属GA
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TSubclassOf<UGameplayAbility> NextAbilityClass;
+};
+
 

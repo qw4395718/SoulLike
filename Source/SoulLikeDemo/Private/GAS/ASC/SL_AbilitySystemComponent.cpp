@@ -44,3 +44,27 @@ void USL_AbilitySystemComponent::ClearAbilityByHandle(FGameplayAbilitySpecHandle
 {
 	Super::ClearAbility(Handle);
 }
+
+TArray<UGameplayTask*> USL_AbilitySystemComponent::GetCurrentlyActiveTasks()
+{
+	TArray<UGameplayTask*> ActiveTasks;
+
+	// 遍历所有激活的技能（Ability）
+	for (const FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+	{
+		if (Spec.IsActive())
+		{
+			for (UGameplayAbility* AbilityInstance : Spec.GetAbilityInstances())
+			{
+				if (AbilityInstance)
+				{
+					// 获取该技能当前所有活跃的任务
+					TArray<UGameplayTask*> AbilityTasks = GetAbilityActiveTasks(AbilityInstance);
+					ActiveTasks.Append(AbilityTasks);
+				}
+			}
+		}
+	}
+
+	return ActiveTasks;
+}

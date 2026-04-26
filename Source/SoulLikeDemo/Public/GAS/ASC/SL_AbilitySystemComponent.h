@@ -30,4 +30,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GAS")
 		void ClearAbilityByHandle(FGameplayAbilitySpecHandle Handle);
 
+	UFUNCTION()
+		TArray<UGameplayTask*> GetCurrentlyActiveTasks();
+
 };

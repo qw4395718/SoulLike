@@ -51,23 +51,18 @@ protected:
 		void OnMontageInterrupted();
 
 	UFUNCTION()
-		void OnComboInputReceived(FGameplayEventData EventData);
+		UActorComponent* GetComboManager() const;
 
 	UFUNCTION()
-		void OnAllowBlendReceived(FGameplayEventData EventData);
+		void RegisterActiveComboTask(UAbilityTask_ComboMontage* InTask);
 
-	/** 执行缓存的连击 */
-	void ExecutePendingCombo();
+	UFUNCTION()
+		void UnRegisterActiveComboTask();
 
 protected:
 	/************************************************************************/
 	/*                              可访问                                        */
 	/************************************************************************/
-
-	FGameplayAbilitySpecHandle CurrentHandle;
-
-	const FGameplayAbilityActorInfo* CurrentActorInfo;
-
 	UPROPERTY()
 	TSubclassOf<UGameplayEffect> AcitvateEffectClass;
 
@@ -107,9 +102,10 @@ private:
 	UPROPERTY()
 		UAbilityTask_ComboMontage* ComboMontageTask;
 
+	mutable TWeakObjectPtr<UActorComponent> CachedComboManager;
+
 	// 输入缓存
 	bool bHasPendingCombo = false;
-	TSubclassOf<UGameplayAbility> PendingNextGA;
 
 	// 标志
 	bool bAllowBlendReached = false;

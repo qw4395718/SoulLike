@@ -3,6 +3,7 @@
 #include "SL_AbilitySystemComponent.h"
 #include <AT/AbilityTask_ComboMontage.h>
 #include <Abilities/Tasks/AbilityTask_WaitGameplayEvent.h>
+#include <SL_ComboManagerComponent.h>
 
 USL_GameplayAbilityComboBase::USL_GameplayAbilityComboBase()
 {
@@ -16,7 +17,8 @@ void USL_GameplayAbilityComboBase::ActivateAbility(const FGameplayAbilitySpecHan
 	const FGameplayAbilityActivationInfo ActivationInfo,
 	const FGameplayEventData* TriggerEventData)
 {
-	if (ActorInfo == nullptr || TriggerEventData == nullptr)
+	Super::ActivateAbility(Handle, ActorInfo,ActivationInfo, TriggerEventData);
+	if (ActorInfo == nullptr)
 	{// 安全性检查
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
@@ -39,41 +41,23 @@ void USL_GameplayAbilityComboBase::ActivateAbility(const FGameplayAbilitySpecHan
 
 		ComboMontageTask->OnCompleted.AddDynamic(this, &USL_GameplayAbilityComboBase::OnMontageCompleted);
 		ComboMontageTask->OnInterrupted.AddDynamic(this, &USL_GameplayAbilityComboBase::OnMontageInterrupted);
+		RegisterActiveComboTask(ComboMontageTask);
 		ComboMontageTask->ReadyForActivation();
+
+		UE_LOG(LogTemp, Warning, TEXT("WindowTag_ActivateAbility"));
 	}
 	else
 	{
 		// 没有动画就直接结束
+		UnRegisterActiveComboTask();
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
-
-	// ====== 2. 监听ComboManager发来的输入事件 ======
-	UAbilityTask_WaitGameplayEvent* WaitComboInput = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
-		this,
-		FGameplayTag::RequestGameplayTag(TEXT("Event.Combo.InputReceived")),
-		nullptr,
-		false,
-		true // OnlyTriggerOnce = true，只需要一次
-	);
-	WaitComboInput->EventReceived.AddDynamic(this, &USL_GameplayAbilityComboBase::OnComboInputReceived);
-	WaitComboInput->ReadyForActivation();
-
-	// ====== 3. 监听AnimNotify发来的AllowBlend事件 ======
-	UAbilityTask_WaitGameplayEvent* WaitAllowBlend = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
-		this,
-		FGameplayTag::RequestGameplayTag(TEXT("Event.Combo.AllowBlend")),
-		nullptr,
-		false,
-		true
-	);
-	WaitAllowBlend->EventReceived.AddDynamic(this, &USL_GameplayAbilityComboBase::OnAllowBlendReceived);
-	WaitAllowBlend->ReadyForActivation();
-
 }
 
 void USL_GameplayAbilityComboBase::EndAbilityForBP(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo& ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	UnRegisterActiveComboTask();
 	EndAbility(Handle, &ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
@@ -105,103 +89,55 @@ void USL_GameplayAbilityComboBase::ApplyEffectToTarget(TSubclassOf<UGameplayEffe
 
 void USL_GameplayAbilityComboBase::OnMontageCompleted()
 {
+	RETURN_IF_TRUE(CurrentActorInfo == nullptr);
 	// 蒙太奇播放完成，结束技能
-	EndAbility(CurrentHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+	UnRegisterActiveComboTask();
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
 void USL_GameplayAbilityComboBase::OnMontageInterrupted()
 {
-	// 蒙太奇被打断，取消技能
-	// 激活缓存的下一招
-	if (bHasPendingCombo && PendingNextGA)
-	{
-		UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
-		if (ASC)
-		{
-			ASC->TryActivateAbilityByClass(PendingNextGA);
-		}
-	}
-
-	EndAbility(CurrentHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+	RETURN_IF_TRUE(CurrentActorInfo == nullptr);
+	// 蒙太奇播放中断，结束技能
+	UnRegisterActiveComboTask();
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
-void USL_GameplayAbilityComboBase::OnComboInputReceived(FGameplayEventData EventData)
+UActorComponent* USL_GameplayAbilityComboBase::GetComboManager() const
 {
-	// 从事件中提取下一招GA的Class
-	UClass* NextGAClass = const_cast<UClass*>(Cast<UClass>(EventData.OptionalObject));
-	if (!NextGAClass)
+	// 使用缓存
+	if (CachedComboManager.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[GA_Combo] Received combo input but no NextGA class provided"));
-		return;
+		return CachedComboManager.Get();
 	}
 
-	PendingNextGA = NextGAClass;
-	bComboInputReceived = true;
-
-	UE_LOG(LogTemp, Log, TEXT("[GA_Combo] Combo input received. NextGA=%s, bAllowBlend=%d"),
-		*PendingNextGA->GetName(),
-		bAllowBlendReached);
-
-	// 检查是否可以立即执行
-	if (bRespectBlendWindow)
+	// 从当前Avatar拿到信息
+	AActor* actor = GetAvatarActorFromActorInfo();
+	if (actor)
 	{
-		if (bAllowBlendReached && ComboMontageTask && ComboMontageTask->IsReadyToBlend())
-		{
-			// 已到达AllowBlend，立即打断并缓存下一招
-			bHasPendingCombo = true;
-			ComboMontageTask->RequestBlendOut();
-		}
-		else
-		{
-			// 还没到AllowBlend，仅标记缓存
-			bHasPendingCombo = true;
-			UE_LOG(LogTemp, Log, TEXT("[GA_Combo] Combo cached, waiting for AllowBlend"));
-		}
+		CachedComboManager = actor->FindComponentByClass<USL_ComboManagerComponent>();
 	}
-	else
-	{
-		// 不尊重窗口，直接打断
-		bHasPendingCombo = true;
-		ComboMontageTask->RequestBlendOut();
-	}
+
+	return CachedComboManager.Get();
 }
 
-void USL_GameplayAbilityComboBase::OnAllowBlendReceived(FGameplayEventData EventData)
+void USL_GameplayAbilityComboBase::RegisterActiveComboTask(UAbilityTask_ComboMontage* InTask)
 {
-	bAllowBlendReached = true;
-
-	UE_LOG(LogTemp, Log, TEXT("[GA_Combo] AllowBlend received. bHasPendingCombo=%d, PendingGA=%s"),
-		bHasPendingCombo,
-		PendingNextGA ? *PendingNextGA->GetName() : TEXT("None"));
-
-	// 通知Task
-	if (ComboMontageTask)
+	// 注册到ComboManager中
+	if (USL_ComboManagerComponent* ComboMgr =Cast<USL_ComboManagerComponent>(GetComboManager()))
 	{
-		ComboMontageTask->OnAllowBlendReached();
+		ComboMgr->RegisterActiveComboTask(InTask);
+		ComboMgr->ClearTargetWindowTag();
 	}
+	UE_LOG(LogTemp, Warning, TEXT("WindowTag_RegisterActiveComboTask"));
 
-	// 如果有缓存的连击输入，且允许混合，立即执行
-	if (bHasPendingCombo && bAllowBlendReached)
-	{
-		ExecutePendingCombo();
-	}
 }
 
-void USL_GameplayAbilityComboBase::ExecutePendingCombo()
+void USL_GameplayAbilityComboBase::UnRegisterActiveComboTask()
 {
-	if (!PendingNextGA)
+	if (USL_ComboManagerComponent* ComboMgr = Cast<USL_ComboManagerComponent>(GetComboManager()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[GA_Combo] ExecutePendingCombo called but no pending GA"));
-		return;
+		ComboMgr->UnregisterActiveComboTask();
 	}
-
-	UE_LOG(LogTemp, Log, TEXT("[GA_Combo] Executing pending combo → %s"), *PendingNextGA->GetName());
-
-	// 请求Task打断动画
-	if (ComboMontageTask && !ComboMontageTask->IsReadyToBlend())
-	{
-		// 如果已经可以混合就立即打断，否则标记等待
-		ComboMontageTask->RequestBlendOut();
-	}
-	// 注意：下一招的激活在 OnMontageInterrupted 中处理
 }
+

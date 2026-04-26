@@ -3,6 +3,7 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemGlobals.h"
 #include <Animation/AnimInstance.h>
+#include <AbilitySystemInterface.h>
 
 UAbilityTask_ComboMontage* UAbilityTask_ComboMontage::CreateComboMontageTask(
 	UGameplayAbility* OwningAbility,
@@ -17,28 +18,12 @@ UAbilityTask_ComboMontage* UAbilityTask_ComboMontage::CreateComboMontageTask(
 	return Task;
 }
 
-void UAbilityTask_ComboMontage::RequestBlendOut()
-{
-	if (bHasFinished) return;
-
-	if (bReadyToBlend)
-	{
-		// 已经可以混合，立即执行
-		ExecuteBlendOut();
-	}
-	else
-	{
-		// 还没到AllowBlend，标记等待
-		bBlendOutRequested = true;
-		UE_LOG(LogTemp, Log, TEXT("[ComboTask] BlendOut requested but not ready yet, pending"));
-	}
-}
-
-void UAbilityTask_ComboMontage::OnAllowBlendReached()
+void UAbilityTask_ComboMontage::OnAllowBlendReached(FGameplayTag CurrentWindowTag)
 {
 	if (bHasFinished) return;
 
 	bReadyToBlend = true;
+	ComboWindowTag = CurrentWindowTag;
 
 	// 如果有暂存的输入，立即执行打断
 	if (bBlendOutRequested) {
@@ -47,7 +32,29 @@ void UAbilityTask_ComboMontage::OnAllowBlendReached()
 	}
 }
 
+bool UAbilityTask_ComboMontage::OnInputReceived(EComboInputActionType InputAction)
+{
+	if (bHasFinished || 
+		InputAction <= EComboInputActionType::EComboInputAction_None ||
+		InputAction >= EComboInputActionType::EComboInputAction_Max) 
+		return false;
 
+	if (bReadyToBlend)
+	{
+		// 情形A：已经可以混合，直接打断
+		UE_LOG(LogTemp, Log, TEXT("[ComboTask] Immediate blend out on input"));
+		ExecuteBlendOut();
+		return true;
+	}
+	else
+	{
+		// 情形B：还未到AllowBlend，缓存输入
+		bHasPendingInput = true;
+		bBlendOutRequested = true;
+		UE_LOG(LogTemp, Log, TEXT("[ComboTask] Input cached, waiting for AllowBlend"));
+		return true;
+	}
+}
 
 void UAbilityTask_ComboMontage::Activate()
 {
@@ -110,11 +117,6 @@ void UAbilityTask_ComboMontage::OnDestroy(bool bInOwnerFinished)
 	Super::OnDestroy(bInOwnerFinished);
 }
 
-
-
-
-
-
 void UAbilityTask_ComboMontage::OnMontageCompleted(UAnimMontage* InMontage, bool bInterrupted)
 {
 	if (bHasFinished) return;
@@ -159,7 +161,7 @@ void UAbilityTask_ComboMontage::ExecuteBlendOut()
 		{
 			AnimInstance->Montage_Stop(BlendOutTime, Montage);
 		}
-	}
+	}	
 
 	// 通知GA：动画被打断了
 	OnInterrupted.Broadcast();

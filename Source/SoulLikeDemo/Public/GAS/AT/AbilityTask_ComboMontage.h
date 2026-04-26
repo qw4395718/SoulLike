@@ -50,12 +50,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combo")
 		bool IsReadyToBlend() const { return bReadyToBlend; }
 
-	/** 请求主动打断（带混合时间） */
-	UFUNCTION(BlueprintCallable, Category = "Combo")
-		void RequestBlendOut();
-
 	/** 被动画通知调用：标记已到达允许混合的位置 */
-	void OnAllowBlendReached();
+	void OnAllowBlendReached(FGameplayTag CurrentWindowTag);
+
+	UFUNCTION(BlueprintCallable, Category = "Combo")
+		bool OnInputReceived(EComboInputActionType InputAction);
+
+
 
 	virtual void Activate() override;
 	virtual void OnDestroy(bool bInOwnerFinished) override;
@@ -91,6 +92,12 @@ private:
     // 播放的蒙太奇
     UPROPERTY()
         UAnimMontage* Montage;
+
+    UPROPERTY()
+        FGameplayTag ComboWindowTag;
+
+	/** 在AllowBlend之前是否有暂存的输入 */
+	bool bHasPendingInput = false;
 
     // 混合出时间
     float BlendOutTime = 0.2f;

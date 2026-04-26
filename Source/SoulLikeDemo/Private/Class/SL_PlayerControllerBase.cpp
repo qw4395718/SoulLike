@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Engine/World.h"
 #include <UIManagerSubsystem.h>
+#include <SL_ComboManagerComponent.h>
 
 // 构造函数
 ASL_PlayerControllerBase::ASL_PlayerControllerBase()
@@ -55,6 +56,32 @@ void ASL_PlayerControllerBase::OnUnPossess()
 	Super::OnUnPossess();
 }
 
+void ASL_PlayerControllerBase::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+	if (!InputComponent) return;
+
+	// 方式一：使用 EInputEvent 精确控制按键时序
+	   // IE_Pressed:  按下瞬间
+	   // IE_Released: 松开瞬间
+	   // IE_Repeat:   按住持续触发
+
+	   // 轻攻击（X键 / 鼠标左键）
+	InputComponent->BindAction("LightAttack", IE_Pressed, this, &ASL_PlayerControllerBase::OnLightAttackPressed);
+	InputComponent->BindAction("LightAttack", IE_Released, this, &ASL_PlayerControllerBase::OnLightAttackReleased);
+
+	// 重攻击（Y键 / 鼠标右键）
+	InputComponent->BindAction("HeavyAttack", IE_Pressed, this, &ASL_PlayerControllerBase::OnHeavyAttackPressed);
+	InputComponent->BindAction("HeavyAttack", IE_Released, this, &ASL_PlayerControllerBase::OnHeavyAttackReleased);
+
+	// 特殊攻击（B键）
+	InputComponent->BindAction("SpecialAttack", IE_Pressed, this, &ASL_PlayerControllerBase::OnSpecialAttackPressed);
+
+	// 闪避（A键）
+	InputComponent->BindAction("Dodge", IE_Pressed, this, &ASL_PlayerControllerBase::OnDodgePressed);
+
+}
+
 // 设置纯UI输入模式（鼠标控制UI）
 void ASL_PlayerControllerBase::SetInputModeUIOnly(UWidget* InWidgetToFocus)
 {
@@ -97,6 +124,7 @@ void ASL_PlayerControllerBase::SetInputModeGameAndUI(UWidget* InWidgetToFocus, b
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
 }
+
 
 // 获取当前控制的角色
 ASL_CharacterBase* ASL_PlayerControllerBase::GetMyPlayerCharacter() const
@@ -141,4 +169,63 @@ void ASL_PlayerControllerBase::DestroyPlayerStatusUI()
 		return;
 	}
 	UIManager->CloseWidget(EWidgetType::EWIDGET_PlayerStatus);
+}
+
+void ASL_PlayerControllerBase::OnLightAttackPressed()
+{
+	ProcessComboInput(EComboInputActionType::EComboInputAction_Light);
+}
+
+void ASL_PlayerControllerBase::OnLightAttackReleased()
+{
+
+}
+
+void ASL_PlayerControllerBase::OnHeavyAttackPressed()
+{
+	ProcessComboInput(EComboInputActionType::EComboInputAction_Height);
+}
+
+void ASL_PlayerControllerBase::OnHeavyAttackReleased()
+{
+
+}
+
+void ASL_PlayerControllerBase::OnSpecialAttackPressed()
+{
+	ProcessComboInput(EComboInputActionType::EComboInputAction_Special);
+}
+
+void ASL_PlayerControllerBase::OnDodgePressed()
+{
+
+}
+
+USL_ComboManagerComponent* ASL_PlayerControllerBase::GetComboManagerComponent() const
+{
+	// 使用缓存
+	if (CachedComboManager.IsValid())
+	{
+		return CachedComboManager.Get();
+	}
+
+	// 从当前控制的 Pawn 上查找
+	APawn* ControlledPawn = GetPawn();
+	if (ControlledPawn)
+	{
+		CachedComboManager = ControlledPawn->FindComponentByClass<USL_ComboManagerComponent>();
+	}
+
+	return CachedComboManager.Get();
+
+}
+
+void ASL_PlayerControllerBase::ProcessComboInput(EComboInputActionType InputType)
+{
+
+	USL_ComboManagerComponent* ComboMgr = GetComboManagerComponent();
+	if (ComboMgr)
+	{
+		ComboMgr->HandleInputPressed(InputType);
+	}
 }

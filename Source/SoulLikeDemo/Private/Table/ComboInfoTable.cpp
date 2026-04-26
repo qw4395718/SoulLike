@@ -81,6 +81,7 @@ bool UComboInfoTable::InitializeFromAsset(TSoftObjectPtr<UDataTable> TableAsset)
 
 bool UComboInfoTable::PostExecuteData()
 {
+	LoadState = ETableLoadState::Loaded;
 	return true;
 }
 

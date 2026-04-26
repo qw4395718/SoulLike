@@ -2,6 +2,9 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystemGlobals.h"
+#include <SL_AbilitySystemComponent.h>
+#include <AT/AbilityTask_ComboMontage.h>
+#include <SL_ComboManagerComponent.h>
 
 void USL_ComboWindow_ANS::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
@@ -9,42 +12,54 @@ void USL_ComboWindow_ANS::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 
 	if (!MeshComp || !MeshComp->GetOwner()) return;
 
-	AActor* Owner = MeshComp->GetOwner();
-	UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner);
+	// 获取ASC
+	IAbilitySystemInterface* ASCInterface = Cast<IAbilitySystemInterface>(MeshComp->GetOwner());
+	if (!ASCInterface) return;
+
+	// 获取ComboManager
+	USL_ComboManagerComponent* comboManagerComp = MeshComp->GetOwner()->FindComponentByClass<USL_ComboManagerComponent>();
+	if (!comboManagerComp) return;
+
+	USL_AbilitySystemComponent* ASC = Cast<USL_AbilitySystemComponent>(ASCInterface->GetAbilitySystemComponent());
 	if (!ASC) return;
 
 	switch (WindowEvent)
 	{
 	case EComboWindowEvent::BeginWindow:
+		// 清理上一轮的窗口Tag
+		// 给角色添加窗口Tag
 		if (ComboWindowTag.IsValid())
 		{
 			ASC->AddLooseGameplayTag(ComboWindowTag);
-			UE_LOG(LogTemp, Verbose, TEXT("[ComboNotify] Begin Window: %s"), *ComboWindowTag.ToString());
+			comboManagerComp->SetNeedClearTag(ComboWindowTag);
+			UE_LOG(LogTemp, Warning, TEXT("WindowTag_Notify BeginWindow: %s"), *ComboWindowTag.ToString());
+
 		}
 		break;
 
 	case EComboWindowEvent::AllowBlend:
-		// 发送GameplayEvent通知当前GA
+		// 通知当前激活的ComboTask：可以物理混合了
+		// Task会绑定在Ability上，我们通过ASC查找
 	{
-		FGameplayEventData EventData;
-		EventData.Instigator = Owner;
-		EventData.Target = Owner;
-		// 将窗口Tag传递给GA，方便GA做日志/判断
-		EventData.EventTag = ComboWindowTag;
-
-		ASC->HandleGameplayEvent(
-			FGameplayTag::RequestGameplayTag(TEXT("Event.Combo.AllowBlend")),
-			&EventData
-		);
-		UE_LOG(LogTemp, Verbose, TEXT("[ComboNotify] AllowBlend: %s"), *ComboWindowTag.ToString());
+		TArray<UGameplayTask*> ActiveTasks = ASC->GetCurrentlyActiveTasks();
+		for (UGameplayTask* Task : ActiveTasks)
+		{
+			UAbilityTask_ComboMontage* ComboTask = Cast<UAbilityTask_ComboMontage>(Task);
+			if (ComboTask && ComboTask->IsActive())
+			{
+				ComboTask->OnAllowBlendReached(ComboWindowTag);
+				break;
+			}
+		}
 	}
 	break;
 
 	case EComboWindowEvent::EndWindow:
+		// 移除窗口Tag
 		if (ComboWindowTag.IsValid())
 		{
 			ASC->RemoveLooseGameplayTag(ComboWindowTag);
-			UE_LOG(LogTemp, Verbose, TEXT("[ComboNotify] End Window: %s"), *ComboWindowTag.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("WindowTag_Notify EndWindow: %s"), *ComboWindowTag.ToString());
 		}
 		break;
 	}

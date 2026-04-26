@@ -1,12 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include <SL_ComboManagerComponent.h>
+#include "SL_ComboManagerComponent.h"
 #include <AbilitySystemComponent.h>
 #include <AbilitySystemInterface.h>
 #include <GameplayTagContainer.h>
-#include <DataTableManager.h>
-#include <ComboInfoTable.h>
+#include "DataTableManager.h"
+#include "ComboInfoTable.h"
+#include <AT/AbilityTask_ComboMontage.h>
 
 USL_ComboManagerComponent::USL_ComboManagerComponent()
 {
@@ -19,52 +20,105 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 {
 	// 获取当前角色的激活窗口状态(连击激活窗口状态同一时间只会有一个,并且永远会有一个)
 	FGameplayTagContainer currentTags;
-	if (IAbilitySystemInterface* ASC_IF = Cast<IAbilitySystemInterface>(GetOwner()))
+	if (UAbilitySystemComponent* ASC = GetCacheASC())
 	{
-		// 从接口获取目标的 AbilitySystemComponent
-		UAbilitySystemComponent* ASC = ASC_IF->GetAbilitySystemComponent();
-		RETURN_IF_TRUE(ASC == nullptr);
-
 		ASC->GetOwnedGameplayTags(currentTags);
-
 		if (UDataTableManager* tableManager = UDataTableManager::Get(this))
 		{
 			if (UComboInfoTable* comboInfoTable = Cast<UComboInfoTable>(tableManager->GetDataTable(EDataTableType::DT_ComboInfo)))
 			{
-				FComboInfo nextComboInfo{};
-				if (comboInfoTable->FindNextComboInfo(currentTags, InputType, nextComboInfo))
+				
+				// 检查是否有任何State.Window.* Tag存在
+				const FGameplayTag ComboWindowRoot = FGameplayTag::RequestGameplayTag(TEXT("State.Window"));
+				bool bInComboWindow = currentTags.HasTag(ComboWindowRoot);
+
+				if (bInComboWindow)
 				{
-					// ASC->TryActivateAbilityByClass(nextComboInfo.NextAbilityClass);
-					// 不直接激活GA，而是发送一个预定义Event
-					SendComboEvent(
-						FGameplayTag::RequestGameplayTag(TEXT("Event.ComboSystem.InputReceived")),
-						nextComboInfo.NextAbilityClass);
-					return;
+					if (comboInfoTable->FindNextComboInfo(currentTags, InputType, nextComboInfo))
+					{
+						if (ActiveComboTask.IsValid())
+						{
+							bool bAccepted = ActiveComboTask->OnInputReceived(InputType);
+							if (bAccepted)
+							{
+								// 将行为委托给AT
+								ActiveComboTask->OnInterrupted.AddUniqueDynamic(this, &USL_ComboManagerComponent::OnMontageBlendOut);
+							}
+						}
+					}
 				}
+				else
+				{
+					// 没有正在执行的TASK,执行初始连段
+					FGameplayTagContainer firstAttackTags;
+					firstAttackTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("State.Window.None")));
+
+					if (comboInfoTable->FindNextComboInfo(firstAttackTags, InputType, nextComboInfo))
+					{
+						// 执行初始连段
+						ASC->TryActivateAbilityByClass(nextComboInfo.NextAbilityClass);
+						return;
+					}
+				}
+				
 			}
+				
 		}
 	}
 }
 
-void USL_ComboManagerComponent::SendComboEvent(const FGameplayTag& EventTag, TSubclassOf<UGameplayAbility> NextAbility)
+void USL_ComboManagerComponent::OnMontageBlendOut()
 {
+	if (UAbilitySystemComponent* ASC = GetCacheASC())
+	{
+		ASC->TryActivateAbilityByClass(nextComboInfo.NextAbilityClass);
+	}
+}
+
+void USL_ComboManagerComponent::RegisterActiveComboTask(class UAbilityTask_ComboMontage* InTask)
+{
+	ActiveComboTask = InTask;
+}
+
+void USL_ComboManagerComponent::UnregisterActiveComboTask()
+{
+	ActiveComboTask.Reset();
+}
+
+void USL_ComboManagerComponent::SetNeedClearTag(FGameplayTag WindowTag)
+{
+	oldWindowTag = WindowTag;
+	UE_LOG(LogTemp, Warning, TEXT("WindowTag_SetNeedClearTag: %s"), *oldWindowTag.ToString());
+}
+
+void USL_ComboManagerComponent::ClearTargetWindowTag()
+{
+	if (UAbilitySystemComponent* ASC = GetCacheASC())
+	{
+		ASC->RemoveLooseGameplayTag(oldWindowTag);
+		UE_LOG(LogTemp, Warning, TEXT("WindowTag_ClearTargetWindowTag: %s"), *oldWindowTag.ToString());
+	}
+}
+
+UAbilitySystemComponent* USL_ComboManagerComponent::GetCacheASC() const
+{
+	// 使用缓存
+	if (CacheASC.IsValid())
+	{
+		return CacheASC.Get();
+	}
+
+	// 从当前控制的 Pawn 上查找
 	if (IAbilitySystemInterface* ASC_IF = Cast<IAbilitySystemInterface>(GetOwner()))
 	{
 		// 从接口获取目标的 AbilitySystemComponent
-		if(UAbilitySystemComponent* ASC = ASC_IF->GetAbilitySystemComponent())
+		if (UAbilitySystemComponent* ASC = ASC_IF->GetAbilitySystemComponent())
 		{
-			FGameplayEventData EventData;
-			EventData.Instigator = GetOwner();
-			EventData.Target = GetOwner();
-			// 用OptionalObject携带下一招的GA类
-			EventData.OptionalObject = NextAbility.Get();
-
-			ASC->HandleGameplayEvent(EventTag, &EventData);
-
-			UE_LOG(LogTemp, Verbose, TEXT("[ComboManager] Sent event: %s with NextGA: %s"),
-				*EventTag.ToString(),
-				*NextAbility->GetName());
+			CacheASC = ASC;
+			return CacheASC.Get();
 		}
 	}
-}
 
+	return nullptr;
+
+}

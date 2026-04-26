@@ -17,6 +17,38 @@ UAbilityTask_ComboMontage* UAbilityTask_ComboMontage::CreateComboMontageTask(
 	return Task;
 }
 
+void UAbilityTask_ComboMontage::RequestBlendOut()
+{
+	if (bHasFinished) return;
+
+	if (bReadyToBlend)
+	{
+		// 已经可以混合，立即执行
+		ExecuteBlendOut();
+	}
+	else
+	{
+		// 还没到AllowBlend，标记等待
+		bBlendOutRequested = true;
+		UE_LOG(LogTemp, Log, TEXT("[ComboTask] BlendOut requested but not ready yet, pending"));
+	}
+}
+
+void UAbilityTask_ComboMontage::OnAllowBlendReached()
+{
+	if (bHasFinished) return;
+
+	bReadyToBlend = true;
+
+	// 如果有暂存的输入，立即执行打断
+	if (bBlendOutRequested) {
+		UE_LOG(LogTemp, Log, TEXT("[ComboTask] AllowBlend reached, consuming cached input"));
+		ExecuteBlendOut();
+	}
+}
+
+
+
 void UAbilityTask_ComboMontage::Activate()
 {
 	Super::Activate();
@@ -62,69 +94,26 @@ void UAbilityTask_ComboMontage::Activate()
 	}
 }
 
-void UAbilityTask_ComboMontage::OnAllowBlendReached()
+void UAbilityTask_ComboMontage::OnDestroy(bool bInOwnerFinished)
 {
-	if (bHasFinished) return;
-
-	bReadyToBlend = true;
-
-	// 如果有暂存的输入，立即执行打断
-	if (bHasPendingInput && PendingInputAction != EComboInputActionType::EComboInputAction_None)
-	{
-		UE_LOG(LogTemp, Log, TEXT("[ComboTask] AllowBlend reached, consuming cached input"));
-		ExecuteBlendOut();
-	}
-}
-
-bool UAbilityTask_ComboMontage::OnInputReceived(EComboInputActionType InputAction)
-{
-	RETURN_VALUE_IF_TRUE(bHasFinished,false);
-	if (InputAction >= EComboInputActionType::EComboInputAction_Max ||
-		InputAction <= EComboInputActionType::EComboInputAction_None)
-	{
-		return false;
-	}
-
-	if (bReadyToBlend)
-	{
-		// 情形A：已经可以混合，直接打断
-		PendingInputAction = InputAction;
-		UE_LOG(LogTemp, Log, TEXT("[ComboTask] Immediate blend out on input"));
-		ExecuteBlendOut();
-		return true;
-	}
-	else
-	{
-		// 情形B：还未到AllowBlend，缓存输入
-		bHasPendingInput = true;
-		PendingInputAction = InputAction;
-		UE_LOG(LogTemp, Log, TEXT("[ComboTask] Input cached, waiting for AllowBlend"));
-		return true;
-	}
-}
-
-void UAbilityTask_ComboMontage::ExecuteBlendOut()
-{
-	if (bHasFinished) return;
-	bHasFinished = true;
-
-	// 停止蒙太奇（带混合时间）
+	// 清理蒙太奇绑定
 	ACharacter* Character = Cast<ACharacter>(GetAvatarActor());
 	if (Character && Montage)
 	{
 		UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
 		if (AnimInstance)
 		{
-			AnimInstance->Montage_Stop(BlendOutTime, Montage);
+			AnimInstance->Montage_Stop(0.f, Montage);
 		}
 	}
 
-	// 触发BlendOut委托，通知GA可以结束了
-	OnBlendOut.Broadcast();
-
-	// 如果GA有EndAbility调用，这里不做EndTask，
-	// 让GA在收到OnBlendOut后自行EndAbility
+	Super::OnDestroy(bInOwnerFinished);
 }
+
+
+
+
+
 
 void UAbilityTask_ComboMontage::OnMontageCompleted(UAnimMontage* InMontage, bool bInterrupted)
 {
@@ -154,18 +143,24 @@ void UAbilityTask_ComboMontage::OnMontageInterrupted(UGameplayAbility* ActiveAbi
 	}
 }
 
-void UAbilityTask_ComboMontage::OnDestroy(bool bInOwnerFinished)
+
+
+void UAbilityTask_ComboMontage::ExecuteBlendOut()
 {
-	// 清理蒙太奇绑定
+	if (bHasFinished) return;
+	bHasFinished = true;
+
+	// 停止蒙太奇（带混合时间）
 	ACharacter* Character = Cast<ACharacter>(GetAvatarActor());
 	if (Character && Montage)
 	{
 		UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
 		if (AnimInstance)
 		{
-			AnimInstance->Montage_Stop(0.f, Montage);
+			AnimInstance->Montage_Stop(BlendOutTime, Montage);
 		}
 	}
 
-	Super::OnDestroy(bInOwnerFinished);
+	// 通知GA：动画被打断了
+	OnInterrupted.Broadcast();
 }

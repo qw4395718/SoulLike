@@ -37,8 +37,8 @@ protected:
 	/************************************************************************/
 	/*                              内部调用                                        */
 	/************************************************************************/
-	// 获取角色ASC
-	UAbilitySystemComponent* GetOwnerASC() const;
+	/** 发送GameplayEvent给ASC */
+	void SendComboEvent(const FGameplayTag& EventTag, TSubclassOf<UGameplayAbility> NextAbility);
 
 protected:
 	/************************************************************************/

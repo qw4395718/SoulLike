@@ -9,31 +9,26 @@ class UAnimMontage;
 class UGameplayAbility;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnComboMontageCompleted);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnComboMontageBlendOut);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnComboMontageInterrupted);
 
 /**
  * 连招专用蒙太奇播放Task
  *
- * 核心功能：
- * 1. 播放蒙太奇并监听AnimNotify事件
- * 2. 分离"逻辑窗口"和"物理混合时机"
- * 3. 输入预缓存：在AllowBlend之前按下输入会被暂存
- * 4. AllowBlend到达后自动消费暂存的输入
+ * 职责：仅管理动画播放和混合时机
+ * - 不参与业务逻辑（不持有连招表、不判断输入）
+ * - 对外暴露 IsReadyToBlend() 查询状态
+ * - 对外暴露 RequestBlendOut() 主动打断
  */
+
 UCLASS()
 class SOULLIKEDEMO_API UAbilityTask_ComboMontage : public UAbilityTask
 {
     GENERATED_BODY()
 
 public:
-    // 蒙太奇正常播完->通知GA结束
-    UPROPERTY(BlueprintAssignable)
-        FOnComboMontageCompleted OnCompleted;
-
-    // 被下一招打断->通知GA结束
-    UPROPERTY(BlueprintAssignable)
-        FOnComboMontageBlendOut OnBlendOut;
-
+	/****************************************************************************/
+    /*										外部调用									*/
+    /****************************************************************************/
     /**
      * 创建Task的静态工厂方法
      * @param OwningAbility    拥有的GA
@@ -51,20 +46,19 @@ public:
         );
 
     // ========== 动画通知回调接口 ==========
+	/** 当前是否已到达AllowBlend位置 */
+	UFUNCTION(BlueprintCallable, Category = "Combo")
+		bool IsReadyToBlend() const { return bReadyToBlend; }
 
-    /** 当AllowBlend通知到达时调用 */
-    void OnAllowBlendReached();
+	/** 请求主动打断（带混合时间） */
+	UFUNCTION(BlueprintCallable, Category = "Combo")
+		void RequestBlendOut();
 
-    /**
-     * 当收到玩家输入时由ComboManager调用
-     * @param InputAction 玩家按下的动作（轻攻击/重攻击等）
-     * @return true=成功缓存或触发打断, false=不在接收窗口
-     */
-    UFUNCTION(BlueprintCallable, Category = "Combo")
-        bool OnInputReceived(EComboInputActionType InputAction);
+	/** 被动画通知调用：标记已到达允许混合的位置 */
+	void OnAllowBlendReached();
 
-    virtual void Activate() override;
-    virtual void OnDestroy(bool bInOwnerFinished) override;
+	virtual void Activate() override;
+	virtual void OnDestroy(bool bInOwnerFinished) override;
 
 protected:
     // 蒙太奇相关回调
@@ -80,6 +74,19 @@ protected:
     // 执行打断混合
     void ExecuteBlendOut();
 
+public:
+	/****************************************************************************/
+	/*										外部调用									*/
+	/****************************************************************************/
+
+	// 蒙太奇正常播完->通知GA结束
+	UPROPERTY(BlueprintAssignable)
+		FOnComboMontageCompleted OnCompleted;
+
+	/** 被连招打断时触发（BlendOut完成后） */
+	UPROPERTY(BlueprintAssignable)
+		FOnComboMontageInterrupted OnInterrupted;
+
 private:
     // 播放的蒙太奇
     UPROPERTY()
@@ -91,17 +98,11 @@ private:
     // 播放速率
     float PlayRate = 1.0f;
 
-    // ====== 核心状态标志 ======
-
     /** 是否已到达AllowBlend位置（允许物理打断） */
     bool bReadyToBlend = false;
 
     /** 在AllowBlend之前是否有暂存的输入 */
-    bool bHasPendingInput = false;
-
-    /** 暂存的输入Action */
-    UPROPERTY()
-    EComboInputActionType PendingInputAction;
+    bool bBlendOutRequested = false;
 
     /** 是否已经结束（防止重复触发） */
     bool bHasFinished = false;

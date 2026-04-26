@@ -34,7 +34,11 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 				FComboInfo nextComboInfo{};
 				if (comboInfoTable->FindNextComboInfo(currentTags, InputType, nextComboInfo))
 				{
-					ASC->TryActivateAbilityByClass(nextComboInfo.NextAbilityClass);
+					// ASC->TryActivateAbilityByClass(nextComboInfo.NextAbilityClass);
+					// 不直接激活GA，而是发送一个预定义Event
+					SendComboEvent(
+						FGameplayTag::RequestGameplayTag(TEXT("Event.ComboSystem.InputReceived")),
+						nextComboInfo.NextAbilityClass);
 					return;
 				}
 			}
@@ -42,4 +46,25 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 	}
 }
 
+void USL_ComboManagerComponent::SendComboEvent(const FGameplayTag& EventTag, TSubclassOf<UGameplayAbility> NextAbility)
+{
+	if (IAbilitySystemInterface* ASC_IF = Cast<IAbilitySystemInterface>(GetOwner()))
+	{
+		// 从接口获取目标的 AbilitySystemComponent
+		if(UAbilitySystemComponent* ASC = ASC_IF->GetAbilitySystemComponent())
+		{
+			FGameplayEventData EventData;
+			EventData.Instigator = GetOwner();
+			EventData.Target = GetOwner();
+			// 用OptionalObject携带下一招的GA类
+			EventData.OptionalObject = NextAbility.Get();
+
+			ASC->HandleGameplayEvent(EventTag, &EventData);
+
+			UE_LOG(LogTemp, Verbose, TEXT("[ComboManager] Sent event: %s with NextGA: %s"),
+				*EventTag.ToString(),
+				*NextAbility->GetName());
+		}
+	}
+}
 

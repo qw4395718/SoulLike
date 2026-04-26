@@ -103,7 +103,12 @@ void UAbilityTask_ComboMontage::Activate()
 
 void UAbilityTask_ComboMontage::OnDestroy(bool bInOwnerFinished)
 {
+	if (Ability)
+	{
+		Ability->OnGameplayAbilityEnded.RemoveAll(this);
+	}
 	// 清理蒙太奇绑定
+	RemoveAllDelegates();
 	ACharacter* Character = Cast<ACharacter>(GetAvatarActor());
 	if (Character && Montage)
 	{
@@ -166,3 +171,10 @@ void UAbilityTask_ComboMontage::ExecuteBlendOut()
 	// 通知GA：动画被打断了
 	OnInterrupted.Broadcast();
 }
+
+void UAbilityTask_ComboMontage::RemoveAllDelegates()
+{
+	OnCompleted.Clear();
+	OnInterrupted.Clear();
+}
+

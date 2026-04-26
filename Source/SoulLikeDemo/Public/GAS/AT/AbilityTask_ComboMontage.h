@@ -75,6 +75,8 @@ protected:
     // 执行打断混合
     void ExecuteBlendOut();
 
+    void RemoveAllDelegates();
+
 public:
 	/****************************************************************************/
 	/*										外部调用									*/

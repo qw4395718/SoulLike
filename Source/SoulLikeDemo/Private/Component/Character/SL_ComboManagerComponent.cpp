@@ -36,14 +36,23 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 				{
 					if (comboInfoTable->FindNextComboInfo(currentTags, InputType, nextComboInfo))
 					{
-						if (ActiveComboTask.IsValid())
+						UAbilityTask_ComboMontage* ComboTask = ActiveComboTask.Get();
+						if (ComboTask && IsValid(ComboTask))
 						{
-							bool bAccepted = ActiveComboTask->OnInputReceived(InputType);
-							if (bAccepted)
+							EComboInputHandledResult AcceptType = ActiveComboTask->OnInputReceived(InputType);
+							if (AcceptType == EComboInputHandledResult::Accepted)
 							{
 								// 将行为委托给AT
-								ActiveComboTask->OnInterrupted.AddUniqueDynamic(this, &USL_ComboManagerComponent::OnMontageBlendOut);
+								ComboTask->OnInterrupted.RemoveAll(this);
+								ComboTask->OnInterrupted.AddUniqueDynamic(this, &USL_ComboManagerComponent::OnMontageBlendOut);
 							}
+							else if (AcceptType == EComboInputHandledResult::AcceptedAndBlended)
+							{
+								// 已经混合好了,直接执行
+								OnMontageBlendOut();
+							}
+							else
+							{}
 						}
 					}
 				}
@@ -73,6 +82,15 @@ void USL_ComboManagerComponent::OnMontageBlendOut()
 	{
 		ASC->TryActivateAbilityByClass(nextComboInfo.NextAbilityClass);
 	}
+}
+
+void USL_ComboManagerComponent::OnMontageFinished()
+{
+	if (ActiveComboTask.IsValid())
+	{
+		ActiveComboTask->OnInterrupted.RemoveAll(this);
+	}
+	ActiveComboTask.Reset();
 }
 
 void USL_ComboManagerComponent::RegisterActiveComboTask(class UAbilityTask_ComboMontage* InTask)

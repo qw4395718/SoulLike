@@ -11,6 +11,15 @@ class UGameplayAbility;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnComboMontageCompleted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnComboMontageInterrupted);
 
+/** OnInputReceived 的返回值状态 */
+UENUM()
+enum class EComboInputHandledResult : uint8
+{
+	Accepted,           // 接受输入，等待 BlendOut
+	AcceptedAndBlended, // 接受输入，且已经触发了 BlendOut（绑定已不需要等待）
+	Rejected,           // 不接受
+};
+
 /**
  * 连招专用蒙太奇播放Task
  *
@@ -54,7 +63,7 @@ public:
 	void OnAllowBlendReached(FGameplayTag CurrentWindowTag);
 
 	UFUNCTION(BlueprintCallable, Category = "Combo")
-		bool OnInputReceived(EComboInputActionType InputAction);
+        EComboInputHandledResult OnInputReceived(EComboInputActionType InputAction);
 
 
 

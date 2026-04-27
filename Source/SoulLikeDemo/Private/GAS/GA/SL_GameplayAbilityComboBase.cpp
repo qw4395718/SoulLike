@@ -91,6 +91,13 @@ void USL_GameplayAbilityComboBase::OnMontageCompleted()
 {
 	RETURN_IF_TRUE(CurrentActorInfo == nullptr);
 	// 蒙太奇播放完成，结束技能
+	if (USL_ComboManagerComponent* ComboMgr = Cast<USL_ComboManagerComponent>(GetComboManager()))
+	{
+		// 通知 ComboManager：当前蒙太奇自然完成，不要等待 BlendOut 了
+		ComboMgr->OnMontageFinished();
+	}
+
+
 	UnRegisterActiveComboTask();
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }

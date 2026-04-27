@@ -36,6 +36,9 @@ public:
 	UFUNCTION()
 		void OnMontageBlendOut();
 
+	UFUNCTION()
+		void OnMontageFinished();
+
 	// 注册当前激活的Combo Task
 	UFUNCTION(BlueprintCallable, Category = "Combo")
 		void RegisterActiveComboTask(UAbilityTask_ComboMontage* InTask);

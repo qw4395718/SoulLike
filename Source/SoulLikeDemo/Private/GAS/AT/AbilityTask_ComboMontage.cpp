@@ -32,19 +32,19 @@ void UAbilityTask_ComboMontage::OnAllowBlendReached(FGameplayTag CurrentWindowTa
 	}
 }
 
-bool UAbilityTask_ComboMontage::OnInputReceived(EComboInputActionType InputAction)
+EComboInputHandledResult UAbilityTask_ComboMontage::OnInputReceived(EComboInputActionType InputAction)
 {
 	if (bHasFinished || 
 		InputAction <= EComboInputActionType::EComboInputAction_None ||
 		InputAction >= EComboInputActionType::EComboInputAction_Max) 
-		return false;
+		return EComboInputHandledResult::Rejected;
 
 	if (bReadyToBlend)
 	{
 		// 情形A：已经可以混合，直接打断
 		UE_LOG(LogTemp, Log, TEXT("[ComboTask] Immediate blend out on input"));
 		ExecuteBlendOut();
-		return true;
+		return EComboInputHandledResult::AcceptedAndBlended;
 	}
 	else
 	{
@@ -52,7 +52,7 @@ bool UAbilityTask_ComboMontage::OnInputReceived(EComboInputActionType InputActio
 		bHasPendingInput = true;
 		bBlendOutRequested = true;
 		UE_LOG(LogTemp, Log, TEXT("[ComboTask] Input cached, waiting for AllowBlend"));
-		return true;
+		return EComboInputHandledResult::Accepted;
 	}
 }
 

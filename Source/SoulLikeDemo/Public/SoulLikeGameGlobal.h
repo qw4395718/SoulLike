@@ -357,6 +357,10 @@ struct FComboInfo : public FTableRowBase
 	// 连击所属GA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TSubclassOf<UGameplayAbility> NextAbilityClass;
+
+	// 本次连击消耗的体力值
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cost")
+		float StaminaCost = 20.0f;
 };
 
 

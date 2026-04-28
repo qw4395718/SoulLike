@@ -19,10 +19,13 @@ class SOULLIKEDEMO_API USL_StatusAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 
-	// ºê¶¨Òå
+	// ï¿½ê¶¨ï¿½ï¿½
 	ATTRIBUTE_ACCESSORS(USL_StatusAttributeSet, Health);
 	ATTRIBUTE_ACCESSORS(USL_StatusAttributeSet, MaxHealth);
 	ATTRIBUTE_ACCESSORS(USL_StatusAttributeSet, Damage);
+	ATTRIBUTE_ACCESSORS(USL_StatusAttributeSet, Stamina);
+	ATTRIBUTE_ACCESSORS(USL_StatusAttributeSet, MaxStamina);
+	ATTRIBUTE_ACCESSORS(USL_StatusAttributeSet, StaminaCost);
 
 public:
 	// Sets default values for this AttributeSet's properties
@@ -30,52 +33,73 @@ public:
 
 	
 	/************************************************************************/
-	/*                               Íâ²¿º¯Êý                                       */
+	/*                               ï¿½â²¿ï¿½ï¿½ï¿½ï¿½                                       */
 	/************************************************************************/
-	// ÉèÖÃÊôÐÔ³ÖÓÐÈË
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½ï¿½ï¿½
 	void SetOwningActor(AActor* pOwnActor);
-	// Íæ¼Ò×´Ì¬ÊôÐÔ³õÊ¼»¯
+	// ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½Ô³ï¿½Ê¼ï¿½ï¿½
+
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "StatusAttributeSet")
 	void InitStatusAS();
 	virtual void InitStatusAS_Implementation();
-	// Íæ¼Ò×´Ì¬ÊôÐÔ-ÑªÁ¿ÐÅÏ¢³õÊ¼»¯
+
+	// ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½-Ñªï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Ê¼ï¿½ï¿½
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "StatusAttributeSet")
 		void InitHealthAS(float MinValue, float MaxValue);
-	virtual void InitHealthAS_Implementation(float MinValue, float MaxValue);;
+	virtual void InitHealthAS_Implementation(float MinValue, float MaxValue);
+
+	// ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Ê¼ï¿½ï¿½
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "StatusAttributeSet")
+		void InitStaminaAS(float MinValue, float MaxValue);
+	virtual void InitStaminaAS_Implementation(float MinValue, float MaxValue);
 
 	UFUNCTION()
 		void OnRep_CurrentHealth();
-	
 
+	UFUNCTION()
+		void OnRep_CurrentStamina();
+	
 protected:
 	/************************************************************************/
-	/*                               ¼Ì³ÐÊµÏÖ                                       */
+	/*                               ï¿½Ì³ï¿½Êµï¿½ï¿½                                       */
 	/************************************************************************/
     virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
     virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
-
-
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 public:
 	/************************************************************************/
-	/*                               Íâ²¿±äÁ¿-×´Ì¬ÊôÐÔ(ÔÚÕ½¶·ÖÐ±ä»¯µÄÊôÐÔ)                                       */
+	/*                               ï¿½â²¿ï¿½ï¿½ï¿½ï¿½-×´Ì¬ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½Õ½ï¿½ï¿½ï¿½Ð±ä»¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)                                       */
 	/************************************************************************/
-	// ×´Ì¬ÊôÐÔ
-    // µ±Ç°ÉúÃüÖµ
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth/*, meta = (HideFromModifiers)*/)
+	// ×´Ì¬ï¿½ï¿½ï¿½ï¿½
+    // ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Öµ
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth, Category = "Health")
     FGameplayAttributeData Health;
 
-    // ×î´óÉúÃüÖµ-ºóÃæÐèÒªÒÆµ½´Î¼¶ÊôÐÔÖÐÈ¥
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Æµï¿½ï¿½Î¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¥
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Health")
     FGameplayAttributeData MaxHealth;
 
-	// ·¢ÆðÕß½áËãµÄ¹¥»÷ÉËº¦
-	UPROPERTY(VisibleAnywhere)
-	FGameplayAttributeData Damage;
+	// Metaï¿½ï¿½ï¿½ï¿½: ï¿½Ý´æ·¢ï¿½ï¿½ï¿½ß½ï¿½ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½ï¿½Ëºï¿½
+	UPROPERTY(VisibleAnywhere, Category = "Health")
+		FGameplayAttributeData Damage;
+
+	// ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Öµ 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentStamina, Category = "Stamina")
+		FGameplayAttributeData Stamina;
+
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Stamina")
+		FGameplayAttributeData MaxStamina;
+
+	// Metaï¿½ï¿½ï¿½ï¿½: ï¿½Ý´ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½Öµ 
+	UPROPERTY(VisibleAnywhere, Category = "Stamina")
+		FGameplayAttributeData StaminaCost;
+
+
 
 private:
 	/************************************************************************/
-	/*                               ÄÚ²¿±äÁ¿                                      */
+	/*                               ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½                                      */
 	/************************************************************************/
 	UPROPERTY()
 	AActor* OwningActor;

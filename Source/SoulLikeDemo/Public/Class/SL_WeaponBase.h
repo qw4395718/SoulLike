@@ -13,6 +13,8 @@
 #include "WeaponAnimNotify_IF.h"
 #include "SL_WeaponBase.generated.h"
 
+class USL_ComboManagerComponent;
+
 /**
  * 
  */
@@ -182,4 +184,8 @@ protected:
 	// 武器中央协调组件
 	UPROPERTY()
 		UWeaponComboCoordinatorComponent* WeaponComboCoordinatorComp;
+
+	// 伤害GE
+    UPROPERTY(EditDefaultsOnly, Category = "GAS")
+    	TSubclassOf<UGameplayEffect> DamageEffectClass;
 };

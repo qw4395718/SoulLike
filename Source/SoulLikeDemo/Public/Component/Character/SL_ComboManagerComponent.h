@@ -55,6 +55,18 @@ public:
 	UFUNCTION()
 		void ClearTargetWindowTag();
 
+    // 获取当前连击伤害倍率
+    UFUNCTION(BlueprintCallable, Category = "Combo")
+        float GetCurrentComboDamageMultiplier() const { return CurrentComboInfo.DamageMultiplier; }
+
+    // 获取当前连击体力消耗
+    UFUNCTION(BlueprintCallable, Category = "Combo")
+        float GetCurrentComboStaminaCost() const { return CurrentComboInfo.StaminaCost; }
+
+    // 获取完整的当前连击信息
+    UFUNCTION(BlueprintCallable, Category = "Combo")
+        const FComboInfo& GetCurrentComboInfo() const { return CurrentComboInfo; }
+
 protected:
 	/************************************************************************/
 	/*                              内部调用                                        */
@@ -69,6 +81,8 @@ protected:
 	TWeakObjectPtr<UAbilityTask_ComboMontage> ActiveComboTask;
 	// ASC的缓存
 	mutable TWeakObjectPtr<UAbilitySystemComponent> CacheASC;
+	// 当前招式的缓存
+	FComboInfo CurrentComboInfo;
 	// 下一招的缓存
 	FComboInfo nextComboInfo;
 	// 上一招的窗口标签(如果是混合过度,则需要手动清理标签)

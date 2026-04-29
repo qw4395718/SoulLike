@@ -17,7 +17,7 @@ void USL_StatusAttributeSet::SetOwningActor(AActor* pOwnActor)
 
 void USL_StatusAttributeSet::InitStatusAS_Implementation()
 {
-	// ÓÉUnluaÌá¹©¸²¸Ç,C++ÖĞ½öÌá¹©Ä¬ÈÏÉèÖÃ
+	// ï¿½ï¿½Unluaï¿½á¹©ï¿½ï¿½ï¿½ï¿½,C++ï¿½Ğ½ï¿½ï¿½á¹©Ä¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	InitHealthAS(0.0f,100.0f);
 	InitStaminaAS(0.0f, 100.0f);
 }
@@ -26,7 +26,7 @@ void USL_StatusAttributeSet::InitHealthAS_Implementation(float MinValue, float M
 {
 	InitHealth(MaxValue);
 	InitMaxHealth(MaxValue);
-	// Ìí¼Óµ½È«¾ÖÎ¯ÍĞµÄÏìÓ¦
+	// ï¿½ï¿½ï¿½Óµï¿½È«ï¿½ï¿½Î¯ï¿½Ğµï¿½ï¿½ï¿½Ó¦
 	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 	{
 		globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, MaxValue, MaxValue, MinValue, MaxValue);
@@ -37,7 +37,7 @@ void USL_StatusAttributeSet::InitStaminaAS_Implementation(float MinValue, float 
 {
 	InitStamina(MaxValue);
 	InitMaxStamina(MaxValue);
-	// Ìí¼Óµ½È«¾ÖÎ¯ÍĞµÄÏìÓ¦
+	// ï¿½ï¿½ï¿½Óµï¿½È«ï¿½ï¿½Î¯ï¿½Ğµï¿½ï¿½ï¿½Ó¦
 	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 	{
 		globalDelegatesManager->OnAttributeStaminaChanged.Broadcast(OwningActor, MaxValue, MaxValue, MinValue, MaxValue);
@@ -61,7 +61,7 @@ void USL_StatusAttributeSet::OnRep_CurrentHealth()
 
 		SetHealth(NewHealthValue);
 		const float CurrentHealth = GetHealth();
-		// Ìí¼Óµ½È«¾ÖÎ¯ÍĞµÄÏìÓ¦
+		// ï¿½ï¿½ï¿½Óµï¿½È«ï¿½ï¿½Î¯ï¿½Ğµï¿½ï¿½ï¿½Ó¦
 		if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 		{
 			globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldHealthValue, CurrentHealth, MinHealthValue, MaxHealthValue);
@@ -86,7 +86,7 @@ void USL_StatusAttributeSet::OnRep_CurrentStamina()
 
 		SetStamina(NewStaminaValue);
 		const float CurrentStamina = GetStamina();
-		// Ìí¼Óµ½È«¾ÖÎ¯ÍĞµÄÏìÓ¦
+		// ï¿½ï¿½ï¿½Óµï¿½È«ï¿½ï¿½Î¯ï¿½Ğµï¿½ï¿½ï¿½Ó¦
 		if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 		{
 			globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldStaminaValue, CurrentStamina, MinStaminaValue, MaxStaminaValue);
@@ -115,7 +115,7 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
-		// ÉúÃüÖµ²»Ö±½Ó½øĞĞĞŞ¸Ä
+		// ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½Ö±ï¿½Ó½ï¿½ï¿½ï¿½ï¿½Ş¸ï¿½
 	}
 	else if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
 	{
@@ -135,7 +135,7 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			// Set the new health after clamping to min-max
 			SetHealth(NewValue);
 			const float CurrentValue = GetHealth();
-			// Ìí¼Óµ½È«¾ÖÎ¯ÍĞµÄÏìÓ¦
+			// ï¿½ï¿½ï¿½Óµï¿½È«ï¿½ï¿½Î¯ï¿½Ğµï¿½ï¿½ï¿½Ó¦
 			if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 			{
 				globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldValue, CurrentValue, MinValue, MaxValue);
@@ -171,7 +171,7 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			// Set the new health after clamping to min-max
 			SetStamina(NewValue);
 			const float CurrentValue = GetStamina();
-			// Ìí¼Óµ½È«¾ÖÎ¯ÍĞµÄÏìÓ¦
+			// ï¿½ï¿½ï¿½Óµï¿½È«ï¿½ï¿½Î¯ï¿½Ğµï¿½ï¿½ï¿½Ó¦
 			if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 			{
 				globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldValue, CurrentValue, MinValue, MaxValue);
@@ -193,6 +193,44 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		// Clear the meta attribute that temporarily held damage
 		SetStaminaCost(0.0f);
 	}
+}
+
+// ===== æ–°å¢æ­»äº¡å¤„ç†å‡½æ•° =====
+void USL_StatusAttributeSet::OnCharacterDeath()
+{
+    UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
+    if (!ASC) return;
+
+    AActor* OwnerActor = ASC->GetOwnerActor();
+    if (!OwnerActor) return;
+
+    // 1. æ›´æ–°GASæ ‡ç­¾
+    ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Alive"));
+    ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Dead"));
+
+    // 2. å¹¿æ’­æ­»äº¡äº‹ä»¶
+    if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+    {
+        DelegateMgr->OnCharacterDied.Broadcast(OwnerActor, nullptr);
+    }
+
+    // 3. ç¦ç”¨è§’è‰²
+    if (ACharacter* Char = Cast<ACharacter>(OwnerActor))
+    {
+        // æ³¨æ„ï¼šUE4.26ä¸­GetMesh()å¯èƒ½è¿”å›nullï¼Œéœ€æ£€æŸ¥
+        if (Char->GetMesh())
+        {
+            Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        }
+        Char->SetActorEnableCollision(false);
+        
+        if (APlayerController* PC = Cast<APlayerController>(Char->GetController()))
+        {
+            PC->SetCinematicMode(true, false, false);
+        }
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("GAS Death: %s died"), *OwnerActor->GetName());
 }
 
 

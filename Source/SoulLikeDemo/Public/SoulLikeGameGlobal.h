@@ -361,6 +361,10 @@ struct FComboInfo : public FTableRowBase
 	// 本次连击消耗的体力值
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cost")
 		float StaminaCost = 20.0f;
+
+	// 本次连击的伤害倍率
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+        float DamageMultiplier = 1.0f;
 };
 
 

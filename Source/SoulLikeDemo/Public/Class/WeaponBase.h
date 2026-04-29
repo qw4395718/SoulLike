@@ -131,6 +131,10 @@ protected:
 	UFUNCTION()
 		void ApplyParryToOverlappingActors();
 
+	// 武器最终伤害计算
+	UFUNCTION(BlueprintNativeEvent, Category = "Combat")
+		float CalculateFinalDamage(AActor* TargetActor) const;
+
 
 public:
 	//状态

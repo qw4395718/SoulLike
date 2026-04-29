@@ -12,6 +12,10 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnClickInterMainMenuButton, const int);
 DECLARE_MULTICAST_DELEGATE_FiveParams(FAttributeHealthChangedEvent,AActor*, float, float, float, float);
 // 耐力变动委托
 DECLARE_MULTICAST_DELEGATE_FiveParams(FAttributeStaminaChangedEvent, AActor*, float, float, float, float);
+// 死亡事件委托
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCharacterDiedEvent, AActor* DeadActor, AActor* Instigator);
+// 复活事件委托
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterRevivedEvent, AActor* RevivedActor);
 
 UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UGlobalDelegatesManager : public UGameInstanceSubsystem
@@ -35,6 +39,10 @@ public:
 		FAttributeHealthChangedEvent OnAttributeHealthChanged;
 	// 血量变动响应委托
 		FAttributeStaminaChangedEvent OnAttributeStaminaChanged;
+	// 死亡事件委托
+		FOnCharacterDiedEvent OnCharacterDied;
+	// 复活事件委托
+		FOnCharacterRevivedEvent OnCharacterRevived;
 
 	/**
 	 * 委托响应函数

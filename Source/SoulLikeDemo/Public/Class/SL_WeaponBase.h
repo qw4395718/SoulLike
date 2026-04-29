@@ -11,6 +11,7 @@
 #include "WeaponData.h"
 #include "WeaponComboCoordinatorComponent.h"
 #include "WeaponAnimNotify_IF.h"
+#include <GameplayEffect.h>
 #include "SL_WeaponBase.generated.h"
 
 class USL_ComboManagerComponent;
@@ -65,6 +66,10 @@ public:
 	// 执行武器行为
 	UFUNCTION()
 		bool PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* OwnerActor);
+
+	// 获取武器基础伤害
+	UFUNCTION()
+		float GetWeaponBaseDamage();
 
 
 	UFUNCTION()
@@ -184,8 +189,4 @@ protected:
 	// 武器中央协调组件
 	UPROPERTY()
 		UWeaponComboCoordinatorComponent* WeaponComboCoordinatorComp;
-
-	// 伤害GE
-    UPROPERTY(EditDefaultsOnly, Category = "GAS")
-    	TSubclassOf<UGameplayEffect> DamageEffectClass;
 };

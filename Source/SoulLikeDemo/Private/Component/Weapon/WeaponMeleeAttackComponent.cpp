@@ -7,6 +7,11 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
 #include "SoulLikeGameGlobal.h"
+#include <AbilitySystemInterface.h>
+#include <GameplayEffectTypes.h>
+#include <AbilitySystemComponent.h>
+#include <GameplayTagContainer.h>
+#include <SL_ComboManagerComponent.h>
 
 UWeaponMeleeAttackComponent::UWeaponMeleeAttackComponent()
 {
@@ -110,12 +115,77 @@ void UWeaponMeleeAttackComponent::ApplyDamageToOverlappingActors()
 		{
 			if (Actor && OnwerActor && OnwerActor != Actor && !AlreadyHitActors.Contains(Actor))
 			{
-				// 调用武器类的伤害结算逻辑
+				AlreadyHitActors.Add(Actor);
 
+				// 1. 检查目标是否具有GAS系统（新的SL_CharacterBase）
+				IAbilitySystemInterface* TargetASI = Cast<IAbilitySystemInterface>(Actor);
+				if (!TargetASI) continue;
+
+				UAbilitySystemComponent* TargetASC = TargetASI->GetAbilitySystemComponent();
+				if (!TargetASC) continue;
+
+				// 2. 计算最终伤害
+				float FinalDamage = CalculateFinalDamage(Actor);
+
+				// 3. 创建GE上下文
+				FGameplayEffectContextHandle EffectContext = TargetASC->MakeEffectContext();
+				EffectContext.AddInstigator(OnwerActor, OnwerWeapon);
+
+				FGameplayEffectSpecHandle SpecHandle = TargetASC->MakeOutgoingSpec(
+					DamageEffectClass, 1.0f, EffectContext);
+
+				if (SpecHandle.IsValid())
+				{
+					// 5. 通过SetByCaller设置伤害值
+					FGameplayTag DamageTag = FGameplayTag::RequestGameplayTag(FName("GameplayCue.DamageNumber"), true);
+					SpecHandle.Data->SetSetByCallerMagnitude(DamageTag, FinalDamage);
+
+					// 6. 应用GE到目标
+					TargetASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+
+					UE_LOG(LogTemp, Warning, TEXT("WeaponBase: GAS Damage - %s dealt %f damage to %s"),
+						*GetName(), FinalDamage, *Actor->GetName());
+				}
 			}
 		}
 	}
 }
+
+float UWeaponMeleeAttackComponent::CalculateFinalDamage_Implementation(AActor* InTargetActor) const
+{
+	// 1. 检查目标是否具有GAS系统（新的SL_CharacterBase）
+	IAbilitySystemInterface* TargetASI = Cast<IAbilitySystemInterface>(InTargetActor);
+	if (!TargetASI) return 0.0f;
+
+	UAbilitySystemComponent* TargetASC = TargetASI->GetAbilitySystemComponent();
+	if (!TargetASC) return 0.0f;
+
+	// 2. 计算最终伤害
+	float FinalDamage = 20.0f;
+
+	// 从ComboManager获取当前连击倍率
+	if (OnwerActor)
+	{
+		// OwningCharacter是ASoulLikeCharacter，需要找到对应的SL_CharacterBase
+		// 方式1：如果OwningCharacter本身就实现了IAbilitySystemInterface
+		if (IAbilitySystemInterface* OwnerASI = Cast<IAbilitySystemInterface>(OnwerActor))
+		{
+			if (UAbilitySystemComponent* OwnerASC = OwnerASI->GetAbilitySystemComponent())
+			{
+				// 从Owner的Actor上找ComboManager组件
+				USL_ComboManagerComponent* ComboMgr =
+					OnwerActor->FindComponentByClass<USL_ComboManagerComponent>();
+				if (ComboMgr)
+				{
+					FinalDamage *= ComboMgr->GetCurrentComboDamageMultiplier();
+				}
+			}
+		}
+	}
+
+	return FinalDamage;
+}
+
 
 void UWeaponMeleeAttackComponent::EnableParryWindowCheck(float Duration)
 {

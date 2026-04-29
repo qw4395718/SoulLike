@@ -7,7 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "WeaponMeleeAttackComponent.generated.h"
 
-class AWeaponBase;
+class UGameplayEffect;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SOULLIKEDEMO_API UWeaponMeleeAttackComponent : public USceneComponent
@@ -58,6 +58,9 @@ protected:
 	UFUNCTION()
 		void ApplyDamageToOverlappingActors();
 
+	// 武器最终伤害计算
+	UFUNCTION(BlueprintNativeEvent, Category = "Combat")
+		float CalculateFinalDamage(AActor* TargetActor) const;
 
 protected:
 	/************************************************************************/
@@ -103,5 +106,9 @@ protected:
 	// 已应用伤害actor集
 	UPROPERTY()
 		TSet<AActor*> AlreadyHitActors;
+
+	// 伤害GE
+	UPROPERTY()
+		TSubclassOf<UGameplayEffect> DamageEffectClass;
 
 };

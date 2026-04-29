@@ -264,6 +264,11 @@ bool ASL_WeaponBase::PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* Own
 	return true;
 }
 
+float ASL_WeaponBase::GetWeaponBaseDamage()
+{
+	return 20.f;
+}
+
 // 新增：实际执行逻辑的函数（不包含 RPC 调用）
 void ASL_WeaponBase::ExecuteWeaponActionInternal(EWeaponModeTyoe ActionType, AActor* OwnerActor)
 {

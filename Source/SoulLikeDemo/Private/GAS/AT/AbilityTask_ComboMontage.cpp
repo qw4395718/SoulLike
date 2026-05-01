@@ -1,4 +1,4 @@
-#include "AbilityTask_ComboMontage.h"
+ï»¿#include "AbilityTask_ComboMontage.h"
 #include "AbilitySystemComponent.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemGlobals.h"
@@ -25,7 +25,7 @@ void UAbilityTask_ComboMontage::OnAllowBlendReached(FGameplayTag CurrentWindowTa
 	bReadyToBlend = true;
 	ComboWindowTag = CurrentWindowTag;
 
-	// Èç¹ûÓĞÔİ´æµÄÊäÈë£¬Á¢¼´Ö´ĞĞ´ò¶Ï
+	// å¦‚æœæœ‰æš‚å­˜çš„è¾“å…¥ï¼Œç«‹å³æ‰§è¡Œæ‰“æ–­
 	if (bBlendOutRequested) {
 		UE_LOG(LogTemp, Log, TEXT("[ComboTask] AllowBlend reached, consuming cached input"));
 		ExecuteBlendOut();
@@ -41,14 +41,14 @@ EComboInputHandledResult UAbilityTask_ComboMontage::OnInputReceived(EComboInputA
 
 	if (bReadyToBlend)
 	{
-		// ÇéĞÎA£ºÒÑ¾­¿ÉÒÔ»ìºÏ£¬Ö±½Ó´ò¶Ï
+		// æƒ…å½¢Aï¼šå·²ç»å¯ä»¥æ··åˆï¼Œç›´æ¥æ‰“æ–­
 		UE_LOG(LogTemp, Log, TEXT("[ComboTask] Immediate blend out on input"));
 		ExecuteBlendOut();
 		return EComboInputHandledResult::AcceptedAndBlended;
 	}
 	else
 	{
-		// ÇéĞÎB£º»¹Î´µ½AllowBlend£¬»º´æÊäÈë
+		// æƒ…å½¢Bï¼šè¿˜æœªåˆ°AllowBlendï¼Œç¼“å­˜è¾“å…¥
 		bHasPendingInput = true;
 		bBlendOutRequested = true;
 		UE_LOG(LogTemp, Log, TEXT("[ComboTask] Input cached, waiting for AllowBlend"));
@@ -66,7 +66,7 @@ void UAbilityTask_ComboMontage::Activate()
 		return;
 	}
 
-	// »ñÈ¡Avatar Actor
+	// è·å–Avatar Actor
 	ACharacter* Character = Cast<ACharacter>(GetAvatarActor());
 	if (!Character)
 	{
@@ -74,7 +74,7 @@ void UAbilityTask_ComboMontage::Activate()
 		return;
 	}
 
-	// ²¥·ÅÃÉÌ«Ææ
+	// æ’­æ”¾è’™å¤ªå¥‡
 	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
 	if (!AnimInstance)
 	{
@@ -84,17 +84,17 @@ void UAbilityTask_ComboMontage::Activate()
 
 	AnimInstance->Montage_Play(Montage, PlayRate);
 
-	// °ó¶¨ÃÉÌ«Ææ½áÊøÎ¯ÍĞ
+	// ç»‘å®šè’™å¤ªå¥‡ç»“æŸå§”æ‰˜
 	FOnMontageEnded MontageEndedDelegate;
 	MontageEndedDelegate.BindUObject(this, &UAbilityTask_ComboMontage::OnMontageCompleted);
 	AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, Montage);
 
-	// °ó¶¨ÃÉÌ«Ææ»ìºÏ³öÎ¯ÍĞ
+	// ç»‘å®šè’™å¤ªå¥‡æ··åˆå‡ºå§”æ‰˜
 	FOnMontageBlendingOutStarted BlendingOutDelegate;
 	BlendingOutDelegate.BindUObject(this, &UAbilityTask_ComboMontage::OnMontageBlendOut);
 	AnimInstance->Montage_SetBlendingOutDelegate(BlendingOutDelegate, Montage);
 
-	// Èç¹ûAbilityÌáÇ°½áÊø
+	// å¦‚æœAbilityæå‰ç»“æŸ
 	if (Ability)
 	{
 		Ability->OnGameplayAbilityEnded.AddUObject(this, &UAbilityTask_ComboMontage::OnMontageInterrupted);
@@ -107,7 +107,7 @@ void UAbilityTask_ComboMontage::OnDestroy(bool bInOwnerFinished)
 	{
 		Ability->OnGameplayAbilityEnded.RemoveAll(this);
 	}
-	// ÇåÀíÃÉÌ«Ææ°ó¶¨
+	// æ¸…ç†è’™å¤ªå¥‡ç»‘å®š
 	RemoveAllDelegates();
 	ACharacter* Character = Cast<ACharacter>(GetAvatarActor());
 	if (Character && Montage)
@@ -132,7 +132,7 @@ void UAbilityTask_ComboMontage::OnMontageCompleted(UAnimMontage* InMontage, bool
 
 void UAbilityTask_ComboMontage::OnMontageBlendOut(UAnimMontage* InMontage, bool bInterrupted)
 {
-	// Õı³£»ìºÏ³ö£¨¶¯»­²¥Íê£©£¬Ö±½Ó½áÊø
+	// æ­£å¸¸æ··åˆå‡ºï¼ˆåŠ¨ç”»æ’­å®Œï¼‰ï¼Œç›´æ¥ç»“æŸ
 	if (!bHasFinished)
 	{
 		bHasFinished = true;
@@ -157,7 +157,7 @@ void UAbilityTask_ComboMontage::ExecuteBlendOut()
 	if (bHasFinished) return;
 	bHasFinished = true;
 
-	// Í£Ö¹ÃÉÌ«Ææ£¨´ø»ìºÏÊ±¼ä£©
+	// åœæ­¢è’™å¤ªå¥‡ï¼ˆå¸¦æ··åˆæ—¶é—´ï¼‰
 	ACharacter* Character = Cast<ACharacter>(GetAvatarActor());
 	if (Character && Montage)
 	{
@@ -168,7 +168,7 @@ void UAbilityTask_ComboMontage::ExecuteBlendOut()
 		}
 	}	
 
-	// Í¨ÖªGA£º¶¯»­±»´ò¶ÏÁË
+	// é€šçŸ¥GAï¼šåŠ¨ç”»è¢«æ‰“æ–­äº†
 	OnInterrupted.Broadcast();
 }
 

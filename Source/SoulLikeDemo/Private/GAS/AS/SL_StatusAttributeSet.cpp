@@ -17,7 +17,6 @@ void USL_StatusAttributeSet::SetOwningActor(AActor* pOwnActor)
 
 void USL_StatusAttributeSet::InitStatusAS_Implementation()
 {
-	// ��Unlua�ṩ����,C++�н��ṩĬ������
 	InitHealthAS(0.0f,100.0f);
 	InitStaminaAS(0.0f, 100.0f);
 }
@@ -26,7 +25,6 @@ void USL_StatusAttributeSet::InitHealthAS_Implementation(float MinValue, float M
 {
 	InitHealth(MaxValue);
 	InitMaxHealth(MaxValue);
-	// ���ӵ�ȫ��ί�е���Ӧ
 	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 	{
 		globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, MaxValue, MaxValue, MinValue, MaxValue);
@@ -37,7 +35,6 @@ void USL_StatusAttributeSet::InitStaminaAS_Implementation(float MinValue, float 
 {
 	InitStamina(MaxValue);
 	InitMaxStamina(MaxValue);
-	// ���ӵ�ȫ��ί�е���Ӧ
 	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 	{
 		globalDelegatesManager->OnAttributeStaminaChanged.Broadcast(OwningActor, MaxValue, MaxValue, MinValue, MaxValue);
@@ -61,7 +58,6 @@ void USL_StatusAttributeSet::OnRep_CurrentHealth()
 
 		SetHealth(NewHealthValue);
 		const float CurrentHealth = GetHealth();
-		// ���ӵ�ȫ��ί�е���Ӧ
 		if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 		{
 			globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldHealthValue, CurrentHealth, MinHealthValue, MaxHealthValue);
@@ -86,7 +82,6 @@ void USL_StatusAttributeSet::OnRep_CurrentStamina()
 
 		SetStamina(NewStaminaValue);
 		const float CurrentStamina = GetStamina();
-		// ���ӵ�ȫ��ί�е���Ӧ
 		if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 		{
 			globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldStaminaValue, CurrentStamina, MinStaminaValue, MaxStaminaValue);
@@ -115,7 +110,6 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
-		// ����ֵ��ֱ�ӽ����޸�
 	}
 	else if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
 	{
@@ -135,7 +129,6 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			// Set the new health after clamping to min-max
 			SetHealth(NewValue);
 			const float CurrentValue = GetHealth();
-			// ���ӵ�ȫ��ί�е���Ӧ
 			if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 			{
 				globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldValue, CurrentValue, MinValue, MaxValue);
@@ -171,7 +164,6 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			// Set the new health after clamping to min-max
 			SetStamina(NewValue);
 			const float CurrentValue = GetStamina();
-			// ���ӵ�ȫ��ί�е���Ӧ
 			if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 			{
 				globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldValue, CurrentValue, MinValue, MaxValue);

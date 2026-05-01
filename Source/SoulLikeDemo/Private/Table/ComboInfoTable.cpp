@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ComboInfoTable.h"
@@ -7,14 +7,14 @@
 
 bool UComboInfoTable::InitializeFromAsset(TSoftObjectPtr<UDataTable> TableAsset)
 {
-	// ¼ì²é×ÊÔ´ÊÇ·ñÓĞĞ§
+	// æ£€æŸ¥èµ„æºæ˜¯å¦æœ‰æ•ˆ
 	if (!TableAsset.IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UComboInfoTable::InitializeFromAsset - TableAsset is invalid"));
 		return false;
 	}
 
-	// ¼ÓÔØDataTable
+	// åŠ è½½DataTable
 	UDataTable* DataTable = TableAsset.LoadSynchronous();
 	if (!DataTable)
 	{
@@ -22,28 +22,28 @@ bool UComboInfoTable::InitializeFromAsset(TSoftObjectPtr<UDataTable> TableAsset)
 		return false;
 	}
 
-	// Çå¿ÕÏÖÓĞÓ³Éä±í
+	// æ¸…ç©ºç°æœ‰æ˜ å°„è¡¨
 	ComboInfoMap.Empty();
 
-	// ±éÀúDataTableÖĞµÄËùÓĞĞĞ
+	// éå†DataTableä¸­çš„æ‰€æœ‰è¡Œ
 	TArray<FName> RowNames = DataTable->GetRowNames();
 	for (const FName& RowName : RowNames)
 	{
 		FComboInfo* ComboInfoRow = DataTable->FindRow<FComboInfo>(RowName, TEXT("InitializeFromAsset"));
 		if (ComboInfoRow)
 		{
-			// ¹¹½¨Ó³Éä±í£ºTag -> (InputActionType -> ComboInfo)
+			// æ„å»ºæ˜ å°„è¡¨ï¼šTag -> (InputActionType -> ComboInfo)
 			FGameplayTag RequiredTag = ComboInfoRow->ActiveRequireWindowTag;
 			EComboInputActionType InputType = ComboInfoRow->InputActionType;
 
-			// ¼ì²éTagÊÇ·ñÓĞĞ§
+			// æ£€æŸ¥Tagæ˜¯å¦æœ‰æ•ˆ
 			if (!RequiredTag.IsValid())
 			{
 				UE_LOG(LogTemp, Warning, TEXT("UComboInfoTable::InitializeFromAsset - Invalid tag in row %s"), *RowName.ToString());
 				continue;
 			}
 
-			// ¼ì²éInputTypeÊÇ·ñÓĞĞ§
+			// æ£€æŸ¥InputTypeæ˜¯å¦æœ‰æ•ˆ
 			if (InputType == EComboInputActionType::EComboInputAction_None ||
 				InputType >= EComboInputActionType::EComboInputAction_Max)
 			{
@@ -51,16 +51,16 @@ bool UComboInfoTable::InitializeFromAsset(TSoftObjectPtr<UDataTable> TableAsset)
 				continue;
 			}
 
-			// ¼ì²éNextAbilityClassÊÇ·ñÓĞĞ§
+			// æ£€æŸ¥NextAbilityClassæ˜¯å¦æœ‰æ•ˆ
 			if (!ComboInfoRow->NextAbilityClass)
 			{
 				continue;
 			}
 
-			// Ìí¼Óµ½Ó³Éä±í
+			// æ·»åŠ åˆ°æ˜ å°„è¡¨
 			TMap<EComboInputActionType, FComboInfo>& InputActionMap = ComboInfoMap.FindOrAdd(RequiredTag);
 
-			// ¼ì²éÊÇ·ñÖØ¸´Ìí¼Ó
+			// æ£€æŸ¥æ˜¯å¦é‡å¤æ·»åŠ 
 			if (InputActionMap.Contains(InputType))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("UComboInfoTable::InitializeFromAsset - Duplicate combo info for Tag: %s, InputType: %d"),
@@ -92,7 +92,7 @@ UBaseDataTable* UComboInfoTable::GetDataTable() const
 
 bool UComboInfoTable::FindNextComboInfo(const FGameplayTagContainer& Tags, EComboInputActionType InputActionType, FComboInfo& ComboInfo)
 {
-	// ±éÀúComboInfoMap
+	// éå†ComboInfoMap
 	for (const auto& pair : ComboInfoMap)
 	{
 		if (Tags.HasTag(pair.Key))
@@ -100,7 +100,7 @@ bool UComboInfoTable::FindNextComboInfo(const FGameplayTagContainer& Tags, EComb
 			const auto& subPair = pair.Value;
 			if (subPair.Contains(InputActionType))
 			{
-				// »ñÈ¡¶ÔÓ¦µÄĞÅÏ¢
+				// è·å–å¯¹åº”çš„ä¿¡æ¯
 				ComboInfo = subPair[InputActionType];
 				return true;
 			}

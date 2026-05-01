@@ -1,4 +1,4 @@
-#include <SL_AbilitySystemComponent.h>
+ï»¿#include <SL_AbilitySystemComponent.h>
 #include <GameplayAbilitySpec.h>
 
 USL_AbilitySystemComponent::USL_AbilitySystemComponent()
@@ -29,7 +29,7 @@ TArray<FGameplayAbilitySpec>& USL_AbilitySystemComponent::GetActivatableAbilitie
 
 bool USL_AbilitySystemComponent::TryActivateAbilityByHandle(FGameplayAbilitySpecHandle Handle)
 {
-	// 1. ¼ì²éHandleÊÇ·ñÓĞĞ§
+	// 1. æ£€æŸ¥Handleæ˜¯å¦æœ‰æ•ˆ
 	if (!Handle.IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("TryActivateAbilityByHandle: Invalid Handle"));
@@ -49,7 +49,7 @@ TArray<UGameplayTask*> USL_AbilitySystemComponent::GetCurrentlyActiveTasks()
 {
 	TArray<UGameplayTask*> ActiveTasks;
 
-	// ±éÀúËùÓĞ¼¤»îµÄ¼¼ÄÜ£¨Ability£©
+	// éå†æ‰€æœ‰æ¿€æ´»çš„æŠ€èƒ½ï¼ˆAbilityï¼‰
 	for (const FGameplayAbilitySpec& Spec : GetActivatableAbilities())
 	{
 		if (Spec.IsActive())
@@ -58,7 +58,7 @@ TArray<UGameplayTask*> USL_AbilitySystemComponent::GetCurrentlyActiveTasks()
 			{
 				if (AbilityInstance)
 				{
-					// »ñÈ¡¸Ã¼¼ÄÜµ±Ç°ËùÓĞ»îÔ¾µÄÈÎÎñ
+					// è·å–è¯¥æŠ€èƒ½å½“å‰æ‰€æœ‰æ´»è·ƒçš„ä»»åŠ¡
 					TArray<UGameplayTask*> AbilityTasks = GetAbilityActiveTasks(AbilityInstance);
 					ActiveTasks.Append(AbilityTasks);
 				}

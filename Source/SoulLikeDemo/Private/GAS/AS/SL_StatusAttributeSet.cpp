@@ -25,6 +25,7 @@ void USL_StatusAttributeSet::InitHealthAS_Implementation(float MinValue, float M
 {
 	InitHealth(MaxValue);
 	InitMaxHealth(MaxValue);
+	InitDamage(0.0f);
 	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 	{
 		globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, MaxValue, MaxValue, MinValue, MaxValue);
@@ -33,8 +34,10 @@ void USL_StatusAttributeSet::InitHealthAS_Implementation(float MinValue, float M
 
 void USL_StatusAttributeSet::InitStaminaAS_Implementation(float MinValue, float MaxValue)
 {
-	InitStamina(MaxValue);
+	InitStamina(MaxValue);      // 满耐力
 	InitMaxStamina(MaxValue);
+	InitStaminaCost(0.0f);      // 清空meta属性
+	InitStaminaRegen(0.0f);     // 清空meta属性
 	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 	{
 		globalDelegatesManager->OnAttributeStaminaChanged.Broadcast(OwningActor, MaxValue, MaxValue, MinValue, MaxValue);
@@ -84,7 +87,7 @@ void USL_StatusAttributeSet::OnRep_CurrentStamina()
 		const float CurrentStamina = GetStamina();
 		if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 		{
-			globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldStaminaValue, CurrentStamina, MinStaminaValue, MaxStaminaValue);
+			globalDelegatesManager->OnAttributeStaminaChanged.Broadcast(OwningActor, OldStaminaValue, CurrentStamina, MinStaminaValue, MaxStaminaValue);
 		}
 	}
 }
@@ -122,7 +125,7 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		const float OldValue = GetHealth();
 		const float MinValue = 0.0f;
 		const float MaxValue = GetMaxHealth();
-		const float NewValue = FMath::Clamp(OldValue - ChangeValue, MinValue, MaxValue);
+		const float NewValue = FMath::Clamp(OldValue + ChangeValue, MinValue, MaxValue);
 
 		if (OldValue != NewValue)
 		{
@@ -150,14 +153,14 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		// Clear the meta attribute that temporarily held damage
 		SetDamage(0.0f);
 	}
-	else if (Data.EvaluatedData.Attribute == GetStaminaAttribute())
+	else if (Data.EvaluatedData.Attribute == GetStaminaCostAttribute())
 	{
 		// Convert into -Health and then clamp
 		const float ChangeValue = GetStaminaCost();
 		const float OldValue = GetStamina();
 		const float MinValue = 0.0f;
 		const float MaxValue = GetMaxStamina();
-		const float NewValue = FMath::Clamp(OldValue - ChangeValue, MinValue, MaxValue);
+		const float NewValue = FMath::Clamp(OldValue + ChangeValue, MinValue, MaxValue);
 
 		if (OldValue != NewValue)
 		{
@@ -166,7 +169,7 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			const float CurrentValue = GetStamina();
 			if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 			{
-				globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldValue, CurrentValue, MinValue, MaxValue);
+				globalDelegatesManager->OnAttributeStaminaChanged.Broadcast(OwningActor, OldValue, CurrentValue, MinValue, MaxValue);
 			}
 
 			// Calculate 'actual' damage applied that respects min and max health
@@ -184,6 +187,28 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 
 		// Clear the meta attribute that temporarily held damage
 		SetStaminaCost(0.0f);
+	}
+	else if (Data.EvaluatedData.Attribute == GetStaminaRegenAttribute())
+	{
+		// 恢复Meta属性 → 转换为耐力增加
+		const float RegenValue = GetStaminaRegen();
+		if (RegenValue > 0.0f)
+		{
+			const float OldValue = GetStamina();
+			const float NewValue = FMath::Min(OldValue + RegenValue, GetMaxStamina());
+
+			if (OldValue != NewValue)
+			{
+				SetStamina(NewValue);
+				const float CurrentValue = GetStamina();
+
+				if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
+				{
+					globalDelegatesManager->OnAttributeStaminaChanged.Broadcast(OwningActor, OldValue, CurrentValue, 0.0f, GetMaxStamina());
+				}
+			}
+		}
+		SetStaminaRegen(0.0f);  // 清空Meta属性
 	}
 }
 

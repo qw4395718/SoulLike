@@ -8,6 +8,7 @@
 #include "DataTableManager.h"
 #include "ComboInfoTable.h"
 #include <AT/AbilityTask_ComboMontage.h>
+#include <SL_StaminaComponent.h>
 
 USL_ComboManagerComponent::USL_ComboManagerComponent()
 {
@@ -20,7 +21,7 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 {
 	// 获取当前角色的激活窗口状态(连击激活窗口状态同一时间只会有一个,并且永远会有一个)
 	FGameplayTagContainer currentTags;
-	if (UAbilitySystemComponent* ASC = GetCacheASC())
+	if (UAbilitySystemComponent* ASC = GetCachedASC())
 	{
 		ASC->GetOwnedGameplayTags(currentTags);
 		if (UDataTableManager* tableManager = UDataTableManager::Get(this))
@@ -36,6 +37,13 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 				{
 					if (comboInfoTable->FindNextComboInfo(currentTags, InputType, nextComboInfo))
 					{
+						// ===== 体力检查：委托给StaminaComponent =====
+						if (CachedStaminaComp.IsValid() && !CachedStaminaComp->CanAffordCost(nextComboInfo.StaminaCost))
+						{
+							UE_LOG(LogTemp, Verbose, TEXT("Stamina: 体力不足，无法继续连击"));
+							return;
+						}
+						
 						UAbilityTask_ComboMontage* ComboTask = ActiveComboTask.Get();
 						if (ComboTask && IsValid(ComboTask))
 						{
@@ -66,6 +74,13 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 					{
 						// 执行初始连段
 						ASC->TryActivateAbilityByClass(nextComboInfo.NextAbilityClass);
+
+						// 暂停恢复
+						if (USL_StaminaComponent* StaminaComp = GetCachedStaminaComp())
+						{
+							StaminaComp->OnComboStarted();
+							StaminaComp->ConsumeStamina(nextComboInfo.StaminaCost);
+						}
 						return;
 					}
 				}
@@ -78,9 +93,13 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 
 void USL_ComboManagerComponent::OnMontageBlendOut()
 {
-	if (UAbilitySystemComponent* ASC = GetCacheASC())
+	if (UAbilitySystemComponent* ASC = GetCachedASC())
 	{
 		ASC->TryActivateAbilityByClass(nextComboInfo.NextAbilityClass);
+	}
+	if (USL_StaminaComponent* StaminaComp = GetCachedStaminaComp())
+	{
+		CachedStaminaComp->ConsumeStamina(nextComboInfo.StaminaCost);
 	}
 }
 
@@ -91,6 +110,13 @@ void USL_ComboManagerComponent::OnMontageFinished()
 		ActiveComboTask->OnInterrupted.RemoveAll(this);
 	}
 	ActiveComboTask.Reset();
+
+	// 通知StaminaComponent：连击结束
+	if (USL_StaminaComponent* StaminaComp = GetCachedStaminaComp())
+	{
+		CachedStaminaComp->OnComboEnded();
+	}
+
 }
 
 void USL_ComboManagerComponent::RegisterActiveComboTask(class UAbilityTask_ComboMontage* InTask)
@@ -111,19 +137,19 @@ void USL_ComboManagerComponent::SetNeedClearTag(FGameplayTag WindowTag)
 
 void USL_ComboManagerComponent::ClearTargetWindowTag()
 {
-	if (UAbilitySystemComponent* ASC = GetCacheASC())
+	if (UAbilitySystemComponent* ASC = GetCachedASC())
 	{
 		ASC->RemoveLooseGameplayTag(oldWindowTag);
 		UE_LOG(LogTemp, Warning, TEXT("WindowTag_ClearTargetWindowTag: %s"), *oldWindowTag.ToString());
 	}
 }
 
-UAbilitySystemComponent* USL_ComboManagerComponent::GetCacheASC() const
+UAbilitySystemComponent* USL_ComboManagerComponent::GetCachedASC() const
 {
 	// 使用缓存
-	if (CacheASC.IsValid())
+	if (CachedASC.IsValid())
 	{
-		return CacheASC.Get();
+		return CachedASC.Get();
 	}
 
 	// 从当前控制的 Pawn 上查找
@@ -132,11 +158,34 @@ UAbilitySystemComponent* USL_ComboManagerComponent::GetCacheASC() const
 		// 从接口获取目标的 AbilitySystemComponent
 		if (UAbilitySystemComponent* ASC = ASC_IF->GetAbilitySystemComponent())
 		{
-			CacheASC = ASC;
-			return CacheASC.Get();
+			CachedASC = ASC;
+			return CachedASC.Get();
 		}
 	}
 
 	return nullptr;
 
+}
+
+USL_StaminaComponent* USL_ComboManagerComponent::GetCachedStaminaComp() const
+{
+	// 使用缓存
+	if (CachedStaminaComp.IsValid())
+	{
+		return CachedStaminaComp.Get();
+	}
+
+	// 从当前控制的 Pawn 上查找
+
+	if (AActor* OwnActor = GetOwner())
+	{
+		if (USL_StaminaComponent* StaminaComp = OwnActor->FindComponentByClass<USL_StaminaComponent>())
+		{
+			CachedStaminaComp = StaminaComp;
+			return CachedStaminaComp.Get();
+		}
+		
+	}
+
+	return nullptr;
 }

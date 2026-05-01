@@ -8,6 +8,7 @@
 #include "SL_ComboManagerComponent.generated.h"
 
 class UAbilitySystemComponent;
+class USL_StaminaComponent;
 class UAbilityTask_ComboMontage;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -71,7 +72,9 @@ protected:
 	/************************************************************************/
 	/*                              内部调用                                        */
 	/************************************************************************/
-	UAbilitySystemComponent* GetCacheASC() const;
+	UAbilitySystemComponent* GetCachedASC() const;
+
+	USL_StaminaComponent* GetCachedStaminaComp() const;
 
 protected:
 	/************************************************************************/
@@ -80,7 +83,9 @@ protected:
 	// 当前激活的ComboTask
 	TWeakObjectPtr<UAbilityTask_ComboMontage> ActiveComboTask;
 	// ASC的缓存
-	mutable TWeakObjectPtr<UAbilitySystemComponent> CacheASC;
+	mutable TWeakObjectPtr<UAbilitySystemComponent> CachedASC;
+	// ASC的缓存
+	mutable TWeakObjectPtr<USL_StaminaComponent> CachedStaminaComp;
 	// 当前招式的缓存
 	FComboInfo CurrentComboInfo;
 	// 下一招的缓存

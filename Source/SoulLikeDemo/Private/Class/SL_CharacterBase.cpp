@@ -413,8 +413,7 @@ void ASL_CharacterBase::InitPartmentComponent()
 	if (StaminaCmp == nullptr && true)
 	{
 		StaminaCmp = NewObject<USL_StaminaComponent>(this);
-		float StaminaMax = 100.0f;
-		StaminaCmp->InitStaminaInfo(StaminaMax);
+		StaminaCmp->InitializeStaminaComponent();
 	}
 
 	if (StateCmp == nullptr && true)

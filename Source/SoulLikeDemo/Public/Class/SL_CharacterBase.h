@@ -188,7 +188,7 @@ protected:
 	UPROPERTY()
 		USL_InventoryComponent* InventoryCmp;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 		USL_StaminaComponent* StaminaCmp;
 
 	UPROPERTY()

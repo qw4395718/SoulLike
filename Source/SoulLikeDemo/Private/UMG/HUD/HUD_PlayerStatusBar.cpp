@@ -21,13 +21,25 @@ void UHUD_PlayerStatusBar::BindGlobalDelegatesEvent()
 		EPlayerStatusAttributeType targetAttributeType = EPlayerStatusAttributeType::EPlayerStatusAttribute_Health;
 
 		// 使用AddLambda替代AddDynamic
-		globalDelegatesManager->OnAttributeHealthChanged.AddLambda([this, targetAttributeType](AActor* TargetPlayer, float OldHealth, float NewHealth, float MinHealth, float MaxHealth)
+		globalDelegatesManager->OnAttributeHealthChanged.AddLambda([this, targetAttributeType](AActor* TargetPlayer, float OldValue, float NewValue, float MinValue, float MaxValue)
 			{
 				// 检测是否为该目标
 				if (TargetPlayer && GetOwningPlayer() && TargetPlayer == GetOwningPlayer()->GetPawn())
 				{
-					SetProgressBarLimit(targetAttributeType, MinHealth, MaxHealth);
-					UpdateProgressInfo(targetAttributeType, OldHealth, NewHealth);
+					SetProgressBarLimit(targetAttributeType, MinValue, MaxValue);
+					UpdateProgressInfo(targetAttributeType, OldValue, NewValue);
+				}
+			});
+
+		targetAttributeType = EPlayerStatusAttributeType::EPlayerStatusAttribute_Stamin;
+
+		globalDelegatesManager->OnAttributeStaminaChanged.AddLambda([this, targetAttributeType](AActor* TargetPlayer, float OldValue, float NewValue, float MinValue, float MaxValue)
+			{
+				// 检测是否为该目标
+				if (TargetPlayer && GetOwningPlayer() && TargetPlayer == GetOwningPlayer()->GetPawn())
+				{
+					SetProgressBarLimit(targetAttributeType, MinValue, MaxValue);
+					UpdateProgressInfo(targetAttributeType, OldValue, NewValue);
 				}
 			});
 	}

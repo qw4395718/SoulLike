@@ -37,7 +37,7 @@ public:
 		FOnClickInterMainMenuButton OnClickInterMainMenuButton;
 	// 血量变动响应委托
 		FAttributeHealthChangedEvent OnAttributeHealthChanged;
-	// 血量变动响应委托
+	// 精力变动响应委托
 		FAttributeStaminaChangedEvent OnAttributeStaminaChanged;
 	// 死亡事件委托
 		FOnCharacterDiedEvent OnCharacterDied;

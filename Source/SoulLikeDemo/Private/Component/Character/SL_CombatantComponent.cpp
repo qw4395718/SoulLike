@@ -92,15 +92,15 @@ void USL_CombatantComponent::PerformAttack()
 	IWeaponBehavior_IF* MyWeaponBehavior = Cast<IWeaponBehavior_IF>(MyCharacterComponentTarget->GetEquipmentComponent());
 	if(MyWeaponBehavior == nullptr){return;}
 
-	IStamina_IF* StaminaTarget = Cast<IStamina_IF>(MyCharacterComponentTarget->GetStaminaComponent());
-	// 检查是否处于精疲力竭状态
-	if (StaminaTarget)
-	{
-		if (StaminaTarget->GetIsStaminaZero() == true)
-		{
-			return;
-		}
-	}
+	//IStamina_IF* StaminaTarget = Cast<IStamina_IF>(MyCharacterComponentTarget->GetStaminaComponent());
+	//// 检查是否处于精疲力竭状态
+	//if (StaminaTarget)
+	//{
+	//	if (StaminaTarget->GetIsStaminaZero() == true)
+	//	{
+	//		return;
+	//	}
+	//}
 
 	// 获取角色位置和前方向量
 	FVector CharacterLocation = GetOwner()->GetActorLocation();
@@ -127,16 +127,16 @@ void USL_CombatantComponent::PerformAttack()
 
 	if (!bHit || OutHits.Num() == 0)
 	{
-		// 若无符合的特殊攻击则进行普通攻击
-		// 消耗体力
-		IStateCalculate_IF* StateCalculateTarget = Cast<IStateCalculate_IF>(GetOwner());
-		if (StateCalculateTarget)
-		{
-			StaminaCostValue = StateCalculateTarget->StaminaCostCalculate(StaminaCostValue);
-		}
-		StaminaTarget->ReduceStamina(StaminaCostValue);
+		//// 若无符合的特殊攻击则进行普通攻击
+		//// 消耗体力
+		//IStateCalculate_IF* StateCalculateTarget = Cast<IStateCalculate_IF>(GetOwner());
+		//if (StateCalculateTarget)
+		//{
+		//	StaminaCostValue = StateCalculateTarget->StaminaCostCalculate(StaminaCostValue);
+		//}
+		//StaminaTarget->ReduceStamina(StaminaCostValue);
 	
-		return;
+		//return;
 	}
 
 	// 遍历所有检测到的敌人
@@ -203,14 +203,14 @@ void USL_CombatantComponent::PerformAttack()
 		}
 	}
 
-	// 若无符合的特殊攻击则进行普通攻击
+	//// 若无符合的特殊攻击则进行普通攻击
 	MyWeaponBehavior->AttackBehaviorResponse(My);
-	IStateCalculate_IF* StateCalculateTarget = Cast<IStateCalculate_IF>(My);
-	if (StateCalculateTarget)
-	{
-		StaminaCostValue = StateCalculateTarget->StaminaCostCalculate(StaminaCostValue);
-	}
-	StaminaTarget->ReduceStamina(StaminaCostValue);
+	//IStateCalculate_IF* StateCalculateTarget = Cast<IStateCalculate_IF>(My);
+	//if (StateCalculateTarget)
+	//{
+	//	StaminaCostValue = StateCalculateTarget->StaminaCostCalculate(StaminaCostValue);
+	//}
+	//StaminaTarget->ReduceStamina(StaminaCostValue);
 	return ;
 }
 

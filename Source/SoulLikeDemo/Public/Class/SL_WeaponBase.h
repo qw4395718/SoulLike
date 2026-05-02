@@ -1,192 +1,176 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Public/Class/WeaponBase.h
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
-#include "SoulLikeGameGlobal.h"
-#include "SoulLikeCharacter.h"
+#include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
-#include "WeaponBehavior_IF.h"
-#include "WeaponData.h"
-#include "WeaponComboCoordinatorComponent.h"
-#include "WeaponAnimNotify_IF.h"
-#include <GameplayEffect.h>
+#include "SoulLikeGameGlobal.h"
 #include "SL_WeaponBase.generated.h"
 
+class USkeletalMeshComponent;
+class UStaticMeshComponent;
+class UCombatComponent;
 class USL_ComboManagerComponent;
+class USL_StaminaComponent;
+class ASL_CharacterBase;
 
-/**
- * 
- */
-UCLASS(Blueprintable)
-class SOULLIKEDEMO_API ASL_WeaponBase : public AActor,public IWeaponAnimNotify_IF
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponHitDelegate, AActor*, TargetActor, const FHitResult&, HitResult, const FWeaponDataInfo&, WeaponData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponParryDelegate, AActor*, TargetActor);
+
+UCLASS()
+class SOULLIKEDEMO_API ASL_WeaponBase : public AActor
 {
 	GENERATED_BODY()
 
 public:
-
 	ASL_WeaponBase();
+
+	// ===== 初始化接口 =====
+	/** 根据武器ID初始化武器 */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+		void InitializeWeaponWithID(int32 WeaponID);
+
+	/** 直接从数据行初始化（用于测试/动态武器） */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+		void InitializeFromDataRow(const FWeaponDataInfo& InWeaponData);
+
+	// ===== 碰撞控制 =====
+	/** 开启攻击碰撞检测 */
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Collision")
+		void EnableAttackCollision();
+
+	/** 关闭攻击碰撞检测 */
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Collision")
+		void DisableAttackCollision();
+
+	/** 开启弹反窗口 */
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Parry")
+		void EnableParryWindow(float Duration);
+
+	/** 关闭弹反窗口 */
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Parry")
+		void DisableParryWindow();
+
+	/** 是否在弹反窗口内 */
+	UFUNCTION(BlueprintPure, Category = "Weapon|Parry")
+		bool IsParryWindowActive() const { return bIsParryWindowActive; }
+
+	// ===== 数据查询 =====
+	UFUNCTION(BlueprintPure, Category = "Weapon|Data")
+		int32 GetWeaponID() const { return WeaponData.WeaponID; }
+
+	UFUNCTION(BlueprintPure, Category = "Weapon|Data")
+		const FWeaponDataInfo& GetWeaponData() const { return WeaponData; }
+
+	UFUNCTION(BlueprintPure, Category = "Weapon|Data")
+		float GetBaseDamage() const { return WeaponData.BaseDamage; }
+
+	UFUNCTION(BlueprintPure, Category = "Weapon|Stamina")
+		float GetStaminaCostMultiplier() const { return WeaponData.StaminaCostMultiplier; }
+
 public:
-	/************************************************************************/
-	/*                               接口实现                                       */
-	/************************************************************************/
-		// 动画(状态)通知响应
-	UFUNCTION()
-		void WeaponAnimNotifyResponse(int NotifyType) override;
+	// ===== 委托 =====
+	/** 武器命中目标时广播 */
+	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
+		FOnWeaponHitDelegate OnWeaponHitDelegate;
 
-	/************************************************************************/
-	/*外部调用                                                                     */
-	/************************************************************************/
-	// 初始化武器信息
-	UFUNCTION()
-		void InitWeaponInfo(const FWeaponData& WeaponInfo,AActor* OwnerActor);
-
-
-	// 激活该武器
-	UFUNCTION()
-		void ActiveWeapon();
-
-	// 静默该武器
-	UFUNCTION()
-		void InActiveWeapon();
-	
-	// 更新武器状态
-	UFUNCTION()
-		void UpdateWeaponEquipState(EWeaponEquipState CurrentState);
-
-	// 该武器是否配置了处决模组
-	UFUNCTION()
-		bool IsLoadExecuteMod();
-
-	// 该武器是否配置了背刺模组
-	UFUNCTION()
-		bool IsLoadBackStabMod();
-
-	// 执行武器行为
-	UFUNCTION()
-		bool PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* OwnerActor);
-
-	// 获取武器基础伤害
-	UFUNCTION()
-		float GetWeaponBaseDamage();
-
-
-	UFUNCTION()
-	void ExecuteWeaponActionInternal(EWeaponModeTyoe ActionType, AActor* OwnerActor);
-	/************************************************************************/
-	/*                                网络同步                                   */
-	/************************************************************************/
-	UFUNCTION(Server, Reliable)
-		void Server_PerformWeaponAction(EWeaponModeTyoe ActionType, AActor* OwnerActor);
-
-	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_PlayWeaponMentage(AActor* OwnerActor, EWeaponModeTyoe MentageType, FName MentageSectionName);
-
-	UFUNCTION()
-		void OnRep_WeaponConfig();
-
-	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
-
+	/** 武器弹反成功时广播 */
+	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
+		FOnWeaponParryDelegate OnWeaponParryDelegate;
 
 protected:
-	/************************************************************************/
-	/*                               继承实现                                       */
-	/************************************************************************/
+	virtual void BeginPlay() override;
 
-	/************************************************************************/
-	/*内部调用                                                                     */
-	/************************************************************************/
-	// 异步加载武器网格体
-	void LoadWeaponMeshAsync(const FString WeaponMeshName);
+	virtual void SetOwner(AActor* NewOwner) override;
 
-	// 当武器网格体加载完成时
-	void OnLoadedWeaponMesh();
+	// ===== 碰撞回调 =====
+	UFUNCTION()
+		void OnCollisionOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	// 异步加载武器蒙太奇动画(供给角色类使用)
-	void LoadWeaponMentageAsync(EWeaponModeTyoe MentageType,const FString MentagePath);
+	UFUNCTION()
+		void OnCollisionOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	// 异步加载武器动画蓝图
-	void LoadWeaponAnimInstanceAsync(const FString WeapinAnimName);
+	/** 定时器回调：对重叠的Actor应用伤害 */
+	void ApplyDamageToOverlappingActors();
 
-	// 当武器网格体加载完成时
-	void OnLoadedWeaponAnimInstance();
+	/** 定时器回调：对重叠的Actor应用弹反 */
+	void ApplyParryToOverlappingActors();
 
-	// 加载武器模组
-	bool LoadWeaponComponents(const TMap<EWeaponComponentType, bool>& WeaponComponentInfo);
+	// ===== 辅助方法 =====
+	/** 初始化资源（网格体、音效、特效） */
+	void LoadWeaponAssets();
 
-	// 播放武器蒙太奇
-	void PlayWeaponMentage(AActor* OwnerActor,EWeaponModeTyoe MentageType,FName MentageSectionName);
+	// 设置动画蓝图
+	void SetupAnimClass();
 
-	FString GetNetworkGUIDString(AActor* InActor);
+	// 设置旋转
+	void SetupRotator();
 
-	// 攻击行为响应
-	void Attack(AActor* OwnerActor);
+	// 设置偏移
+	void SetupOffset();
 
-	// 防御行为响应
-	void Defence(AActor* OwnerActor);
-
-	// 技能行为响应
-	void ComboSkill(AActor* OwnerActor);
-
-	// 处决行为响应
-	void Execute(AActor* OwnerActor);
-
-	// 背刺行为响应
-	void BackStab(AActor* OwnerActor);
+	/** 设置碰撞盒大小 */
+	void SetupCollisionBox();
 
 protected:
-	/************************************************************************/
-	/*内部变量                                                                     */
-	/************************************************************************/
+	// ===== 组件 =====
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		UBoxComponent* CollisionBox;
 
-	// 武器ID
-	UPROPERTY()
-		uint32 WeaponID;
-
-	UPROPERTY(ReplicatedUsing = OnRep_WeaponConfig)
-		FWeaponData WeaponConfig;
-
-	// 异步加载骨骼网格体模型
-		TSoftObjectPtr<USkeletalMesh> SoftMeshReference;
-
-	// 武器骨骼网格体组件
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		USkeletalMeshComponent* SkeletalWeaponMesh;
 
-	// 碰撞盒子尺寸
-	UPROPERTY()
-		FVector CollisionBoxSize;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		UStaticMeshComponent* StaticWeaponMesh;
 
-	// 武器蒙太奇动画异步加载ptr
-	UPROPERTY()
-		TMap<EWeaponModeTyoe, UAnimMontage*> WeaponMentageMap;
+	// ===== 数据 =====
+	/** 当前武器配置数据 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Data")
+		FWeaponDataInfo WeaponData;
 
-	// 武器动画蓝图
+	/** 持有者角色 */
 	UPROPERTY()
-		TSoftClassPtr<UClass> SoftWeaponAnimInstanceReference;
+		class ASL_CharacterBase* OwningCharacter;
 
-	// 武器模组(请注意武器模组与武器动画蓝图是直接关联的)
-	UPROPERTY()
-		TMap<EWeaponComponentType, USceneComponent*> WeaponComponentMap;
+	// ===== 状态 =====
+	/** 弹反窗口是否激活 */
+	bool bIsParryWindowActive;
 
-	// 武器模组实际加载情况
-	UPROPERTY()
-		TMap<EWeaponComponentType, bool> WeaponLoadComponentInfoMap;
+	/** 是否使用静态网格体 */
+	bool bIsStaticMesh;
 
-	// 武器装备槽位情况
-	UPROPERTY()
-		EWeaponEquipState WeaponEquipInfo;
+	// ===== 碰撞系统 =====
+	/** 攻击碰撞定时器 */
+	FTimerHandle DamageTimerHandle;
 
-	// 武器持有者
-	UPROPERTY()
-		TWeakObjectPtr<AActor> Owning;
+	/** 弹反碰撞定时器 */
+	FTimerHandle ParryTimerHandle;
 
-	// 武器绑定插槽名
+	/** 攻击重叠Actor列表 */
 	UPROPERTY()
-		FString WeaponOnwerSocketName;
+		TArray<AActor*> AttackOverlappingActors;
 
-	// 武器中央协调组件
+	/** 弹反重叠Actor列表 */
 	UPROPERTY()
-		UWeaponComboCoordinatorComponent* WeaponComboCoordinatorComp;
+		TArray<AActor*> ParryOverlappingActors;
+
+	/** 已命中的Actor列表（防止重复伤害） */
+	UPROPERTY()
+		TSet<AActor*> AlreadyHitActors;
+
+	/** 已弹反的Actor列表 */
+	UPROPERTY()
+		TSet<AActor*> AlreadyParryActors;
+
+	// ===== 配置 =====
+	/** 伤害检测间隔 */
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Config")
+		float DamageInterval = 0.1f;
+
+	/** 弹反检测间隔 */
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Config")
+		float ParryInterval = 0.05f;
 };

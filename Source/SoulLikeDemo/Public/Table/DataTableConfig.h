@@ -11,6 +11,7 @@ enum class EDataTableType : uint8
 {
 	DT_None					UMETA(DisplayName = "None"),
 	DT_ComboInfo			UMETA(DisplayName = "ComboInfo"),
+	DT_WeaponDataInfo			UMETA(DisplayName = "WeaponDataInfo"),
 	DT_Max					UMETA(Hidden)
 };
 

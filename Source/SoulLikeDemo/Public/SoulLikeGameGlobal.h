@@ -367,4 +367,96 @@ struct FComboInfo : public FTableRowBase
         float DamageMultiplier = 1.0f;
 };
 
+// ===== 武器类型枚举 =====
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	Sword		UMETA(DisplayName = "剑"),
+	Dagger		UMETA(DisplayName = "匕首"),
+	Spear		UMETA(DisplayName = "矛"),
+	GreatSword	UMETA(DisplayName = "大剑"),
+	Shield		UMETA(DisplayName = "盾牌"),
+	Bow			UMETA(DisplayName = "弓"),
+	Staff		UMETA(DisplayName = "法杖"),
+	Max			UMETA(Hidden)
+};
+
+// ===== 武器数据表结构 =====
+USTRUCT(BlueprintType)
+struct FWeaponDataInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	// ===== 基础信息 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		int32 WeaponID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FName WeaponName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		EWeaponType WeaponType;
+
+	// ===== 资源 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asset")
+		TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asset")
+		TSoftObjectPtr<UStaticMesh> StaticMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asset")
+		TSoftObjectPtr<USoundBase> HitSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asset")
+		TSoftObjectPtr<USoundBase> SwingSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asset")
+		TSoftObjectPtr<UParticleSystem> HitEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asset")
+		TSoftObjectPtr<UAnimInstance> AnimClass;
+
+	// ===== 碰撞盒配置 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+		FVector CollisionBoxSize;
+
+	// 插槽偏移
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Offset")
+		FVector Offset;
+
+	// 旋转
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rotator")
+		FRotator Rotator;
+
+	// ===== 伤害配置 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+		float BaseDamage = 10.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+		EDamageType DamageType = EDamageType::SLASH;
+
+	// ===== 体力消耗倍率 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+		float StaminaCostMultiplier = 1.0f;
+
+	// ===== 弹反窗口配置 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Parry")
+		float ParryWindowDuration = 0.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Parry")
+		float ParryStaminaCost = 20.0f;
+
+	// ===== 是否双手武器 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		bool bIsTwoHanded = false;
+
+	// ===== 是否左手武器 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		bool bIsLeftHanded = false;
+
+	// ===== 武器持有插槽 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FName SocketName = TEXT("WeaponSocket");
+};
+
 

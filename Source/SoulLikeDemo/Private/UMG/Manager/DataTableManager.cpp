@@ -6,6 +6,7 @@
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
 #include <ComboInfoTable.h>
+#include <WeaponDataTable.h>
 
 // 静态常量定义
 const FString UDataTableManager::DefaultConfigTablePath = TEXT("/Game/SoulLikeDemo/DataTables/Config/DT_DataTableConfig.DT_DataTableConfig");
@@ -80,6 +81,7 @@ void UDataTableManager::RegisterDefaultTableClasses()
 	// 系统会自动使用UBaseDataTable作为默认类
 
 	RegisterTableClass(EDataTableType::DT_ComboInfo, UComboInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_WeaponDataInfo, UWeaponDataTable::StaticClass());
 
 	UE_LOG(LogTemp, Log, TEXT("DataTableManager::RegisterDefaultTableClasses - Default classes registered"));
 }

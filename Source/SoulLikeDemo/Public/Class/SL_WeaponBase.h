@@ -14,6 +14,7 @@ class UCombatComponent;
 class USL_ComboManagerComponent;
 class USL_StaminaComponent;
 class ASL_CharacterBase;
+class UGameplayEffect;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponHitDelegate, AActor*, TargetActor, const FHitResult&, HitResult, const FWeaponDataInfo&, WeaponData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponParryDelegate, AActor*, TargetActor);
@@ -96,6 +97,9 @@ protected:
 	/** 定时器回调：对重叠的Actor应用伤害 */
 	void ApplyDamageToOverlappingActors();
 
+	// 计算伤害
+	float CalculateFinalDamage(AActor* InTargetActor) const;
+
 	/** 定时器回调：对重叠的Actor应用弹反 */
 	void ApplyParryToOverlappingActors();
 
@@ -130,6 +134,10 @@ protected:
 	/** 当前武器配置数据 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Data")
 		FWeaponDataInfo WeaponData;
+
+	// 伤害EffectClass 通过SetByCaller确定修改值
+	UPROPERTY(EditDefaultsOnly, Category = "Damage|Config")
+		TSubclassOf<UGameplayEffect> DamageEffectClass;
 
 	/** 持有者角色 */
 	UPROPERTY()

@@ -9,6 +9,9 @@
 #include "DataTableManager.h"
 #include "WeaponDataTable.h"
 #include <SL_CharacterBase.h>
+#include <AbilitySystemInterface.h>
+#include <AbilitySystemComponent.h>
+#include <SL_ComboManagerComponent.h>
 
 ASL_WeaponBase::ASL_WeaponBase()
 {
@@ -46,7 +49,7 @@ void ASL_WeaponBase::BeginPlay()
 
 void ASL_WeaponBase::SetOwner(AActor* NewOwner)
 {
-	RETURN_IF_TRUE(NewOwner);
+	RETURN_IF_TRUE(NewOwner == nullptr);
 	OwningCharacter = Cast<ASL_CharacterBase>(NewOwner);
 }
 
@@ -63,9 +66,16 @@ void ASL_WeaponBase::InitializeWeaponWithID(int32 WeaponID)
 			if (WeaponTable->GetWeaponData(WeaponID, OutData))
 			{
 				InitializeFromDataRow(OutData);
-				return;
 			}
 		}
+	}
+
+	if (!DamageEffectClass)
+	{
+		DamageEffectClass = LoadClass<UGameplayEffect>(
+			nullptr,
+			TEXT("/Game/SoulLikeDemo/GAS/GE/GE_Damage.GE_Damage_C")
+			);
 	}
 
 	UE_LOG(LogTemp, Error, TEXT("ASL_WeaponBase::InitializeWeaponWithID - Failed to load weapon data for ID: %d"), WeaponID);
@@ -339,17 +349,76 @@ void ASL_WeaponBase::ApplyDamageToOverlappingActors()
 		if (!Actor || Actor == OwningCharacter || AlreadyHitActors.Contains(Actor))
 			continue;
 
-		// 构造命中结果
-		FHitResult HitResult;
-		// 这里可以传入SweepResult，简化处理使用默认
+		// 1. 检查目标是否具有GAS系统（新的SL_CharacterBase）
+		IAbilitySystemInterface* TargetASI = Cast<IAbilitySystemInterface>(Actor);
+		if (!TargetASI) continue;
 
-		// 广播命中事件
-		OnWeaponHitDelegate.Broadcast(Actor, HitResult, WeaponData);
+		UAbilitySystemComponent* TargetASC = TargetASI->GetAbilitySystemComponent();
+		if (!TargetASC) continue;
+
+		// 2. 计算最终伤害
+		float FinalDamage = CalculateFinalDamage(Actor);
+
+		// 3. 创建GE上下文
+		FGameplayEffectContextHandle EffectContext = TargetASC->MakeEffectContext();
+		EffectContext.AddInstigator(OwningCharacter, this);
+
+		FGameplayEffectSpecHandle SpecHandle = TargetASC->MakeOutgoingSpec(
+			DamageEffectClass, 1.0f, EffectContext);
+
+		if (SpecHandle.IsValid())
+		{
+			// 5. 通过SetByCaller设置伤害值
+			FGameplayTag DamageTag = FGameplayTag::RequestGameplayTag(FName("GameplayCue.DamageNumber"), true);
+			SpecHandle.Data->SetSetByCallerMagnitude(DamageTag, FinalDamage);
+
+			// 6. 应用GE到目标
+			TargetASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+
+			UE_LOG(LogTemp, Warning, TEXT("WeaponBase: GAS Damage - %s dealt %f damage to %s"),
+				*GetName(), FinalDamage, *Actor->GetName());
+		}
 
 		// 记录已命中
 		AlreadyHitActors.Add(Actor);
 	}
+
 }
+
+float ASL_WeaponBase::CalculateFinalDamage(AActor* InTargetActor) const
+{
+	// 1. 检查目标是否具有GAS系统（新的SL_CharacterBase）
+	IAbilitySystemInterface* TargetASI = Cast<IAbilitySystemInterface>(InTargetActor);
+	if (!TargetASI) return 0.0f;
+
+	UAbilitySystemComponent* TargetASC = TargetASI->GetAbilitySystemComponent();
+	if (!TargetASC) return 0.0f;
+
+	// 2. 计算最终伤害
+	float FinalDamage = WeaponData.BaseDamage;
+
+	// 从ComboManager获取当前连击倍率
+	if (OwningCharacter)
+	{
+		// 方式1：如果OwningCharacter本身就实现了IAbilitySystemInterface
+		if (IAbilitySystemInterface* OwnerASI = Cast<IAbilitySystemInterface>(OwningCharacter))
+		{
+			if (UAbilitySystemComponent* OwnerASC = OwnerASI->GetAbilitySystemComponent())
+			{
+				// 从Owner的Actor上找ComboManager组件
+				USL_ComboManagerComponent* ComboMgr =
+					OwningCharacter->FindComponentByClass<USL_ComboManagerComponent>();
+				if (ComboMgr)
+				{
+					FinalDamage *= ComboMgr->GetCurrentComboDamageMultiplier();
+				}
+			}
+		}
+	}
+
+	return FinalDamage;
+}
+
 
 void ASL_WeaponBase::ApplyParryToOverlappingActors()
 {

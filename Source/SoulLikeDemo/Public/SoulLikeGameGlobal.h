@@ -459,4 +459,31 @@ struct FWeaponDataInfo : public FTableRowBase
 		FName SocketName = TEXT("WeaponSocket");
 };
 
+// ===== 职业配置表结构 =====
+USTRUCT(BlueprintType)
+struct FClassConfigInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+		// ===== 基础信息 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		int32 ClassID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FName ClassName;
+
+	// ===== 武器配置 =====
+	/** 左手武器ID（0表示无武器） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+		int32 LeftHandWeaponID = 0;
+
+	/** 右手武器ID（0表示无武器） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+		int32 RightHandWeaponID = 0;
+
+	// ===== 道具配置 =====
+	/** 道具集IDs */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+		TArray<int32> SlotItemIDs;
+};
 

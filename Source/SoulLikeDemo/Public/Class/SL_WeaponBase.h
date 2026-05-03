@@ -27,6 +27,8 @@ class SOULLIKEDEMO_API ASL_WeaponBase : public AActor
 public:
 	ASL_WeaponBase();
 
+	virtual void SetOwner(AActor* NewOwner) override;
+
 	// ===== 初始化接口 =====
 	/** 根据武器ID初始化武器 */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -70,6 +72,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapon|Stamina")
 		float GetStaminaCostMultiplier() const { return WeaponData.StaminaCostMultiplier; }
 
+
 public:
 	// ===== 委托 =====
 	/** 武器命中目标时广播 */
@@ -82,8 +85,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
-	virtual void SetOwner(AActor* NewOwner) override;
 
 	// ===== 碰撞回调 =====
 	UFUNCTION()

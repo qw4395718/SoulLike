@@ -1,134 +1,141 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Public/Component/Character/SL_EquipmentComponent.h
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "SoulLikeGameGlobal.h"
-#include "WeaponBase.h"
-#include "WeaponData.h"
-#include "WeaponBehavior_IF.h"
-#include "Containers/Map.h"
-#include "SL_WeaponBase.h"
+#include <WeaponAnimNotify_IF.h>
+#include <SL_WeaponBase.h>
 #include "SL_EquipmentComponent.generated.h"
 
-const INT EQUIPMENT_SLOT_NUM  = 5;
+class ASL_CharacterBase;
 
+/** 武器变更事件委托 */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponEquippedDelegate, ASL_WeaponBase*, Weapon, EArrowKeyType, HandType);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class SOULLIKEDEMO_API USL_EquipmentComponent : public UActorComponent,public IWeaponBehavior_IF
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+class SOULLIKEDEMO_API USL_EquipmentComponent : public UActorComponent, public IWeaponAnimNotify_IF
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
+public:
 	USL_EquipmentComponent();
 
+
+	/************************************************************************/
+	/*                               接口实现                               */
+	/************************************************************************/
+	virtual void WeaponAnimNotifyResponse(int NotifyType) override;
+
+	/************************************************************************/
+	/*                               外部调用                               */
+	/************************************************************************/
+	// 设置组件的持有者
+	void SetOwner(AActor* NewOwner);
+
+	// ===== 初始化 =====
+	/** 根据职业索引初始化装备组件 */
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+		void InitializeWithClassID(int32 ClassID);
+
+	/** 直接传入配置数据初始化（用于测试/动态配置） */
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+		void InitializeWithConfig(const FClassConfigInfo& ClassConfig);
+
+	// ===== 武器访问接口 =====
+	/** 获取当前左手武器 */
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+		ASL_WeaponBase* GetCurrentLeftHandWeapon() const { return CurrentLeftHandWeapon; }
+
+	/** 获取当前右手武器 */
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+		ASL_WeaponBase* GetCurrentRightHandWeapon() const { return CurrentRightHandWeapon; }
+
+	/** 获取指定手的武器 */
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+		ASL_WeaponBase* GetWeaponByHand(int32 bIsRightHand) const;
+
+	// ===== 道具操作接口 =====
+	/** 使用上方道具 */
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+		void UseSelectedSlotItem();
+
+	/** 获取上方道具ID */
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+		int32 GetSelectSlotItemID() const;
+
+	// ===== 查询接口 =====
+	/** 获取当前职业配置 */
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+		const FClassConfigInfo& GetClassConfig() const { return CurrentClassConfig; }
+
+	/** 获取当前职业ID */
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+		int32 GetClassID() const { return CurrentClassConfig.ClassID; }
+
 public:
 	/************************************************************************/
-	/*                                接口实现                                      */
+	/*                               外部访问                               */
 	/************************************************************************/
-	// 攻击行为响应
-	UFUNCTION()
-		void AttackBehaviorResponse(AActor* OwnerActor) override;
+	// ===== 委托 =====
+	/** 武器装备变更委托 */
+	UPROPERTY(BlueprintAssignable, Category = "Equipment|Events")
+		FOnWeaponEquippedDelegate OnLeftHandWeaponEquipped;
 
-	// 防御行为响应
-	UFUNCTION()
-		void DefenceBehaviorResponse(AActor* OwnerActor) override;
-
-	// 技能行为响应
-	UFUNCTION()
-		void ComboSkillBehaviorResponse(AActor* OwnerActor) override;
-
-	// 处决行为响应
-	UFUNCTION()
-		void ExecuteBehaviorResponse(AActor* OwnerActor) override;
-
-	// 背刺行为响应
-	UFUNCTION()
-		void BackStabBehaviorResponse(AActor* OwnerActor) override;
-
-public:
-	/************************************************************************/
-	/*                                 外部调用                                     */
-	/************************************************************************/
-	UFUNCTION()
-		void InitEquipmentComponent(const TArray<FWeaponData> WeaponList,const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex ,AActor* OwnerActor);
-
-	UFUNCTION()
-		void UseUpSlotItemEvent();
-
-	UFUNCTION()
-		void UseDownSlotItemEvent();
-
-	UFUNCTION()
-		void SwitchEquipmentEvent(EArrowKeyType ArrowType);
-
-	UFUNCTION()
-		void SetEquipemntInfo(EArrowKeyType ArrowType,int SlotIndex, FWeaponData& WeaponInfo);
-
-	UFUNCTION()
-		void SetCostItemInfo(EArrowKeyType ArrowType, int SlotIndex, int ItemID);
-
-	UFUNCTION()
-		void CleanCostItemInfo(EArrowKeyType ArrowType, int SlotIndex);
-
-	UFUNCTION()
-		ASL_WeaponBase* GetCurrentLHWeapon();
-
-	UFUNCTION()
-		ASL_WeaponBase* GetCurrentRHWeapon();
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "CallLuaByFLuaTable", Category = "UnLua Tutorial"))
-		static void CallLuaByFLuaTable();
+	/** 右手武器装备变更委托 */
+	UPROPERTY(BlueprintAssignable, Category = "Equipment|Events")
+		FOnWeaponEquippedDelegate OnRightHandWeaponEquipped;
 
 protected:
 	/************************************************************************/
-	/*                                  内部调用                                    */
+	/*                               内部调用                               */
 	/************************************************************************/
+	/** 根据武器ID派生武器实例 */
+	ASL_WeaponBase* SpawnWeaponByID(int32 WeaponID);
 
+	/** 销毁武器实例 */
+	void DestroyWeapon(ASL_WeaponBase* Weapon);
+
+	/** 装备左手武器 */
+	void EquipLeftHandWeapon(int32 WeaponID);
+
+	/** 装备右手武器 */
+	void EquipRightHandWeapon(int32 WeaponID);
+
+	/** 解除当前武器 */
+	void UnequipCurrentWeapon(ASL_WeaponBase*& CurrentWeapon);
 
 protected:
 	/************************************************************************/
-	/*                                  变量                                    */
+	/*                               内部访问                               */
 	/************************************************************************/
-	// 当前四个装备槽的当前Index
-	UPROPERTY()
-		TMap<EArrowKeyType,int> CurrentEquipmentIndex;
+	// ===== 职业配置 =====
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment|Config")
+		FClassConfigInfo CurrentClassConfig;
 
-	// 左手装备信息数组
-	UPROPERTY()
-		ASL_WeaponBase* LeftHandEquipmentInfoList[EQUIPMENT_SLOT_NUM];
-
-	// 当前左手武器
+	// ===== 武器实例 =====
+	/** 当前左手武器实例 */
 	UPROPERTY()
 		ASL_WeaponBase* CurrentLeftHandWeapon;
 
-	// 右手装备信息数组
-	UPROPERTY()
-		ASL_WeaponBase* RightHandEquipmentInfoList[EQUIPMENT_SLOT_NUM];
-
-	// 当前左手武器
+	/** 当前右手武器实例 */
 	UPROPERTY()
 		ASL_WeaponBase* CurrentRightHandWeapon;
 
-	// 上方装备道具信息
+	// ===== 道具数据 =====
+	/** 道具集 */
 	UPROPERTY()
-		int UpItemList[EQUIPMENT_SLOT_NUM];
+		TArray<int32> SlotItemIDList;
 
-	// 当前上方装备道具
 	UPROPERTY()
-		int CurrentUpSlotItemID;
+		int32 CurrentSelectSlotIndex;
 
-	// 下方装备道具信息
+	// ===== 缓存 =====
 	UPROPERTY()
-		int DownItemList[EQUIPMENT_SLOT_NUM];
-	
-	// 当前下方装备道具
-	UPROPERTY()
-		int CurrentDownSlotItemID;
+		ASL_CharacterBase* OwningCharacter;
 
-	//// 持有者信息
-	//UPROPERTY()
-	//	AActor* Owning;
+	/** 武器派生模板类 */
+	UPROPERTY(EditDefaultsOnly, Category = "Equipment|Config")
+		TSubclassOf<ASL_WeaponBase> WeaponBaseClass;
 };

@@ -9,6 +9,7 @@
 
 class UUIManagerSubsystem;
 class USL_ComboManagerComponent;
+class USL_EquipmentComponent;
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_PlayerControllerBase : public APlayerController
@@ -84,6 +85,8 @@ protected:
 	/** 安全获取 ComboManager */
 	USL_ComboManagerComponent* GetComboManagerComponent() const;
 
+	USL_EquipmentComponent* GetEquipmentComponent() const;
+
 	/** 通用输入处理，所有输入都走这个方法 */
 	void ProcessComboInput(EComboInputActionType InputType);
 
@@ -95,4 +98,7 @@ private:
 
 	// 缓存 ComboManager 引用，避免频繁 FindComponent
 	mutable TWeakObjectPtr<USL_ComboManagerComponent> CachedComboManager;
+
+	// 缓存 EquipmentComp 引用，避免频繁 FindComponent
+	mutable TWeakObjectPtr<USL_EquipmentComponent> CachedEquipmentComp;
 };

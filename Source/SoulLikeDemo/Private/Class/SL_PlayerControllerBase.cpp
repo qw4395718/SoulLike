@@ -220,6 +220,24 @@ USL_ComboManagerComponent* ASL_PlayerControllerBase::GetComboManagerComponent() 
 
 }
 
+USL_EquipmentComponent* ASL_PlayerControllerBase::GetEquipmentComponent() const
+{
+	// 使用缓存
+	if (CachedEquipmentComp.IsValid())
+	{
+		return CachedEquipmentComp.Get();
+	}
+
+	// 从当前控制的 Pawn 上查找
+	APawn* ControlledPawn = GetPawn();
+	if (ControlledPawn)
+	{
+		CachedEquipmentComp = ControlledPawn->FindComponentByClass<USL_EquipmentComponent>();
+	}
+
+	return CachedEquipmentComp.Get();
+}
+
 void ASL_PlayerControllerBase::ProcessComboInput(EComboInputActionType InputType)
 {
 

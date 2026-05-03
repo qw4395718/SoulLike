@@ -7,6 +7,11 @@
 
 USL_StatusAttributeSet::USL_StatusAttributeSet() 
 {
+	// 复活委托绑定
+	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
+	{
+		globalDelegatesManager->OnCharacterRevived.AddUObject(this,&USL_StatusAttributeSet::OnCharacterReLive);
+	}
 }
 
 void USL_StatusAttributeSet::SetOwningActor(AActor* pOwnActor)
@@ -125,7 +130,7 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		const float OldValue = GetHealth();
 		const float MinValue = 0.0f;
 		const float MaxValue = GetMaxHealth();
-		const float NewValue = FMath::Clamp(OldValue + ChangeValue, MinValue, MaxValue);
+		const float NewValue = FMath::Clamp(OldValue - ChangeValue, MinValue, MaxValue);
 
 		if (OldValue != NewValue)
 		{
@@ -135,6 +140,8 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 			{
 				globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldValue, CurrentValue, MinValue, MaxValue);
+				// 血量归零
+				if (CurrentValue == MinValue) {OnCharacterDeath();}
 			}
 
 			// Calculate 'actual' damage applied that respects min and max health
@@ -160,7 +167,7 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		const float OldValue = GetStamina();
 		const float MinValue = 0.0f;
 		const float MaxValue = GetMaxStamina();
-		const float NewValue = FMath::Clamp(OldValue + ChangeValue, MinValue, MaxValue);
+		const float NewValue = FMath::Clamp(OldValue - ChangeValue, MinValue, MaxValue);
 
 		if (OldValue != NewValue)
 		{
@@ -250,6 +257,19 @@ void USL_StatusAttributeSet::OnCharacterDeath()
     UE_LOG(LogTemp, Warning, TEXT("GAS Death: %s died"), *OwnerActor->GetName());
 }
 
+
+void USL_StatusAttributeSet::OnCharacterReLive(AActor* ReviveActor)
+{
+	UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
+	if (!ASC) return;
+
+	AActor* OwnerActor = ASC->GetOwnerActor();
+	if (!OwnerActor|| ReviveActor != OwnerActor) return;
+
+	// 1. 更新GAS标签
+	ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Dead"));
+	ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Alive")); 
+}
 
 void USL_StatusAttributeSet::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {

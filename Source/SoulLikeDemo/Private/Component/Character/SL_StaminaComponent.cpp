@@ -110,7 +110,7 @@ void USL_StaminaComponent::ConsumeStamina(float InAmount)
 		{
 			Spec.Data->SetSetByCallerMagnitude(
 				FGameplayTag::RequestGameplayTag(TEXT("Data.StaminaCostNumber")),
-				-InAmount
+				InAmount
 			);
 			CachedASC->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 		}

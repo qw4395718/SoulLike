@@ -339,12 +339,9 @@ void ASL_WeaponBase::OnCollisionOverlapEnd(UPrimitiveComponent* OverlappedComp, 
 
 void ASL_WeaponBase::ApplyDamageToOverlappingActors()
 {
-	TArray<AActor*> ActorsToDamage;
-
-	// 获取当前重叠的Actor
-	CollisionBox->GetOverlappingActors(ActorsToDamage);
-
-	for (AActor* Actor : ActorsToDamage)
+	// 此处需要考虑玩家死亡后从容器中移除了
+	TArray<AActor*> ActorsCopy = AttackOverlappingActors;
+	for (AActor* Actor : ActorsCopy)
 	{
 		if (!Actor || Actor == OwningCharacter || AlreadyHitActors.Contains(Actor))
 			continue;
@@ -369,7 +366,7 @@ void ASL_WeaponBase::ApplyDamageToOverlappingActors()
 		if (SpecHandle.IsValid())
 		{
 			// 5. 通过SetByCaller设置伤害值
-			FGameplayTag DamageTag = FGameplayTag::RequestGameplayTag(FName("GameplayCue.DamageNumber"), true);
+			FGameplayTag DamageTag = FGameplayTag::RequestGameplayTag(FName("Data.DamageNumber"), true);
 			SpecHandle.Data->SetSetByCallerMagnitude(DamageTag, FinalDamage);
 
 			// 6. 应用GE到目标
@@ -431,16 +428,16 @@ void ASL_WeaponBase::ApplyParryToOverlappingActors()
 			continue;
 
 		// 检查是否可以被弹反
-		if (ASoulLikeCharacter* Enemy = Cast<ASoulLikeCharacter>(Actor))
+		if (ASL_CharacterBase* Enemy = Cast<ASL_CharacterBase>(Actor))
 		{
-			if (Enemy->CombatComponent)
-			{
-				Enemy->CombatComponent->HandleParry();
-				AlreadyParryActors.Add(Actor);
+			//if (Enemy->CombatComponent)
+			//{
+			//	Enemy->CombatComponent->HandleParry();
+			//	AlreadyParryActors.Add(Actor);
 
-				// 广播弹反事件
-				OnWeaponParryDelegate.Broadcast(Actor);
-			}
+			//	// 广播弹反事件
+			//	OnWeaponParryDelegate.Broadcast(Actor);
+			//}
 		}
 	}
 }

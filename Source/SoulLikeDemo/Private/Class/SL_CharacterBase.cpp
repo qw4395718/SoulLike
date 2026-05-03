@@ -334,27 +334,13 @@ void ASL_CharacterBase::WeaponAnimProcess(int HandType, EWeaponAnimNotifyType We
 	RETURN_IF_TRUE(EquipmentCmp == nullptr);
 	RETURN_IF_TRUE(HandType != 0 && HandType != 1);
 
-	if (HandType == false)
+	if (ASL_WeaponBase* Weapon = EquipmentCmp->GetWeaponByHand(HandType))
 	{
-		if (EquipmentCmp->GetCurrentLHWeapon())
-		{
-			ASL_WeaponBase* Weapon = EquipmentCmp->GetCurrentLHWeapon();
-			IWeaponAnimNotify_IF* WeaponAnimNotify = Cast<IWeaponAnimNotify_IF>(Weapon);
-			if (WeaponAnimNotify == nullptr) { return; }
-			WeaponAnimNotify->WeaponAnimNotifyResponse(int(WeaponAnimType));
-		}
+		IWeaponAnimNotify_IF* WeaponAnimNotify = Cast<IWeaponAnimNotify_IF>(Weapon);
+		if (WeaponAnimNotify == nullptr) { return; }
+		WeaponAnimNotify->WeaponAnimNotifyResponse(int(WeaponAnimType));
 	}
-	else
-	{
-		if (EquipmentCmp->GetCurrentRHWeapon())
-		{
-			ASL_WeaponBase* Weapon = EquipmentCmp->GetCurrentLHWeapon();
-			IWeaponAnimNotify_IF* WeaponAnimNotify = Cast<IWeaponAnimNotify_IF>(Weapon);
-			if (WeaponAnimNotify == nullptr) { return; }
-			WeaponAnimNotify->WeaponAnimNotifyResponse(int(WeaponAnimType));
 
-		}
-	}
 }
 
 void ASL_CharacterBase::InitializeCharacter()
@@ -374,7 +360,11 @@ void ASL_CharacterBase::InitPartmentComponent()
 	if (EquipmentCmp == nullptr && true)
 	{
 		EquipmentCmp = NewObject<USL_EquipmentComponent>(this);
-		// 装备组件的信息初始化放在背包组件中
+		if (EquipmentCmp)
+		{
+			EquipmentCmp->SetOwner(this);
+			EquipmentCmp->InitializeWithClassID(1001);
+		}
 	}
 
 	if (HealthCmp == nullptr && true)
@@ -387,27 +377,6 @@ void ASL_CharacterBase::InitPartmentComponent()
 	if (InventoryCmp == nullptr && true)
 	{
 		InventoryCmp = NewObject<USL_InventoryComponent>(this);
-		TArray<int> WeaponList;
-		TArray<int> ItemList;
-		TMap<EArrowKeyType, int> ActiveList;
-		TArray<FWeaponData> EquipmentWeaponList;
-
-		for (int i = 0;i< 1/*EQUIPMENT_SLOT_NUM*2*/;i++)
-		{ 
-			WeaponList.Add(100000+i);
-			ItemList.Add(200000+i);
-		}
-		
-		//ActiveList.Add(EArrowKeyType::ARROWKEY_Left,0);
-		ActiveList.Add(EArrowKeyType::ARROWKEY_Right, 0);
-		//ActiveList.Add(EArrowKeyType::ARROWKEY_Up, 0);
-		//ActiveList.Add(EArrowKeyType::ARROWKEY_Down, 0);
-		InventoryCmp->InitEquipmentInfo(WeaponList, ItemList, ActiveList);
-		InventoryCmp->GetEquipmentInfoList(EquipmentWeaponList);
-		if (EquipmentCmp != nullptr)
-		{
-			EquipmentCmp->InitEquipmentComponent(EquipmentWeaponList, ItemList, ActiveList,this);
-		}
 	}
 
 	if (StaminaCmp == nullptr && true)

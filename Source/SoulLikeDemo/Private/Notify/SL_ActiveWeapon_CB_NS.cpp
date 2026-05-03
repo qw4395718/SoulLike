@@ -5,21 +5,27 @@
 #include "SoulLikeCharacter.h"
 #include "CombatComponent.h"
 #include "WeaponBase.h"
+#include "SL_CharacterBase.h"
 
 void USL_ActiveWeapon_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{
 		// 假设角色持有武器，并通过接口控制碰撞
-		ASL_CharacterBase* Character = Cast<ASL_CharacterBase>(MeshComp->GetOwner());
-		/*	if (Character && Character->CombatComponent && Character->CombatComponent->LH_EquippedWeapon && bIsLHActive)
+		if (ASL_CharacterBase* Character = Cast<ASL_CharacterBase>(MeshComp->GetOwner()))
+		{
+			if (USL_EquipmentComponent* EquipmentComp = Cast<USL_EquipmentComponent>(Character->GetEquipmentComponent()))
 			{
-				Character->CombatComponent->LH_EquippedWeapon->EnableAttackCollisonCheck();
+				if (ASL_WeaponBase* Weapon = EquipmentComp->GetCurrentLeftHandWeapon())
+				{
+					Weapon->EnableAttackCollision();
+				}
+				if (ASL_WeaponBase* Weapon = EquipmentComp->GetCurrentRightHandWeapon())
+				{
+					Weapon->EnableAttackCollision();
+				}
 			}
-			if (Character && Character->CombatComponent && Character->CombatComponent->RH_EquippedWeapon && bIsRHActive)
-			{
-				Character->CombatComponent->RH_EquippedWeapon->EnableAttackCollisonCheck();
-			}*/
+		}
 	}
 }
 
@@ -28,14 +34,19 @@ void USL_ActiveWeapon_CB_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSe
 	if (MeshComp && MeshComp->GetOwner())
 	{
 		// 假设角色持有武器，并通过接口控制碰撞
-		ASL_CharacterBase* Character = Cast<ASL_CharacterBase>(MeshComp->GetOwner());
-	/*	if (Character && Character->CombatComponent && Character->CombatComponent->LH_EquippedWeapon && bIsLHActive)
+		if (ASL_CharacterBase* Character = Cast<ASL_CharacterBase>(MeshComp->GetOwner()))
 		{
-			Character->CombatComponent->LH_EquippedWeapon->DisableAttackCollisonCheck();
+			if (USL_EquipmentComponent* EquipmentComp = Cast<USL_EquipmentComponent>(Character->GetEquipmentComponent()))
+			{
+				if (ASL_WeaponBase* Weapon = EquipmentComp->GetCurrentLeftHandWeapon())
+				{
+					Weapon->DisableAttackCollision();
+				}
+				if (ASL_WeaponBase* Weapon = EquipmentComp->GetCurrentRightHandWeapon())
+				{
+					Weapon->DisableAttackCollision();
+				}
+			}
 		}
-		if (Character && Character->CombatComponent && Character->CombatComponent->RH_EquippedWeapon && bIsRHActive)
-		{
-			Character->CombatComponent->RH_EquippedWeapon->DisableAttackCollisonCheck();
-		}*/
 	}
 }

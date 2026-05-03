@@ -58,7 +58,7 @@ public:
 	UFUNCTION()
 		UActorComponent* GetCombatantComponent() override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		UActorComponent* GetEquipmentComponent() override;
 
 	UFUNCTION()

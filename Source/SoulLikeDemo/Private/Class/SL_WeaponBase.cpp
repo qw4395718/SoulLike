@@ -225,7 +225,7 @@ void ASL_WeaponBase::EnableAttackCollision()
 	// 重置已命中目标记录
 	AlreadyHitActors.Reset();
 
-	UE_LOG(LogTemp, Verbose, TEXT("ASL_WeaponBase::EnableAttackCollision"));
+	UE_LOG(LogTemp, Warning, TEXT("ASL_WeaponBase::EnableAttackCollision"));
 }
 
 void ASL_WeaponBase::DisableAttackCollision()
@@ -246,7 +246,7 @@ void ASL_WeaponBase::DisableAttackCollision()
 	AlreadyHitActors.Reset();
 	AttackOverlappingActors.Empty();
 
-	UE_LOG(LogTemp, Verbose, TEXT("ASL_WeaponBase::DisableAttackCollision"));
+	UE_LOG(LogTemp, Warning, TEXT("ASL_WeaponBase::DisableAttackCollision"));
 }
 
 // ==================== 弹反窗口控制 ====================
@@ -321,6 +321,7 @@ void ASL_WeaponBase::OnCollisionOverlapBegin(UPrimitiveComponent* OverlappedComp
 		else
 		{
 			AttackOverlappingActors.AddUnique(OtherActor);
+			UE_LOG(LogTemp, Warning, TEXT("WeaponBase:OnCollisionOverlapBegin"));
 		}
 	}
 }
@@ -328,10 +329,11 @@ void ASL_WeaponBase::OnCollisionOverlapBegin(UPrimitiveComponent* OverlappedComp
 void ASL_WeaponBase::OnCollisionOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor)
+	if (OtherActor && OtherActor != this && OtherActor != OwningCharacter)
 	{
 		AttackOverlappingActors.Remove(OtherActor);
 		ParryOverlappingActors.Remove(OtherActor);
+		UE_LOG(LogTemp, Warning, TEXT("WeaponBase:OnCollisionOverlapEnd"));
 	}
 }
 
@@ -339,13 +341,16 @@ void ASL_WeaponBase::OnCollisionOverlapEnd(UPrimitiveComponent* OverlappedComp, 
 
 void ASL_WeaponBase::ApplyDamageToOverlappingActors()
 {
+	UE_LOG(LogTemp, Warning, TEXT("WeaponBase:ApplyDamageToOverlappingActors 1"))
 	// 此处需要考虑玩家死亡后从容器中移除了
 	TArray<AActor*> ActorsCopy = AttackOverlappingActors;
 	for (AActor* Actor : ActorsCopy)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("WeaponBase:ApplyDamageToOverlappingActors 2"))
 		if (!Actor || Actor == OwningCharacter || AlreadyHitActors.Contains(Actor))
 			continue;
 
+		UE_LOG(LogTemp, Warning, TEXT("WeaponBase:ApplyDamageToOverlappingActors 3"))
 		// 1. 检查目标是否具有GAS系统（新的SL_CharacterBase）
 		IAbilitySystemInterface* TargetASI = Cast<IAbilitySystemInterface>(Actor);
 		if (!TargetASI) continue;

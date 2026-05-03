@@ -4,6 +4,7 @@
 #include <GlobalDelegatesManager.h>
 #include <SL_Macros.h>
 #include <SL_CharacterBase.h>
+#include <Components/CapsuleComponent.h>
 
 USL_StatusAttributeSet::USL_StatusAttributeSet() 
 {
@@ -242,10 +243,6 @@ void USL_StatusAttributeSet::OnCharacterDeath()
     if (ACharacter* Char = Cast<ACharacter>(OwnerActor))
     {
         // 注意：UE4.26中GetMesh()可能返回null，需检查
-        if (Char->GetMesh())
-        {
-            Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        }
         Char->SetActorEnableCollision(false);
         
         if (APlayerController* PC = Cast<APlayerController>(Char->GetController()))
@@ -253,6 +250,22 @@ void USL_StatusAttributeSet::OnCharacterDeath()
             PC->SetCinematicMode(true, false, false);
         }
     }
+
+	// 4.添加布娃娃系统检验-后续需要拆分到动画模块中
+	if (ACharacter* Char = Cast<ACharacter>(OwnerActor))
+	{
+		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
+		{
+			comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+		if (Char->GetMesh())
+		{
+			Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			Char->GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+			Char->GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"),true,true);
+		}
+	}
+
 
     UE_LOG(LogTemp, Warning, TEXT("GAS Death: %s died"), *OwnerActor->GetName());
 }
@@ -269,6 +282,21 @@ void USL_StatusAttributeSet::OnCharacterReLive(AActor* ReviveActor)
 	// 1. 更新GAS标签
 	ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Dead"));
 	ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Alive")); 
+
+	// 2.移除布娃娃系统,恢复正常的碰撞
+	if (ACharacter* Char = Cast<ACharacter>(ReviveActor))
+	{
+		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
+		{
+			comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		}
+		if (Char->GetMesh())
+		{
+			Char->GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+			Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			Char->GetMesh()->SetAllBodiesSimulatePhysics(false);
+		}
+	}
 }
 
 void USL_StatusAttributeSet::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const

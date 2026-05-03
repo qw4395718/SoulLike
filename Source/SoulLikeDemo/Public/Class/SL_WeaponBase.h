@@ -175,9 +175,9 @@ protected:
 		TSet<AActor*> AlreadyParryActors;
 
 	// ===== 配置 =====
-	/** 伤害检测间隔 */
+	/** 伤害检测间隔 需要<= 一帧 */
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Config")
-		float DamageInterval = 0.1f;
+		float DamageInterval = 0.03f;
 
 	/** 弹反检测间隔 */
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Config")

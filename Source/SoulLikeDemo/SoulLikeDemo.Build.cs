@@ -31,7 +31,8 @@ public class SoulLikeDemo : ModuleRules
 			"Engine", 
 			"InputCore",
 			"UnLua",
-            "GameplayAbilities", "GameplayTags", "GameplayTasks"
+            "GameplayAbilities", "GameplayTags", "GameplayTasks",
+            "AIModule"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "Lua" });

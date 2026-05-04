@@ -166,7 +166,6 @@ float UWeaponMeleeAttackComponent::CalculateFinalDamage_Implementation(AActor* I
 	// 从ComboManager获取当前连击倍率
 	if (OnwerActor)
 	{
-		// OwningCharacter是ASoulLikeCharacter，需要找到对应的SL_CharacterBase
 		// 方式1：如果OwningCharacter本身就实现了IAbilitySystemInterface
 		if (IAbilitySystemInterface* OwnerASI = Cast<IAbilitySystemInterface>(OnwerActor))
 		{

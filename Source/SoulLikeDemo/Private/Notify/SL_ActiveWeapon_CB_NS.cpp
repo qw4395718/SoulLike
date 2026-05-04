@@ -2,10 +2,8 @@
 
 
 #include "SL_ActiveWeapon_CB_NS.h"
-#include "SoulLikeCharacter.h"
-#include "CombatComponent.h"
-#include "WeaponBase.h"
 #include "SL_CharacterBase.h"
+#include <SL_WeaponBase.h>
 
 void USL_ActiveWeapon_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {

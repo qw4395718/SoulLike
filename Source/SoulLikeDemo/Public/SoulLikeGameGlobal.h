@@ -487,3 +487,57 @@ struct FClassConfigInfo : public FTableRowBase
 		TArray<int32> SlotItemIDs;
 };
 
+// ===== 波次配置表结构 =====
+USTRUCT(BlueprintType)
+struct FWaveConfigInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+		// ===== 波次信息 =====
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wave")
+		int32 WaveID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wave")
+		FName WaveName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wave")
+		int32 LevelID;  // 所属关卡ID
+
+		// ===== 怪物配置 =====
+		/** 怪物类型列表（SpawnerID -> 数量） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster")
+		TMap<int32, int32> MonsterSpawnCounts;  // SpawnerID -> Count
+
+		/** 怪物生成延迟（秒） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster")
+		float SpawnDelay = 1.0f;
+
+	/** 怪物生成间隔（秒） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster")
+		float SpawnInterval = 0.5f;
+
+	// ===== 波次条件 =====
+	/** 本波次所有怪物被消灭后，延迟下一波的时间 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wave")
+		float NextWaveDelay = 3.0f;
+
+	/** 是否是最后一波 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wave")
+		bool bIsFinalWave = false;
+};
+
+// ===== 怪物生成点配置 =====
+USTRUCT(BlueprintType)
+struct FSpawnPointInfo
+{
+	GENERATED_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FName SpawnPointID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FVector Location;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FRotator Rotation;
+};

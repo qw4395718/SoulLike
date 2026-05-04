@@ -72,7 +72,7 @@ void ASL_CharacterBase::BeginPlay()
 		}
 	}
 
-	UE_LOG(SL_CharacterBase, Display, TEXT("ZYF_C++_ASL_CharacterBase::BeginPlay()"));
+	UE_LOG(LogTemp, Display, TEXT("ZYF_C++_ASL_CharacterBase::BeginPlay()"));
 
 	UE_LOG(LogTemp, Warning, TEXT("Character %s BeginPlay: Role=%d, HasAuthority=%d, GUID=%s"),
 		*GetName(),
@@ -89,16 +89,6 @@ void ASL_CharacterBase::Tick(float DeltaTime)
 void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ASL_CharacterBase::PerformAttack);
-	PlayerInputComponent->BindAction("Defence", IE_Pressed, this, &ASL_CharacterBase::PerformDefence);
-	PlayerInputComponent->BindAction("ComboSkill", IE_Pressed, this, &ASL_CharacterBase::PerformComboSkill);
-	PlayerInputComponent->BindAction("LockRotation", IE_Pressed, this, &ASL_CharacterBase::PerformLockRotation);
-	PlayerInputComponent->BindAction("Roll", IE_Pressed, this, &ASL_CharacterBase::PerformRoll);
-	PlayerInputComponent->BindAction("SwitchEquipmentUp", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentUp);
-	PlayerInputComponent->BindAction("SwitchEquipmentDown", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentDown);
-	PlayerInputComponent->BindAction("EquipmentLeft", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentLeft);
-	PlayerInputComponent->BindAction("EquipmentRight", IE_Pressed, this, &ASL_CharacterBase::PerformSwitchEquipmentRight);
 
 	// ASC能力
 	if (!AbilitySystemComp)
@@ -162,59 +152,6 @@ void ASL_CharacterBase::AnimNotifyResponse(int NotifyType)
 	WeaponAnimProcess(CheckAnimNotifyToHand(EAnimNotifyType(NotifyType)), TranslteAnimNotifyToWeapon(EAnimNotifyType(NotifyType)));
 }
 
-void ASL_CharacterBase::PerformAttack()
-{	
-	UE_LOG(LogTemp, Warning, TEXT("Character %s BeginPlay: Role=%d, HasAuthority=%d NetworkGUID: %s"),
-		*GetName(),
-		(int)GetLocalRole(),
-		HasAuthority(),
-		*GetNetworkGUIDString(this));
-	if (CombatCmp)
-	{
-		CombatCmp->PerformAttack();
-	}
-}
-
-void ASL_CharacterBase::PerformDefence()
-{
-	UE_LOG(SL_CharacterBase, Display, TEXT("ASL_CharacterBase::PerformDefence"));
-}
-
-void ASL_CharacterBase::PerformComboSkill()
-{
-	UE_LOG(SL_CharacterBase, Display, TEXT("ASL_CharacterBase::PerformComboSkill"));
-}
-
-void ASL_CharacterBase::PerformLockRotation()
-{
-	UE_LOG(SL_CharacterBase, Display, TEXT("ASL_CharacterBase::PerformLockRotation"));
-
-}
-
-void ASL_CharacterBase::PerformRoll()
-{
-	UE_LOG(SL_CharacterBase, Display, TEXT("ASL_CharacterBase::PerformRoll"));
-}
-
-void ASL_CharacterBase::PerformSwitchEquipmentUp()
-{
-	UE_LOG(SL_CharacterBase, Display, TEXT("ASL_CharacterBase::PerformSwitchEquipmentUp"));
-}
-
-void ASL_CharacterBase::PerformSwitchEquipmentDown()
-{
-	UE_LOG(SL_CharacterBase, Display, TEXT("ASL_CharacterBase::PerformSwitchEquipmentDown"));
-}
-
-void ASL_CharacterBase::PerformSwitchEquipmentLeft()
-{
-	UE_LOG(SL_CharacterBase, Display, TEXT("ASL_CharacterBase::PerformSwitchEquipmentLeft"));
-}
-
-void ASL_CharacterBase::PerformSwitchEquipmentRight()
-{
-	UE_LOG(SL_CharacterBase, Display, TEXT("ASL_CharacterBase::PerformSwitchEquipmentRight"));
-}
 
 EWeaponAnimNotifyType ASL_CharacterBase::TranslteAnimNotifyToWeapon(EAnimNotifyType NotifyType)
 {

@@ -95,41 +95,6 @@ protected:
 	/************************************************************************/
 	/*                                内部调用                                      */
 	/************************************************************************/
-	// 左键响应
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformAttack();
-
-	// 右键响应
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformDefence();
-
-	// 左Ctrl响应
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformComboSkill();
-
-	// 锁定响应
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformLockRotation();
-
-	// 翻滚响应
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformRoll();
-
-	// 切换上方道具栏响应
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformSwitchEquipmentUp();
-
-	// 切换上方道具栏响应
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformSwitchEquipmentDown();
-
-	// 切换左方武器栏响应
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformSwitchEquipmentLeft();
-
-	// 切换右方武器栏响应
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void PerformSwitchEquipmentRight();
 
 	// 角色通知转武器通知(EAnimNotifyType -> EWeaponAnimNotifyType)
 	EWeaponAnimNotifyType TranslteAnimNotifyToWeapon(EAnimNotifyType NotifyType);

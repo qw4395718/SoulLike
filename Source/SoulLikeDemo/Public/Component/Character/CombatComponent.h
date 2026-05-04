@@ -8,8 +8,8 @@
 #include "DamageEventDispatcher.h"
 #include "CombatComponent.generated.h"
 
-class AWeaponBase;
-class ASoulLikeCharacter;
+class ASL_WeaponBase;
+class ASL_CharacterBase;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SOULLIKEDEMO_API UCombatComponent : public UActorComponent
@@ -30,9 +30,9 @@ public:
 		virtual void Initialize();
 	//提供给外部初始化武器背包
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponInventoryManage")
-		void InitWeaponInventory(TArray<AWeaponBase*> arrWeaponInventory);
+		void InitWeaponInventory(TArray<ASL_WeaponBase*> arrWeaponInventory);
 	UFUNCTION(BlueprintCallable, Category = "CombatComponent_WeaponInventoryManage")
-		void WeaponInventoryChange(int32 Weaponindex, AWeaponBase* NewWeapon);
+		void WeaponInventoryChange(int32 Weaponindex, ASL_WeaponBase* NewWeapon);
 
 	/************************************************************************/
 	/* 外部调用                                                                     */
@@ -130,18 +130,18 @@ protected:
 public:
 	// 当前右手装备武器
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-		AWeaponBase* LH_EquippedWeapon;
+		ASL_WeaponBase* LH_EquippedWeapon;
 
 	// 当前右手装备武器
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-		AWeaponBase* RH_EquippedWeapon;
+		ASL_WeaponBase* RH_EquippedWeapon;
 
 	// 武器库存
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-		TArray<AWeaponBase*> WeaponInventory;
+		TArray<ASL_WeaponBase*> WeaponInventory;
 
 	// 组件引用
 	UPROPERTY()
-		ASoulLikeCharacter* CharacterOwner;
+		ASL_CharacterBase* CharacterOwner;
 
 };

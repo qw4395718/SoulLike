@@ -7,7 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "WeaponParryComponent.generated.h"
 
-class AWeaponBase;
+class ASL_WeaponBase;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SOULLIKEDEMO_API UWeaponParryComponent : public USceneComponent

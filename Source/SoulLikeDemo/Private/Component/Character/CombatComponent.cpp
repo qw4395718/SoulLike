@@ -2,11 +2,11 @@
 
 
 #include "CombatComponent.h"
-#include "SoulLikeCharacter.h"
-#include "WeaponBase.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
+#include <SL_WeaponBase.h>
+#include <SL_CharacterBase.h>
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -30,7 +30,7 @@ void UCombatComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	// 获取所属角色
-	CharacterOwner = Cast<ASoulLikeCharacter>(GetOwner());
+	CharacterOwner = Cast<ASL_CharacterBase>(GetOwner());
 	if (!CharacterOwner) return;
 
 	if (DamageDispatcher == nullptr)
@@ -57,71 +57,13 @@ void UCombatComponent::InitializeComponent()
 
 void UCombatComponent::Initialize()
 {
-	// 初始化左手武器
-	if (LH_EquippedWeapon == nullptr)
-	{
-		LH_EquippedWeapon = GetWorld()->SpawnActor<AWeaponBase>(
-		AWeaponBase::StaticClass(), FVector::ZeroVector,FRotator::ZeroRotator
-		);
-	}
 
-	//将武器绑定到指定虚拟骨骼
-	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("ik_hand_l")) && 
-		LH_EquippedWeapon)
-	{
-		LH_EquippedWeapon->AttachToComponent(
-			CharacterOwner->GetMesh(),
-			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // 保持相对变换
-			TEXT("ik_hand_l") // Socket 名称
-		);
-		LH_EquippedWeapon->OwningCharacter = CharacterOwner;
-	}
-
-	// 初始化右手武器
-	if (RH_EquippedWeapon == nullptr)
-	{
-		RH_EquippedWeapon = GetWorld()->SpawnActor<AWeaponBase>(
-			AWeaponBase::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator
-			);
-	}
-
-	//将武器绑定到指定虚拟骨骼
-	if (CharacterOwner->GetMesh()->DoesSocketExist(TEXT("ik_hand_r")) &&
-		RH_EquippedWeapon)
-	{
-		RH_EquippedWeapon->AttachToComponent(
-			CharacterOwner->GetMesh(),
-			FAttachmentTransformRules::SnapToTargetNotIncludingScale, // 保持相对变换
-			TEXT("ik_hand_r") // Socket 名称
-		);
-		RH_EquippedWeapon->OwningCharacter = CharacterOwner;
-	}
 
 }
 
 void UCombatComponent::DrawWeapon()
 {
-	//if (EquippedWeapon == nullptr) 
-	//{//如果当前未有武器装备,则从武器仓库中拿一把
-	//	bool bFindValidWeapon = false;
-	//	for each (AWeaponBase* pWeapon in WeaponInventory)
-	//	{
-	//		if (pWeapon != nullptr)
-	//		{
-	//			EquippedWeapon = pWeapon;
-	//			bFindValidWeapon = true;
-	//			break;
-	//		}
-	//		if (bFindValidWeapon == true)
-	//		{
-	//			
-	//		}
-	//		else
-	//		{
-	//			//无有效的武器
-	//		}
-	//	}
-	//}
+
 
 }
 
@@ -132,12 +74,7 @@ void UCombatComponent::SheathWeapon()
 
 void UCombatComponent::PerformCombatSkill()
 {
-	if (LH_EquippedWeapon && CanAction()) {
-		LH_EquippedWeapon->PerformCombatSkill();
 
-		// 类魂特性：消耗耐力
-		ChangeAP(LH_EquippedWeapon->GetStaminaCost(EAttackType::Skill_Combo_Phase_1));
-	}
 }
 
 void UCombatComponent::SwitchToWeapon(int32 Index)
@@ -386,12 +323,12 @@ void UCombatComponent::PerformAttack()
 	//return;
 }
 
-void UCombatComponent::InitWeaponInventory(TArray<AWeaponBase*> arrWeaponInventory)
+void UCombatComponent::InitWeaponInventory(TArray<ASL_WeaponBase*> arrWeaponInventory)
 {
 
 }
 
-void UCombatComponent::WeaponInventoryChange(int32 Weaponindex, AWeaponBase* NewWeapon)
+void UCombatComponent::WeaponInventoryChange(int32 Weaponindex, ASL_WeaponBase* NewWeapon)
 {
 
 }

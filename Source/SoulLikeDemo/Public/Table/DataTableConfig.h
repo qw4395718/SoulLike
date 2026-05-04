@@ -14,6 +14,7 @@ enum class EDataTableType : uint8
 	DT_WeaponDataInfo			UMETA(DisplayName = "WeaponDataInfo"),
 	DT_ClassConfigInfo			UMETA(DisplayName = "ClassConfigInfo"),
 	DT_WaveConfigInfo			UMETA(DisplayName = "WaveConfigInfo"),
+	DT_EnemyConfigInfo		UMETA(DisplayName = "EnemyConfigInfo"),
 	DT_Max					UMETA(Hidden)
 };
 

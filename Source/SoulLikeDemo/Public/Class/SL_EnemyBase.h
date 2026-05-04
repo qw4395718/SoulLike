@@ -3,11 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SL_CharacterBase.h"
-#include <GameFramework/Character.h>
-#include <BrainComponent.h>
-#include <Perception/AIPerceptionComponent.h>
-#include <BehaviorTree/BehaviorTree.h>
+#include "GameFramework/Character.h"
+#include <SoulLikeGameGlobal.h>
 #include "SL_EnemyBase.generated.h"
 
 /** 敌人状态 */
@@ -83,18 +80,31 @@ public:
 		FOnEnemyDied OnEnemyDied;
 
 protected:
+	/************************************************************************/
+	/*                               内部调用                                       */
+	/************************************************************************/
+	// 应用敌人配置到自身
+	void ApplyEnemyConfig(const FEnemyConfigInfo& Config);
+
+	// 加载敌人外观 
+	void LoadEnemyAppearance(const FEnemyConfigInfo& Config);
+
+	// 初始化敌人AI 
+	void InitializeEnemyAI(const FEnemyConfigInfo& Config);
+
+protected:
 	// ===== 配置数据 =====
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Config")
-		TSubclassOf<UBehaviorTree> BehaviorTreeClass;
+		FEnemyConfigInfo EnemyConfig;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Config")
-		TSubclassOf<UAIPerceptionComponent> PerceptionComponentClass;
+		TSubclassOf<class UAIPerceptionComponent> PerceptionComponentClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Config")
-		float DetectionRange = 1000.0f;
+		float PerceptionRange = 1000.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Config")
-		float CombatRange = 200.0f;
+		float AttackRange = 200.0f;
 
 	// ===== 状态 =====
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy")
@@ -105,8 +115,21 @@ protected:
 
 	// ===== AI组件 =====
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Components")
-		UAIPerceptionComponent* AIPerception;
+		class UBrainComponent* BrainComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Components")
-		UBrainComponent* BrainComponent;
+		class UAIPerceptionComponent* AIPerception;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Components")
+		class UBehaviorTree* BehaviorTree;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Components")
+		class UBlackboardData* BlackboardData;
+
+	// GAS组件
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Components")
+		class USL_AbilitySystemComponent* AbilitySystemComp;
+
+	UPROPERTY()
+		class USL_StatusAttributeSet* StatusAttributeSet;
 };

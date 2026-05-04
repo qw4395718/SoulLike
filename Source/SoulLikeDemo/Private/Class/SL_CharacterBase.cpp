@@ -300,7 +300,6 @@ void ASL_CharacterBase::InitPartmentComponent()
 		if (EquipmentCmp)
 		{
 			EquipmentCmp->SetOwner(this);
-			EquipmentCmp->InitializeWithClassID(1001);
 		}
 	}
 
@@ -342,6 +341,13 @@ void ASL_CharacterBase::InitPartmentComponent()
 UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComp;
+}
+
+void ASL_CharacterBase::InitEquipmentWithClass(int32 InPlayerClassID)
+{
+	RETURN_IF_TRUE(EquipmentCmp == nullptr);
+	EquipmentCmp->InitializeWithClassID(InPlayerClassID);
+	// Todo:切换职业的时候需要广播,改变能力值和Tag
 }
 
 FString ASL_CharacterBase::GetNetworkGUIDString(AActor* InActor)

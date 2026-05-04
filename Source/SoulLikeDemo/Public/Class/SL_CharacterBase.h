@@ -124,6 +124,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void InitEquipmentWithClass(int32 InPlayerClassID);
+
 	FString GetNetworkGUIDString(AActor* InActor);
 protected:
 	/************************************************************************/

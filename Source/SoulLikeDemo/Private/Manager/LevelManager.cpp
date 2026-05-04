@@ -15,7 +15,7 @@ ALevelManager::ALevelManager()
 	PrimaryActorTick.bCanEverTick = false;
 
 	CurrentLevelID = 1;
-	CurrentPlayerClassID = 1;
+	CurrentPlayerClassID = 1001;
 }
 
 void ALevelManager::BeginPlay()
@@ -59,7 +59,7 @@ void ALevelManager::StartLevel(int32 LevelID, int32 PlayerClassID)
 		UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	if (PlayerCharacter)
 	{
-		//PlayerCharacter->InitEquipmentWithClass(PlayerClassID);
+		PlayerCharacter->InitEquipmentWithClass(PlayerClassID);
 	}
 
 	// 开始关卡流程

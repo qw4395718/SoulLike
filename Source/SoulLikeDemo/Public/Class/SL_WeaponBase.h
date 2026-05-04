@@ -32,7 +32,7 @@ public:
 	// ===== 初始化接口 =====
 	/** 根据武器ID初始化武器 */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-		void InitializeWeaponWithID(int32 WeaponID);
+		void InitializeWeaponWithID(int32 InWeaponID, FName InSocketName);
 
 	/** 直接从数据行初始化（用于测试/动态武器） */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -182,4 +182,7 @@ protected:
 	/** 弹反检测间隔 */
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Config")
 		float ParryInterval = 0.05f;
+
+	UPROPERTY()
+		FName SocketName;
 };

@@ -55,7 +55,7 @@ void ASL_WeaponBase::SetOwner(AActor* NewOwner)
 
 // ==================== 初始化 ====================
 
-void ASL_WeaponBase::InitializeWeaponWithID(int32 WeaponID)
+void ASL_WeaponBase::InitializeWeaponWithID(int32 InWeaponID, FName InSocketName)
 {
 	// 从DataTableManager获取武器数据表
 	if (UDataTableManager* TableManager = UDataTableManager::Get(this))
@@ -63,8 +63,9 @@ void ASL_WeaponBase::InitializeWeaponWithID(int32 WeaponID)
 		if (UWeaponDataTable* WeaponTable = Cast<UWeaponDataTable>(TableManager->GetDataTable(EDataTableType::DT_WeaponDataInfo)))
 		{
 			FWeaponDataInfo OutData;
-			if (WeaponTable->GetWeaponData(WeaponID, OutData))
+			if (WeaponTable->GetWeaponData(InWeaponID, OutData))
 			{
+				SocketName = InSocketName;
 				InitializeFromDataRow(OutData);
 			}
 		}
@@ -78,7 +79,7 @@ void ASL_WeaponBase::InitializeWeaponWithID(int32 WeaponID)
 			);
 	}
 
-	UE_LOG(LogTemp, Error, TEXT("ASL_WeaponBase::InitializeWeaponWithID - Failed to load weapon data for ID: %d"), WeaponID);
+	UE_LOG(LogTemp, Error, TEXT("ASL_WeaponBase::InitializeWeaponWithID - Failed to load weapon data for ID: %d"), InWeaponID);
 }
 
 void ASL_WeaponBase::InitializeFromDataRow(const FWeaponDataInfo& InWeaponData)
@@ -120,12 +121,12 @@ void ASL_WeaponBase::LoadWeaponAssets()
 			if (OwningCharacter)
 			{
 				//将武器绑定到指定虚拟骨骼
-				if (OwningCharacter->GetMesh()->DoesSocketExist(WeaponData.SocketName))
+				if (OwningCharacter->GetMesh()->DoesSocketExist(SocketName))
 				{
 					this->AttachToComponent(
 						OwningCharacter->GetMesh(),
 						FAttachmentTransformRules::SnapToTargetNotIncludingScale, // 保持相对变换
-						WeaponData.SocketName // Socket 名称
+						SocketName // Socket 名称
 					);
 					//RootComponent->SetRelativeLocation()
 				}
@@ -151,12 +152,12 @@ void ASL_WeaponBase::LoadWeaponAssets()
 			if (OwningCharacter)
 			{
 				//将武器绑定到指定虚拟骨骼
-				if (OwningCharacter->GetMesh()->DoesSocketExist(WeaponData.SocketName))
+				if (OwningCharacter->GetMesh()->DoesSocketExist(SocketName))
 				{
 					this->AttachToComponent(
 						OwningCharacter->GetMesh(),
 						FAttachmentTransformRules::SnapToTargetNotIncludingScale, // 保持相对变换
-						WeaponData.SocketName // Socket 名称
+						SocketName // Socket 名称
 					);
 					//RootComponent->SetRelativeLocation()
 				}

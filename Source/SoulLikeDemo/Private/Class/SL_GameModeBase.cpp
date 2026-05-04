@@ -60,7 +60,7 @@ void ASL_GameModeBase::StartCurrentLevel()
 	if (!LevelManager) return;
 
 	// 从存档读取玩家职业和关卡ID
-	int32 PlayerClassID = 1;  // TODO: 从存档读取
+	int32 PlayerClassID = 1001;  // TODO: 从存档读取
 	int32 LevelID = 1;        // TODO: 从存档读取
 
 	// 初始化玩家装备
@@ -97,7 +97,7 @@ void ASL_GameModeBase::InitializePlayer(int32 PlayerClassID)
 
 	if (PlayerCharacter)
 	{
-		//PlayerCharacter->InitEquipmentWithClass(PlayerClassID);
+		PlayerCharacter->InitEquipmentWithClass(PlayerClassID);
 		UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::InitializePlayer - Player initialized with class %d"), PlayerClassID);
 	}
 }

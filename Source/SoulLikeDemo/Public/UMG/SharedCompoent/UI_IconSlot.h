@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "UI_BaseSlot.h"
+#include <StatusEffectInfo.h>
 #include "UI_IconSlot.generated.h"
 
 /**

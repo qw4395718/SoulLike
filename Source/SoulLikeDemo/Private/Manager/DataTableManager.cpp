@@ -9,9 +9,10 @@
 #include <WeaponDataTable.h>
 #include <ClassConfigInfoTable.h>
 #include <WaveConfigInfoTable.h>
+#include <EnemyConfigInfoTable.h>
 
 // 静态常量定义
-const FString UDataTableManager::DefaultConfigTablePath = TEXT("/Game/SoulLikeDemo/DataTables/Config/DT_DataTableConfig.DT_DataTableConfig");
+const FString UDataTableManager::DefaultConfigTablePath = TEXT("/Game/SoulLikeDemo/Data/DataTables/Config/DT_DataTableConfig.DT_DataTableConfig");
 
 void UDataTableManager::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -86,6 +87,7 @@ void UDataTableManager::RegisterDefaultTableClasses()
 	RegisterTableClass(EDataTableType::DT_WeaponDataInfo, UWeaponDataTable::StaticClass());
 	RegisterTableClass(EDataTableType::DT_ClassConfigInfo, UClassConfigInfoTable::StaticClass());
 	RegisterTableClass(EDataTableType::DT_WaveConfigInfo, UWaveConfigInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_EnemyConfigInfo, UEnemyConfigInfoTable::StaticClass());
 
 	UE_LOG(LogTemp, Log, TEXT("DataTableManager::RegisterDefaultTableClasses - Default classes registered"));
 }

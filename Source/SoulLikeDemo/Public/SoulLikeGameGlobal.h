@@ -1,11 +1,15 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "SL_Macros.h"
-#include <GameplayTagContainer.h>
 #include <Engine/DataTable.h>
+#include <GameplayTagContainer.h>
 #include "SoulLikeGameGlobal.generated.h"
 
 class UGameplayAbility;
+class USkeletalMesh;
+class UAnimBlueprint;
+class UBehaviorTree;
+class UBlackboardData;
 
 /************************************************************************/
 /*                              Const                                         */
@@ -53,10 +57,11 @@ const int INTERACT_BTN_HEIGHT = 40;
 UENUM(BlueprintType)
 enum class EDamageType :uint8
 {
-	SLASH      UMETA(DisplayName = "Slash"),      // 斩击
-	PIERCE     UMETA(DisplayName = "Pierce"),     // 穿刺
-	BLUNT      UMETA(DisplayName = "Blunt"),      // 打击（补充类型）
-	FIRE       UMETA(DisplayName = "Fire")        // 火焰
+	SLASH      UMETA(DisplayName = "斩击"),      
+	PIERCE     UMETA(DisplayName = "穿刺"),     
+	BLUNT      UMETA(DisplayName = "打击"),      
+	FIRE       UMETA(DisplayName = "火焰"),       
+	Max			UMETA(Hidden)
 };
 
 // 武器攻击动作类型
@@ -381,6 +386,16 @@ enum class EWeaponType : uint8
 	Max			UMETA(Hidden)
 };
 
+// 武器持有状态
+UENUM(BlueprintType)
+enum class EWeaponHandType : uint8
+{
+	LeftHand		UMETA(DisplayName = "左手"),
+	RightHand		UMETA(DisplayName = "右手"),
+	TwoHand			UMETA(DisplayName = "双手"),
+	Max				UMETA(Hidden)
+};
+
 // ===== 武器数据表结构 =====
 USTRUCT(BlueprintType)
 struct FWeaponDataInfo : public FTableRowBase
@@ -453,10 +468,6 @@ struct FWeaponDataInfo : public FTableRowBase
 	// ===== 是否左手武器 =====
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 		bool bIsLeftHanded = false;
-
-	// ===== 武器持有插槽 =====
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
-		FName SocketName = TEXT("WeaponSocket");
 };
 
 // ===== 职业配置表结构 =====
@@ -480,6 +491,18 @@ struct FClassConfigInfo : public FTableRowBase
 	/** 右手武器ID（0表示无武器） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 		int32 RightHandWeaponID = 0;
+
+	// ===== 左手武器持有插槽 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FName LeftHandSocketName = TEXT("None");
+
+	// ===== 右手武器持有插槽 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FName RightHandSocketName = TEXT("None");
+
+	// ===== 双手武器持有插槽 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FName TwoHandSocketName = TEXT("None");
 
 	// ===== 道具配置 =====
 	/** 道具集IDs */
@@ -532,12 +555,172 @@ struct FSpawnPointInfo
 {
 	GENERATED_BODY()
 
-		UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FName SpawnPointID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName SpawnPointID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FVector Location;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FRotator Rotation;
+};
+
+// ===== 敌人类型枚举 =====
+UENUM(BlueprintType)
+enum class EEnemyType : uint8
+{
+	Normal		UMETA(DisplayName = "普通"),
+	Elite		UMETA(DisplayName = "精英"),
+	Boss		UMETA(DisplayName = "Boss"),
+	Minion		UMETA(DisplayName = "小兵"),
+	Max			UMETA(Hidden)
+};
+
+// ===== 敌人攻击方式枚举 =====
+UENUM(BlueprintType)
+enum class EEnemyAttackType : uint8
+{
+	Melee		UMETA(DisplayName = "近战"),
+	Ranged		UMETA(DisplayName = "远程"),
+	Magic		UMETA(DisplayName = "魔法"),
+	Mixed		UMETA(DisplayName = "混合"),
+	Max			UMETA(Hidden)
+};
+
+// ===== 敌人配置表结构 =====
+USTRUCT(BlueprintType)
+struct FEnemyConfigInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	// ===== 基础信息 =====
+	/** 怪物ID（主键） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		int32 EnemyID;
+
+	/** 怪物名称 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FName EnemyName;
+
+	/** 怪物类型 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		EEnemyType EnemyType;
+
+	/** 攻击方式 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		EEnemyAttackType AttackType;
+
+	// ===== 属性配置 =====
+	/** 基础生命值 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		float BaseHealth = 100.0f;
+
+	/** 基础攻击力 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		float BaseAttack = 10.0f;
+
+	/** 基础防御力 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		float BaseDefense = 5.0f;
+
+	/** 基础移动速度 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		float BaseMoveSpeed = 300.0f;
+
+	/** 基础体力（用于敌人自身的耐力系统） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		float BaseStamina = 100.0f;
+
+	// ===== 外观配置 =====
+	/** 骨骼网格体 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
+		TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+
+	/** 动画蓝图 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
+		TSoftObjectPtr<UAnimBlueprint> AnimBlueprint;
+
+	/** 左手武器ID（0表示无武器） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
+		int32 LeftHandWeaponID = 0;
+	
+	// 左手武器的缩放倍率
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
+		float LeftHandWeaponScale = 1.0f;
+
+	/** 右手武器ID（0表示无武器） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
+		int32 RightHandWeaponID = 0;
+
+	// 右手武器的缩放倍率
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
+		float RightHandWeaponScale = 1.0f;
+
+	// ===== 左手武器持有插槽 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FName LeftHandSocketName = TEXT("None");
+
+	// ===== 右手武器持有插槽 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FName RightHandSocketName = TEXT("None");
+
+	// ===== 双手武器持有插槽 =====
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FName TwoHandSocketName = TEXT("None");
+
+	// ===== AI配置 =====
+	/** AI行为树 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+		TSoftObjectPtr<UBehaviorTree> BehaviorTree;
+
+	/** AI黑板 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+		TSoftObjectPtr<UBlackboardData> BlackboardData;
+
+	/** 感知范围 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+		float PerceptionRange = 1000.0f;
+
+	/** 攻击范围 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+		float AttackRange = 200.0f;
+
+	/** 警戒范围 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+		float AlertRange = 500.0f;
+
+	// ===== 掉落配置 =====
+	/** 掉落经验值 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop")
+		int32 DropExperience = 10;
+
+	/** 掉落金币 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop")
+		int32 DropGold = 5;
+
+	/** 掉落物品列表（物品ID -> 掉落概率 0.0~1.0） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop")
+		TMap<int32, float> DropItems;
+
+	// ===== 连击配置 =====
+	/** 此敌人使用的连击窗口Tag（对应ComboInfo表中的攻击模式） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combo")
+		FGameplayTag ComboWindowTag;
+
+	/** GAS能力列表 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combo")
+		TArray<TSubclassOf<UGameplayAbility>> GrantedAbilities;
+
+	// ===== 缩放配置 =====
+	/** 模型缩放 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
+		float MeshScale = 1.0f;
+
+	/** 碰撞胶囊体半径 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+		float CapsuleRadius = 44.0f;
+
+	/** 碰撞胶囊体高度 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+		float CapsuleHalfHeight = 88.0f;
 };

@@ -92,7 +92,20 @@ ASL_WeaponBase* USL_EquipmentComponent::SpawnWeaponByID(int32 WeaponID)
 	if (Weapon)
 	{
 		// 初始化武器
-		Weapon->InitializeWeaponWithID(WeaponID);
+		FName SocketName;
+		if (CurrentClassConfig.LeftHandWeaponID != 0 && CurrentClassConfig.RightHandWeaponID != 0)
+		{
+			SocketName = CurrentClassConfig.TwoHandSocketName;
+		}
+		else if (CurrentClassConfig.LeftHandWeaponID != 0)
+		{
+			SocketName = CurrentClassConfig.LeftHandSocketName;
+		}
+		else
+		{
+			SocketName = CurrentClassConfig.RightHandSocketName;
+		}
+		Weapon->InitializeWeaponWithID(WeaponID, SocketName);
 		Weapon->SetOwner(OwningCharacter);
 		Weapon->FinishSpawning(FTransform::Identity);
 

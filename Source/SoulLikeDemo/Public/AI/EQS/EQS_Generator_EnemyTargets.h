@@ -1,4 +1,4 @@
-// Public/AI/EQS_Generator_EnemyTargets.h
+ï»¿// Public/AI/EQS_Generator_EnemyTargets.h
 
 #pragma once
 
@@ -9,8 +9,8 @@
 #include "EQS_Generator_EnemyTargets.generated.h"
 
 /**
- * EQSÉú³ÉÆ÷£ºÉú³ÉËùÓĞÇ±ÔÚµÄµĞÈËÄ¿±ê£¨Íæ¼Ò£©
- * ÔÚ¸ĞÖª·¶Î§ÄÚÉú³ÉËùÓĞ¿ÉÄÜµÄ¹¥»÷Ä¿±ê
+ * EQSç”Ÿæˆå™¨ï¼šç”Ÿæˆæ‰€æœ‰æ½œåœ¨çš„æ•Œäººç›®æ ‡ï¼ˆç©å®¶ï¼‰
+ * åœ¨æ„ŸçŸ¥èŒƒå›´å†…ç”Ÿæˆæ‰€æœ‰å¯èƒ½çš„æ”»å‡»ç›®æ ‡
  */
 UCLASS()
 class SOULLIKEDEMO_API UEQS_Generator_EnemyTargets : public UEnvQueryGenerator
@@ -22,11 +22,11 @@ public:
 
 	virtual void GenerateItems(FEnvQueryInstance& QueryInstance) const override;
 
-	/** ËÑË÷°ë¾¶£¨´Ó²éÑ¯ÉÏÏÂÎÄÎ»ÖÃ¿ªÊ¼£© */
+	/** æœç´¢åŠå¾„ï¼ˆä»æŸ¥è¯¢ä¸Šä¸‹æ–‡ä½ç½®å¼€å§‹ï¼‰ */
 	UPROPERTY(EditDefaultsOnly, Category = "Generator")
 		FAIDataProviderFloatValue SearchRadius;
 
-	/** ËÑË÷ÖĞĞÄ£¨Ä¬ÈÏÎª²éÑ¯ÕßµÄÎ»ÖÃ£© */
+	/** æœç´¢ä¸­å¿ƒï¼ˆé»˜è®¤ä¸ºæŸ¥è¯¢è€…çš„ä½ç½®ï¼‰ */
 	UPROPERTY(EditDefaultsOnly, Category = "Generator")
 		TSubclassOf<UEnvQueryContext> SearchCenter;
 };

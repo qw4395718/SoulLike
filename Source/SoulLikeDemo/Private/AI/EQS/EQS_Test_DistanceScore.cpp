@@ -1,4 +1,4 @@
-// Private/AI/EQS_Test_DistanceScore.cpp
+ï»¿// Private/AI/EQS_Test_DistanceScore.cpp
 
 #include "EQS_Test_DistanceScore.h"
 #include "EnvironmentQuery/Items/EnvQueryItemType_Actor.h"
@@ -8,22 +8,22 @@
 
 UEQS_Test_DistanceScore::UEQS_Test_DistanceScore()
 {
-	// ÉèÖÃ²âÊÔÄ¿µÄ£ºÆÀ·Ö
+	// è®¾ç½®æµ‹è¯•ç›®çš„ï¼šè¯„åˆ†
 	TestPurpose = EEnvTestPurpose::Score;
 
-	// ÉèÖÃ¸¡µãÖµÊä³ö
+	// è®¾ç½®æµ®ç‚¹å€¼è¾“å‡º
 	SetWorkOnFloatValues(true);
 
-	// Ä¬ÈÏÊ¹ÓÃ3D¾àÀë
+	// é»˜è®¤ä½¿ç”¨3Dè·ç¦»
 	DistanceMode = EEnvTestDistance::Distance3D;
 
-	// Ä¬ÈÏÎª0£¬±íÊ¾Ê¹ÓÃ×î¶Ì¾àÀë
+	// é»˜è®¤ä¸º0ï¼Œè¡¨ç¤ºä½¿ç”¨æœ€çŸ­è·ç¦»
 	IdealDistance = 0.0f;
 }
 
 void UEQS_Test_DistanceScore::RunTest(FEnvQueryInstance& QueryInstance) const
 {
-	//// »ñÈ¡²éÑ¯ËùÓĞÕßÎ»ÖÃ
+	//// è·å–æŸ¥è¯¢æ‰€æœ‰è€…ä½ç½®
 	//UObject* QueryOwner = QueryInstance.Owner.Get();
 	//AAIController* AIController = Cast<AAIController>(QueryOwner);
 	//if (!AIController) return;
@@ -31,36 +31,36 @@ void UEQS_Test_DistanceScore::RunTest(FEnvQueryInstance& QueryInstance) const
 	//AActor* QueryOwnerActor = AIController->GetPawn();
 	//if (!QueryOwnerActor) return;
 
-	//// ¶ÔÃ¿¸öÏîÄ¿¼ÆËã¾àÀëÆÀ·Ö
+	//// å¯¹æ¯ä¸ªé¡¹ç›®è®¡ç®—è·ç¦»è¯„åˆ†
 	//for (int32 ItemIndex = 0; ItemIndex < QueryInstance.Items.Num(); ItemIndex++)
 	//{
 	//	AActor* ItemActor = Cast<AActor>(QueryInstance.Items[ItemIndex].Item);
 	//	if (!ItemActor) continue;
 
-	//	// ¼ÆËã¾àÀë
+	//	// è®¡ç®—è·ç¦»
 	//	float Distance = FVector::Dist(QueryOwnerActor->GetActorLocation(), ItemActor->GetActorLocation());
 
-	//	// ¼ÆËãÆÀ·Ö
+	//	// è®¡ç®—è¯„åˆ†
 	//	float Score = CalculateScore(Distance);
 
-	//	// ÉèÖÃÆÀ·Ö
+	//	// è®¾ç½®è¯„åˆ†
 	//	QueryInstance.SetItemScore(ItemIndex, Score);
 	//}
 }
 
 float UEQS_Test_DistanceScore::CalculateScore(float Distance) const
 {
-	// Èç¹ûÔÚÀíÏë¾àÀëÄÚ£¬µÃÂú·Ö
+	// å¦‚æœåœ¨ç†æƒ³è·ç¦»å†…ï¼Œå¾—æ»¡åˆ†
 	if (Distance <= IdealDistance)
 	{
 		return 1.0f;
 	}
 
-	// ·ñÔò°´¾àÀëË¥¼õ
-	// Ê¹ÓÃ1/distance×÷ÎªÆÀ·Ö£¬µ«ÏŞÖÆ×îĞ¡Öµ
+	// å¦åˆ™æŒ‰è·ç¦»è¡°å‡
+	// ä½¿ç”¨1/distanceä½œä¸ºè¯„åˆ†ï¼Œä½†é™åˆ¶æœ€å°å€¼
 	float Score = FMath::Max(0.0f, 1.0f / (Distance - IdealDistance + 1.0f));
 
-	// ¹éÒ»»¯µ½0-1·¶Î§
+	// å½’ä¸€åŒ–åˆ°0-1èŒƒå›´
 	Score = FMath::Clamp(Score, 0.0f, 1.0f);
 
 	return Score;

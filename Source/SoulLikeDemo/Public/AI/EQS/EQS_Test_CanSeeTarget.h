@@ -1,4 +1,4 @@
-// Public/AI/EQS_Test_CanSeeTarget.h
+ï»¿// Public/AI/EQS_Test_CanSeeTarget.h
 
 #pragma once
 
@@ -7,8 +7,8 @@
 #include "EQS_Test_CanSeeTarget.generated.h"
 
 /**
- * EQS²âÊÔ£º¼ì²âÄ¿±êÊÇ·ñ¿É¼û£¨ÊÓÏß¼ì²â£©
- * Ê¹ÓÃÉäÏß¼ì²âÅĞ¶ÏÊÇ·ñÓĞÕÏ°­ÎïÕÚµ²
+ * EQSæµ‹è¯•ï¼šæ£€æµ‹ç›®æ ‡æ˜¯å¦å¯è§ï¼ˆè§†çº¿æ£€æµ‹ï¼‰
+ * ä½¿ç”¨å°„çº¿æ£€æµ‹åˆ¤æ–­æ˜¯å¦æœ‰éšœç¢ç‰©é®æŒ¡
  */
 UCLASS()
 class SOULLIKEDEMO_API UEQS_Test_CanSeeTarget : public UEnvQueryTest
@@ -21,7 +21,7 @@ public:
 	virtual void RunTest(FEnvQueryInstance& QueryInstance) const override;
 
 	bool PerformLineOfSightCheck(class ASL_EnemyBase* Enemy, AActor* Target) const;
-	/** ÊÓÏß¼ì²âÊ±ºöÂÔµÄActorÀà */
+	/** è§†çº¿æ£€æµ‹æ—¶å¿½ç•¥çš„Actorç±» */
 	UPROPERTY(EditDefaultsOnly, Category = "Test")
 		TArray<TSubclassOf<AActor>> ActorsToIgnore;
 };

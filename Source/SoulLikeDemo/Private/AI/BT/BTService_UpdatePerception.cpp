@@ -1,4 +1,4 @@
-// Private/AI/BTService_UpdatePerception.cpp
+ï»¿// Private/AI/BTService_UpdatePerception.cpp
 
 #include "BTService_UpdatePerception.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -10,7 +10,7 @@ UBTService_UpdatePerception::UBTService_UpdatePerception()
 	NodeName = "Update Perception";
 	bNotifyBecomeRelevant = false;
 	bNotifyCeaseRelevant = false;
-	Interval = 0.2f; // Ã¿0.2Ãë¸üĞÂÒ»´Î
+	Interval = 0.2f; // æ¯0.2ç§’æ›´æ–°ä¸€æ¬¡
 	RandomDeviation = 0.1f;
 }
 
@@ -27,10 +27,10 @@ void UBTService_UpdatePerception::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
 	if (!Enemy) return;
 
-	// »ñÈ¡µ±Ç°Ä¿±ê
+	// è·å–å½“å‰ç›®æ ‡
 	AActor* TargetActor = Cast<AActor>(Blackboard->GetValueAsObject(TargetActorKey.SelectedKeyName));
 
-	// Èç¹ûÃ»ÓĞÄ¿±ê£¬³¢ÊÔÑ°ÕÒ
+	// å¦‚æœæ²¡æœ‰ç›®æ ‡ï¼Œå°è¯•å¯»æ‰¾
 	if (!TargetActor)
 	{
 		AActor* NewTarget = Enemy->FindNearestTarget();
@@ -41,19 +41,19 @@ void UBTService_UpdatePerception::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 		}
 	}
 
-	// ¸üĞÂ¸ĞÖª×´Ì¬
+	// æ›´æ–°æ„ŸçŸ¥çŠ¶æ€
 	if (TargetActor)
 	{
-		// ¼ì²éÊÇ·ñ¿ÉÒÔ¿´µ½Ä¿±ê
+		// æ£€æŸ¥æ˜¯å¦å¯ä»¥çœ‹åˆ°ç›®æ ‡
 		bool bCanSee = Enemy->CanSeeTarget(TargetActor);
 		Blackboard->SetValueAsBool(bCanSeeTargetKey.SelectedKeyName, bCanSee);
 
-		// ¼ì²éÊÇ·ñÔÚ¹¥»÷·¶Î§ÄÚ
+		// æ£€æŸ¥æ˜¯å¦åœ¨æ”»å‡»èŒƒå›´å†…
 		float Distance = FVector::Dist(Enemy->GetActorLocation(), TargetActor->GetActorLocation());
 		bool bInRange = Distance <= Enemy->GetAttackRange();
 		Blackboard->SetValueAsBool(bInCombatRangeKey.SelectedKeyName, bInRange);
 
-		// Èç¹ûÄ¿±ê³¬³ö¸ĞÖª·¶Î§£¬Çå³ıÄ¿±ê
+		// å¦‚æœç›®æ ‡è¶…å‡ºæ„ŸçŸ¥èŒƒå›´ï¼Œæ¸…é™¤ç›®æ ‡
 		if (Distance > Enemy->GetPerceptionRange())
 		{
 			Blackboard->ClearValue(TargetActorKey.SelectedKeyName);

@@ -1,4 +1,4 @@
-// Private/AI/BTTask_ChaseTarget.cpp
+ï»¿// Private/AI/BTTask_ChaseTarget.cpp
 
 #include "BTTask_ChaseTarget.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -18,20 +18,20 @@ EBTNodeResult::Type UBTTask_ChaseTarget::ExecuteTask(UBehaviorTreeComponent& Own
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (!AIController) return EBTNodeResult::Failed;
 
-	// »ñÈ¡Ä¿±ê
+	// è·å–ç›®æ ‡
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
 	AActor* TargetActor = Cast<AActor>(Blackboard->GetValueAsObject(TargetActorKey.SelectedKeyName));
 
 	if (!TargetActor) return EBTNodeResult::Failed;
 
-	// ÉèÖÃÒÆ¶¯ËÙ¶È
+	// è®¾ç½®ç§»åŠ¨é€Ÿåº¦
 	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
 	if (Enemy && Enemy->GetCharacterMovement())
 	{
 		Enemy->GetCharacterMovement()->MaxWalkSpeed *= SpeedMultiplier;
 	}
 
-	// ¿ªÊ¼ÒÆ¶¯×·»÷
+	// å¼€å§‹ç§»åŠ¨è¿½å‡»
 	AIController->MoveToActor(TargetActor, AcceptanceRadius, true, true, false);
 
 	return EBTNodeResult::InProgress;
@@ -46,21 +46,21 @@ void UBTTask_ChaseTarget::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 		return;
 	}
 
-	// ¼ì²éÊÇ·ñµ½´ïÄ¿±ê
+	// æ£€æŸ¥æ˜¯å¦åˆ°è¾¾ç›®æ ‡
 	if (!AIController->IsFollowingAPath())
 	{
-		// µ½´ïÄ¿±êÎ»ÖÃ£¬ÈÎÎñÍê³É
+		// åˆ°è¾¾ç›®æ ‡ä½ç½®ï¼Œä»»åŠ¡å®Œæˆ
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return;
 	}
 
-	// ¼ì²éÄ¿±êÊÇ·ñËÀÍö
+	// æ£€æŸ¥ç›®æ ‡æ˜¯å¦æ­»äº¡
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
 	AActor* TargetActor = Cast<AActor>(Blackboard->GetValueAsObject(TargetActorKey.SelectedKeyName));
 
 	if (!TargetActor || TargetActor->IsPendingKillPending())
 	{
-		// Ä¿±êÒÑËÀÍö£¬È¡Ïû×·»÷
+		// ç›®æ ‡å·²æ­»äº¡ï¼Œå–æ¶ˆè¿½å‡»
 		AIController->StopMovement();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 		return;

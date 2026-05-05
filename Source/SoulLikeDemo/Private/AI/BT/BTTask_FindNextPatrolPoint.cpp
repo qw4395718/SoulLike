@@ -1,4 +1,4 @@
-// Private/AI/BTTask_FindNextPatrolPoint.cpp
+ï»¿// Private/AI/BTTask_FindNextPatrolPoint.cpp
 
 #include "BTTask_FindNextPatrolPoint.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -20,12 +20,12 @@ EBTNodeResult::Type UBTTask_FindNextPatrolPoint::ExecuteTask(UBehaviorTreeCompon
 	//UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
 	//if (!Blackboard) return EBTNodeResult::Failed;
 
-	//// »ñÈ¡Ñ²ÂßµãÊı×é
+	//// è·å–å·¡é€»ç‚¹æ•°ç»„
 	//TArray<FVector> PatrolPoints;
 	//if (!Blackboard->GetValue<UBlackboardKeyType_Object>(PatrolPointsKey.GetSelectedKeyID()))
 	//{
-	//	// Èç¹ûºÚ°å¼üÊÇObjectÀàĞÍ£¬³¢ÊÔ»ñÈ¡Êı×é
-	//	// ×¢Òâ£ºUE4µÄBlackboard²»Ö±½ÓÖ§³ÖÊı×é£¬ÕâÀïÊ¹ÓÃÒ»ÖÖ±äÍ¨·½·¨
+	//	// å¦‚æœé»‘æ¿é”®æ˜¯Objectç±»å‹ï¼Œå°è¯•è·å–æ•°ç»„
+	//	// æ³¨æ„ï¼šUE4çš„Blackboardä¸ç›´æ¥æ”¯æŒæ•°ç»„ï¼Œè¿™é‡Œä½¿ç”¨ä¸€ç§å˜é€šæ–¹æ³•
 	//	PatrolPoints = Blackboard->GetValue<UBlackboardKeyType_Vector>(PatrolPointsKey.GetSelectedKeyID());
 	//}
 
@@ -35,10 +35,10 @@ EBTNodeResult::Type UBTTask_FindNextPatrolPoint::ExecuteTask(UBehaviorTreeCompon
 	//	return EBTNodeResult::Failed;
 	//}
 
-	//// »ñÈ¡µ±Ç°Ë÷Òı
+	//// è·å–å½“å‰ç´¢å¼•
 	//int32 CurrentIndex = Blackboard->GetValueAsInt(PatrolIndexKey.SelectedKeyName);
 
-	//// ¼ÆËãÏÂÒ»¸öË÷Òı
+	//// è®¡ç®—ä¸‹ä¸€ä¸ªç´¢å¼•
 	//int32 NextIndex = CurrentIndex + 1;
 	//if (NextIndex >= PatrolPoints.Num())
 	//{
@@ -52,7 +52,7 @@ EBTNodeResult::Type UBTTask_FindNextPatrolPoint::ExecuteTask(UBehaviorTreeCompon
 	//	}
 	//}
 
-	//// ÉèÖÃĞÂµÄÑ²Âßµã
+	//// è®¾ç½®æ–°çš„å·¡é€»ç‚¹
 	//Blackboard->SetValueAsInt(PatrolIndexKey.SelectedKeyName, NextIndex);
 	//Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, PatrolPoints[NextIndex]);
 

@@ -1,4 +1,4 @@
-// Public/AI/EQC_TargetContext.h
+ï»¿// Public/AI/EQC_TargetContext.h
 
 #pragma once
 
@@ -7,8 +7,8 @@
 #include "EQC_TargetContext.generated.h"
 
 /**
- * EQSÉÏÏÂÎÄ£º»ñÈ¡µĞÈËµ±Ç°Ä¿±ê
- * Ìá¹©¸øEQS²éÑ¯Ê¹ÓÃµÄÉÏÏÂÎÄ£¬ÓÃÓÚ»ñÈ¡µ±Ç°Ä¿±êµÄActor
+ * EQSä¸Šä¸‹æ–‡ï¼šè·å–æ•Œäººå½“å‰ç›®æ ‡
+ * æä¾›ç»™EQSæŸ¥è¯¢ä½¿ç”¨çš„ä¸Šä¸‹æ–‡ï¼Œç”¨äºè·å–å½“å‰ç›®æ ‡çš„Actor
  */
 UCLASS()
 class SOULLIKEDEMO_API UEQC_TargetContext : public UEnvQueryContext

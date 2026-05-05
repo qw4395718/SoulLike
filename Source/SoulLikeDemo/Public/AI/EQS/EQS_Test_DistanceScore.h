@@ -1,4 +1,4 @@
-// Public/AI/EQS_Test_DistanceScore.h
+ï»¿// Public/AI/EQS_Test_DistanceScore.h
 
 #pragma once
 
@@ -8,8 +8,8 @@
 #include "EQS_Test_DistanceScore.generated.h"
 
 /**
- * EQS²âÊÔ£º¸ù¾İ¾àÀëÆÀ·Ö
- * Ô½½üµÄÄ¿±êµÃ·ÖÔ½¸ß£¨ÓÃÓÚÑ¡Ôñ×î½üµÄ¹¥»÷Ä¿±ê£©
+ * EQSæµ‹è¯•ï¼šæ ¹æ®è·ç¦»è¯„åˆ†
+ * è¶Šè¿‘çš„ç›®æ ‡å¾—åˆ†è¶Šé«˜ï¼ˆç”¨äºé€‰æ‹©æœ€è¿‘çš„æ”»å‡»ç›®æ ‡ï¼‰
  */
 UCLASS()
 class SOULLIKEDEMO_API UEQS_Test_DistanceScore : public UEnvQueryTest
@@ -22,11 +22,11 @@ public:
 	virtual void RunTest(FEnvQueryInstance& QueryInstance) const override;
 
 	float CalculateScore(float Distance) const;
-	/** ¾àÀëÆÀ·ÖÄ£Ê½ */
+	/** è·ç¦»è¯„åˆ†æ¨¡å¼ */
 	UPROPERTY(EditDefaultsOnly, Category = "Test")
 		TEnumAsByte<EEnvTestDistance::Type> DistanceMode;
 
-	/** ÀíÏë¾àÀë£¨ÔÚ´Ë¾àÀëÄÚµÃÂú·Ö£© */
+	/** ç†æƒ³è·ç¦»ï¼ˆåœ¨æ­¤è·ç¦»å†…å¾—æ»¡åˆ†ï¼‰ */
 	UPROPERTY(EditDefaultsOnly, Category = "Test")
 		float IdealDistance;
 };

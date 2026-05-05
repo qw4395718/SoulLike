@@ -1,4 +1,4 @@
-// Private/AI/EQS_Generator_EnemyTargets.cpp
+ï»¿// Private/AI/EQS_Generator_EnemyTargets.cpp
 
 #include "EQS_Generator_EnemyTargets.h"
 #include "EnvironmentQuery/Items/EnvQueryItemType_Actor.h"
@@ -17,7 +17,7 @@ UEQS_Generator_EnemyTargets::UEQS_Generator_EnemyTargets()
 
 void UEQS_Generator_EnemyTargets::GenerateItems(FEnvQueryInstance& QueryInstance) const
 {
-	// »ñÈ¡ËÑË÷ÖĞĞÄÎ»ÖÃ
+	// è·å–æœç´¢ä¸­å¿ƒä½ç½®
 	TArray<FVector> CenterLocation;
 	CenterLocation.Add(FVector::ZeroVector);
 	if (!QueryInstance.PrepareContext(SearchCenter, CenterLocation))
@@ -25,40 +25,40 @@ void UEQS_Generator_EnemyTargets::GenerateItems(FEnvQueryInstance& QueryInstance
 		return;
 	}
 
-	// »ñÈ¡ËÑË÷°ë¾¶
+	// è·å–æœç´¢åŠå¾„
 	float Radius = SearchRadius.GetValue();
 	if (Radius <= 0.0f)
 	{
 		return;
 	}
 
-	// »ñÈ¡²éÑ¯ËùÓĞÕß
+	// è·å–æŸ¥è¯¢æ‰€æœ‰è€…
 	AActor* QueryOwner = Cast<AActor>(QueryInstance.Owner);
 	if (!QueryOwner) return;
 
-	// »ñÈ¡AI¿ØÖÆÆ÷
+	// è·å–AIæ§åˆ¶å™¨
 	AAIController* AIController = Cast<AAIController>(QueryOwner);
 	if (!AIController) return;
 
-	// »ñÈ¡µĞÈËÀà
+	// è·å–æ•Œäººç±»
 	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
 	if (!Enemy) return;
 
-	// ²éÕÒËùÓĞÇ±ÔÚµÄµĞÈËÄ¿±ê£¨Íæ¼Ò£©
+	// æŸ¥æ‰¾æ‰€æœ‰æ½œåœ¨çš„æ•Œäººç›®æ ‡ï¼ˆç©å®¶ï¼‰
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(QueryOwner->GetWorld(), ASL_CharacterBase::StaticClass(), FoundActors);
 
-	// ¹ıÂË²¢Ìí¼ÓÄ¿±ê
+	// è¿‡æ»¤å¹¶æ·»åŠ ç›®æ ‡
 	for (AActor* Actor : FoundActors)
 	{
-		// ÅÅ³ı×Ô¼º
+		// æ’é™¤è‡ªå·±
 		if (Actor == Enemy) continue;
 
-		// ¼ì²éÄ¿±êÊÇ·ñ´æ»î
+		// æ£€æŸ¥ç›®æ ‡æ˜¯å¦å­˜æ´»
 		ASL_CharacterBase* TargetChar = Cast<ASL_CharacterBase>(Actor);
 		if (TargetChar && TargetChar->IsAlive())
 		{
-			// ¼ì²é¾àÀëÊÇ·ñÔÚËÑË÷°ë¾¶ÄÚ
+			// æ£€æŸ¥è·ç¦»æ˜¯å¦åœ¨æœç´¢åŠå¾„å†…
 			float Distance = FVector::Dist(CenterLocation[0], Actor->GetActorLocation());
 			if (Distance <= Radius)
 			{

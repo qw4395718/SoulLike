@@ -1,4 +1,4 @@
-// Private/AI/EQC_TargetContext.cpp
+ï»¿// Private/AI/EQC_TargetContext.cpp
 
 #include "EQC_TargetContext.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
@@ -8,23 +8,23 @@
 
 void UEQC_TargetContext::ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQueryContextData& ContextData) const
 {
-	// »ñÈ¡²éÑ¯µÄËùÓĞÕß£¨Í¨³£ÊÇAIController£©
+	// è·å–æŸ¥è¯¢çš„æ‰€æœ‰è€…ï¼ˆé€šå¸¸æ˜¯AIControllerï¼‰
 	AActor* QueryOwner = Cast<AActor>(QueryInstance.Owner);
 	if (!QueryOwner) return;
 
-	// ´Ó²éÑ¯ËùÓĞÕß»ñÈ¡AIController
+	// ä»æŸ¥è¯¢æ‰€æœ‰è€…è·å–AIController
 	AAIController* AIController = Cast<AAIController>(QueryOwner);
 	if (!AIController) return;
 
-	// »ñÈ¡µĞÈËÀà
+	// è·å–æ•Œäººç±»
 	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
 	if (!Enemy) return;
 
-	// »ñÈ¡µ±Ç°Ä¿±ê
+	// è·å–å½“å‰ç›®æ ‡
 	AActor* CurrentTarget = Enemy->GetCurrentTarget();
 	if (CurrentTarget)
 	{
-		// ½«Ä¿±êActorÌí¼Óµ½ÉÏÏÂÎÄÊı¾İÖĞ
+		// å°†ç›®æ ‡Actoræ·»åŠ åˆ°ä¸Šä¸‹æ–‡æ•°æ®ä¸­
 		UEnvQueryItemType_Actor::SetContextHelper(ContextData, CurrentTarget);
 	}
 }

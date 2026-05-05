@@ -1,4 +1,4 @@
-// Private/AI/EQS_Test_CanSeeTarget.cpp
+ï»¿// Private/AI/EQS_Test_CanSeeTarget.cpp
 
 #include "EQS_Test_CanSeeTarget.h"
 #include "EnvironmentQuery/Items/EnvQueryItemType_Actor.h"
@@ -9,16 +9,16 @@
 
 UEQS_Test_CanSeeTarget::UEQS_Test_CanSeeTarget()
 {
-	// ÉèÖÃ²âÊÔÄ¿µÄ£ºÉ¸Ñ¡·ûºÏÌõ¼şµÄÄ¿±ê
+	// è®¾ç½®æµ‹è¯•ç›®çš„ï¼šç­›é€‰ç¬¦åˆæ¡ä»¶çš„ç›®æ ‡
 	TestPurpose = EEnvTestPurpose::FilterAndScore;
 
-	// ÉèÖÃÎª²¼¶ûÀàĞÍ²âÊÔ£¨¿É¼û/²»¿É¼û£©
+	// è®¾ç½®ä¸ºå¸ƒå°”ç±»å‹æµ‹è¯•ï¼ˆå¯è§/ä¸å¯è§ï¼‰
 	SetWorkOnFloatValues(false);
 }
 
 void UEQS_Test_CanSeeTarget::RunTest(FEnvQueryInstance& QueryInstance) const
 {
-	//// »ñÈ¡²éÑ¯ËùÓĞÕß
+	//// è·å–æŸ¥è¯¢æ‰€æœ‰è€…
 	//UObject* QueryOwner = QueryInstance.Owner.Get();
 	//AAIController* AIController = Cast<AAIController>(QueryOwner);
 	//if (!AIController) return;
@@ -26,16 +26,16 @@ void UEQS_Test_CanSeeTarget::RunTest(FEnvQueryInstance& QueryInstance) const
 	//ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
 	//if (!Enemy) return;
 
-	//// »ñÈ¡µ±Ç°²éÑ¯µÄActor
+	//// è·å–å½“å‰æŸ¥è¯¢çš„Actor
 	//for (int32 ItemIndex = 0; ItemIndex < QueryInstance.Items.Num(); ItemIndex++)
 	//{
 	//	AActor* ItemActor = Cast<AActor>(QueryInstance.Items[ItemIndex].Item);
 	//	if (!ItemActor) continue;
 
-	//	// Ö´ĞĞÊÓÏß¼ì²â
+	//	// æ‰§è¡Œè§†çº¿æ£€æµ‹
 	//	bool bCanSee = PerformLineOfSightCheck(Enemy, ItemActor);
 
-	//	// ÉèÖÃ²âÊÔ½á¹û
+	//	// è®¾ç½®æµ‹è¯•ç»“æœ
 	//	QueryInstance.SetItemScore(ItemIndex, bCanSee ? 1.0f : 0.0f);
 	//}
 }
@@ -44,13 +44,13 @@ bool UEQS_Test_CanSeeTarget::PerformLineOfSightCheck(ASL_EnemyBase* Enemy, AActo
 {
 	if (!Enemy || !Target) return false;
 
-	// ÉèÖÃ¼ì²â²ÎÊı
+	// è®¾ç½®æ£€æµ‹å‚æ•°
 	FHitResult HitResult;
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(Enemy);
 	QueryParams.bTraceComplex = false;
 
-	// ºöÂÔÖ¸¶¨µÄActorÀà
+	// å¿½ç•¥æŒ‡å®šçš„Actorç±»
 	for (TSubclassOf<AActor> IgnoreClass : ActorsToIgnore)
 	{
 		if (Target->IsA(IgnoreClass))
@@ -59,7 +59,7 @@ bool UEQS_Test_CanSeeTarget::PerformLineOfSightCheck(ASL_EnemyBase* Enemy, AActo
 		}
 	}
 
-	// ´ÓµĞÈËÍ·²¿Î»ÖÃµ½Ä¿±êÎ»ÖÃ½øĞĞÉäÏß¼ì²â
+	// ä»æ•Œäººå¤´éƒ¨ä½ç½®åˆ°ç›®æ ‡ä½ç½®è¿›è¡Œå°„çº¿æ£€æµ‹
 	FVector StartLocation = Enemy->GetActorLocation() + FVector(0.0f, 0.0f, 50.0f);
 	FVector EndLocation = Target->GetActorLocation() + FVector(0.0f, 0.0f, 50.0f);
 
@@ -71,7 +71,7 @@ bool UEQS_Test_CanSeeTarget::PerformLineOfSightCheck(ASL_EnemyBase* Enemy, AActo
 		QueryParams
 	);
 
-	// µ÷ÊÔ¿ÉÊÓ»¯
+	// è°ƒè¯•å¯è§†åŒ–
 	if (Enemy->bEnableDebugDraw)
 	{
 		DrawDebugLine(
@@ -83,6 +83,6 @@ bool UEQS_Test_CanSeeTarget::PerformLineOfSightCheck(ASL_EnemyBase* Enemy, AActo
 		);
 	}
 
-	// Èç¹ûÃ»ÓĞÅö×²µ½ÈÎºÎ¶«Î÷£¬»òÕßÅö×²µ½µÄ¾ÍÊÇÄ¿±ê±¾Éí£¬ÔòÊÓÎª¿É¼û
+	// å¦‚æœæ²¡æœ‰ç¢°æ’åˆ°ä»»ä½•ä¸œè¥¿ï¼Œæˆ–è€…ç¢°æ’åˆ°çš„å°±æ˜¯ç›®æ ‡æœ¬èº«ï¼Œåˆ™è§†ä¸ºå¯è§
 	return (!bHit || HitResult.GetActor() == Target);
 }

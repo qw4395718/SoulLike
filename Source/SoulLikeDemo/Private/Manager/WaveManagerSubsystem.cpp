@@ -267,6 +267,12 @@ ASL_EnemyBase* UWaveManagerSystem::SpawnEnemyAtPoint(int32 SpawnerID, const FTra
 		Enemy->InitializeEnemy(SpawnerID);
 		Enemy->FinishSpawning(SpawnTransform);
 
+		// === 修正：绑定敌人死亡事件 ===
+		Enemy->OnEnemyDied.AddDynamic(this, &UWaveManagerSystem::OnEnemyDiedCallback);
+
+		ActiveEnemies.Add(Enemy);
+		AllSpawnedEnemies.Add(Enemy);
+
 		UE_LOG(LogTemp, Log, TEXT("UWaveManagerSystem::SpawnEnemyAtPoint - Spawned enemy at %s"), *SpawnTransform.ToString());
 	}
 
@@ -292,7 +298,9 @@ void UWaveManagerSystem::OnEnemyDiedCallback()
 {
 	// 从活动列表中移除
 	ActiveEnemies.RemoveAll([](ASL_EnemyBase* Enemy) {
-		return Enemy == nullptr || Enemy->IsPendingKillPending();
+		return Enemy == nullptr || 
+		Enemy->IsPendingKillPending() || 
+		Enemy->GetEnemyState() == EEnemyState::Dead;
 		});
 
 	// 检查波次是否完成

@@ -352,7 +352,7 @@ void ASL_WeaponBase::ApplyDamageToOverlappingActors()
 			continue;
 
 		UE_LOG(LogTemp, Warning, TEXT("WeaponBase:ApplyDamageToOverlappingActors 3"))
-		// 1. 检查目标是否具有GAS系统（新的SL_CharacterBase）
+		// 1. 检查目标是否具有GAS系统（新的SL_CharacterBase/SL_enemyBase）
 		IAbilitySystemInterface* TargetASI = Cast<IAbilitySystemInterface>(Actor);
 		if (!TargetASI) continue;
 

@@ -13,7 +13,7 @@
 #include <BehaviorTree/BlackboardData.h>
 #include "SL_AbilitySystemComponent.h"
 #include <SL_StatusAttributeSet.h>
-
+#include <Manager/GlobalDelegatesManager.h>
 
 ASL_EnemyBase::ASL_EnemyBase()
 {
@@ -70,6 +70,9 @@ void ASL_EnemyBase::InitializeEnemy(int32 EnemyID)
 	// 应用配置
 	ApplyEnemyConfig(Config);
 
+	// 绑定死亡委托
+	BindGASDeathEvent();
+
 	UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::InitializeEnemy - Initialized enemy: ID=%d, Name=%s, Type=%d"),
 		EnemyID, *Config.EnemyName.ToString(), (int32)Config.EnemyType);
 }
@@ -110,35 +113,68 @@ void ASL_EnemyBase::LoseTarget()
 	SetEnemyState(EEnemyState::Patrol);
 }
 
-void ASL_EnemyBase::SufferDamage(float DamageAmount, AActor* DamageInstigator)
+void ASL_EnemyBase::Die()
 {
 	if (CurrentState == EEnemyState::Dead) return;
 
-	// 受到伤害，进入战斗状态
-	CurrentTarget = DamageInstigator;
-	if (CurrentState != EEnemyState::Combat)
-	{
-		EnterCombat();
-	}
-
-	// TODO: 通过GAS应用伤害
-	// 这里预留接口，后续由GAS系统处理
-}
-
-void ASL_EnemyBase::Die()
-{
 	SetEnemyState(EEnemyState::Dead);
 
-	// 广播死亡事件
+	// === 修正：先广播死亡事件（WaveManager会收到这个） ===
 	OnEnemyDied.Broadcast();
 
-	// 禁用AI
+	// === 修正：禁用AI ===
 	if (BrainComponent)
 	{
 		BrainComponent->StopLogic(TEXT("Enemy Dead"));
 	}
 
-	// TODO: 播放死亡动画、掉落物品等
+	// === 新增：禁用碰撞 ===
+	SetActorEnableCollision(false);
+
+	// === 新增：播放死亡动画（如果有） ===
+	if (GetMesh())
+	{
+		// 可以在这里触发布娃娃或者死亡蒙太奇
+		// 但为了避免与GAS的布娃娃逻辑冲突，这里只做简单的禁用
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	// === 修正：延迟销毁（给死亡动画和掉落物品时间） ===
+	FTimerHandle DestroyHandle;
+	GetWorld()->GetTimerManager().SetTimer(DestroyHandle, FTimerDelegate::CreateLambda([this]()
+		{
+			// 延迟销毁敌人
+			SetLifeSpan(2.0f);  // 2秒后自动销毁
+		}), 1.0f, false);
+
+	UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::Die - Enemy %s died"), *GetName());
+}
+
+void ASL_EnemyBase::BindGASDeathEvent()
+{
+	// 绑定GAS的死亡委托
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		// 防止重复绑定
+		if (!OnCharacterDiedHandle.IsValid())
+		{
+			OnCharacterDiedHandle = DelegateMgr->OnCharacterDied.AddUObject(this, &ASL_EnemyBase::OnGASCharacterDied);
+		}
+	}
+}
+
+void ASL_EnemyBase::OnGASCharacterDied(AActor* DiedActor, AActor* KillerActor)
+{
+	// 检查是否是自己的死亡事件
+	if (DiedActor != this) return;
+
+	UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::OnGASCharacterDied - Enemy %s died"), *GetName());
+
+	// 确保执行死亡逻辑
+	if (CurrentState != EEnemyState::Dead)
+	{
+		Die();
+	}
 }
 
 void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
@@ -146,11 +182,16 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
 	// 1. 设置属性（通过GAS）
 	if (AbilitySystemComp)
 	{
-		// TODO: 通过GAS的AttributeSet设置初始属性
-		// 例如：SetHealth(Config.BaseHealth)
-		//       SetAttack(Config.BaseAttack)
-		//       SetDefense(Config.BaseDefense)
-		//       SetMoveSpeed(Config.BaseMoveSpeed)
+		// 设置初始血量
+		if (USL_StatusAttributeSet* StatusSet = const_cast<USL_StatusAttributeSet*>(AbilitySystemComp->GetSet<USL_StatusAttributeSet>()))
+		{
+			// 通过GAS的Attribute设置初始值
+			StatusSet->InitHealth(Config.BaseHealth);
+			StatusSet->InitMaxHealth(Config.BaseHealth);
+
+			// 设置其他属性
+			// 注意：Stamina、Attack、Defense等需要额外配置GE
+		}
 	}
 
 	// 2. 修改碰撞体大小
@@ -182,6 +223,9 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
 			}
 		}
 	}
+
+	// 7. 绑定GAS死亡事件
+	BindGASDeathEvent();
 }
 
 void ASL_EnemyBase::LoadEnemyAppearance(const FEnemyConfigInfo& Config)

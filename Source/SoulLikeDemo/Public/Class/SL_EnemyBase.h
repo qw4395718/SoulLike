@@ -63,9 +63,6 @@ public:
 		void LoseTarget();
 
 	// ===== 战斗接口 =====
-	/** 受到攻击 */
-	UFUNCTION(BlueprintCallable, Category = "Enemy|Combat")
-		void SufferDamage(float DamageAmount, AActor* DamageInstigator);
 
 	/** 死亡处理 */
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Combat")
@@ -78,6 +75,13 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Enemy|Events")
 		FOnEnemyDied OnEnemyDied;
+
+	/** 绑定GAS死亡事件 */
+	void BindGASDeathEvent();
+
+	/** GAS角色死亡回调 */
+	UFUNCTION()
+		void OnGASCharacterDied(AActor* DiedActor, AActor* KillerActor);
 
 protected:
 	/************************************************************************/
@@ -132,4 +136,7 @@ protected:
 
 	UPROPERTY()
 		class USL_StatusAttributeSet* StatusAttributeSet;
+
+	// 死亡委托的句柄
+	FDelegateHandle OnCharacterDiedHandle;
 };

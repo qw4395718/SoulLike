@@ -483,6 +483,27 @@ struct FClassConfigInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 		FName ClassName;
 
+	// ===== 属性配置 =====
+/** 基础生命值 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		float BaseHealth = 100.0f;
+
+	/** 基础攻击力 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		float BaseAttack = 10.0f;
+
+	/** 基础防御力 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		float BaseDefense = 5.0f;
+
+	/** 基础移动速度 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		float BaseMoveSpeed = 300.0f;
+
+	/** 基础体力（用于自身的耐力系统） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+		float BaseStamina = 100.0f;
+
 	// ===== 武器配置 =====
 	/** 左手武器ID（0表示无武器） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")

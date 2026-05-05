@@ -67,7 +67,7 @@ protected:
     virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
-	void OnCharacterDeath();
+	void OnCharacterDeath(AActor* DeathActor);
 	void OnCharacterReLive(AActor* ReviveActor);
 public:
 	/************************************************************************/

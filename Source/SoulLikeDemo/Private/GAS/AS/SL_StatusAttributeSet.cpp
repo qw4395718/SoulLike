@@ -4,6 +4,7 @@
 #include <GlobalDelegatesManager.h>
 #include <SL_Macros.h>
 #include <SL_CharacterBase.h>
+#include "SL_EnemyBase.h"
 #include <Components/CapsuleComponent.h>
 
 USL_StatusAttributeSet::USL_StatusAttributeSet() 
@@ -142,7 +143,7 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			{
 				globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldValue, CurrentValue, MinValue, MaxValue);
 				// 血量归零
-				if (CurrentValue == MinValue) {OnCharacterDeath();}
+				if (CurrentValue == MinValue) {OnCharacterDeath(OwningActor);}
 			}
 
 			// Calculate 'actual' damage applied that respects min and max health
@@ -221,13 +222,13 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 }
 
 // ===== 新增死亡处理函数 =====
-void USL_StatusAttributeSet::OnCharacterDeath()
+void USL_StatusAttributeSet::OnCharacterDeath(AActor* DeathActor)
 {
     UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
     if (!ASC) return;
 
     AActor* OwnerActor = ASC->GetOwnerActor();
-    if (!OwnerActor) return;
+    if (!OwnerActor || DeathActor != OwnerActor) return;
 
     // 1. 更新GAS标签
     ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Alive"));
@@ -239,6 +240,20 @@ void USL_StatusAttributeSet::OnCharacterDeath()
         DelegateMgr->OnCharacterDied.Broadcast(OwnerActor, nullptr);
     }
 
+	// 检查是否是敌人
+	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(OwnerActor);
+	if (Enemy)
+	{
+		// 调用敌人的Die函数，它会处理：
+		// - 设置状态为Dead
+		// - 广播OnEnemyDied委托（WaveManager监听这个）
+		// - 禁用AI
+		// - 播死亡动画等
+		Enemy->Die();
+		return;
+	}
+
+	
     // 3. 禁用角色
     if (ACharacter* Char = Cast<ACharacter>(OwnerActor))
     {
@@ -249,11 +264,7 @@ void USL_StatusAttributeSet::OnCharacterDeath()
         {
             PC->SetCinematicMode(true, false, false);
         }
-    }
 
-	// 4.添加布娃娃系统检验-后续需要拆分到动画模块中
-	if (ACharacter* Char = Cast<ACharacter>(OwnerActor))
-	{
 		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
 		{
 			comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -262,9 +273,9 @@ void USL_StatusAttributeSet::OnCharacterDeath()
 		{
 			Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			Char->GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
-			Char->GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"),true,true);
+			Char->GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
 		}
-	}
+    }
 
 
     UE_LOG(LogTemp, Warning, TEXT("GAS Death: %s died"), *OwnerActor->GetName());

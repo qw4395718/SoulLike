@@ -14,12 +14,26 @@
 #include "SL_AbilitySystemComponent.h"
 #include <SL_StatusAttributeSet.h>
 #include <Manager/GlobalDelegatesManager.h>
+#include <DrawDebugHelpers.h>
+#include <Kismet/KismetMathLibrary.h>
+#include <SL_CharacterBase.h>
+#include <GameFramework/CharacterMovementComponent.h>
+#include <Kismet/GameplayStatics.h>
 
 ASL_EnemyBase::ASL_EnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = false; 
 	CurrentState = EEnemyState::Idle;
 	CurrentTarget = nullptr;
+
+	bEnableDebugDraw = true;
+
+	// 调试：绘制感知范围
+	if (bEnableDebugDraw)
+	{
+		DrawDebugSphere(GetWorld(), GetActorLocation(), PerceptionRange, 32, FColor::Green, true, -1, 0, 2.0f);
+		DrawDebugSphere(GetWorld(), GetActorLocation(), AttackRange, 32, FColor::Red, true, -1, 0, 2.0f);
+	}
 
 	// AI感知组件（预留）
 	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
@@ -36,6 +50,29 @@ void ASL_EnemyBase::BeginPlay()
 void ASL_EnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	// 更新状态计时
+	if (CurrentState != EEnemyState::Dead)
+	{
+		StateElapsedTime = GetWorld()->GetTimeSeconds() - LastStateChangeTime;
+	}
+
+	// 更新感知系统
+	UpdatePerception(DeltaTime);
+
+	// 状态更新
+	OnStateTick(DeltaTime);
+
+	// 调试：绘制目标连线
+	if (bEnableDebugDraw && CurrentTarget)
+	{
+		DrawDebugLine(
+			GetWorld(),
+			GetActorLocation() + FVector(0.0f, 0.0f, 50.0f),
+			CurrentTarget->GetActorLocation() + FVector(0.0f, 0.0f, 50.0f),
+			CurrentState == EEnemyState::Combat ? FColor::Red : FColor::Yellow,
+			false, -1, 0, 2.0f
+		);
+	}
 }
 
 void ASL_EnemyBase::InitializeEnemy(int32 EnemyID)
@@ -77,14 +114,142 @@ void ASL_EnemyBase::InitializeEnemy(int32 EnemyID)
 		EnemyID, *Config.EnemyName.ToString(), (int32)Config.EnemyType);
 }
 
+void ASL_EnemyBase::OnStateEnter(EEnemyState NewState)
+{
+	switch (NewState)
+	{
+	case EEnemyState::Idle:
+		// 进入空闲状态：停止移动，等待
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->StopMovementImmediately();
+		}
+		break;
+
+	case EEnemyState::Patrol:
+		// 进入巡逻状态：开始沿着路径移动
+		// 由蓝图行为树处理具体巡逻逻辑
+		break;
+
+	case EEnemyState::Alert:
+		// 进入警戒状态：看向目标方向，准备战斗
+		if (CurrentTarget)
+		{
+			// 面向目标
+			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(
+				GetActorLocation(), CurrentTarget->GetActorLocation());
+			SetActorRotation(FRotator(0.0f, LookAtRotation.Yaw, 0.0f));
+		}
+		break;
+
+	case EEnemyState::Combat:
+		// 进入战斗状态：启动AI行为树
+		if (BehaviorTree && BrainComponent)
+		{
+			//BrainComponent->StartBehaviorTree(BehaviorTree);
+		}
+		break;
+
+	case EEnemyState::Dead:
+		// 进入死亡状态
+		if (BrainComponent)
+		{
+			BrainComponent->StopLogic(TEXT("Enemy Dead"));
+		}
+		break;
+	}
+}
+
+void ASL_EnemyBase::OnStateExit(EEnemyState OldState)
+{
+	switch (OldState)
+	{
+	case EEnemyState::Combat:
+		// 退出战斗状态：可以做一些清理工作
+		break;
+
+	default:
+		break;
+	}
+}
+
+void ASL_EnemyBase::OnStateTick(float DeltaTime)
+{
+	switch (CurrentState)
+	{
+	case EEnemyState::Idle:
+		// 空闲状态下，检测是否有目标进入感知范围
+		if (!CurrentTarget)
+		{
+			AActor* Target = FindNearestTarget();
+			if (Target)
+			{
+				CurrentTarget = Target;
+				SetEnemyState(EEnemyState::Alert);
+			}
+		}
+		break;
+
+	case EEnemyState::Alert:
+		// 警戒状态下，面向目标并准备战斗
+		if (CurrentTarget)
+		{
+			// 如果目标在攻击范围内，进入战斗
+			if (IsTargetInAttackRange())
+			{
+				SetEnemyState(EEnemyState::Combat);
+			}
+			// 如果目标超出感知范围，失去目标
+			else if (!CanSeeTarget(CurrentTarget))
+			{
+				LoseTarget();
+			}
+		}
+		else
+		{
+			// 没有目标，回到空闲状态
+			SetEnemyState(EEnemyState::Idle);
+		}
+		break;
+
+	case EEnemyState::Combat:
+		// 战斗状态下，由AI行为树控制
+		// 这里只做简单的检查：如果目标丢失，回到警戒状态
+		if (CurrentTarget)
+		{
+			if (!CanSeeTarget(CurrentTarget))
+			{
+				// 目标丢失，进入警戒状态一段时间后如果还没找到就回到巡逻
+				float LostTargetTime = GetStateTime();
+				if (LostTargetTime > 5.0f)  // 5秒后放弃追踪
+				{
+					LoseTarget();
+				}
+			}
+		}
+		break;
+
+	default:
+		break;
+	}
+}
+
 // ==================== 状态管理 ====================
 
 void ASL_EnemyBase::SetEnemyState(EEnemyState NewState)
 {
 	if (CurrentState == NewState) return;
 
+	// 退出旧状态
+	OnStateExit(CurrentState);
+
 	EEnemyState OldState = CurrentState;
 	CurrentState = NewState;
+	LastStateChangeTime = GetWorld()->GetTimeSeconds();
+	StateElapsedTime = 0.0f;
+
+	// 进入新状态
+	OnStateEnter(NewState);
 
 	OnEnemyStateChanged.Broadcast(NewState);
 
@@ -271,4 +436,99 @@ void ASL_EnemyBase::InitializeEnemyAI(const FEnemyConfigInfo& Config)
 
 	UE_LOG(LogTemp, Verbose, TEXT("ASL_EnemyBase::InitializeEnemyAI - PerceptionRange=%.2f, AttackRange=%.2f"),
 		PerceptionRange, AttackRange);
+}
+
+void ASL_EnemyBase::UpdatePerception(float DeltaTime)
+{
+	// 如果已经死亡，不更新感知
+	if (CurrentState == EEnemyState::Dead) return;
+
+	// 每隔0.2秒更新一次感知（性能优化）
+	static float PerceptionTimer = 0.0f;
+	PerceptionTimer += DeltaTime;
+	if (PerceptionTimer < 0.2f) return;
+	PerceptionTimer = 0.0f;
+
+	// 如果没有目标，寻找最近的玩家
+	if (!CurrentTarget)
+	{
+		AActor* Target = FindNearestTarget();
+		if (Target)
+		{
+			CurrentTarget = Target;
+			if (CurrentState == EEnemyState::Idle)
+			{
+				SetEnemyState(EEnemyState::Alert);
+			}
+		}
+	}
+}
+
+bool ASL_EnemyBase::CanSeeTarget(AActor* TargetActor) const
+{
+	if (!TargetActor) return false;
+
+	// 1. 计算距离
+	float Distance = FVector::Dist(GetActorLocation(), TargetActor->GetActorLocation());
+	if (Distance > PerceptionRange) return false;
+
+	// 2. 视线检测（射线检测）
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+	QueryParams.bTraceComplex = false;
+
+	FVector StartLocation = GetActorLocation() + FVector(0.0f, 0.0f, 50.0f); // 从头部位置检测
+	FVector EndLocation = TargetActor->GetActorLocation() + FVector(0.0f, 0.0f, 50.0f);
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		StartLocation,
+		EndLocation,
+		ECC_Visibility,
+		QueryParams
+	);
+
+	// 如果没有障碍物，或者障碍物就是目标本身，则可以看到
+	if (!bHit || HitResult.GetActor() == TargetActor)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool ASL_EnemyBase::IsTargetInAttackRange() const
+{
+	if (!CurrentTarget) return false;
+
+	float Distance = FVector::Dist(GetActorLocation(), CurrentTarget->GetActorLocation());
+	return Distance <= AttackRange;
+}
+
+AActor* ASL_EnemyBase::FindNearestTarget() const
+{
+	// 查找距离最近的玩家
+	TArray<AActor*> FoundPlayers;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASL_CharacterBase::StaticClass(), FoundPlayers);
+
+	AActor* NearestTarget = nullptr;
+	float MinDistance = PerceptionRange;
+
+	for (AActor* Player : FoundPlayers)
+	{
+		// 检查玩家是否存活
+		ASL_CharacterBase* Char = Cast<ASL_CharacterBase>(Player);
+		if (Char && Char->IsAlive() == true)
+		{
+			float Distance = FVector::Dist(GetActorLocation(), Player->GetActorLocation());
+			if (Distance < MinDistance && CanSeeTarget(Player))
+			{
+				MinDistance = Distance;
+				NearestTarget = Player;
+			}
+		}
+	}
+
+	return NearestTarget;
 }

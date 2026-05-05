@@ -7,6 +7,7 @@
 #include "SoulLikeGameGlobal.h"
 #include "Stamina_IF.h"
 #include <GameplayEffectTypes.h>
+#include "GameplayEffect.h"
 #include "SL_StaminaComponent.generated.h"
 
 class UAbilitySystemComponent;

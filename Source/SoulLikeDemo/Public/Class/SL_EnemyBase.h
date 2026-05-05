@@ -42,6 +42,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Enemy")
 		void InitializeEnemy(int32 EnemyID);
 
+	// ===== 状态机接口 =====
+	/** 状态进入回调 */
+	virtual void OnStateEnter(EEnemyState NewState);
+
+	/** 状态退出回调 */
+	virtual void OnStateExit(EEnemyState OldState);
+
+	/** 状态更新（每帧调用） */
+	virtual void OnStateTick(float DeltaTime);
+
+	/** 获取当前状态持续时间 */
+	UFUNCTION(BlueprintPure, Category = "Enemy|State")
+		float GetStateTime() const { return StateElapsedTime; }
+
+	/** 获取当前目标 */
+	UFUNCTION(BlueprintPure, Category = "Enemy|AI")
+		AActor* GetCurrentTarget() const { return CurrentTarget; }
+
 	// ===== 状态管理 =====
 	UFUNCTION(BlueprintCallable, Category = "Enemy")
 		void SetEnemyState(EEnemyState NewState);
@@ -68,6 +86,29 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Combat")
 		void Die();
 
+	// ===== 感知接口 =====
+	UFUNCTION(BlueprintPure, Category = "Enemy|Perception")
+		float GetPerceptionRange() const { return PerceptionRange; }
+
+	UFUNCTION(BlueprintPure, Category = "Enemy|Perception")
+		float GetAttackRange() const { return AttackRange; }
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy|Perception")
+		void SetPerceptionRange(float NewRange) { PerceptionRange = NewRange; }
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy|Perception")
+		void SetAttackRange(float NewRange) { AttackRange = NewRange; }
+
+	/** 检测是否可以看见目标 */
+	bool CanSeeTarget(AActor* TargetActor) const;
+
+	/** 检测目标是否在攻击范围内 */
+	bool IsTargetInAttackRange() const;
+
+	/** 获取最近的敌人（玩家） */
+	AActor* FindNearestTarget() const;
+
+
 public:
 	// ===== 委托 =====
 	UPROPERTY(BlueprintAssignable, Category = "Enemy|Events")
@@ -83,6 +124,8 @@ public:
 	UFUNCTION()
 		void OnGASCharacterDied(AActor* DiedActor, AActor* KillerActor);
 
+	bool bEnableDebugDraw = false;
+
 protected:
 	/************************************************************************/
 	/*                               内部调用                                       */
@@ -95,6 +138,10 @@ protected:
 
 	// 初始化敌人AI 
 	void InitializeEnemyAI(const FEnemyConfigInfo& Config);
+
+	// ===== 感知系统 =====
+	/** 更新感知（每帧调用） */
+	void UpdatePerception(float DeltaTime);
 
 protected:
 	// ===== 配置数据 =====
@@ -113,6 +160,12 @@ protected:
 	// ===== 状态 =====
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy")
 		EEnemyState CurrentState;
+
+	/** 状态持续时间 */
+	float StateElapsedTime;
+
+	/** 上次状态切换时间 */
+	float LastStateChangeTime;
 
 	UPROPERTY()
 		AActor* CurrentTarget;
@@ -139,4 +192,5 @@ protected:
 
 	// 死亡委托的句柄
 	FDelegateHandle OnCharacterDiedHandle;
+
 };

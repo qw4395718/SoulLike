@@ -3,7 +3,6 @@
 #include "SL_StaminaComponent.h"
 #include "AbilitySystemComponent.h"
 #include "SL_StatusAttributeSet.h"
-#include "GameplayEffect.h"
 #include "GlobalDelegatesManager.h"
 #include <AbilitySystemInterface.h>
 

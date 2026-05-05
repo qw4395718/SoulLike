@@ -350,6 +350,14 @@ void ASL_CharacterBase::InitEquipmentWithClass(int32 InPlayerClassID)
 	// Todo:切换职业的时候需要广播,改变能力值和Tag
 }
 
+bool ASL_CharacterBase::IsAlive()
+{
+	RETURN_VALUE_IF_TRUE(AbilitySystemComp == nullptr,false);
+	FGameplayTagContainer currentTags;
+	AbilitySystemComp->GetOwnedGameplayTags(currentTags);
+	return currentTags.HasTag(FGameplayTag::RequestGameplayTag(TEXT("State.Alive")));
+}
+
 FString ASL_CharacterBase::GetNetworkGUIDString(AActor* InActor)
 {
 	if(InActor == nullptr){return TEXT("InActor InValid"); }

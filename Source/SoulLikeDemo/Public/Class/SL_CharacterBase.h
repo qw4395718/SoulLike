@@ -127,6 +127,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitEquipmentWithClass(int32 InPlayerClassID);
 
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		bool IsAlive();
+
 	FString GetNetworkGUIDString(AActor* InActor);
 protected:
 	/************************************************************************/

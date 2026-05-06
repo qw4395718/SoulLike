@@ -6,7 +6,7 @@
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "BTTask_FindTarget.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UBTTask_FindTarget : public UBTTaskNode
 {
     GENERATED_BODY()
@@ -29,4 +29,7 @@ protected:
 
     /** EQS查询完成的回调 */
     void OnEQSQueryFinished(TSharedPtr<FEnvQueryResult> Result);
+
+	// 对于异步EQS查询，存储当前的行为树组件引用
+	UBehaviorTreeComponent* CachedBTComp;
 };

@@ -5,6 +5,7 @@
 #include "AIController.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include <SL_Macros.h>
 
 UBTTask_FindTarget::UBTTask_FindTarget()
 {
@@ -15,6 +16,8 @@ UBTTask_FindTarget::UBTTask_FindTarget()
 
 EBTNodeResult::Type UBTTask_FindTarget::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+    CachedBTComp = &OwnerComp;
+
     AAIController* AIController = OwnerComp.GetAIOwner();
     if (!AIController) return EBTNodeResult::Failed;
 
@@ -37,6 +40,7 @@ EBTNodeResult::Type UBTTask_FindTarget::ExecuteTask(UBehaviorTreeComponent& Owne
 
 void UBTTask_FindTarget::OnEQSQueryFinished(TSharedPtr<FEnvQueryResult> Result)
 {
+    RETURN_IF_TRUE(CachedBTComp == nullptr);
     if (!Result.IsValid() || !Result->IsFinished())
     {
         UE_LOG(LogTemp, Warning, TEXT("UBTTask_FindTarget: EQS query failed or aborted"));
@@ -44,7 +48,7 @@ void UBTTask_FindTarget::OnEQSQueryFinished(TSharedPtr<FEnvQueryResult> Result)
     }
 
     // 获取行为树组件
-    UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(GetBTComponent());
+    UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(CachedBTComp);
     if (!BTComp) return;
 
     // 获取EQS查询结果中的最佳Actor

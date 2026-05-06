@@ -6,7 +6,7 @@
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "BTTask_EnemyAttack.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UBTTask_EnemyAttack : public UBTTaskNode
 {
     GENERATED_BODY()

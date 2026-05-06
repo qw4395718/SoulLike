@@ -232,9 +232,14 @@ void UWaveManagerSystem::SpawnWaveMonsters(FWaveConfigInfo& WaveConfig)
 			{
 				ActiveEnemies.Add(Enemy);
 				AllSpawnedEnemies.Add(Enemy);
-
-				// 绑定死亡事件
-				Enemy->OnEnemyDied.AddDynamic(this, &UWaveManagerSystem::OnEnemyDiedCallback);
+				if (!Enemy->OnEnemyDied.IsAlreadyBound(this, &UWaveManagerSystem::OnEnemyDiedCallback))
+				{
+					Enemy->OnEnemyDied.AddDynamic(this, &UWaveManagerSystem::OnEnemyDiedCallback);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Enemy %s already bound, skipping"), *Enemy->GetName());
+				}
 			}
 
 			SpawnedCount++;

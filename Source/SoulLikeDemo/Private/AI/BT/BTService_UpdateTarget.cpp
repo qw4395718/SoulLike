@@ -19,6 +19,7 @@ UBTService_UpdateTarget::UBTService_UpdateTarget()
 void UBTService_UpdateTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+    CachedBTComp = &OwnerComp;
 
     AAIController* AIController = OwnerComp.GetAIOwner();
     if (!AIController) return;
@@ -79,13 +80,13 @@ void UBTService_UpdateTarget::OnEQSQueryFinished(TSharedPtr<FEnvQueryResult> Res
 {
     bIsQuerying = false;
 
-    if (!Result.IsValid() || !Result->IsFinished())
+    if (!Result.IsValid() || !Result->IsFinished() || CachedBTComp == nullptr)
     {
         return;
     }
 
     // 获取行为树组件
-    UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(GetBTComponent());
+    UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(CachedBTComp);
     if (!BTComp) return;
 
     // 获取EQS结果中的最佳Actor

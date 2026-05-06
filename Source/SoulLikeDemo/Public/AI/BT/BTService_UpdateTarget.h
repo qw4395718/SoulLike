@@ -6,7 +6,7 @@
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "BTService_UpdateTarget.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UBTService_UpdateTarget : public UBTService
 {
     GENERATED_BODY()
@@ -42,4 +42,7 @@ private:
 
     // 标记当前是否有EQS查询正在进行（防止重复查询）
     bool bIsQuerying = false;
+
+	// 对于异步EQS查询，存储当前的行为树组件引用
+	UBehaviorTreeComponent* CachedBTComp;
 };

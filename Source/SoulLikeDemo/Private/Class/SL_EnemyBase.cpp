@@ -18,12 +18,19 @@
 #include <SL_CharacterBase.h>
 #include <GameFramework/CharacterMovementComponent.h>
 #include <Kismet/GameplayStatics.h>
+#include <SL_EnemyAIController.h>
 
 ASL_EnemyBase::ASL_EnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = false; 
 	CurrentState = EEnemyState::Idle;
 	CurrentTarget = nullptr;
+
+	// === 核心：配置AIControllerClass和AutoPossessAI ===
+	AIControllerClass = ASL_EnemyAIController::StaticClass();
+
+	// 设置自动Possess模式
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 void ASL_EnemyBase::BeginPlay()
@@ -163,55 +170,15 @@ void ASL_EnemyBase::OnStateTick(float DeltaTime)
 	switch (CurrentState)
 	{
 	case EEnemyState::Idle:
-		// 空闲状态下，检测是否有目标进入感知范围
-		if (!CurrentTarget)
-		{
-			AActor* Target = FindNearestTarget();
-			if (Target)
-			{
-				CurrentTarget = Target;
-				SetEnemyState(EEnemyState::Alert);
-			}
-		}
 		break;
 
 	case EEnemyState::Alert:
 		// 警戒状态下，面向目标并准备战斗
-		if (CurrentTarget)
-		{
-			// 如果目标在攻击范围内，进入战斗
-			if (IsTargetInAttackRange())
-			{
-				SetEnemyState(EEnemyState::Combat);
-			}
-			// 如果目标超出感知范围，失去目标
-			else if (!CanSeeTarget(CurrentTarget))
-			{
-				LoseTarget();
-			}
-		}
-		else
-		{
-			// 没有目标，回到空闲状态
-			SetEnemyState(EEnemyState::Idle);
-		}
 		break;
 
 	case EEnemyState::Combat:
 		// 战斗状态下，由AI行为树控制
 		// 这里只做简单的检查：如果目标丢失，回到警戒状态
-		if (CurrentTarget)
-		{
-			if (!CanSeeTarget(CurrentTarget))
-			{
-				// 目标丢失，进入警戒状态一段时间后如果还没找到就回到巡逻
-				float LostTargetTime = GetStateTime();
-				if (LostTargetTime > 5.0f)  // 5秒后放弃追踪
-				{
-					LoseTarget();
-				}
-			}
-		}
 		break;
 
 	default:

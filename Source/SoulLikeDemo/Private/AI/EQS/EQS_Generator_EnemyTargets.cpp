@@ -36,13 +36,13 @@ void UEQS_Generator_EnemyTargets::GenerateItems(FEnvQueryInstance& QueryInstance
 	AActor* QueryOwner = Cast<AActor>(QueryInstance.Owner);
 	if (!QueryOwner) return;
 
-	// 获取AI控制器
-	AAIController* AIController = Cast<AAIController>(QueryOwner);
-	if (!AIController) return;
-
 	// 获取敌人类
-	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
+	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(QueryOwner);
 	if (!Enemy) return;
+
+	// 获取AI控制器
+	AAIController* AIController = Cast<AAIController>(Enemy->GetController());
+	if (!AIController) return;
 
 	// 查找所有潜在的敌人目标（玩家）
 	TArray<AActor*> FoundActors;

@@ -350,6 +350,7 @@ void ASL_EnemyBase::LoadEnemyAppearance(const FEnemyConfigInfo& Config)
 		if (EnemyMesh && GetMesh())
 		{
 			GetMesh()->SetSkeletalMesh(EnemyMesh);
+			GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 		}
 	}
 

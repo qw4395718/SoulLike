@@ -80,6 +80,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Enemy|AI")
 		void LoseTarget();
 
+	/*
+	 * 公开给AIController访问
+	 */
+	// AIController获取行为树配置
+    UFUNCTION(BlueprintPure, Category = "Enemy|AI")
+        UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
+
+	// AIController获取黑板空间配置
+    UFUNCTION(BlueprintPure, Category = "Enemy|AI")
+        UBlackboardData* GetBlackboardData() const { return BlackboardData; }
+
+    UFUNCTION(BlueprintPure, Category = "Enemy|AI")
+        bool IsAlive() const { return CurrentState != EEnemyState::Dead; }
+
+	// AIController引用
+    UFUNCTION(BlueprintPure, Category = "Enemy|AI")
+        class ASL_EnemyAIController* GetEnemyAIController() const;
+
 	// ===== 战斗接口 =====
 
 	/** 死亡处理 */
@@ -98,16 +116,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Perception")
 		void SetAttackRange(float NewRange) { AttackRange = NewRange; }
-
-	/** 检测是否可以看见目标 */
-	bool CanSeeTarget(AActor* TargetActor) const;
-
-	/** 检测目标是否在攻击范围内 */
-	bool IsTargetInAttackRange() const;
-
-	/** 获取最近的敌人（玩家） */
-	AActor* FindNearestTarget() const;
-
 
 public:
 	// ===== 委托 =====
@@ -138,22 +146,17 @@ protected:
 
 	// 初始化敌人AI 
 	void InitializeEnemyAI(const FEnemyConfigInfo& Config);
-
-	// ===== 感知系统 =====
-	/** 更新感知（每帧调用） */
-	void UpdatePerception(float DeltaTime);
-
+	
 protected:
 	// ===== 配置数据 =====
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Config")
 		FEnemyConfigInfo EnemyConfig;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Config")
-		TSubclassOf<class UAIPerceptionComponent> PerceptionComponentClass;
-
+	// 后续从EnemyConfig获取配置
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Config")
 		float PerceptionRange = 1000.0f;
 
+	// 后续从EnemyConfig获取配置
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Config")
 		float AttackRange = 200.0f;
 
@@ -170,13 +173,7 @@ protected:
 	UPROPERTY()
 		AActor* CurrentTarget;
 
-	// ===== AI组件 =====
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Components")
-		class UBrainComponent* BrainComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Components")
-		class UAIPerceptionComponent* AIPerception;
-
+	// ===== AI组件->提供给AIController =====
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Components")
 		class UBehaviorTree* BehaviorTree;
 

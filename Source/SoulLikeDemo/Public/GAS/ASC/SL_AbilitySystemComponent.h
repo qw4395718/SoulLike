@@ -4,7 +4,6 @@
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemComponent.h"
 #include "SL_AbilitySystemComponent.generated.h"
 
-// ����ί��
 UCLASS()
 class SOULLIKEDEMO_API USL_AbilitySystemComponent : public UAbilitySystemComponent
 {
@@ -32,5 +31,17 @@ public:
 
 	UFUNCTION()
 		TArray<UGameplayTask*> GetCurrentlyActiveTasks();
+
+		 /** 通过Tag激活能力（供BTTask使用） */
+    UFUNCTION(BlueprintCallable, Category = "GAS")
+        bool TryActivateAbilityByTag(const FGameplayTag& AbilityTag);
+
+    /** 通过Tag获取能力SpecHandle（供BTTask监听委托） */
+    UFUNCTION(BlueprintCallable, Category = "GAS")
+        FGameplayAbilitySpecHandle FindAbilitySpecHandleByTag(const FGameplayTag& AbilityTag) const;
+
+    /** 获取能力实例（供BTTask绑定委托） */
+    UFUNCTION(BlueprintCallable, Category = "GAS")
+        USL_GameplayAbilityBase* GetActiveAbilityInstanceByTag(const FGameplayTag& AbilityTag) const;
 
 };

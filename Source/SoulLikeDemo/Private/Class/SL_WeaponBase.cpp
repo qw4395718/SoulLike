@@ -41,16 +41,16 @@ void ASL_WeaponBase::BeginPlay()
 	Super::BeginPlay();
 
 	// 获取持有者
-	if (GetOwner() && Cast<ASL_CharacterBase>(GetOwner()))
+	if (GetOwner() && Cast<ACharacter>(GetOwner()))
 	{
-		OwningCharacter = Cast<ASL_CharacterBase>(GetOwner());
+		OwningCharacter = Cast<ACharacter>(GetOwner());
 	}
 }
 
 void ASL_WeaponBase::SetOwner(AActor* NewOwner)
 {
 	RETURN_IF_TRUE(NewOwner == nullptr);
-	OwningCharacter = Cast<ASL_CharacterBase>(NewOwner);
+	OwningCharacter = Cast<ACharacter>(NewOwner);
 }
 
 // ==================== 初始化 ====================
@@ -414,6 +414,11 @@ float ASL_WeaponBase::CalculateFinalDamage(AActor* InTargetActor) const
 				if (ComboMgr)
 				{
 					FinalDamage *= ComboMgr->GetCurrentComboDamageMultiplier();
+				}
+				else
+				{
+					// 方式2：如果ComboManager不存在，则使用默认倍率
+					FinalDamage *= 1.0f;
 				}
 			}
 		}

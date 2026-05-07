@@ -11,29 +11,38 @@
 UENUM(BlueprintType)
 enum class EEnemyState : uint8
 {
-	Idle,
-	Patrol,
-	Alert,
-	Combat,
-	Dead
+    Alive   UMETA(DisplayName = "存活"),
+    Dead    UMETA(DisplayName = "死亡")
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyStateChanged, EEnemyState, NewState);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDied);
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_EnemyBase : public ACharacter
+public IWeaponAccessory_IF,
+public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
-	ASL_EnemyBase();
+	ASL_EnemyBase(const FObjectInitializer& ObjectInitializer);
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
+public:
+    /************************************************************************/
+    /*                    IWeaponAccessory_IF 接口实现                        */
+    /************************************************************************/
+    virtual ASL_WeaponBase* GetLeftHandWeapon() const override;
+    virtual ASL_WeaponBase* GetRightHandWeapon() const override;
+    virtual ASL_WeaponBase* GetWeaponByHand(int32 HandIndex) const override;
 
+    /************************************************************************/
+    /*                    IAbilitySystemInterface 接口实现                        */
+    /************************************************************************/
+	UFUNCTION(BlueprintCallable, Category = "Enemy|Ability")
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 public:
 
@@ -42,43 +51,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Enemy")
 		void InitializeEnemy(int32 EnemyID);
 
-	// ===== 状态机接口 =====
-	/** 状态进入回调 */
-	virtual void OnStateEnter(EEnemyState NewState);
-
-	/** 状态退出回调 */
-	virtual void OnStateExit(EEnemyState OldState);
-
-	/** 状态更新（每帧调用） */
-	virtual void OnStateTick(float DeltaTime);
-
-	/** 获取当前状态持续时间 */
-	UFUNCTION(BlueprintPure, Category = "Enemy|State")
-		float GetStateTime() const { return StateElapsedTime; }
-
-	/** 获取当前目标 */
-	UFUNCTION(BlueprintPure, Category = "Enemy|AI")
-		AActor* GetCurrentTarget() const { return CurrentTarget; }
-
-	// ===== 状态管理 =====
-	UFUNCTION(BlueprintCallable, Category = "Enemy")
-		void SetEnemyState(EEnemyState NewState);
-
 	UFUNCTION(BlueprintPure, Category = "Enemy")
 		EEnemyState GetEnemyState() const { return CurrentState; }
-
-	// ===== AI接口 =====
-	/** 切换到战斗状态 */
-	UFUNCTION(BlueprintCallable, Category = "Enemy|AI")
-		void EnterCombat();
-
-	/** 切换到巡逻状态 */
-	UFUNCTION(BlueprintCallable, Category = "Enemy|AI")
-		void EnterPatrol();
-
-	/** 失去目标 */
-	UFUNCTION(BlueprintCallable, Category = "Enemy|AI")
-		void LoseTarget();
 
 	/*
 	 * 公开给AIController访问
@@ -120,9 +94,6 @@ public:
 public:
 	// ===== 委托 =====
 	UPROPERTY(BlueprintAssignable, Category = "Enemy|Events")
-		FOnEnemyStateChanged OnEnemyStateChanged;
-
-	UPROPERTY(BlueprintAssignable, Category = "Enemy|Events")
 		FOnEnemyDied OnEnemyDied;
 
 	/** 绑定GAS死亡事件 */
@@ -146,6 +117,12 @@ protected:
 
 	// 初始化敌人AI 
 	void InitializeEnemyAI(const FEnemyConfigInfo& Config);
+
+	/** 根据武器ID派生武器实例 */
+    ASL_WeaponBase* SpawnWeaponByID(int32 WeaponID,);
+
+    /** 根据配置生成左右手武器 */
+    void SpawnEnemyWeapons(const FEnemyConfigInfo& Config);
 	
 protected:
 	// ===== 配置数据 =====
@@ -189,5 +166,18 @@ protected:
 
 	// 死亡委托的句柄
 	FDelegateHandle OnCharacterDiedHandle;
+
+	/** 武器派生模板类 */
+	UPROPERTY(EditDefaultsOnly, Category = "Equipment|Config")
+		TSubclassOf<ASL_WeaponBase> WeaponBaseClass;
+
+	    // ===== 新增：敌人持有的武器 =====
+    /** 左手武器实例（在 ApplyEnemyConfig 中创建） */
+    UPROPERTY()
+        ASL_WeaponBase* LeftHandWeapon;
+
+    /** 右手武器实例 */
+    UPROPERTY()
+        ASL_WeaponBase* RightHandWeapon;
 
 };

@@ -395,6 +395,39 @@ FString ASL_CharacterBase::GetNetworkGUIDString(AActor* InActor)
 	return TEXT("Invalid GUID");
 }
 
+/************************************************************************/
+/*                    IWeaponAccessory_IF 接口实现                        */
+/************************************************************************/
+ASL_WeaponBase* ASL_CharacterBase::GetLeftHandWeapon() const
+{
+    if (!EquipmentCmp)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ASL_CharacterBase::GetLeftHandWeapon - EquipmentCmp is null"));
+        return nullptr;
+    }
+    return EquipmentCmp->GetCurrentLeftHandWeapon();
+}
+
+ASL_WeaponBase* ASL_CharacterBase::GetRightHandWeapon() const
+{
+    if (!EquipmentCmp)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ASL_CharacterBase::GetRightHandWeapon - EquipmentCmp is null"));
+        return nullptr;
+    }
+    return EquipmentCmp->GetCurrentRightHandWeapon();
+}
+
+ASL_WeaponBase* ASL_CharacterBase::GetWeaponByHand(int32 HandIndex) const
+{
+    if (!EquipmentCmp)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ASL_CharacterBase::GetWeaponByHand - EquipmentCmp is null"));
+        return nullptr;
+    }
+    return EquipmentCmp->GetWeaponByHand(HandIndex);
+}
+
 
 
 

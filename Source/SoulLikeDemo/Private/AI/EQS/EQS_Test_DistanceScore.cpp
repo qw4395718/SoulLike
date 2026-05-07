@@ -23,29 +23,31 @@ UEQS_Test_DistanceScore::UEQS_Test_DistanceScore()
 
 void UEQS_Test_DistanceScore::RunTest(FEnvQueryInstance& QueryInstance) const
 {
-	//// 获取查询所有者位置
-	//UObject* QueryOwner = QueryInstance.Owner.Get();
-	//AAIController* AIController = Cast<AAIController>(QueryOwner);
-	//if (!AIController) return;
+	// 获取查询所有者位置
+	UObject* QueryOwner = QueryInstance.Owner.Get();
+	AAIController* AIController = Cast<AAIController>(QueryOwner);
+	if (!AIController) return;
 
-	//AActor* QueryOwnerActor = AIController->GetPawn();
-	//if (!QueryOwnerActor) return;
+	AActor* QueryOwnerActor = AIController->GetPawn();
+	if (!QueryOwnerActor) return;
 
-	//// 对每个项目计算距离评分
-	//for (int32 ItemIndex = 0; ItemIndex < QueryInstance.Items.Num(); ItemIndex++)
-	//{
-	//	AActor* ItemActor = Cast<AActor>(QueryInstance.Items[ItemIndex].Item);
-	//	if (!ItemActor) continue;
+	// 对每个项目计算距离评分
+	int32 ItemIndex = 0;
+	for(auto& Item : QueryInstance.GetAllAsActors())
+	{
+		AActor* ItemActor = Cast<AActor>(Item);
+		if (!ItemActor) continue;
 
-	//	// 计算距离
-	//	float Distance = FVector::Dist(QueryOwnerActor->GetActorLocation(), ItemActor->GetActorLocation());
+		// 计算距离
+		float Distance = FVector::Dist(QueryOwnerActor->GetActorLocation(), ItemActor->GetActorLocation());
 
-	//	// 计算评分
-	//	float Score = CalculateScore(Distance);
+		// 计算评分
+		float Score = CalculateScore(Distance);
 
-	//	// 设置评分
-	//	QueryInstance.SetItemScore(ItemIndex, Score);
-	//}
+		// 设置评分
+		QueryInstance.SetItemScore(ItemIndex, Score);
+		ItemIndex++;
+	}
 }
 
 float UEQS_Test_DistanceScore::CalculateScore(float Distance) const

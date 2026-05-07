@@ -27,7 +27,11 @@ class UWidgetComponent;
 class USL_ComboManagerComponent;
 
 UCLASS()
-class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,public ICharacterComponent_IF, public IAnimNotify_IF, public IAbilitySystemInterface
+class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,
+public ICharacterComponent_IF, 
+public IAnimNotify_IF, 
+public IAbilitySystemInterface,
+public IWeaponAccessory_IF 
 {
 	GENERATED_BODY()
 
@@ -86,6 +90,14 @@ public:
 	// 动画(状态)通知响应
 	UFUNCTION()
 		void AnimNotifyResponse(int NotifyType) override;
+
+	/************************************************************************/
+    /*                    IWeaponAccessory_IF 接口实现                        */
+    /************************************************************************/
+	
+    virtual ASL_WeaponBase* GetLeftHandWeapon() const override;
+    virtual ASL_WeaponBase* GetRightHandWeapon() const override;
+    virtual ASL_WeaponBase* GetWeaponByHand(int32 HandIndex) const override;
 
 	/************************************************************************/
 	/*                               Unlua相关                                      */

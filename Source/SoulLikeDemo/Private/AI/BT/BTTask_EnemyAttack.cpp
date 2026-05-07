@@ -3,17 +3,18 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "AIController.h"
-#include "EnvironmentQuery/EnvQuery.h"
-#include "EnvironmentQuery/EnvQueryManager.h"
 #include "SL_EnemyBase.h"
+#include "SL_AbilitySystemComponent.h"
+#include "SL_GameplayAbilityBase.h"
 #include "SL_CharacterBase.h"
 
 UBTTask_EnemyAttack::UBTTask_EnemyAttack()
 {
-    NodeName = TEXT("Enemy Attack (EQS)");
-    bNotifyTick = false;
-    bCreateNodeInstance = true;
-    CachedBTComp = nullptr;
+    NodeName = TEXT("Enemy Attack (GAS)");
+    //bNotifyTick = true;          // 需要Tick来轮询
+    bNotifyTick = false;          // 需要Tick来轮询
+    bCreateNodeInstance = true;  // 每个实例独立
+    CachedOwnerComp = nullptr;
 }
 
 EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -21,94 +22,195 @@ EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& Own
     AAIController* AIController = OwnerComp.GetAIOwner();
     if (!AIController) return EBTNodeResult::Failed;
 
+    ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
+    if (!Enemy) return EBTNodeResult::Failed;
+
+    // 检查攻击Tag是否有效
+    if (!AttackAbilityTag.IsValid())
+    {
+        UE_LOG(LogTemp, Error, TEXT("UBTTask_EnemyAttack: AttackAbilityTag is not set!"));
+        return EBTNodeResult::Failed;
+    }
+
+    // 获取目标的GAS组件
+    IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(Enemy);
+    if (!ASI) return EBTNodeResult::Failed;
+
+    USL_AbilitySystemComponent* ASC = Cast<USL_AbilitySystemComponent>(ASI->GetAbilitySystemComponent());
+    if (!ASC) return EBTNodeResult::Failed;
+
+    // ===== 面向目标 =====
     AActor* Target = Cast<AActor>(
         OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetActorKey.SelectedKeyName));
-    if (!Target) return EBTNodeResult::Failed;
-
-    // 如果有EQS验证查询，先运行EQS再攻击
-    if (EQSValidateAttackQuery)
+    if (Target)
     {
-        CachedBTComp = &OwnerComp;
-
-        FEnvQueryRequest QueryRequest(EQSValidateAttackQuery, AIController->GetPawn());
-        QueryRequest.Execute(EEnvQueryRunMode::SingleResult,
-            FQueryFinishedSignature::CreateUObject(this, &UBTTask_EnemyAttack::OnEQSQueryFinished));
-
-        // 保持运行中，等待EQS回调
-        return EBTNodeResult::InProgress;
+        FVector Dir = Target->GetActorLocation() - Enemy->GetActorLocation();
+        Dir.Z = 0;
+        if (Dir.SizeSquared() > 0.01f)
+        {
+            Enemy->SetActorRotation(Dir.Rotation());
+        }
     }
 
-    // 没有EQS验证，直接攻击
-    PerformAttack(AIController, Target);
-    return EBTNodeResult::Succeeded;
+    // ===== 通过Tag激活能力 =====
+    bool bActivated = ASC->TryActivateAbilityByTag(AttackAbilityTag);
+    
+    if (!bActivated)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("UBTTask_EnemyAttack: Failed to activate ability with tag %s"), 
+            *AttackAbilityTag.ToString());
+        return EBTNodeResult::Failed;
+    }
+
+    UE_LOG(LogTemp, Verbose, TEXT("UBTTask_EnemyAttack: Activated ability %s"), *AttackAbilityTag.ToString());
+
+    // ===== 缓存行为树组件（用于后续回调） =====
+    CachedOwnerComp = &OwnerComp;
+
+    // ===== 绑定蒙太奇完成委托 =====
+    // 延迟一帧绑定，确保Ability已经激活
+    FTimerHandle DummyHandle;
+    Enemy->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this, ASC]()
+    {
+        // 通过Tag获取刚激活的能力实例
+        USL_GameplayAbilityBase* AbilityInstance = ASC->GetActiveAbilityInstanceByTag(AttackAbilityTag);
+        if (AbilityInstance)
+        {
+            CachedAbilityInstance = AbilityInstance;
+            
+            // 绑定蒙太奇完成事件
+            MontageDelegateHandle = AbilityInstance->OnMontageCompletedDelegate.AddUObject(
+                this, &UBTTask_EnemyAttack::OnMontageFinished);
+            
+            UE_LOG(LogTemp, Verbose, TEXT("UBTTask_EnemyAttack: Bound to ability %s montage event"), 
+                *AttackAbilityTag.ToString());
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("UBTTask_EnemyAttack: Ability instance not found immediately after activation"));
+        }
+    }));
+
+    // 保持InProgress状态，等待蒙太奇完成或Tick检测
+    return EBTNodeResult::InProgress;
 }
 
-void UBTTask_EnemyAttack::OnEQSQueryFinished(TSharedPtr<FEnvQueryResult> Result)
+// void UBTTask_EnemyAttack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+// {
+//     Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+
+//     // ===== 后备方案：如果委托没有触发，通过Tick轮询检查状态 =====
+//     if (CachedAbilityInstance.IsValid())
+//     {
+//         USL_GameplayAbilityBase* Ability = CachedAbilityInstance.Get();
+//         if (!Ability)
+//         {
+//             // 能力实例已失效
+//             UE_LOG(LogTemp, Warning, TEXT("UBTTask_EnemyAttack: Ability instance lost, finishing task"));
+//             ClearAbilityDelegate();
+//             FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+//         }
+//     }
+//     else
+//     {
+//         // 没有有效的能力实例，可能是能力已经结束
+//         UE_LOG(LogTemp, Verbose, TEXT("UBTTask_EnemyAttack: No active ability instance, finishing"));
+//         // 尝试重新检查是否有正在运行的能力
+//         AAIController* AIController = OwnerComp.GetAIOwner();
+//         if (AIController)
+//         {
+//             ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
+//             if (Enemy)
+//             {
+//                 IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(Enemy);
+//                 if (ASI)
+//                 {
+//                     USL_AbilitySystemComponent* ASC = Cast<USL_AbilitySystemComponent>(ASI->GetAbilitySystemComponent());
+//                     if (ASC)
+//                     {
+//                         USL_GameplayAbilityBase* AbilityInstance = ASC->GetActiveAbilityInstanceByTag(AttackAbilityTag);
+//                         if (AbilityInstance)
+//                         {
+//                             // 重新绑定
+//                             CachedAbilityInstance = AbilityInstance;
+//                             MontageDelegateHandle = AbilityInstance->OnMontageCompletedDelegate.AddUObject(
+//                                 this, &UBTTask_EnemyAttack::OnMontageFinished);
+//                             return;
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+        
+//         ClearAbilityDelegate();
+//         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+//     }
+// }
+
+void UBTTask_EnemyAttack::OnMontageFinished()
 {
-    if (!CachedBTComp)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UBTTask_EnemyAttack: BTComp is null in callback"));
-        return;
-    }
+    UE_LOG(LogTemp, Verbose, TEXT("UBTTask_EnemyAttack: Montage finished callback received"));
 
-    AAIController* AIController = CachedBTComp->GetAIOwner();
-    if (!AIController)
-    {
-        FinishLatentTask(*CachedBTComp, EBTNodeResult::Failed);
-        return;
-    }
+    ClearAbilityDelegate();
 
-    AActor* Target = Cast<AActor>(
-        CachedBTComp->GetBlackboardComponent()->GetValueAsObject(TargetActorKey.SelectedKeyName));
-    if (!Target)
+    if (CachedOwnerComp)
     {
-        FinishLatentTask(*CachedBTComp, EBTNodeResult::Failed);
-        return;
+        FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
+        CachedOwnerComp = nullptr;
     }
-
-    // 如果EQS验证通过，执行攻击
-    PerformAttack(AIController, Target);
-    FinishLatentTask(*CachedBTComp, EBTNodeResult::Succeeded);
 }
 
-void UBTTask_EnemyAttack::PerformAttack(AAIController* AIController, AActor* Target)
+void UBTTask_EnemyAttack::ClearAbilityDelegate()
 {
-    ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
-    if (!Enemy) return;
-
-    // 面向目标
-    FVector Dir = Target->GetActorLocation() - Enemy->GetActorLocation();
-    Dir.Z = 0;
-    if (Dir.SizeSquared() > 0.01f)
+    if (MontageDelegateHandle.IsValid() && CachedAbilityInstance.IsValid())
     {
-        FRotator TargetRot = Dir.Rotation();
-        Enemy->SetActorRotation(TargetRot);
+        CachedAbilityInstance->OnMontageCompletedDelegate.Remove(MontageDelegateHandle);
+        MontageDelegateHandle.Reset();
     }
-
-    // 触发攻击动画（需要通过GAS Ability或Montage播放）
-    UAnimInstance* AnimInstance = Enemy->GetMesh()->GetAnimInstance();
-    if (AnimInstance)
-    {
-        // TODO: 从EnemyConfig中获取攻击Montage播放
-        // AnimInstance->Montage_Play(AttackMontage);
-        // AnimInstance->Montage_JumpToSection(AttackSectionName);
-    }
-
-    UE_LOG(LogTemp, Verbose, TEXT("Enemy %s attacked target %s"), *Enemy->GetName(), *Target->GetName());
+    CachedAbilityInstance = nullptr;
 }
 
 EBTNodeResult::Type UBTTask_EnemyAttack::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-    CachedBTComp = nullptr;
+    // ===== 当行为树被中断时，清理所有绑定 =====
+    ClearAbilityDelegate();
+
+    // ===== 尝试取消正在运行的能力 =====
+    AAIController* AIController = OwnerComp.GetAIOwner();
+    if (AIController)
+    {
+        ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
+        if (Enemy)
+        {
+            IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(Enemy);
+            if (ASI)
+            {
+                USL_AbilitySystemComponent* ASC = Cast<USL_AbilitySystemComponent>(ASI->GetAbilitySystemComponent());
+                if (ASC)
+                {
+                    ASC->TryActivateAbilityByTag(AttackAbilityTag);
+                }
+            }
+        }
+    }
+
+    CachedOwnerComp = nullptr;
     return EBTNodeResult::Aborted;
+}
+
+void UBTTask_EnemyAttack::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+    Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
+
+    // 确保清理
+    ClearAbilityDelegate();
 }
 
 FString UBTTask_EnemyAttack::GetStaticDescription() const
 {
-    if (EQSValidateAttackQuery)
+    if (AttackAbilityTag.IsValid())
     {
-        return FString::Printf(TEXT("Attack with EQS: %s, Section: %s"),
-            *EQSValidateAttackQuery->GetName(), *AttackSectionName.ToString());
+        return FString::Printf(TEXT("Attack via GAS: Tag=%s"), *AttackAbilityTag.ToString());
     }
-    return FString::Printf(TEXT("Attack (No EQS), Section: %s"), *AttackSectionName.ToString());
+    return TEXT("Attack via GAS: No Tag Set!");
 }

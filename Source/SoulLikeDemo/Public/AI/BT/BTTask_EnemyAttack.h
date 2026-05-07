@@ -3,10 +3,12 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "EnvironmentQuery/EnvQueryTypes.h"
 #include "BTTask_EnemyAttack.generated.h"
 
-UCLASS(BlueprintType, Blueprintable)
+class USL_GameplayAbilityBase;
+class UBehaviorTreeComponent;
+
+UCLASS()
 class SOULLIKEDEMO_API UBTTask_EnemyAttack : public UBTTaskNode
 {
     GENERATED_BODY()
@@ -16,27 +18,35 @@ public:
 
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
     virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+    virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult) override;
     virtual FString GetStaticDescription() const override;
 
 protected:
-    /** 攻击前使用的EQS（可选：用于确认攻击位置有效性） */
-    UPROPERTY(EditAnywhere, Category = "EQS")
-        class UEnvQuery* EQSValidateAttackQuery;
+    /** 激活敌人攻击能力所需的GameplayTag（对应SL_GameplayAbilityBase::ActivationTag） */
+    UPROPERTY(EditAnywhere, Category = "GAS")
+        FGameplayTag AttackAbilityTag;
 
-    /** 攻击的Montage Section名称 */
-    UPROPERTY(EditAnywhere, Category = "Attack")
-        FName AttackSectionName;
-
+    /** 目标黑板键 */
     UPROPERTY(EditAnywhere, Category = "Blackboard")
         struct FBlackboardKeySelector TargetActorKey;
 
-    /** EQS查询完成回调 */
-    void OnEQSQueryFinished(TSharedPtr<FEnvQueryResult> Result);
+    /** 是否在攻击前先移动到攻击范围 */
+    UPROPERTY(EditAnywhere, Category = "Config")
+        bool bMoveToAttackRange = true;
 
-    /** 实际执行攻击 */
-    void PerformAttack(AAIController* AIController, AActor* Target);
+    /** 蒙太奇完成回调 */
+    void OnMontageFinished();
+
+    /** 清理绑定 */
+    void ClearAbilityDelegate();
 
 private:
-    // 对于异步EQS查询，存储当前的行为树组件引用
-    UBehaviorTreeComponent* CachedBTComp;
+    // 缓存的行为树组件（用于异步回调）
+    UBehaviorTreeComponent* CachedOwnerComp;
+
+    // 缓存的能力实例（用于绑定委托）
+    TWeakObjectPtr<USL_GameplayAbilityBase> CachedAbilityInstance;
+
+    // 委托句柄
+    FDelegateHandle MontageDelegateHandle;
 };

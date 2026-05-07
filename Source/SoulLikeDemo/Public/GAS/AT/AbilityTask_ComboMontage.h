@@ -11,22 +11,22 @@ class UGameplayAbility;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnComboMontageCompleted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnComboMontageInterrupted);
 
-/** OnInputReceived µÄ·µ»ØÖµ×´Ì¬ */
+/** OnInputReceived çš„è¿”å›å€¼çŠ¶æ€ */
 UENUM()
 enum class EComboInputHandledResult : uint8
 {
-	Accepted,           // ½ÓÊÜÊäÈë£¬µÈ´ı BlendOut
-	AcceptedAndBlended, // ½ÓÊÜÊäÈë£¬ÇÒÒÑ¾­´¥·¢ÁË BlendOut£¨°ó¶¨ÒÑ²»ĞèÒªµÈ´ı£©
-	Rejected,           // ²»½ÓÊÜ
+	Accepted,           // æ¥å—è¾“å…¥ï¼Œç­‰å¾… BlendOut
+	AcceptedAndBlended, // æ¥å—è¾“å…¥ï¼Œä¸”å·²ç»è§¦å‘äº† BlendOutï¼ˆç»‘å®šå·²ä¸éœ€è¦ç­‰å¾…ï¼‰
+	Rejected,           // ä¸æ¥å—
 };
 
 /**
- * Á¬ÕĞ×¨ÓÃÃÉÌ«Ææ²¥·ÅTask
+ * è¿æ‹›ä¸“ç”¨è’™å¤ªå¥‡æ’­æ”¾Task
  *
- * Ö°Ôğ£º½ö¹ÜÀí¶¯»­²¥·ÅºÍ»ìºÏÊ±»ú
- * - ²»²ÎÓëÒµÎñÂß¼­£¨²»³ÖÓĞÁ¬ÕĞ±í¡¢²»ÅĞ¶ÏÊäÈë£©
- * - ¶ÔÍâ±©Â¶ IsReadyToBlend() ²éÑ¯×´Ì¬
- * - ¶ÔÍâ±©Â¶ RequestBlendOut() Ö÷¶¯´ò¶Ï
+ * èŒè´£ï¼šä»…ç®¡ç†åŠ¨ç”»æ’­æ”¾å’Œæ··åˆæ—¶æœº
+ * - ä¸å‚ä¸ä¸šåŠ¡é€»è¾‘ï¼ˆä¸æŒæœ‰è¿æ‹›è¡¨ã€ä¸åˆ¤æ–­è¾“å…¥ï¼‰
+ * - å¯¹å¤–æš´éœ² IsReadyToBlend() æŸ¥è¯¢çŠ¶æ€
+ * - å¯¹å¤–æš´éœ² RequestBlendOut() ä¸»åŠ¨æ‰“æ–­
  */
 
 UCLASS()
@@ -36,14 +36,14 @@ class SOULLIKEDEMO_API UAbilityTask_ComboMontage : public UAbilityTask
 
 public:
 	/****************************************************************************/
-    /*										Íâ²¿µ÷ÓÃ									*/
+    /*										å¤–éƒ¨è°ƒç”¨									*/
     /****************************************************************************/
     /**
-     * ´´½¨TaskµÄ¾²Ì¬¹¤³§·½·¨
-     * @param OwningAbility    ÓµÓĞµÄGA
-     * @param MontageToPlay    Òª²¥·ÅµÄÃÉÌ«Ææ
-     * @param InBlendOutTime   ±»´ò¶ÏÊ±µÄ»ìºÏÊ±¼ä
-     * @param InPlayRate       ²¥·ÅËÙÂÊ
+     * åˆ›å»ºTaskçš„é™æ€å·¥å‚æ–¹æ³•
+     * @param OwningAbility    æ‹¥æœ‰çš„GA
+     * @param MontageToPlay    è¦æ’­æ”¾çš„è’™å¤ªå¥‡
+     * @param InBlendOutTime   è¢«æ‰“æ–­æ—¶çš„æ··åˆæ—¶é—´
+     * @param InPlayRate       æ’­æ”¾é€Ÿç‡
      */
     UFUNCTION(BlueprintCallable, Category = "Ability|Tasks",
         meta = (HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
@@ -54,12 +54,12 @@ public:
             float InPlayRate = 1.0f
         );
 
-    // ========== ¶¯»­Í¨Öª»Øµ÷½Ó¿Ú ==========
-	/** µ±Ç°ÊÇ·ñÒÑµ½´ïAllowBlendÎ»ÖÃ */
+    // ========== åŠ¨ç”»é€šçŸ¥å›è°ƒæ¥å£ ==========
+	/** å½“å‰æ˜¯å¦å·²åˆ°è¾¾AllowBlendä½ç½® */
 	UFUNCTION(BlueprintCallable, Category = "Combo")
 		bool IsReadyToBlend() const { return bReadyToBlend; }
 
-	/** ±»¶¯»­Í¨Öªµ÷ÓÃ£º±ê¼ÇÒÑµ½´ïÔÊĞí»ìºÏµÄÎ»ÖÃ */
+	/** è¢«åŠ¨ç”»é€šçŸ¥è°ƒç”¨ï¼šæ ‡è®°å·²åˆ°è¾¾å…è®¸æ··åˆçš„ä½ç½® */
 	void OnAllowBlendReached(FGameplayTag CurrentWindowTag);
 
 	UFUNCTION(BlueprintCallable, Category = "Combo")
@@ -71,7 +71,7 @@ public:
 	virtual void OnDestroy(bool bInOwnerFinished) override;
 
 protected:
-    // ÃÉÌ«ÆæÏà¹Ø»Øµ÷
+    // è’™å¤ªå¥‡ç›¸å…³å›è°ƒ
     UFUNCTION()
         void OnMontageCompleted(UAnimMontage* InMontage, bool bInterrupted);
 
@@ -81,47 +81,47 @@ protected:
     UFUNCTION()
         void OnMontageInterrupted(UGameplayAbility* ActiveAbility);
 
-    // Ö´ĞĞ´ò¶Ï»ìºÏ
+    // æ‰§è¡Œæ‰“æ–­æ··åˆ
     void ExecuteBlendOut();
 
     void RemoveAllDelegates();
 
 public:
 	/****************************************************************************/
-	/*										Íâ²¿µ÷ÓÃ									*/
+	/*										å¤–éƒ¨è°ƒç”¨									*/
 	/****************************************************************************/
 
-	// ÃÉÌ«ÆæÕı³£²¥Íê->Í¨ÖªGA½áÊø
+	// è’™å¤ªå¥‡æ­£å¸¸æ’­å®Œ->é€šçŸ¥GAç»“æŸ
 	UPROPERTY(BlueprintAssignable)
 		FOnComboMontageCompleted OnCompleted;
 
-	/** ±»Á¬ÕĞ´ò¶ÏÊ±´¥·¢£¨BlendOutÍê³Éºó£© */
+	/** è¢«è¿æ‹›æ‰“æ–­æ—¶è§¦å‘ï¼ˆBlendOutå®Œæˆåï¼‰ */
 	UPROPERTY(BlueprintAssignable)
 		FOnComboMontageInterrupted OnInterrupted;
 
 private:
-    // ²¥·ÅµÄÃÉÌ«Ææ
+    // æ’­æ”¾çš„è’™å¤ªå¥‡
     UPROPERTY()
         UAnimMontage* Montage;
 
     UPROPERTY()
         FGameplayTag ComboWindowTag;
 
-	/** ÔÚAllowBlendÖ®Ç°ÊÇ·ñÓĞÔİ´æµÄÊäÈë */
+	/** åœ¨AllowBlendä¹‹å‰æ˜¯å¦æœ‰æš‚å­˜çš„è¾“å…¥ */
 	bool bHasPendingInput = false;
 
-    // »ìºÏ³öÊ±¼ä
+    // æ··åˆå‡ºæ—¶é—´
     float BlendOutTime = 0.2f;
 
-    // ²¥·ÅËÙÂÊ
+    // æ’­æ”¾é€Ÿç‡
     float PlayRate = 1.0f;
 
-    /** ÊÇ·ñÒÑµ½´ïAllowBlendÎ»ÖÃ£¨ÔÊĞíÎïÀí´ò¶Ï£© */
+    /** æ˜¯å¦å·²åˆ°è¾¾AllowBlendä½ç½®ï¼ˆå…è®¸ç‰©ç†æ‰“æ–­ï¼‰ */
     bool bReadyToBlend = false;
 
-    /** ÔÚAllowBlendÖ®Ç°ÊÇ·ñÓĞÔİ´æµÄÊäÈë */
+    /** åœ¨AllowBlendä¹‹å‰æ˜¯å¦æœ‰æš‚å­˜çš„è¾“å…¥ */
     bool bBlendOutRequested = false;
 
-    /** ÊÇ·ñÒÑ¾­½áÊø£¨·ÀÖ¹ÖØ¸´´¥·¢£© */
+    /** æ˜¯å¦å·²ç»ç»“æŸï¼ˆé˜²æ­¢é‡å¤è§¦å‘ï¼‰ */
     bool bHasFinished = false;
 };

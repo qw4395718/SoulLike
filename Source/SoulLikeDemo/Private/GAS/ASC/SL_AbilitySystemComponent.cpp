@@ -68,3 +68,47 @@ TArray<UGameplayTask*> USL_AbilitySystemComponent::GetCurrentlyActiveTasks()
 
 	return ActiveTasks;
 }
+
+bool USL_AbilitySystemComponent::TryActivateAbilityByTag(const FGameplayTag& AbilityTag)
+{
+    if (!AbilityTag.IsValid()) return false;
+
+    // UE4.26: 通过Tag查找可激活的能力
+    FGameplayAbilitySpec* FoundSpec = FindAbilitySpecFromTag(AbilityTag);
+    if (FoundSpec)
+    {
+        return TryActivateAbility(FoundSpec->Handle);
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("USL_AbilitySystemComponent::TryActivateAbilityByTag - No ability found with tag: %s"), 
+        *AbilityTag.ToString());
+    return false;
+}
+
+FGameplayAbilitySpecHandle USL_AbilitySystemComponent::FindAbilitySpecHandleByTag(const FGameplayTag& AbilityTag) const
+{
+    const FGameplayAbilitySpec* FoundSpec = FindAbilitySpecFromTag(AbilityTag);
+    if (FoundSpec)
+    {
+        return FoundSpec->Handle;
+    }
+    return FGameplayAbilitySpecHandle();
+}
+
+USL_GameplayAbilityBase* USL_AbilitySystemComponent::GetActiveAbilityInstanceByTag(const FGameplayTag& AbilityTag) const
+{
+    const FGameplayAbilitySpec* FoundSpec = FindAbilitySpecFromTag(AbilityTag);
+    if (FoundSpec && FoundSpec->IsActive())
+    {
+        // UE4.26: 获取激活的能力实例
+        TArray<UGameplayAbility*> Instances = FoundSpec->GetAbilityInstances();
+        for (UGameplayAbility* Instance : Instances)
+        {
+            if (Instance && Instance->IsActive())
+            {
+                return Cast<USL_GameplayAbilityBase>(Instance);
+            }
+        }
+    }
+    return nullptr;
+}

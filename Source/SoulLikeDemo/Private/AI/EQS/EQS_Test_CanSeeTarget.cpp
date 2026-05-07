@@ -18,26 +18,26 @@ UEQS_Test_CanSeeTarget::UEQS_Test_CanSeeTarget()
 
 void UEQS_Test_CanSeeTarget::RunTest(FEnvQueryInstance& QueryInstance) const
 {
-	//// 获取查询所有者
-	//UObject* QueryOwner = QueryInstance.Owner.Get();
-	//AAIController* AIController = Cast<AAIController>(QueryOwner);
-	//if (!AIController) return;
+	// 获取查询所有者
+	UObject* QueryOwner = QueryInstance.Owner.Get();
+	AAIController* AIController = Cast<AAIController>(QueryOwner);
+	if (!AIController) return;
 
-	//ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
-	//if (!Enemy) return;
+	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
+	if (!Enemy) return;
 
-	//// 获取当前查询的Actor
-	//for (int32 ItemIndex = 0; ItemIndex < QueryInstance.Items.Num(); ItemIndex++)
-	//{
-	//	AActor* ItemActor = Cast<AActor>(QueryInstance.Items[ItemIndex].Item);
-	//	if (!ItemActor) continue;
+	// 获取当前查询的Actor
+	for(auto& Item : QueryInstance.GetAllAsActors())
+	{
+		AActor* ItemActor = Cast<AActor>(Item);
+		if (!ItemActor) continue;
 
-	//	// 执行视线检测
-	//	bool bCanSee = PerformLineOfSightCheck(Enemy, ItemActor);
+		// 执行视线检测
+		bool bCanSee = PerformLineOfSightCheck(Enemy, ItemActor);
 
-	//	// 设置测试结果
-	//	QueryInstance.SetItemScore(ItemIndex, bCanSee ? 1.0f : 0.0f);
-	//}
+		// 设置测试结果
+		QueryInstance.SetItemScore(ItemIndex, bCanSee ? 1.0f : 0.0f);
+	}
 }
 
 bool UEQS_Test_CanSeeTarget::PerformLineOfSightCheck(ASL_EnemyBase* Enemy, AActor* Target) const

@@ -1,7 +1,6 @@
 // Private/Class/SL_EnemyBase.cpp
 
 #include "SL_EnemyBase.h"
-#include <Perception/AIPerceptionComponent.h>
 #include <BehaviorTree/BehaviorTree.h>
 #include <Manager/DataTableManager.h>
 #include <EnemyConfigInfoTable.h>
@@ -13,9 +12,6 @@
 #include "SL_AbilitySystemComponent.h"
 #include <SL_StatusAttributeSet.h>
 #include <Manager/GlobalDelegatesManager.h>
-#include <DrawDebugHelpers.h>
-#include <Kismet/KismetMathLibrary.h>
-#include <SL_CharacterBase.h>
 #include <GameFramework/CharacterMovementComponent.h>
 #include <Kismet/GameplayStatics.h>
 #include <SL_EnemyAIController.h>
@@ -26,44 +22,25 @@ ASL_EnemyBase::ASL_EnemyBase()
 	CurrentState = EEnemyState::Idle;
 	CurrentTarget = nullptr;
 
-	// === 核心：配置AIControllerClass和AutoPossessAI ===
+	/************************************************************************/
+	/*                                AI组件相关                                      */
+	/************************************************************************/
 	AIControllerClass = ASL_EnemyAIController::StaticClass();
-
-	// 设置自动Possess模式
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	/************************************************************************/
+	/*                                GAS组件相关                                      */
+	/************************************************************************/
+	 // ASC-核心功能组件
+	AbilitySystemComp = CreateDefaultSubobject<USL_AbilitySystemComponent>(TEXT("AbilitySystem"));
+	// AS(CharacterCombatState)
+	StatusAttributeSet = CreateDefaultSubobject<USL_StatusAttributeSet>(TEXT("StatusSet"));
+
 }
 
 void ASL_EnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// 初始状态
-	SetEnemyState(EEnemyState::Idle);
-}
-
-void ASL_EnemyBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	// 更新状态计时
-	if (CurrentState != EEnemyState::Dead)
-	{
-		StateElapsedTime = GetWorld()->GetTimeSeconds() - LastStateChangeTime;
-	}
-
-	// 状态更新
-	OnStateTick(DeltaTime);
-
-	// 调试：绘制目标连线
-	if (bEnableDebugDraw && CurrentTarget)
-	{
-		DrawDebugLine(
-			GetWorld(),
-			GetActorLocation() + FVector(0.0f, 0.0f, 50.0f),
-			CurrentTarget->GetActorLocation() + FVector(0.0f, 0.0f, 50.0f),
-			CurrentState == EEnemyState::Combat ? FColor::Red : FColor::Yellow,
-			false, -1, 0, 2.0f
-		);
-	}
 }
 
 void ASL_EnemyBase::InitializeEnemy(int32 EnemyID)
@@ -105,128 +82,6 @@ void ASL_EnemyBase::InitializeEnemy(int32 EnemyID)
 		EnemyID, *Config.EnemyName.ToString(), (int32)Config.EnemyType);
 }
 
-void ASL_EnemyBase::OnStateEnter(EEnemyState NewState)
-{
-	switch (NewState)
-	{
-	case EEnemyState::Idle:
-		// 进入空闲状态：停止移动，等待
-		if (GetCharacterMovement())
-		{
-			GetCharacterMovement()->StopMovementImmediately();
-		}
-		break;
-
-	case EEnemyState::Patrol:
-		// 进入巡逻状态：开始沿着路径移动
-		// 由蓝图行为树处理具体巡逻逻辑
-		break;
-
-	case EEnemyState::Alert:
-		// 进入警戒状态：看向目标方向，准备战斗
-		if (CurrentTarget)
-		{
-			// 面向目标
-			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(
-				GetActorLocation(), CurrentTarget->GetActorLocation());
-			SetActorRotation(FRotator(0.0f, LookAtRotation.Yaw, 0.0f));
-		}
-		break;
-
-	case EEnemyState::Combat:
-		// 进入战斗状态：行为树已经在运行，无需额外操作
-        // AI行为树会通过BTService_UpdateTarget自动切换行为
-		
-		break;
-
-	case EEnemyState::Dead:
-		// 进入死亡状态
-		 if (ASL_EnemyAIController* AIC = GetEnemyAIController())
-        {
-            if (UBrainComponent* BC = AIC->GetBrainComponent())
-            {
-                BC->StopLogic(TEXT("Enemy Dead"));
-            }
-        }
-		break;
-	}
-}
-
-void ASL_EnemyBase::OnStateExit(EEnemyState OldState)
-{
-	switch (OldState)
-	{
-	case EEnemyState::Combat:
-		// 退出战斗状态：可以做一些清理工作
-		break;
-
-	default:
-		break;
-	}
-}
-
-void ASL_EnemyBase::OnStateTick(float DeltaTime)
-{
-	switch (CurrentState)
-	{
-	case EEnemyState::Idle:
-		break;
-
-	case EEnemyState::Alert:
-		// 警戒状态下，面向目标并准备战斗
-		break;
-
-	case EEnemyState::Combat:
-		// 战斗状态下，由AI行为树控制
-		// 这里只做简单的检查：如果目标丢失，回到警戒状态
-		break;
-
-	default:
-		break;
-	}
-}
-
-// ==================== 状态管理 ====================
-
-void ASL_EnemyBase::SetEnemyState(EEnemyState NewState)
-{
-	if (CurrentState == NewState) return;
-
-	// 退出旧状态
-	OnStateExit(CurrentState);
-
-	EEnemyState OldState = CurrentState;
-	CurrentState = NewState;
-	LastStateChangeTime = GetWorld()->GetTimeSeconds();
-	StateElapsedTime = 0.0f;
-
-	// 进入新状态
-	OnStateEnter(NewState);
-
-	OnEnemyStateChanged.Broadcast(NewState);
-
-	UE_LOG(LogTemp, Log, TEXT("Enemy State: %d -> %d"), (int32)OldState, (int32)NewState);
-}
-
-void ASL_EnemyBase::EnterCombat()
-{
-	SetEnemyState(EEnemyState::Combat);
-
-	// TODO: 启动AI行为树
-
-}
-
-void ASL_EnemyBase::EnterPatrol()
-{
-	SetEnemyState(EEnemyState::Patrol);
-}
-
-void ASL_EnemyBase::LoseTarget()
-{
-	CurrentTarget = nullptr;
-	SetEnemyState(EEnemyState::Patrol);
-}
-
 ASL_EnemyAIController* ASL_EnemyBase::GetEnemyAIController() const
 {
     return Cast<ASL_EnemyAIController>(GetController());
@@ -236,7 +91,7 @@ void ASL_EnemyBase::Die()
 {
 	if (CurrentState == EEnemyState::Dead) return;
 
-	SetEnemyState(EEnemyState::Dead);
+	CurrentState = EEnemyState::Dead;
 
 	// === 修正：先广播死亡事件（WaveManager会收到这个） ===
 	OnEnemyDied.Broadcast();
@@ -322,6 +177,9 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
 	// 4. 加载外观
 	LoadEnemyAppearance(Config);
 
+	// 4.1 初始化武器
+	SpawnEnemyWeapons(Config);
+
 	// 5. 初始化AI
 	InitializeEnemyAI(Config);
 
@@ -332,7 +190,23 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
 		{
 			if (AbilityClass)
 			{
-				AbilitySystemComp->GiveAbility(FGameplayAbilitySpec(AbilityClass, 1, INDEX_NONE, this));
+ 				// UE4.26: 通过 GiveAbility 授予能力
+                FGameplayAbilitySpec Spec(AbilityClass, 1, INDEX_NONE, this);
+                
+                // 设置能力的SourceTag（用于后续通过Tag查找）
+                if (USL_GameplayAbilityNPCBase* DefaultAbility = Cast<USL_GameplayAbilityNPCBase>(AbilityClass->GetDefaultObject()))
+                {
+                    if (DefaultAbility->ActivationTag.IsValid())
+                    {
+                        // 通过DynamicAbilityTags标记能力
+                        Spec.DynamicAbilityTags.AddTag(DefaultAbility->ActivationTag);
+                        
+                        UE_LOG(LogTemp, Log, TEXT("Enemy %s: Granting ability %s with tag %s"), 
+                            *GetName(), *AbilityClass->GetName(), *DefaultAbility->ActivationTag.ToString());
+                    }
+                }
+
+                AbilitySystemComp->GiveAbility(Spec);			
 			}
 		}
 	}
@@ -385,4 +259,117 @@ void ASL_EnemyBase::InitializeEnemyAI(const FEnemyConfigInfo& Config)
 
 	UE_LOG(LogTemp, Verbose, TEXT("ASL_EnemyBase::InitializeEnemyAI - PerceptionRange=%.2f, AttackRange=%.2f"),
 		PerceptionRange, AttackRange);
+}
+
+// ===== 新增：生成敌人武器 =====
+void ASL_EnemyBase::SpawnEnemyWeapons(const FEnemyConfigInfo& Config)
+{
+    // 生成左手武器
+    if (Config.LeftHandWeaponID > 0)
+    {
+        LeftHandWeapon = SpawnWeaponByID(Config.LeftHandWeaponID);
+        if (LeftHandWeapon)
+        {
+            // 附加到左手插槽
+            FName SocketName = (Config.LeftHandSocketName != NAME_None) 
+                ? Config.LeftHandSocketName 
+                : FName("Weapon_L");
+            
+            LeftHandWeapon->AttachToComponent(GetMesh(), 
+                FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+            
+            // 设置缩放
+            LeftHandWeapon->SetActorScale3D(FVector(Config.LeftHandWeaponScale));
+        }
+    }
+
+    // 生成右手武器
+    if (Config.RightHandWeaponID > 0)
+    {
+        RightHandWeapon = SpawnWeaponByID(Config.RightHandWeaponID);
+        if (RightHandWeapon)
+        {
+            FName SocketName = (Config.RightHandSocketName != NAME_None) 
+                ? Config.RightHandSocketName 
+                : FName("Weapon_R");
+            
+            RightHandWeapon->AttachToComponent(GetMesh(), 
+                FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+            
+            RightHandWeapon->SetActorScale3D(FVector(Config.RightHandWeaponScale));
+        }
+    }
+}
+
+// ===== 新增：根据武器ID派生武器实例 =====
+ASL_WeaponBase* ASL_EnemyBase::SpawnWeaponByID(int32 WeaponID)
+{
+    if (!GetWorld() || WeaponID <= 0) return nullptr;
+
+	ACharacter* OwningCharacter = Cast<ACharacter>(this);
+	if (!OwningCharacter) return nullptr;
+
+	// 创建武器实例
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = OwningCharacter;
+	SpawnParams.Instigator = Cast<APawn>(OwningCharacter);
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	ASL_WeaponBase* Weapon = GetWorld()->SpawnActorDeferred<ASL_WeaponBase>(
+		WeaponBaseClass,
+		FTransform::Identity,
+		OwningCharacter,
+		Cast<APawn>(OwningCharacter),
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
+		);
+
+	if (Weapon)
+	{
+		// 初始化武器
+		FName SocketName;
+		if (EnemyConfig.LeftHandWeaponID != 0 && EnemyConfig.RightHandWeaponID != 0)
+		{
+			SocketName = EnemyConfig.TwoHandSocketName;
+		}
+		else if (EnemyConfig.LeftHandWeaponID != 0)
+		{
+			SocketName = EnemyConfig.LeftHandSocketName;
+		}
+		else
+		{
+			SocketName = EnemyConfig.RightHandSocketName;
+		}
+		Weapon->InitializeWeaponWithID(WeaponID, SocketName);
+		Weapon->SetOwner(OwningCharacter);
+		Weapon->FinishSpawning(FTransform::Identity);
+
+		UE_LOG(LogTemp, Verbose, TEXT("USL_EquipmentComponent::SpawnWeaponByID - Spawned weapon ID=%d"), WeaponID);
+	}
+
+	return Weapon;
+}
+
+// IWeaponAccessory_IF 接口实现
+ASL_WeaponBase* ASL_EnemyBase::GetLeftHandWeapon() const
+{
+    return LeftHandWeapon;
+}
+
+ASL_WeaponBase* ASL_EnemyBase::GetRightHandWeapon() const
+{
+    return RightHandWeapon;
+}
+
+ASL_WeaponBase* ASL_EnemyBase::GetWeaponByHand(int32 HandIndex) const
+{
+    // 约定：0=左手, 1=右手
+    if (HandIndex == 0) return LeftHandWeapon;
+    if (HandIndex == 1) return RightHandWeapon;
+    return nullptr;
+}
+
+// IAbilitySystemInterface 接口实现
+UAbilitySystemComponent* ASL_EnemyBase::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComp;
 }

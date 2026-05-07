@@ -142,7 +142,7 @@ protected:
 
 	/** 持有者角色 */
 	UPROPERTY()
-		class ASL_CharacterBase* OwningCharacter;
+		class ACharacter* OwningCharacter;
 
 	// ===== 状态 =====
 	/** 弹反窗口是否激活 */

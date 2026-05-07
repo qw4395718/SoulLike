@@ -9,20 +9,18 @@ void USL_ActiveWeapon_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnim
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{
-		// 假设角色持有武器，并通过接口控制碰撞
-		if (ASL_CharacterBase* Character = Cast<ASL_CharacterBase>(MeshComp->GetOwner()))
+		// 假设角色/NPC持有武器，并通过接口控制碰撞
+		if (IWeaponAccessory_IF* WeaponAccessory = Cast<IWeaponAccessory_IF>(MeshComp->GetOwner()))
 		{
-			if (USL_EquipmentComponent* EquipmentComp = Cast<USL_EquipmentComponent>(Character->GetEquipmentComponent()))
+			if (ASL_WeaponBase* Weapon = WeaponAccessory->GetLeftHandWeapon())
 			{
-				if (ASL_WeaponBase* Weapon = EquipmentComp->GetCurrentLeftHandWeapon())
-				{
-					Weapon->EnableAttackCollision();
-				}
-				if (ASL_WeaponBase* Weapon = EquipmentComp->GetCurrentRightHandWeapon())
-				{
-					Weapon->EnableAttackCollision();
-				}
+				Weapon->EnableAttackCollision();
 			}
+			if (ASL_WeaponBase* Weapon = WeaponAccessory->GetRightHandWeapon())
+			{
+				Weapon->EnableAttackCollision();
+			}
+			
 		}
 	}
 }
@@ -31,20 +29,18 @@ void USL_ActiveWeapon_CB_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSe
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{
-		// 假设角色持有武器，并通过接口控制碰撞
-		if (ASL_CharacterBase* Character = Cast<ASL_CharacterBase>(MeshComp->GetOwner()))
+		// 假设角色/NPC持有武器，并通过接口控制碰撞
+		if (IWeaponAccessory_IF* WeaponAccessory = Cast<IWeaponAccessory_IF>(MeshComp->GetOwner()))
 		{
-			if (USL_EquipmentComponent* EquipmentComp = Cast<USL_EquipmentComponent>(Character->GetEquipmentComponent()))
+			if (ASL_WeaponBase* Weapon = WeaponAccessory->GetLeftHandWeapon())
 			{
-				if (ASL_WeaponBase* Weapon = EquipmentComp->GetCurrentLeftHandWeapon())
-				{
-					Weapon->DisableAttackCollision();
-				}
-				if (ASL_WeaponBase* Weapon = EquipmentComp->GetCurrentRightHandWeapon())
-				{
-					Weapon->DisableAttackCollision();
-				}
+				Weapon->DisableAttackCollision();
 			}
+			if (ASL_WeaponBase* Weapon = WeaponAccessory->GetRightHandWeapon())
+			{
+				Weapon->DisableAttackCollision();
+			}
+			
 		}
 	}
 }

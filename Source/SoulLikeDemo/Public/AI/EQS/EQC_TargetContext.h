@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "EnvironmentQuery/EnvQueryContext.h"
+#include <BehaviorTree/BehaviorTreeTypes.h>
 #include "EQC_TargetContext.generated.h"
 
 /**
@@ -17,4 +18,8 @@ class SOULLIKEDEMO_API UEQC_TargetContext : public UEnvQueryContext
 
 public:
 	virtual void ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQueryContextData& ContextData) const override;
+
+public:
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+		struct FBlackboardKeySelector TargetActorKey;
 };

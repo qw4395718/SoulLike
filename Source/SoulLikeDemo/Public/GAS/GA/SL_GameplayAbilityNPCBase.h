@@ -68,13 +68,13 @@ public:
             float PlayRate = 1.0f);
 
     UFUNCTION(BlueprintCallable, Category = "Ability")
-        void ApplyEffectToTarget(TSubclassOf<UGameplayEffect> EffectClass, 
+        void ApplyEffectToTarget(TSubclassOf<UGameplayEffect> GameEffectClass,
             AActor* Target, float Level = 1.0f);
 
 public:
 	// 蓝图可配置的效果类
 	UPROPERTY(EditDefaultsOnly, Category = "AbilityGE|Config")
-		TSubclassOf<UGameplayEffect> EffectClass
+		TSubclassOf<UGameplayEffect> EffectClass;
 
 protected:
     // ===== 修改：蒙太奇回调 =====

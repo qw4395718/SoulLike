@@ -1,16 +1,16 @@
-// Public/Interface/IWeaponAccessory_IF.h
+// Public/Interface/WeaponAccessory_IF.h
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "GameFramework/Actor.h"
-#include "IWeaponAccessory_IF.generated.h"
+#include "WeaponAccessory_IF.generated.h"
 
 class ASL_WeaponBase;  // 前向声明
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, BlueprintType, meta = (CannotImplementInterfaceInBlueprint))
-class UIWeaponAccessory_IF : public UInterface
+class UWeaponAccessory_IF : public UInterface
 {
     GENERATED_BODY()
 };

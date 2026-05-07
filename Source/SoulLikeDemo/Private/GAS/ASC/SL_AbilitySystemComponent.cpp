@@ -95,7 +95,7 @@ FGameplayAbilitySpecHandle USL_AbilitySystemComponent::FindAbilitySpecHandleByTa
     return FGameplayAbilitySpecHandle();
 }
 
-USL_GameplayAbilityBase* USL_AbilitySystemComponent::GetActiveAbilityInstanceByTag(const FGameplayTag& AbilityTag) const
+UGameplayAbility* USL_AbilitySystemComponent::GetActiveAbilityInstanceByTag(const FGameplayTag& AbilityTag) const
 {
     const FGameplayAbilitySpec* FoundSpec = FindAbilitySpecFromTag(AbilityTag);
     if (FoundSpec && FoundSpec->IsActive())
@@ -106,9 +106,14 @@ USL_GameplayAbilityBase* USL_AbilitySystemComponent::GetActiveAbilityInstanceByT
         {
             if (Instance && Instance->IsActive())
             {
-                return Cast<USL_GameplayAbilityBase>(Instance);
+                return Cast<UGameplayAbility>(Instance);
             }
         }
     }
     return nullptr;
+}
+
+FGameplayAbilitySpec* USL_AbilitySystemComponent::FindAbilitySpecFromTag(const FGameplayTag& AbilityTag) const
+{
+	return nullptr;
 }

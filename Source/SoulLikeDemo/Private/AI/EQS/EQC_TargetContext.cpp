@@ -5,6 +5,8 @@
 #include "EnvironmentQuery/Items/EnvQueryItemType_Actor.h"
 #include "AIController.h"
 #include "SL_EnemyBase.h"
+#include <BehaviorTree/BlackboardComponent.h>
+#include <BehaviorTree/BehaviorTreeComponent.h>
 
 void UEQC_TargetContext::ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQueryContextData& ContextData) const
 {
@@ -16,12 +18,12 @@ void UEQC_TargetContext::ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQu
 	AAIController* AIController = Cast<AAIController>(QueryOwner);
 	if (!AIController) return;
 
-	// 获取敌人类
-	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
-	if (!Enemy) return;
+	// 获取黑板
+	UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+	if (!BlackboardComp) return;
 
 	// 获取当前目标
-	AActor* CurrentTarget = Enemy->GetCurrentTarget();
+	AActor* CurrentTarget = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
 	if (CurrentTarget)
 	{
 		// 将目标Actor添加到上下文数据中

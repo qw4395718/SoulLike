@@ -15,11 +15,14 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include <Kismet/GameplayStatics.h>
 #include <SL_EnemyAIController.h>
+#include <SL_GameplayAbilityNPCBase.h>
+#include <SL_WeaponBase.h>
 
-ASL_EnemyBase::ASL_EnemyBase()
+ASL_EnemyBase::ASL_EnemyBase(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = false; 
-	CurrentState = EEnemyState::Idle;
+	CurrentState = EEnemyState::Alive;
 	CurrentTarget = nullptr;
 
 	/************************************************************************/

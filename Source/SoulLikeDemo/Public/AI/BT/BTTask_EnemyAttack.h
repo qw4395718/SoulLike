@@ -5,7 +5,7 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTask_EnemyAttack.generated.h"
 
-class USL_GameplayAbilityBase;
+class USL_GameplayAbilityNPCBase;
 class UBehaviorTreeComponent;
 
 UCLASS()
@@ -45,7 +45,7 @@ private:
     UBehaviorTreeComponent* CachedOwnerComp;
 
     // 缓存的能力实例（用于绑定委托）
-    TWeakObjectPtr<USL_GameplayAbilityBase> CachedAbilityInstance;
+    TWeakObjectPtr<USL_GameplayAbilityNPCBase> CachedAbilityInstance;
 
     // 委托句柄
     FDelegateHandle MontageDelegateHandle;

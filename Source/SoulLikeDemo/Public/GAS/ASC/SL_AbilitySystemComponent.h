@@ -42,6 +42,7 @@ public:
 
     /** 获取能力实例（供BTTask绑定委托） */
     UFUNCTION(BlueprintCallable, Category = "GAS")
-        USL_GameplayAbilityBase* GetActiveAbilityInstanceByTag(const FGameplayTag& AbilityTag) const;
+        UGameplayAbility* GetActiveAbilityInstanceByTag(const FGameplayTag& AbilityTag) const;
 
+	FGameplayAbilitySpec* FindAbilitySpecFromTag(const FGameplayTag& AbilityTag) const;
 };

@@ -14,7 +14,6 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include "StateCalculate_IF.h"
 #include "BehavioralResponse_IF.h"
-#include "WeaponBehavior_IF.h"
 #include "CharacterComponent_IF.h"
 
 USL_CombatantComponent::USL_CombatantComponent()

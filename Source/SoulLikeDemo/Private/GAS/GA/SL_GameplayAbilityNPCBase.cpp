@@ -1,6 +1,7 @@
 ﻿#include "SL_GameplayAbilityNPCBase.h"
 #include "SL_CharacterBase.h"
 #include "SL_AbilitySystemComponent.h"
+#include <Abilities/Tasks/AbilityTask_PlayMontageAndWait.h>
 
 USL_GameplayAbilityNPCBase::USL_GameplayAbilityNPCBase()
 {
@@ -52,15 +53,15 @@ void USL_GameplayAbilityNPCBase::PlayMontageForAbility(UAnimMontage* Montage, co
         MontagePlayState = EMontagePlayState::Playing;
 
         // 绑定蒙太奇完成事件
-        MontageTask->OnCompleted.AddDynamic(this, &USL_GameplayAbilityBase::OnMontageCompleted);
-        MontageTask->OnInterrupted.AddDynamic(this, &USL_GameplayAbilityBase::OnMontageInterrupted);
+        MontageTask->OnCompleted.AddDynamic(this, &USL_GameplayAbilityNPCBase::OnMontageCompleted);
+        MontageTask->OnInterrupted.AddDynamic(this, &USL_GameplayAbilityNPCBase::OnMontageInterrupted);
 
         // 激活任务
         MontageTask->ReadyForActivation();
     }
 }
 
-void USL_GameplayAbilityNPCBase::ApplyEffectToTarget(TSubclassOf<UGameplayEffect> EffectClass, AActor* Target, float Level)
+void USL_GameplayAbilityNPCBase::ApplyEffectToTarget(TSubclassOf<UGameplayEffect> InEffectClass, AActor* Target, float Level)
 {
 	if (!CurrentActorInfo || !Target || !EffectClass)
 		return;

@@ -26,8 +26,11 @@ void UEQS_Test_CanSeeTarget::RunTest(FEnvQueryInstance& QueryInstance) const
 	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
 	if (!Enemy) return;
 
+	int32 ItemIndex = 0;
+	TArray<AActor*> GeneratorActor;
+	QueryInstance.GetAllAsActors(GeneratorActor);
 	// 获取当前查询的Actor
-	for(auto& Item : QueryInstance.GetAllAsActors())
+	for(auto& Item : GeneratorActor)
 	{
 		AActor* ItemActor = Cast<AActor>(Item);
 		if (!ItemActor) continue;
@@ -36,7 +39,7 @@ void UEQS_Test_CanSeeTarget::RunTest(FEnvQueryInstance& QueryInstance) const
 		bool bCanSee = PerformLineOfSightCheck(Enemy, ItemActor);
 
 		// 设置测试结果
-		QueryInstance.SetItemScore(ItemIndex, bCanSee ? 1.0f : 0.0f);
+		//QueryInstance.SetItemScore(ItemIndex, bCanSee ? 1.0f : 0.0f);
 	}
 }
 

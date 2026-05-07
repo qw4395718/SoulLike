@@ -15,6 +15,7 @@
 #include "WeaponAnimNotify_IF.h"
 #include "AnimNotify_IF.h"
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemInterface.h"
+#include <WeaponAccessory_IF.h>
 #include "SL_CharacterBase.generated.h"
 
 // 声明一个自定义日志类别

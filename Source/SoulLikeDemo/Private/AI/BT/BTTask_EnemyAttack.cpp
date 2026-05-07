@@ -5,8 +5,8 @@
 #include "AIController.h"
 #include "SL_EnemyBase.h"
 #include "SL_AbilitySystemComponent.h"
-#include "SL_GameplayAbilityBase.h"
 #include "SL_CharacterBase.h"
+#include <SL_GameplayAbilityNPCBase.h>
 
 UBTTask_EnemyAttack::UBTTask_EnemyAttack()
 {
@@ -73,8 +73,7 @@ EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& Own
     Enemy->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this, ASC]()
     {
         // 通过Tag获取刚激活的能力实例
-        USL_GameplayAbilityBase* AbilityInstance = ASC->GetActiveAbilityInstanceByTag(AttackAbilityTag);
-        if (AbilityInstance)
+        if (USL_GameplayAbilityNPCBase* AbilityInstance = Cast<USL_GameplayAbilityNPCBase>(ASC->GetActiveAbilityInstanceByTag(AttackAbilityTag)))
         {
             CachedAbilityInstance = AbilityInstance;
             

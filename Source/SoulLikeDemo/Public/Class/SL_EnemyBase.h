@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include <SoulLikeGameGlobal.h>
+#include <WeaponAccessory_IF.h>
+#include <AbilitySystemInterface.h>
 #include "SL_EnemyBase.generated.h"
 
 /** 敌人状态 */
@@ -18,7 +20,7 @@ enum class EEnemyState : uint8
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDied);
 
 UCLASS()
-class SOULLIKEDEMO_API ASL_EnemyBase : public ACharacter
+class SOULLIKEDEMO_API ASL_EnemyBase : public ACharacter,
 public IWeaponAccessory_IF,
 public IAbilitySystemInterface
 {
@@ -119,7 +121,7 @@ protected:
 	void InitializeEnemyAI(const FEnemyConfigInfo& Config);
 
 	/** 根据武器ID派生武器实例 */
-    ASL_WeaponBase* SpawnWeaponByID(int32 WeaponID,);
+    ASL_WeaponBase* SpawnWeaponByID(int32 WeaponID);
 
     /** 根据配置生成左右手武器 */
     void SpawnEnemyWeapons(const FEnemyConfigInfo& Config);

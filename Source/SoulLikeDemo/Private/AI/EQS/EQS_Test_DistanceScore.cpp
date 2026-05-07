@@ -33,7 +33,9 @@ void UEQS_Test_DistanceScore::RunTest(FEnvQueryInstance& QueryInstance) const
 
 	// 对每个项目计算距离评分
 	int32 ItemIndex = 0;
-	for(auto& Item : QueryInstance.GetAllAsActors())
+	TArray<AActor*> GeneratorActor;
+	QueryInstance.GetAllAsActors(GeneratorActor);
+	for(auto& Item : GeneratorActor)
 	{
 		AActor* ItemActor = Cast<AActor>(Item);
 		if (!ItemActor) continue;
@@ -45,7 +47,7 @@ void UEQS_Test_DistanceScore::RunTest(FEnvQueryInstance& QueryInstance) const
 		float Score = CalculateScore(Distance);
 
 		// 设置评分
-		QueryInstance.SetItemScore(ItemIndex, Score);
+		//QueryInstance.SetItemScore(ItemIndex, Score);
 		ItemIndex++;
 	}
 }

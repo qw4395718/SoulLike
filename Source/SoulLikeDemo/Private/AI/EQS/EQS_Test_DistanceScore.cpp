@@ -32,12 +32,9 @@ void UEQS_Test_DistanceScore::RunTest(FEnvQueryInstance& QueryInstance) const
 	if (!QueryOwnerActor) return;
 
 	// 对每个项目计算距离评分
-	int32 ItemIndex = 0;
-	TArray<AActor*> GeneratorActor;
-	QueryInstance.GetAllAsActors(GeneratorActor);
-	for(auto& Item : GeneratorActor)
+for (FEnvQueryInstance::ItemIterator It(this, QueryInstance); It; ++It)
 	{
-		AActor* ItemActor = Cast<AActor>(Item);
+		AActor* ItemActor = GetItemActor(QueryInstance, It.GetIndex());
 		if (!ItemActor) continue;
 
 		// 计算距离
@@ -47,8 +44,7 @@ void UEQS_Test_DistanceScore::RunTest(FEnvQueryInstance& QueryInstance) const
 		float Score = CalculateScore(Distance);
 
 		// 设置评分
-		//QueryInstance.SetItemScore(ItemIndex, Score);
-		ItemIndex++;
+		It.SetScore(TestPurpose, FilterType, Score, MinThresholdValue, MaxThresholdValue);
 	}
 }
 
@@ -62,10 +58,10 @@ float UEQS_Test_DistanceScore::CalculateScore(float Distance) const
 
 	// 否则按距离衰减
 	// 使用1/distance作为评分，但限制最小值
-	float Score = FMath::Max(0.0f, 1.0f / (Distance - IdealDistance + 1.0f));
+	float Score = FMath::Max(MinThresholdValue, MaxThresholdValue / (Distance - IdealDistance + 1.0f));
 
 	// 归一化到0-1范围
-	Score = FMath::Clamp(Score, 0.0f, 1.0f);
+	Score = FMath::Clamp(Score, MinThresholdValue, MaxThresholdValue);
 
 	return Score;
 }

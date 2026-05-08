@@ -29,4 +29,12 @@ public:
 	/** 理想距离（在此距离内得满分） */
 	UPROPERTY(EditDefaultsOnly, Category = "Test")
 		float IdealDistance;
+
+		/** 距离评分的最小阈值 */
+	UPROPERTY(EditDefaultsOnly, Category = "Test")
+		float MinThresholdValue;
+
+		/** 距离评分的最大阈值 */
+	UPROPERTY(EditDefaultsOnly, Category = "Test")
+		float MaxThresholdValue;
 };

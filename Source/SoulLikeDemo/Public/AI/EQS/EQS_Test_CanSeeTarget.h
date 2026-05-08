@@ -24,4 +24,12 @@ public:
 	/** 视线检测时忽略的Actor类 */
 	UPROPERTY(EditDefaultsOnly, Category = "Test")
 		TArray<TSubclassOf<AActor>> ActorsToIgnore;
+
+		/** 视线检测的最小阈值 */
+	UPROPERTY(EditDefaultsOnly, Category = "Test")
+		float MinThresholdValue;
+
+		/** 视线检测的最大阈值 */
+	UPROPERTY(EditDefaultsOnly, Category = "Test")
+		float MaxThresholdValue;
 };

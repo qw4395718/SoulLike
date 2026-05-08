@@ -13,6 +13,10 @@ ASL_EnemyAIController::ASL_EnemyAIController()
     Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComponent"));
 }
 
+/************************************************************************/
+/*                               继承实现                                */
+/************************************************************************/
+
 void ASL_EnemyAIController::BeginPlay()
 {
     Super::BeginPlay();
@@ -50,6 +54,10 @@ void ASL_EnemyAIController::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
+/************************************************************************/
+/*                               外部调用                                */
+/************************************************************************/
+
 void ASL_EnemyAIController::InitializeAI(UBehaviorTree* InBehaviorTree, UBlackboardData* InBlackboardData)
 {
     if (!InBehaviorTree || !InBlackboardData)
@@ -62,31 +70,6 @@ void ASL_EnemyAIController::InitializeAI(UBehaviorTree* InBehaviorTree, UBlackbo
     CurrentBlackboardData = InBlackboardData;
 
     RunBehaviorTreeAndBlackboard();
-}
-
-void ASL_EnemyAIController::RunBehaviorTreeAndBlackboard()
-{
-    if (!CurrentBehaviorTree || !CurrentBlackboardData)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("ASL_EnemyAIController::RunBehaviorTree - No BT or BB set"));
-        return;
-    }
-
-    // UE4.26: 初始化黑板
-    if (Blackboard && Blackboard->InitializeBlackboard(*CurrentBlackboardData))
-    {
-        // UE4.26: 运行行为树
-        if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(BrainComponent))
-        {
-            BTComp->StartTree(*CurrentBehaviorTree, EBTExecutionMode::Looped);
-            UE_LOG(LogTemp, Log, TEXT("ASL_EnemyAIController: Started BT %s with BB %s"),
-                *CurrentBehaviorTree->GetName(), *CurrentBlackboardData->GetName());
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("ASL_EnemyAIController: Failed to initialize Blackboard"));
-    }
 }
 
 void ASL_EnemyAIController::SetTargetActor(AActor* NewTarget)
@@ -119,5 +102,34 @@ void ASL_EnemyAIController::SetBlackboardValueAsObject(const FName& KeyName, UOb
     if (Blackboard)
     {
         Blackboard->SetValueAsObject(KeyName, Value);
+    }
+}
+
+/************************************************************************/
+/*                               内部调用                                */
+/************************************************************************/
+
+void ASL_EnemyAIController::RunBehaviorTreeAndBlackboard()
+{
+    if (!CurrentBehaviorTree || !CurrentBlackboardData)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ASL_EnemyAIController::RunBehaviorTree - No BT or BB set"));
+        return;
+    }
+
+    // UE4.26: 初始化黑板
+    if (Blackboard && Blackboard->InitializeBlackboard(*CurrentBlackboardData))
+    {
+        // UE4.26: 运行行为树
+        if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(BrainComponent))
+        {
+            BTComp->StartTree(*CurrentBehaviorTree, EBTExecutionMode::Looped);
+            UE_LOG(LogTemp, Log, TEXT("ASL_EnemyAIController: Started BT %s with BB %s"),
+                *CurrentBehaviorTree->GetName(), *CurrentBlackboardData->GetName());
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("ASL_EnemyAIController: Failed to initialize Blackboard"));
     }
 }

@@ -16,6 +16,9 @@ class SOULLIKEDEMO_API ASL_EnemyAIController : public AAIController
 public:
     ASL_EnemyAIController();
 
+    /************************************************************************/
+    /*                               外部调用                               */
+    /************************************************************************/
     // 初始化AI（由Spawner或EnemyBase调用）
     UFUNCTION(BlueprintCallable, Category = "AI")
         void InitializeAI(UBehaviorTree* InBehaviorTree, UBlackboardData* InBlackboardData);
@@ -36,15 +39,24 @@ public:
         void SetBlackboardValueAsObject(const FName& KeyName, UObject* Value);
 
 protected:
+    /************************************************************************/
+    /*                               继承实现                               */
+    /************************************************************************/
     virtual void BeginPlay() override;
     virtual void OnPossess(APawn* InPawn) override;
     virtual void OnUnPossess() override;
     virtual void Tick(float DeltaTime) override;
 
+    /************************************************************************/
+    /*                               内部调用                               */
+    /************************************************************************/
     // 运行行为树
     void RunBehaviorTreeAndBlackboard();
 
 protected:
+    /************************************************************************/
+    /*                               内部访问                               */
+    /************************************************************************/
     // 行为树和黑板（从EnemyConfig中设置）
     UPROPERTY()
         UBehaviorTree* CurrentBehaviorTree;

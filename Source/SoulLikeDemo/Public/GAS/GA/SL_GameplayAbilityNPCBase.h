@@ -76,6 +76,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "AbilityGE|Config")
 		TSubclassOf<UGameplayEffect> EffectClass;
 
+	/** 这一招的动画蒙太奇 */
+	UPROPERTY(EditDefaultsOnly, Category = "Combo|Animation")
+		UAnimMontage* AttackMontage;
+
 protected:
     // ===== 修改：蒙太奇回调 =====
     UFUNCTION()

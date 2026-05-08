@@ -21,6 +21,8 @@ void USL_GameplayAbilityNPCBase::ActivateAbility(const FGameplayAbilitySpecHandl
 	CurrentActorInfo = ActorInfo;
 	MontagePlayState = EMontagePlayState::None;
 
+    PlayMontageForAbility(AttackMontage, ActivationInfo,1.0f);
+
 }
 
 void USL_GameplayAbilityNPCBase::EndAbilityForBP(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo& ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)

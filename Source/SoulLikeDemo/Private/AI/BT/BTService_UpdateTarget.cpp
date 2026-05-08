@@ -41,6 +41,15 @@ void UBTService_UpdateTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
         {
             // 目标在感知范围内，重置丢失计时
             TimeTargetLost = 0.0f;
+            BB->SetValueAsVector(TargetActorLocationKey.SelectedKeyName, CurrentTarget->GetActorLocation());
+
+            // 设置目标在可攻击的范围内
+            if (Distance <= Enemy->GetAttackRange())
+            {
+                BB->SetValueAsBool(InAttackRangeStateKey.SelectedKeyName, true);
+            }
+
+            
             return; // 不需要搜索
         }
 

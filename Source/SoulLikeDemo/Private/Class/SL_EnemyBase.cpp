@@ -24,6 +24,8 @@ ASL_EnemyBase::ASL_EnemyBase(const FObjectInitializer& ObjectInitializer)
 	PrimaryActorTick.bCanEverTick = false; 
 	CurrentState = EEnemyState::Alive;
 	CurrentTarget = nullptr;
+	// 默认武器派生类
+	WeaponBaseClass = ASL_WeaponBase::StaticClass();
 
 	/************************************************************************/
 	/*                                AI组件相关                                      */

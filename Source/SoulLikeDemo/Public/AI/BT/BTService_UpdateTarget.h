@@ -25,6 +25,18 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Blackboard")
         struct FBlackboardKeySelector TargetActorKey;
 
+    // 输出目标点位置到黑板键
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+		struct FBlackboardKeySelector TargetActorLocationKey;
+
+	// 输出是否有目标到黑板键
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+		struct FBlackboardKeySelector HasTargetStateKey;
+
+	// 输出是否在攻击范围内到黑板键
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+		struct FBlackboardKeySelector InAttackRangeStateKey;
+
     /** 目标丢失超时时间（秒） */
     UPROPERTY(EditAnywhere, Category = "Config", meta = (ClampMin = "0.0"))
         float LoseTargetTimeout = 5.0f;

@@ -115,5 +115,38 @@ UGameplayAbility* USL_AbilitySystemComponent::GetActiveAbilityInstanceByTag(cons
 
 FGameplayAbilitySpec* USL_AbilitySystemComponent::FindAbilitySpecFromTag(const FGameplayTag& AbilityTag) const
 {
+	// 检查Tag是否有效
+	if (!AbilityTag.IsValid())
+	{
+		return nullptr;
+	}
+
+	// UE4.26: GetActivatableAbilities() 返回 const TArray<FGameplayAbilitySpec>&
+	// 但因为我们在const函数中，需要使用const_cast来获取可修改的指针
+	// 这是安全的，因为我们只是读取数据并返回指针，不修改数据
+	const TArray<FGameplayAbilitySpec>& ActivatableAbilities_temp = GetActivatableAbilities();
+
+	for (int32 Index = 0; Index < ActivatableAbilities_temp.Num(); Index++)
+	{
+		const FGameplayAbilitySpec& Spec = ActivatableAbilities_temp[Index];
+
+		// 检查能力本身的Tag
+		if (Spec.Ability && Spec.Ability->AbilityTags.HasTag(AbilityTag))
+		{
+			// 通过索引获取可修改的引用
+			return &const_cast<TArray<FGameplayAbilitySpec>&>(ActivatableAbilities_temp)[Index];
+		}
+
+		// 检查动态赋予的Tag
+		if (Spec.DynamicAbilityTags.HasTag(AbilityTag))
+		{
+			return &const_cast<TArray<FGameplayAbilitySpec>&>(ActivatableAbilities_temp)[Index];
+		}
+	}
+
+	// 没有找到匹配的能力
+	UE_LOG(LogTemp, Verbose, TEXT("USL_AbilitySystemComponent::FindAbilitySpecFromTag - No ability found with tag: %s"),
+		*AbilityTag.ToString());
+
 	return nullptr;
 }

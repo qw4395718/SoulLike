@@ -11,8 +11,7 @@
 UBTTask_EnemyAttack::UBTTask_EnemyAttack()
 {
     NodeName = TEXT("Enemy Attack (GAS)");
-    //bNotifyTick = true;          // 需要Tick来轮询
-    bNotifyTick = false;          // 需要Tick来轮询
+    bNotifyTick = false;          // 无需Tick来轮询
     bCreateNodeInstance = true;  // 每个实例独立
     CachedOwnerComp = nullptr;
 }
@@ -93,58 +92,6 @@ EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& Own
     // 保持InProgress状态，等待蒙太奇完成或Tick检测
     return EBTNodeResult::InProgress;
 }
-
-// void UBTTask_EnemyAttack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
-// {
-//     Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
-
-//     // ===== 后备方案：如果委托没有触发，通过Tick轮询检查状态 =====
-//     if (CachedAbilityInstance.IsValid())
-//     {
-//         USL_GameplayAbilityBase* Ability = CachedAbilityInstance.Get();
-//         if (!Ability)
-//         {
-//             // 能力实例已失效
-//             UE_LOG(LogTemp, Warning, TEXT("UBTTask_EnemyAttack: Ability instance lost, finishing task"));
-//             ClearAbilityDelegate();
-//             FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-//         }
-//     }
-//     else
-//     {
-//         // 没有有效的能力实例，可能是能力已经结束
-//         UE_LOG(LogTemp, Verbose, TEXT("UBTTask_EnemyAttack: No active ability instance, finishing"));
-//         // 尝试重新检查是否有正在运行的能力
-//         AAIController* AIController = OwnerComp.GetAIOwner();
-//         if (AIController)
-//         {
-//             ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
-//             if (Enemy)
-//             {
-//                 IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(Enemy);
-//                 if (ASI)
-//                 {
-//                     USL_AbilitySystemComponent* ASC = Cast<USL_AbilitySystemComponent>(ASI->GetAbilitySystemComponent());
-//                     if (ASC)
-//                     {
-//                         USL_GameplayAbilityBase* AbilityInstance = ASC->GetActiveAbilityInstanceByTag(AttackAbilityTag);
-//                         if (AbilityInstance)
-//                         {
-//                             // 重新绑定
-//                             CachedAbilityInstance = AbilityInstance;
-//                             MontageDelegateHandle = AbilityInstance->OnMontageCompletedDelegate.AddUObject(
-//                                 this, &UBTTask_EnemyAttack::OnMontageFinished);
-//                             return;
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-        
-//         ClearAbilityDelegate();
-//         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-//     }
-// }
 
 void UBTTask_EnemyAttack::OnMontageFinished()
 {

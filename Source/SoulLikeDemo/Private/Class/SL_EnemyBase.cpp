@@ -87,6 +87,14 @@ void ASL_EnemyBase::InitializeEnemy(int32 EnemyID)
 		EnemyID, *Config.EnemyName.ToString(), (int32)Config.EnemyType);
 }
 
+bool ASL_EnemyBase::IsAlive()
+{
+	RETURN_VALUE_IF_TRUE(AbilitySystemComp == nullptr,false);
+	FGameplayTagContainer currentTags;
+	AbilitySystemComp->GetOwnedGameplayTags(currentTags);
+	return currentTags.HasTag(FGameplayTag::RequestGameplayTag(TEXT("State.Alive")));
+}
+
 ASL_EnemyAIController* ASL_EnemyBase::GetEnemyAIController() const
 {
     return Cast<ASL_EnemyAIController>(GetController());
@@ -155,13 +163,13 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
 	// 1. 设置属性（通过GAS）
 	if (AbilitySystemComp)
 	{
+		AbilitySystemComp->SetAliveTag();
 		// 设置初始血量
 		if (USL_StatusAttributeSet* StatusSet = const_cast<USL_StatusAttributeSet*>(AbilitySystemComp->GetSet<USL_StatusAttributeSet>()))
 		{
 			// 通过GAS的Attribute设置初始值
 			StatusSet->InitHealth(Config.BaseHealth);
 			StatusSet->InitMaxHealth(Config.BaseHealth);
-
 			// 设置其他属性
 			// 注意：Stamina、Attack、Defense等需要额外配置GE
 		}

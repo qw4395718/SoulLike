@@ -67,8 +67,8 @@ public:
     UFUNCTION(BlueprintPure, Category = "Enemy|AI")
         UBlackboardData* GetBlackboardData() const { return BlackboardData; }
 
-    UFUNCTION(BlueprintPure, Category = "Enemy|AI")
-        bool IsAlive() const { return CurrentState != EEnemyState::Dead; }
+    UFUNCTION(BlueprintCallable, Category = "Enemy|AI")
+		bool IsAlive();
 
 	// AIController引用
     UFUNCTION(BlueprintPure, Category = "Enemy|AI")

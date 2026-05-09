@@ -150,3 +150,9 @@ FGameplayAbilitySpec* USL_AbilitySystemComponent::FindAbilitySpecFromTag(const F
 
 	return nullptr;
 }
+
+void USL_AbilitySystemComponent::SetAliveTag()
+{
+	RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Dead"));
+	AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Alive")); 
+}

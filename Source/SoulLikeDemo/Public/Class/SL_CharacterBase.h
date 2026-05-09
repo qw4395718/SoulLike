@@ -27,6 +27,14 @@ class UGameplayAbility;
 class UWidgetComponent;
 class USL_ComboManagerComponent;
 
+UENUM(BlueprintType)
+enum class EPlayerState : uint8
+{
+    Alive   UMETA(DisplayName = "存活"),
+    Dead    UMETA(DisplayName = "死亡")
+};
+
+
 UCLASS()
 class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,
 public ICharacterComponent_IF, 
@@ -118,6 +126,12 @@ protected:
 	// 武器动画通知下发
 	void WeaponAnimProcess(int HandType,EWeaponAnimNotifyType NotifyType);
 
+	void Die();
+
+	void Revive();
+
+	bool ApplyEnemyConfig(const FClassConfigInfo& InConfig);
+
 	/************************************************************************/
 	/*                                GAS委托处理                                      */
 	/************************************************************************/
@@ -135,13 +149,23 @@ public:
 		void InitPartmentComponent();
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void BindGASDeathEvent();
+
+				/** GAS角色死亡回调 */
+	UFUNCTION()
+		void OnGASCharacterDied(AActor* DiedActor, AActor* KillerActor);
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void InitEquipmentWithClass(int32 InPlayerClassID);
+		void InitCharacterWithClassID(int32 InPlayerClassID);
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		bool IsAlive();
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void SetClassID(int32 InPlayerClassID);
 
 	FString GetNetworkGUIDString(AActor* InActor);
 protected:
@@ -186,4 +210,12 @@ protected:
 
 	UPROPERTY()
 		USL_ComboManagerComponent* ComboManagerCmp;
+
+	// 这个状态仅用于确定是否需要触发死亡布娃娃系统
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+		EPlayerState CurrentState;
+
+	// 角色配置
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+		FClassConfigInfo ClassConfig;
 };

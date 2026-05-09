@@ -56,7 +56,7 @@ void UEQS_Generator_EnemyTargets::GenerateItems(FEnvQueryInstance& QueryInstance
 
 		// 检查目标是否存活
 		ASL_CharacterBase* TargetChar = Cast<ASL_CharacterBase>(Actor);
-		if (TargetChar /*&& TargetChar->IsAlive()*/)
+		if (TargetChar && TargetChar->IsAlive())
 		{
 			// 检查距离是否在搜索半径内
 			float Distance = FVector::Dist(CenterLocation[0], Actor->GetActorLocation());

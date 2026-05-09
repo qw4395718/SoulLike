@@ -45,4 +45,8 @@ public:
         UGameplayAbility* GetActiveAbilityInstanceByTag(const FGameplayTag& AbilityTag) const;
 
 	FGameplayAbilitySpec* FindAbilitySpecFromTag(const FGameplayTag& AbilityTag) const;
+
+	// 设置状态Tag为“存活”
+	UFUNCTION(BlueprintCallable, Category = "GAS")
+	void SetAliveTag();
 };

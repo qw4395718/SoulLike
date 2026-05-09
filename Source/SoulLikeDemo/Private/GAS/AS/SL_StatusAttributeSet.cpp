@@ -240,44 +240,6 @@ void USL_StatusAttributeSet::OnCharacterDeath(AActor* DeathActor)
         DelegateMgr->OnCharacterDied.Broadcast(OwnerActor, nullptr);
     }
 
-	// 检查是否是敌人
-	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(OwnerActor);
-	if (Enemy)
-	{
-		// 调用敌人的Die函数，它会处理：
-		// - 设置状态为Dead
-		// - 广播OnEnemyDied委托（WaveManager监听这个）
-		// - 禁用AI
-		// - 播死亡动画等
-		Enemy->Die();
-		return;
-	}
-
-	
-    // 3. 禁用角色
-    if (ACharacter* Char = Cast<ACharacter>(OwnerActor))
-    {
-        // 注意：UE4.26中GetMesh()可能返回null，需检查
-        Char->SetActorEnableCollision(false);
-        
-        if (APlayerController* PC = Cast<APlayerController>(Char->GetController()))
-        {
-            PC->SetCinematicMode(true, false, false);
-        }
-
-		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
-		{
-			comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-		if (Char->GetMesh())
-		{
-			Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			Char->GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
-			Char->GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
-		}
-    }
-
-
     UE_LOG(LogTemp, Warning, TEXT("GAS Death: %s died"), *OwnerActor->GetName());
 }
 
@@ -294,20 +256,11 @@ void USL_StatusAttributeSet::OnCharacterReLive(AActor* ReviveActor)
 	ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Dead"));
 	ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Alive")); 
 
-	// 2.移除布娃娃系统,恢复正常的碰撞
-	if (ACharacter* Char = Cast<ACharacter>(ReviveActor))
-	{
-		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
-		{
-			comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		}
-		if (Char->GetMesh())
-		{
-			Char->GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
-			Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-			Char->GetMesh()->SetAllBodiesSimulatePhysics(false);
-		}
-	}
+	 // 2. 广播死亡事件
+    if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+    {
+        DelegateMgr->OnCharacterRevived.Broadcast(OwnerActor);
+    }
 }
 
 void USL_StatusAttributeSet::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const

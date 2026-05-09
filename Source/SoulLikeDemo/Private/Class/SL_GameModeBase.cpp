@@ -97,7 +97,7 @@ void ASL_GameModeBase::InitializePlayer(int32 PlayerClassID)
 
 	if (PlayerCharacter)
 	{
-		PlayerCharacter->InitEquipmentWithClass(PlayerClassID);
+		PlayerCharacter->SetClassID(PlayerClassID);
 		UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::InitializePlayer - Player initialized with class %d"), PlayerClassID);
 	}
 }

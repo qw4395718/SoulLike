@@ -46,11 +46,13 @@ void ASL_CharacterBase::BeginPlay()
 	Super::BeginPlay();
 	// 初始化角色(包含组件)
 	InitializeCharacter();
+	InitCharacterWithClassID();
 
 	// 为ASC设置持有者和化身
 	if (AbilitySystemComp)
 	{
 		AbilitySystemComp->InitAbilityActorInfo(this, this);
+		AbilitySystemComp->SetAliveTag();
 	}
 
 	if (StatusAttributeSet)
@@ -343,12 +345,163 @@ UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComp;
 }
 
-void ASL_CharacterBase::InitEquipmentWithClass(int32 InPlayerClassID)
+void ASL_CharacterBase::SetClassID(int32 InPlayerClassID)
 {
-	RETURN_IF_TRUE(EquipmentCmp == nullptr);
-	EquipmentCmp->InitializeWithClassID(InPlayerClassID);
+	PlayerClassID = InPlayerClassID;
+	// 此处临时存档,需要等gamemodebase 重写RestartPlayer后才能走begin正常初始化的流程
+	InitCharacterWithClassID(PlayerClassID);
+}
+
+void ASL_CharacterBase::InitCharacterWithClassID(int32 InPlayerClassID)
+{
+	if (!UDataTableManager* TableManager = UDataTableManager::Get(this))
+	{
+		UE_LOG(LogTemp, Error, TEXT("ASL_CharacterBase::InitializeCharacter - DataTableManager not found"));
+		return;
+	}
+	if (!UClassConfigInfoTable* ClassTable = Cast<UClassConfigInfoTable>(TableManager->GetDataTable(EDataTableType::DT_ClassConfigInfo)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("ASL_CharacterBase::InitializeCharacter - ClassConfigInfoTable not found"));
+		return;
+	}
+
+	FEnemyConfigInfo Config;
+	if(!ClassTable->GetClassConfig(InPlayerClassID, Config))
+	{
+		UE_LOG(LogTemp, Error, TEXT("ASL_CharacterBase::InitializeCharacter - ClassConfig not found"));
+		return;
+	}
+
+	// 保存角色的配置
+	ClassConfig = Config;
+
+	// 应用配置
+	ApplyEnemyConfig(ClassConfig);
+
+	BindGASDeathEvent();
+
 	// Todo:切换职业的时候需要广播,改变能力值和Tag
 }
+
+void ASL_CharacterBase::ApplyEnemyConfig(const FClassConfigInfo& Config)
+{
+	// 1. 设置属性（通过GAS）
+	if (AbilitySystemComp)
+	{
+		AbilitySystemComp->SetAliveTag();
+		// 设置初始血量
+		if (USL_StatusAttributeSet* StatusSet = const_cast<USL_StatusAttributeSet*>(AbilitySystemComp->GetSet<USL_StatusAttributeSet>()))
+		{
+			// 通过GAS的Attribute设置初始值
+			StatusSet->InitHealth(Config.BaseHealth);
+			StatusSet->InitMaxHealth(Config.BaseHealth);
+			StatusSet->InitStamina(Config.BaseStamina);
+			StatusSet->InitMaxStamina(Config.BaseStamina);
+			// StatusSet->InitAttack(Config.BaseAttack);
+			// StatusSet->InitDefense(Config.BaseDefense);
+			// 设置其他属性
+			// 注意：Stamina、Attack、Defense等需要额外配置GE
+		}
+	}
+	if (EquipmentCmp)
+	{
+		EquipmentCmp->InitializeWithClassID(InPlayerClassID);
+	}
+
+	
+}
+
+void ASL_CharacterBase::BindGASDeathEvent()
+{
+	// 绑定GAS的死亡委托
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		// 防止重复绑定
+		if (!OnCharacterDiedHandle.IsValid())
+		{
+			OnCharacterDiedHandle = DelegateMgr->OnCharacterDied.AddUObject(this, &ASL_CharacterBase::OnGASCharacterDied);
+		}
+	}
+}
+
+void ASL_CharacterBase::OnGASCharacterDied(AActor* DiedActor, AActor* KillerActor)
+{
+	// 检查是否是自己的死亡事件
+	if (DiedActor != this) return;
+
+	UE_LOG(LogTemp, Log, TEXT("ASL_CharacterBase::OnGASCharacterDied - Enemy %s died"), *GetName());
+
+	// 确保执行死亡逻辑
+	if (CurrentState != EPlayerState::Dead)
+	{
+		Die();
+	}
+}
+
+void ASL_CharacterBase::OnGASCharacterRevive(AActor* ReviveActor)
+{
+	// 检查是否是自己的复活事件
+	if (ReviveActor != this) return;
+
+	UE_LOG(LogTemp, Log, TEXT("ASL_CharacterBase::OnGASCharacterRevive - Enemy %s revived"), *GetName());
+
+	// 确保执行复活逻辑
+	if (CurrentState != EPlayerState::Alive)
+	{
+		Revive();
+	}
+}
+
+void ASL_CharacterBase::Die()
+{
+	if (CurrentState == EPlayerState::Dead) return;
+	CurrentState = EPlayerState::Dead;
+
+    // 禁用角色
+    if (ACharacter* Char = Cast<ACharacter>(this))
+    {
+        // 注意：UE4.26中GetMesh()可能返回null，需检查
+        Char->SetActorEnableCollision(false);
+        
+        if (APlayerController* PC = Cast<APlayerController>(Char->GetController()))
+        {
+            PC->SetCinematicMode(true, false, false);
+        }
+
+		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
+		{
+			comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+		if (Char->GetMesh())
+		{
+			Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			Char->GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+			Char->GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
+		}
+    }
+
+}
+
+void ASL_CharacterBase::Revive()
+{
+	if (CurrentState == EPlayerState::AAlive) return;
+	CurrentState = EPlayerState::Alive;
+	// 2.移除布娃娃系统,恢复正常的碰撞
+	if (ACharacter* Char = Cast<ACharacter>(ReviveActor))
+	{
+		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
+		{
+			comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		}
+		if (Char->GetMesh())
+		{
+			Char->GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+			Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			Char->GetMesh()->SetAllBodiesSimulatePhysics(false);
+		}
+	}
+}
+
 
 bool ASL_CharacterBase::IsAlive()
 {

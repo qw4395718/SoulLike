@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
+#include <EnemyConfigInfoTable.h>
+#include <SoulLikeGameGlobal.h>
 
 void UWaveManagerSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -220,12 +222,33 @@ void UWaveManagerSystem::SpawnWaveMonsters(FWaveConfigInfo& WaveConfig)
 
 			if (SpawnerID < 0) return;
 
+			UDataTableManager* TableManager = UDataTableManager::Get(this);
+			if (!TableManager)
+			{
+				UE_LOG(LogTemp, Error, TEXT("UWaveManagerSystem::SpawnWaveMonsters - DataTableManager not found"));
+				return;;
+			}
+
+			UEnemyConfigInfoTable* EnemyTable = Cast<UEnemyConfigInfoTable>(TableManager->GetDataTable(EDataTableType::DT_EnemyConfigInfo));
+			if (!EnemyTable)
+			{
+				UE_LOG(LogTemp, Error, TEXT("UWaveManagerSystem::SpawnWaveMonsters - EnemyConfigInfoTable not found"));
+				return;
+			}
+
+			FEnemyConfigInfo Config;
+			if (!EnemyTable->GetEnemyConfig(SpawnerID, Config))
+			{
+				UE_LOG(LogTemp, Error, TEXT("UWaveManagerSystem::SpawnWaveMonsters - EnemyID=%d not found in config table"), SpawnerID);
+				return;
+			}
+
 			// 选择一个生成点
 			int32 PointIndex = SpawnedCount % SpawnPoints.Num();
 			const FSpawnPointInfo& SpawnPoint = SpawnPoints[PointIndex];
 
 			// 生成怪物
-			FTransform SpawnTransform(SpawnPoint.Rotation, SpawnPoint.Location);
+			FTransform SpawnTransform(SpawnPoint.Rotation, SpawnPoint.Location + FVector{0,0,Config.CapsuleHalfHeight});
 			ASL_EnemyBase* Enemy = SpawnEnemyAtPoint(SpawnerID, SpawnTransform);
 
 			if (Enemy)
@@ -252,7 +275,8 @@ ASL_EnemyBase* UWaveManagerSystem::SpawnEnemyAtPoint(int32 SpawnerID, const FTra
 {
 	if (!GetWorld()) return nullptr;
 
-	// TODO: 从EnemyDataTable获取敌人类型
+
+
 	// 这里先使用默认的敌人基类
 	TSubclassOf<ASL_EnemyBase> EnemyClass = ASL_EnemyBase::StaticClass();
 

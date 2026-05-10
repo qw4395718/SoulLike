@@ -18,10 +18,8 @@
 #include <SL_GameplayAbilityNPCBase.h>
 #include <SL_WeaponBase.h>
 
-ASL_EnemyBase::ASL_EnemyBase(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+ASL_EnemyBase::ASL_EnemyBase()
 {
-	PrimaryActorTick.bCanEverTick = false; 
 	CurrentState = EEnemyState::Alive;
 	CurrentTarget = nullptr;
 	// 默认武器派生类
@@ -40,7 +38,6 @@ ASL_EnemyBase::ASL_EnemyBase(const FObjectInitializer& ObjectInitializer)
 	AbilitySystemComp = CreateDefaultSubobject<USL_AbilitySystemComponent>(TEXT("AbilitySystem"));
 	// AS(CharacterCombatState)
 	StatusAttributeSet = CreateDefaultSubobject<USL_StatusAttributeSet>(TEXT("StatusSet"));
-
 }
 
 void ASL_EnemyBase::BeginPlay()
@@ -87,12 +84,20 @@ void ASL_EnemyBase::InitializeEnemy(int32 EnemyID)
 		EnemyID, *Config.EnemyName.ToString(), (int32)Config.EnemyType);
 }
 
-bool ASL_EnemyBase::IsAlive()
+bool ASL_EnemyBase::IsAlive() const
 {
-	RETURN_VALUE_IF_TRUE(AbilitySystemComp == nullptr,false);
+	RETURN_VALUE_IF_TRUE(AbilitySystemComp == nullptr, false);
 	FGameplayTagContainer currentTags;
 	AbilitySystemComp->GetOwnedGameplayTags(currentTags);
 	return currentTags.HasTag(FGameplayTag::RequestGameplayTag(TEXT("State.Alive")));
+}
+
+bool ASL_EnemyBase::IsDie() const
+{
+	RETURN_VALUE_IF_TRUE(AbilitySystemComp == nullptr, false);
+	FGameplayTagContainer currentTags;
+	AbilitySystemComp->GetOwnedGameplayTags(currentTags);
+	return currentTags.HasTag(FGameplayTag::RequestGameplayTag(TEXT("State.Dead")));
 }
 
 ASL_EnemyAIController* ASL_EnemyBase::GetEnemyAIController() const
@@ -179,12 +184,15 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
 	if (GetCapsuleComponent())
 	{
 		GetCapsuleComponent()->SetCapsuleSize(Config.CapsuleRadius, Config.CapsuleHalfHeight);
+		//GetCapsuleComponent()->SetRelativeLocation(Config.MeshRelativeLocationOffset);
 	}
 
-	// 3. 设置模型缩放
+	// 3. 设置模型缩放,旋转,偏移
 	if (GetMesh())
 	{
-		GetMesh()->SetRelativeScale3D(FVector(Config.MeshScale));
+		GetMesh()->SetRelativeScale3D(Config.MeshScale);
+		GetMesh()->SetRelativeRotation(Config.MeshRelativeRotate);
+		GetMesh()->SetRelativeLocation(FVector(0,0, -Config.CapsuleHalfHeight));
 	}
 
 	// 4. 加载外观
@@ -226,6 +234,9 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
 
 	// 7. 绑定GAS死亡事件
 	BindGASDeathEvent();
+
+	// 8. 设置基础移速
+	GetCharacterMovement()->MaxWalkSpeed = Config.BaseMoveSpeed;
 }
 
 void ASL_EnemyBase::LoadEnemyAppearance(const FEnemyConfigInfo& Config)
@@ -237,7 +248,6 @@ void ASL_EnemyBase::LoadEnemyAppearance(const FEnemyConfigInfo& Config)
 		if (EnemyMesh && GetMesh())
 		{
 			GetMesh()->SetSkeletalMesh(EnemyMesh);
-			GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 		}
 	}
 

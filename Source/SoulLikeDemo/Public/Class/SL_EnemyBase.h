@@ -7,6 +7,7 @@
 #include <SoulLikeGameGlobal.h>
 #include <WeaponAccessory_IF.h>
 #include <AbilitySystemInterface.h>
+#include <ActorState_IF.h>
 #include "SL_EnemyBase.generated.h"
 
 /** 敌人状态 */
@@ -22,12 +23,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDied);
 UCLASS()
 class SOULLIKEDEMO_API ASL_EnemyBase : public ACharacter,
 public IWeaponAccessory_IF,
-public IAbilitySystemInterface
+public IAbilitySystemInterface,
+public IActorState_IF
 {
 	GENERATED_BODY()
 
 public:
-	ASL_EnemyBase(const FObjectInitializer& ObjectInitializer);
+	ASL_EnemyBase();
 
 protected:
 	virtual void BeginPlay() override;
@@ -56,6 +58,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Enemy")
 		EEnemyState GetEnemyState() const { return CurrentState; }
 
+	/************************************************************************/
+	/*                    IActorState_IF 接口实现                        */
+	/************************************************************************/
+
+	virtual bool IsAlive() const override;
+	virtual bool IsDie() const override;
+
 	/*
 	 * 公开给AIController访问
 	 */
@@ -66,9 +75,6 @@ public:
 	// AIController获取黑板空间配置
     UFUNCTION(BlueprintPure, Category = "Enemy|AI")
         UBlackboardData* GetBlackboardData() const { return BlackboardData; }
-
-    UFUNCTION(BlueprintCallable, Category = "Enemy|AI")
-		bool IsAlive();
 
 	// AIController引用
     UFUNCTION(BlueprintPure, Category = "Enemy|AI")

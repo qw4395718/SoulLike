@@ -6,6 +6,7 @@
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "SL_EnemyBase.h"
+#include <ActorState_IF.h>
 
 UBTService_UpdateTarget::UBTService_UpdateTarget()
 {
@@ -27,6 +28,7 @@ void UBTService_UpdateTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
     AAIController* AIController = OwnerComp.GetAIOwner();
     if (!AIController) return;
 
+    // AI自身是否存活
     ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
     if (!Enemy || !Enemy->IsAlive()) return;
 
@@ -34,12 +36,30 @@ void UBTService_UpdateTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
     if (!BB) return;
 
     AActor* CurrentTarget = Cast<AActor>(BB->GetValueAsObject(TargetActorKey.SelectedKeyName));
-
+    
     /************************************************************************/
     /*              情况1：已有目标，更新目标状态或检查丢失                    */
     /************************************************************************/
     if (CurrentTarget)
     {
+		/************************************************************************/
+	    /*              情况2：有目标但已死亡,清理信息,通过EQS搜索新目标                              */
+	    /************************************************************************/
+        // 检测目标是否死亡
+        if (IActorState_IF* ActorState_IF = Cast<IActorState_IF>(CurrentTarget))
+        {
+            if (ActorState_IF->IsDie() == true)
+            {
+                ClearCurrentTargetInfo();
+                FindNewTarget(OwnerComp);
+                return;
+            }
+        }
+        else
+        {// 为继承状态接口的目标为无效目标
+            return;
+        }
+
         float Distance = FVector::Dist(Enemy->GetActorLocation(), CurrentTarget->GetActorLocation());
 
         // 更新目标位置和距离
@@ -81,22 +101,11 @@ void UBTService_UpdateTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
         return; // 已有目标，不需要搜索
     }
 
+	/************************************************************************/
+    /*              情况3：没有目标，通过EQS搜索                              */
     /************************************************************************/
-    /*              情况2：没有目标，通过EQS搜索                              */
-    /************************************************************************/
-    if (!EQSQueryTemplate || bIsQuerying) return;
+    FindNewTarget(OwnerComp);
 
-    TimeSinceLastSearch += Interval;
-    if (TimeSinceLastSearch < SearchInterval) return;
-    TimeSinceLastSearch = 0.0f;
-
-    // 运行EQS查询
-    FEnvQueryRequest QueryRequest(EQSQueryTemplate, Enemy);
-    bIsQuerying = true;
-    CachedBTComp = &OwnerComp;
-
-    QueryRequest.Execute(EEnvQueryRunMode::SingleResult,
-        FQueryFinishedSignature::CreateUObject(this, &UBTService_UpdateTarget::OnEQSQueryFinished));
 }
 
 /************************************************************************/
@@ -133,4 +142,45 @@ void UBTService_UpdateTarget::OnEQSQueryFinished(TSharedPtr<FEnvQueryResult> Res
 void UBTService_UpdateTarget::UpdateTargetState(UBehaviorTreeComponent& OwnerComp, AActor* TargetActor)
 {
     // 此函数保留用于扩展，目前逻辑直接在 TickNode 中处理
+}
+
+void UBTService_UpdateTarget::ClearCurrentTargetInfo()
+{
+	if (!CachedBTComp) return;
+
+	UBlackboardComponent* BB = CachedBTComp->GetBlackboardComponent();
+	if (!BB) return;
+	// 清除当前目标的所有信息
+	BB->ClearValue(TargetActorKey.SelectedKeyName);
+    BB->ClearValue(TargetLocationKey.SelectedKeyName);
+    BB->ClearValue(SuspectedLocationKey.SelectedKeyName);
+    BB->SetValueAsBool(HasSuspectedLocationKey.SelectedKeyName, false);
+	BB->SetValueAsBool(HasTargetKey.SelectedKeyName, false);
+	BB->SetValueAsBool(InAttackRangeKey.SelectedKeyName, false);
+    BB->SetValueAsBool(InChaseRangeKey.SelectedKeyName, false);
+}
+
+void UBTService_UpdateTarget::FindNewTarget(UBehaviorTreeComponent& OwnerComp)
+{
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	if (!AIController) return;
+
+	// AI自身是否存活
+	ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(AIController->GetPawn());
+	if (!Enemy || !Enemy->IsAlive()) return;
+
+	if (!EQSQueryTemplate || bIsQuerying) return;
+
+	TimeSinceLastSearch += Interval;
+	if (TimeSinceLastSearch < SearchInterval) return;
+	TimeSinceLastSearch = 0.0f;
+
+	// 运行EQS查询
+	FEnvQueryRequest QueryRequest(EQSQueryTemplate, Enemy);
+	bIsQuerying = true;
+	CachedBTComp = &OwnerComp;
+
+	QueryRequest.Execute(EEnvQueryRunMode::SingleResult,
+		FQueryFinishedSignature::CreateUObject(this, &UBTService_UpdateTarget::OnEQSQueryFinished));
+
 }

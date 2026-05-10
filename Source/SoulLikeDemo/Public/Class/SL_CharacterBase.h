@@ -16,6 +16,7 @@
 #include "AnimNotify_IF.h"
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemInterface.h"
 #include <WeaponAccessory_IF.h>
+#include <ActorState_IF.h>
 #include "SL_CharacterBase.generated.h"
 
 // 声明一个自定义日志类别
@@ -40,7 +41,8 @@ class SOULLIKEDEMO_API ASL_CharacterBase : public ACharacter ,
 public ICharacterComponent_IF, 
 public IAnimNotify_IF, 
 public IAbilitySystemInterface,
-public IWeaponAccessory_IF 
+public IWeaponAccessory_IF,
+public IActorState_IF
 {
 	GENERATED_BODY()
 
@@ -109,6 +111,13 @@ public:
     virtual ASL_WeaponBase* GetWeaponByHand(int32 HandIndex) const override;
 
 	/************************************************************************/
+	/*                    IActorState_IF 接口实现                        */
+	/************************************************************************/
+
+	virtual bool IsAlive() const override;
+	virtual bool IsDie() const override;
+
+	/************************************************************************/
 	/*                               Unlua相关                                      */
 	/************************************************************************/
 
@@ -130,7 +139,7 @@ protected:
 
 	void Revive();
 
-	bool ApplyEnemyConfig(const FClassConfigInfo& InConfig);
+	void ApplyEnemyConfig(const FClassConfigInfo& InConfig);
 
 	/************************************************************************/
 	/*                                GAS委托处理                                      */
@@ -151,18 +160,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void BindGASDeathEvent();
 
-				/** GAS角色死亡回调 */
+	// GAS角色死亡回调
 	UFUNCTION()
 		void OnGASCharacterDied(AActor* DiedActor, AActor* KillerActor);
+
+	// GAS角色复活回调
+	UFUNCTION()
+		void OnGASCharacterRevive(AActor* ReviveActor);
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitCharacterWithClassID(int32 InPlayerClassID);
-
-	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		bool IsAlive();
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void SetClassID(int32 InPlayerClassID);
@@ -218,4 +228,9 @@ protected:
 	// 角色配置
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
 		FClassConfigInfo ClassConfig;
+
+	int32 PlayerClassID;
+
+	// 死亡委托的句柄
+	FDelegateHandle OnCharacterDiedHandle;
 };

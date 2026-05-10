@@ -59,7 +59,7 @@ void ALevelManager::StartLevel(int32 LevelID, int32 PlayerClassID)
 		UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	if (PlayerCharacter)
 	{
-		PlayerCharacter->InitEquipmentWithClass(PlayerClassID);
+		PlayerCharacter->InitCharacterWithClassID(PlayerClassID);
 	}
 
 	// 开始关卡流程

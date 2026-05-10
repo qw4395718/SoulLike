@@ -732,10 +732,18 @@ struct FEnemyConfigInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combo")
 		TArray<TSubclassOf<UGameplayAbility>> GrantedAbilities;
 
-	// ===== 缩放配置 =====
+	// ===== Mesh配置 =====
 	/** 模型缩放 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
-		float MeshScale = 1.0f;
+		FVector MeshScale {1.0f, 1.0f,1.0f,};
+
+	// 模型相对旋转量
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+		FRotator MeshRelativeRotate {0.0f, -90.0f, 0.0f};
+
+	// 模型相对位移量
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+		FVector MeshRelativeLocationOffset;
 
 	/** 碰撞胶囊体半径 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
@@ -743,5 +751,7 @@ struct FEnemyConfigInfo : public FTableRowBase
 
 	/** 碰撞胶囊体高度 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
-		float CapsuleHalfHeight = 88.0f;
+		float CapsuleHalfHeight = 44.0f;
+
+	
 };

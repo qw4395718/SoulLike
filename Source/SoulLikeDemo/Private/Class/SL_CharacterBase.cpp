@@ -11,6 +11,11 @@
 #include <Engine/PackageMapClient.h>
 #include <GameplayTagContainer.h>
 #include <SL_ComboManagerComponent.h>
+#include <Manager/DataTableManager.h>
+#include <ClassConfigInfoTable.h>
+#include <SoulLikeGameGlobal.h>
+#include <Manager/GlobalDelegatesManager.h>
+#include <Components/CapsuleComponent.h>
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 
@@ -46,7 +51,7 @@ void ASL_CharacterBase::BeginPlay()
 	Super::BeginPlay();
 	// 初始化角色(包含组件)
 	InitializeCharacter();
-	InitCharacterWithClassID();
+	InitCharacterWithClassID(1001);
 
 	// 为ASC设置持有者和化身
 	if (AbilitySystemComp)
@@ -354,18 +359,20 @@ void ASL_CharacterBase::SetClassID(int32 InPlayerClassID)
 
 void ASL_CharacterBase::InitCharacterWithClassID(int32 InPlayerClassID)
 {
-	if (!UDataTableManager* TableManager = UDataTableManager::Get(this))
+	UDataTableManager* TableManager = UDataTableManager::Get(this);
+	if (!TableManager)
 	{
 		UE_LOG(LogTemp, Error, TEXT("ASL_CharacterBase::InitializeCharacter - DataTableManager not found"));
 		return;
 	}
-	if (!UClassConfigInfoTable* ClassTable = Cast<UClassConfigInfoTable>(TableManager->GetDataTable(EDataTableType::DT_ClassConfigInfo)))
+	UClassConfigInfoTable* ClassTable = Cast<UClassConfigInfoTable>(TableManager->GetDataTable(EDataTableType::DT_ClassConfigInfo));
+	if (!ClassTable)
 	{
 		UE_LOG(LogTemp, Error, TEXT("ASL_CharacterBase::InitializeCharacter - ClassConfigInfoTable not found"));
 		return;
 	}
 
-	FEnemyConfigInfo Config;
+	FClassConfigInfo Config;
 	if(!ClassTable->GetClassConfig(InPlayerClassID, Config))
 	{
 		UE_LOG(LogTemp, Error, TEXT("ASL_CharacterBase::InitializeCharacter - ClassConfig not found"));
@@ -405,7 +412,7 @@ void ASL_CharacterBase::ApplyEnemyConfig(const FClassConfigInfo& Config)
 	}
 	if (EquipmentCmp)
 	{
-		EquipmentCmp->InitializeWithClassID(InPlayerClassID);
+		EquipmentCmp->InitializeWithClassID(PlayerClassID);
 	}
 
 	
@@ -484,10 +491,10 @@ void ASL_CharacterBase::Die()
 
 void ASL_CharacterBase::Revive()
 {
-	if (CurrentState == EPlayerState::AAlive) return;
+	if (CurrentState == EPlayerState::Alive) return;
 	CurrentState = EPlayerState::Alive;
 	// 2.移除布娃娃系统,恢复正常的碰撞
-	if (ACharacter* Char = Cast<ACharacter>(ReviveActor))
+	if (ACharacter* Char = Cast<ACharacter>(this))
 	{
 		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
 		{
@@ -502,13 +509,21 @@ void ASL_CharacterBase::Revive()
 	}
 }
 
-
-bool ASL_CharacterBase::IsAlive()
+bool ASL_CharacterBase::IsAlive() const
 {
-	RETURN_VALUE_IF_TRUE(AbilitySystemComp == nullptr,false);
+	RETURN_VALUE_IF_TRUE(AbilitySystemComp == nullptr, false);
 	FGameplayTagContainer currentTags;
 	AbilitySystemComp->GetOwnedGameplayTags(currentTags);
 	return currentTags.HasTag(FGameplayTag::RequestGameplayTag(TEXT("State.Alive")));
+}
+
+bool ASL_CharacterBase::IsDie() const
+{
+	RETURN_VALUE_IF_TRUE(AbilitySystemComp == nullptr, false);
+	FGameplayTagContainer currentTags;
+	AbilitySystemComp->GetOwnedGameplayTags(currentTags);
+	return currentTags.HasTag(FGameplayTag::RequestGameplayTag(TEXT("State.Dead")));
+
 }
 
 FString ASL_CharacterBase::GetNetworkGUIDString(AActor* InActor)

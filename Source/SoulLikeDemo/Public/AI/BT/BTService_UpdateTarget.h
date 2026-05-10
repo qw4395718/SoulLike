@@ -77,6 +77,12 @@ private:
     // 更新黑板中距离和目标状态
     void UpdateTargetState(UBehaviorTreeComponent& OwnerComp, AActor* TargetActor);
 
+    // 清空当前目标数据
+    void ClearCurrentTargetInfo();
+
+    // 调用EQS查询目标
+    void FindNewTarget(UBehaviorTreeComponent& OwnerComp);
+
 private:
     /************************************************************************/
     /*                               内部访问                               */

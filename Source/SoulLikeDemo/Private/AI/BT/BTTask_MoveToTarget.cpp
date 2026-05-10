@@ -29,13 +29,13 @@ EBTNodeResult::Type UBTTask_MoveToTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 	if (TargetActor)
 	{
 		// 移动向目标Actor
-		AIController->MoveToActor(TargetActor, AcceptanceRadius, true, true, false);
+		EPathFollowingRequestResult::Type result = AIController->MoveToActor(TargetActor, AcceptanceRadius, true, true, false);
 		return EBTNodeResult::InProgress;
 	}
 	else if (!TargetLocation.IsZero())
 	{
 		// 移动向目标位置
-		AIController->MoveToLocation(TargetLocation, AcceptanceRadius, true);
+		EPathFollowingRequestResult::Type result = AIController->MoveToLocation(TargetLocation, AcceptanceRadius, true);
 		return EBTNodeResult::InProgress;
 	}
 

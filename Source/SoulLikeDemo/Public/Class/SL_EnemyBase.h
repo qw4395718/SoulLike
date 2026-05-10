@@ -86,6 +86,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Combat")
 		void Die();
 
+	void RagDollStart();
+	void RagDollEnd();
 	// ===== 感知接口 =====
 	UFUNCTION(BlueprintPure, Category = "Enemy|Perception")
 		float GetPerceptionRange() const { return PerceptionRange; }

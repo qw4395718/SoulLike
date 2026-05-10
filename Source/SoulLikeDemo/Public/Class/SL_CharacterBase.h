@@ -137,7 +137,11 @@ protected:
 
 	void Die();
 
+	void RagDollStart();
+
 	void Revive();
+
+	void RagDollEnd();
 
 	void ApplyEnemyConfig(const FClassConfigInfo& InConfig);
 

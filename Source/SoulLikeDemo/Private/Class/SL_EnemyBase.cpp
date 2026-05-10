@@ -43,6 +43,17 @@ ASL_EnemyBase::ASL_EnemyBase()
 void ASL_EnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 为ASC设置持有者和化身
+	if (AbilitySystemComp)
+	{
+		AbilitySystemComp->InitAbilityActorInfo(this, this);
+	}
+
+	if (StatusAttributeSet)
+	{
+		StatusAttributeSet->SetOwningActor(this);
+	}
 }
 
 void ASL_EnemyBase::InitializeEnemy(int32 EnemyID)
@@ -122,7 +133,8 @@ void ASL_EnemyBase::Die()
 	{
 		// 可以在这里触发布娃娃或者死亡蒙太奇
 		// 但为了避免与GAS的布娃娃逻辑冲突，这里只做简单的禁用
-		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		RagDollStart();
 	}
 
 	// === 修正：延迟销毁（给死亡动画和掉落物品时间） ===
@@ -131,10 +143,69 @@ void ASL_EnemyBase::Die()
 		{
 			// 延迟销毁敌人
 			SetLifeSpan(2.0f);  // 2秒后自动销毁
+			// 附属销毁
+			if (LeftHandWeapon)
+			{
+				LeftHandWeapon->SetLifeSpan(3.5f);
+			}
+			if (RightHandWeapon)
+			{
+				RightHandWeapon->SetLifeSpan(3.5f);
+			}
+
 		}), 1.0f, false);
 
 	UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::Die - Enemy %s died"), *GetName());
 }
+
+void ASL_EnemyBase::RagDollStart()
+{
+	if (ACharacter* Char = Cast<ACharacter>(this))
+	{
+		if (UCharacterMovementComponent* comp = Char->GetCharacterMovement())
+		{
+			comp->SetMovementMode(MOVE_None);
+		}
+
+		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
+		{
+			comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+		if (USkeletalMeshComponent* comp = Char->GetMesh())
+		{
+			comp->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+			comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			comp->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
+			if (UAnimInstance* AimInstance = comp->GetAnimInstance())
+			{
+				AimInstance->StopAllMontages(0.2f);
+			}
+		}
+	}
+}
+
+void ASL_EnemyBase::RagDollEnd()
+{
+	// 移除布娃娃系统,恢复正常的碰撞
+	if (ACharacter* Char = Cast<ACharacter>(this))
+	{
+		if (UCharacterMovementComponent* comp = Char->GetCharacterMovement())
+		{
+			comp->SetMovementMode(MOVE_Walking);
+		}
+		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
+		{
+			comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		}
+		if (USkeletalMeshComponent* comp = Char->GetMesh())
+		{
+			comp->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+			comp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			comp->SetAllBodiesSimulatePhysics(false);
+		}
+	}
+}
+
 
 void ASL_EnemyBase::BindGASDeathEvent()
 {
@@ -170,11 +241,11 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
 	{
 		AbilitySystemComp->SetAliveTag();
 		// 设置初始血量
-		if (USL_StatusAttributeSet* StatusSet = const_cast<USL_StatusAttributeSet*>(AbilitySystemComp->GetSet<USL_StatusAttributeSet>()))
+		if (StatusAttributeSet)
 		{
 			// 通过GAS的Attribute设置初始值
-			StatusSet->InitHealth(Config.BaseHealth);
-			StatusSet->InitMaxHealth(Config.BaseHealth);
+			StatusAttributeSet->InitHealthAS(0, Config.BaseHealth);
+			StatusAttributeSet->InitStaminaAS(0, Config.BaseStamina);
 			// 设置其他属性
 			// 注意：Stamina、Attack、Defense等需要额外配置GE
 		}
@@ -184,7 +255,6 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
 	if (GetCapsuleComponent())
 	{
 		GetCapsuleComponent()->SetCapsuleSize(Config.CapsuleRadius, Config.CapsuleHalfHeight);
-		//GetCapsuleComponent()->SetRelativeLocation(Config.MeshRelativeLocationOffset);
 	}
 
 	// 3. 设置模型缩放,旋转,偏移

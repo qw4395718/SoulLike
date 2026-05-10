@@ -39,11 +39,6 @@ public:
 	/*                               外部调用                                      */
 	/************************************************************************/
 	void SetOwningActor(AActor* pOwnActor);
-	
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "StatusAttributeSet")
-	void InitStatusAS();
-	virtual void InitStatusAS_Implementation();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "StatusAttributeSet")
 		void InitHealthAS(float MinValue, float MaxValue);

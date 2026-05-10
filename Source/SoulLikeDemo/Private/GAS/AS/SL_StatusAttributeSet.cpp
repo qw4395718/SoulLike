@@ -22,12 +22,6 @@ void USL_StatusAttributeSet::SetOwningActor(AActor* pOwnActor)
 	OwningActor = pOwnActor;
 }
 
-void USL_StatusAttributeSet::InitStatusAS_Implementation()
-{
-	InitHealthAS(0.0f,100.0f);
-	InitStaminaAS(0.0f, 100.0f);
-}
-
 void USL_StatusAttributeSet::InitHealthAS_Implementation(float MinValue, float MaxValue)
 {
 	InitHealth(MaxValue);

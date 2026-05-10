@@ -59,13 +59,11 @@ void ASL_CharacterBase::BeginPlay()
 	if (AbilitySystemComp)
 	{
 		AbilitySystemComp->InitAbilityActorInfo(this, this);
-		AbilitySystemComp->SetAliveTag();
 	}
 
 	if (StatusAttributeSet)
 	{
 		StatusAttributeSet->SetOwningActor(this);
-		StatusAttributeSet->InitStatusAS();
 	}
 	
 	if (!IsPlayerControlled())
@@ -398,14 +396,12 @@ void ASL_CharacterBase::ApplyEnemyConfig(const FClassConfigInfo& Config)
 	if (AbilitySystemComp)
 	{
 		AbilitySystemComp->SetAliveTag();
-		// 设置初始血量
-		if (USL_StatusAttributeSet* StatusSet = const_cast<USL_StatusAttributeSet*>(AbilitySystemComp->GetSet<USL_StatusAttributeSet>()))
+
+		if (StatusAttributeSet)
 		{
 			// 通过GAS的Attribute设置初始值
-			StatusSet->InitHealth(Config.BaseHealth);
-			StatusSet->InitMaxHealth(Config.BaseHealth);
-			StatusSet->InitStamina(Config.BaseStamina);
-			StatusSet->InitMaxStamina(Config.BaseStamina);
+			StatusAttributeSet->InitHealthAS(0, Config.BaseHealth);
+			StatusAttributeSet->InitStaminaAS(0, Config.BaseStamina);
 			// StatusSet->InitAttack(Config.BaseAttack);
 			// StatusSet->InitDefense(Config.BaseDefense);
 			// 设置其他属性
@@ -466,14 +462,18 @@ void ASL_CharacterBase::Die()
 	if (CurrentState == EPlayerState::Dead) return;
 	CurrentState = EPlayerState::Dead;
 
-    // 禁用角色
-    if (ACharacter* Char = Cast<ACharacter>(this))
-    {
+	RagDollStart();
+}
+
+void ASL_CharacterBase::RagDollStart()
+{
+	if (ACharacter* Char = Cast<ACharacter>(this))
+	{
 		if (UCharacterMovementComponent* comp = Char->GetCharacterMovement())
 		{
 			comp->SetMovementMode(MOVE_None);
 		}
-		
+
 		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
 		{
 			comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -487,15 +487,21 @@ void ASL_CharacterBase::Die()
 			{
 				AimInstance->StopAllMontages(0.2f);
 			}
-		}	
-    }
+		}
+	}
 }
 
 void ASL_CharacterBase::Revive()
 {
 	if (CurrentState == EPlayerState::Alive) return;
 	CurrentState = EPlayerState::Alive;
-	// 2.移除布娃娃系统,恢复正常的碰撞
+
+	RagDollEnd();
+}
+
+void ASL_CharacterBase::RagDollEnd()
+{
+	// 移除布娃娃系统,恢复正常的碰撞
 	if (ACharacter* Char = Cast<ACharacter>(this))
 	{
 		if (UCharacterMovementComponent* comp = Char->GetCharacterMovement())
@@ -506,11 +512,11 @@ void ASL_CharacterBase::Revive()
 		{
 			comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		}
-		if (Char->GetMesh())
+		if (USkeletalMeshComponent* comp = Char->GetMesh())
 		{
-			Char->GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
-			Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-			Char->GetMesh()->SetAllBodiesSimulatePhysics(false);
+			comp->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+			comp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			comp->SetAllBodiesSimulatePhysics(false);
 		}
 	}
 }

@@ -16,6 +16,8 @@
 #include <SoulLikeGameGlobal.h>
 #include <Manager/GlobalDelegatesManager.h>
 #include <Components/CapsuleComponent.h>
+#include <GameFramework/CharacterMovementComponent.h>
+#include "Components/SkeletalMeshComponent.h"
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 
@@ -467,26 +469,26 @@ void ASL_CharacterBase::Die()
     // 禁用角色
     if (ACharacter* Char = Cast<ACharacter>(this))
     {
-        // 注意：UE4.26中GetMesh()可能返回null，需检查
-        Char->SetActorEnableCollision(false);
-        
-        if (APlayerController* PC = Cast<APlayerController>(Char->GetController()))
-        {
-            PC->SetCinematicMode(true, false, false);
-        }
-
+		if (UCharacterMovementComponent* comp = Char->GetCharacterMovement())
+		{
+			comp->SetMovementMode(MOVE_None);
+		}
+		
 		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
 		{
 			comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
-		if (Char->GetMesh())
+		if (USkeletalMeshComponent* comp = Char->GetMesh())
 		{
-			Char->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			Char->GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
-			Char->GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
-		}
+			comp->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+			comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			comp->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
+			if (UAnimInstance* AimInstance = comp->GetAnimInstance())
+			{
+				AimInstance->StopAllMontages(0.2f);
+			}
+		}	
     }
-
 }
 
 void ASL_CharacterBase::Revive()
@@ -496,6 +498,10 @@ void ASL_CharacterBase::Revive()
 	// 2.移除布娃娃系统,恢复正常的碰撞
 	if (ACharacter* Char = Cast<ACharacter>(this))
 	{
+		if (UCharacterMovementComponent* comp = Char->GetCharacterMovement())
+		{
+			comp->SetMovementMode(MOVE_Walking);
+		}
 		if (UCapsuleComponent* comp = Char->GetCapsuleComponent())
 		{
 			comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

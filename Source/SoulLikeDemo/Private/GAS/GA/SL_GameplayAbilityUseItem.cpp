@@ -106,10 +106,10 @@ FName USL_GameplayAbilityUseItem::ParseItemIDFromEventData(const FGameplayEventD
 	if (!InEventData) return NAME_None;
 
 	// 从 ContextString 中获取道具ID
-	if (!InEventData->ContextString.IsEmpty())
+	/*if (!InEventData->ContextString.IsEmpty())
 	{
 		return FName(*InEventData->ContextString);
-	}
+	}*/
 
 	return NAME_None;
 }

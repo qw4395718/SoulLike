@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundBase.h"
+#include <Manager/SL_GameSaveSubsystem.h>
 
 ALevelManager::ALevelManager()
 {
@@ -281,7 +282,7 @@ void ALevelManager::SaveGameProgress()
 	}
 }
 
-void ALevelManager::UnlockNextLevel(int32 NextLevelID)
+void ALevelManager::UnlockNextLevel(int32 InNextLevelID)
 {
 	// 更新当前关卡ID为下一关
 	CurrentLevelID = InNextLevelID;

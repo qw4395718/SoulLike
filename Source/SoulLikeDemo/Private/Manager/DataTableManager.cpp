@@ -10,6 +10,7 @@
 #include <ClassConfigInfoTable.h>
 #include <WaveConfigInfoTable.h>
 #include <EnemyConfigInfoTable.h>
+#include <ItemDataTable.h>
 
 // 静态常量定义
 const FString UDataTableManager::DefaultConfigTablePath = TEXT("/Game/SoulLikeDemo/Data/DataTables/Config/DT_DataTableConfig.DT_DataTableConfig");

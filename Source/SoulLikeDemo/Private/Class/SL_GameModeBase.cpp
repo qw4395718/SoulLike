@@ -3,7 +3,7 @@
 #include "LevelManager.h"
 #include "SL_CharacterBase.h"
 #include "WaveManagerSystem.h"
-#include "USL_GameSaveSubsystem.h"
+#include "SL_GameSaveSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
 ASL_GameModeBase::ASL_GameModeBase()
@@ -134,7 +134,8 @@ void ASL_GameModeBase::SaveCurrentProgress()
 {
 	if (!LevelManager) return;
 
-	int32 CurrentLevelID = LevelManager->CurrentLevelID;
+	int32 CurrentLevelID = LevelManager->GetCurrentLevelID();
+	int32 PlayerClassID = 1001;
 
 	USL_GameSaveSubsystem* SaveSubsystem = USL_GameSaveSubsystem::Get(this);
 	if (SaveSubsystem)

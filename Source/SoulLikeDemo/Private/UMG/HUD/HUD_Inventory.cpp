@@ -60,38 +60,38 @@ FReply UHUD_Inventory::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEv
 
 void UHUD_Inventory::SetInventoryComponent(USL_InventoryComponent* NewInventoryComponent)
 {
-	if (InventoryComponent && InventoryComponent->OnInventoryUpdated.IsAlreadyBound(this, &UHUD_Inventory::OnInventoryUpdated))
-	{
-		InventoryComponent->OnInventoryUpdated.RemoveDynamic(this, &UHUD_Inventory::OnInventoryUpdated);
-	}
+	//if (InventoryComponent && InventoryComponent->OnInventoryUpdated.IsAlreadyBound(this, &UHUD_Inventory::OnInventoryUpdated))
+	//{
+	//	InventoryComponent->OnInventoryUpdated.RemoveDynamic(this, &UHUD_Inventory::OnInventoryUpdated);
+	//}
 
-	InventoryComponent = NewInventoryComponent;
+	//InventoryComponent = NewInventoryComponent;
 
-	if (InventoryComponent)
-	{
-		InventoryComponent->OnInventoryUpdated.AddDynamic(this, &UHUD_Inventory::OnInventoryUpdated);
-		RefreshInventory();
-	}
+	//if (InventoryComponent)
+	//{
+	//	InventoryComponent->OnInventoryUpdated.AddDynamic(this, &UHUD_Inventory::OnInventoryUpdated);
+	//	RefreshInventory();
+	//}
 }
 
 void UHUD_Inventory::RefreshInventory()
 {
-    if (!InventoryComponent || !InventoryTileView) return;
+    //if (!InventoryComponent || !InventoryTileView) return;
 
-    // 清空当前显示
-    InventoryTileView->ClearListItems();
+    //// 清空当前显示
+    //InventoryTileView->ClearListItems();
 
-    // 获取所有物品
-    TArray<UItemData*> Items = InventoryComponent->GetInventoryItems();
+    //// 获取所有物品
+    //TArray<UItemData*> Items = InventoryComponent->GetInventoryItems();
 
-    // 添加到Tile View
-    for (UItemData* Item : Items)
-    {
-        InventoryTileView->AddItem(Item);
-    }
+    //// 添加到Tile View
+    //for (UItemData* Item : Items)
+    //{
+    //    InventoryTileView->AddItem(Item);
+    //}
 
-    // 更新背包信息
-    UpdateInventoryInfo();
+    //// 更新背包信息
+    //UpdateInventoryInfo();
 }
 
 void UHUD_Inventory::ToggleInventory()
@@ -170,14 +170,14 @@ void UHUD_Inventory::BindEvents()
 
 void UHUD_Inventory::UpdateInventoryInfo()
 {
-    if (!InventoryComponent || !WeightText || !SlotCountText) return;
+ /*    if (!InventoryComponent || !WeightText || !SlotCountText) return;
 
     // 更新负重信息
     float TotalWeight = InventoryComponent->GetTotalWeight();
     WeightText->SetText(FText::FromString(FString::Printf(TEXT("Weight: %.1f"), TotalWeight)));
 
     // 更新格子使用情况
-  /*  int32 UsedSlots = InventoryComponent->MaxInventorySlots - InventoryComponent->GetEmptySlotCount();
+   int32 UsedSlots = InventoryComponent->MaxInventorySlots - InventoryComponent->GetEmptySlotCount();
 	SlotCountText->SetText(FText::FromString(FString::Printf(TEXT("Slots: %d/%d"),
 		UsedSlots, InventoryComponent->MaxInventorySlots)));*/
 }
@@ -232,10 +232,10 @@ void UHUD_Inventory::OnSlotHovered(UUI_InventorySlot* HoveredSlot)
 
 void UHUD_Inventory::OnSortButtonClicked()
 {
-    if (InventoryComponent)
-    {
-        InventoryComponent->SortInventory();
-    }
+    //if (InventoryComponent)
+    //{
+    //    InventoryComponent->SortInventory();
+    //}
 }
 
 void UHUD_Inventory::OnCloseButtonClicked()

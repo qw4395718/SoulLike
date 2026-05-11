@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/DataTable.h"
 #include "ItemDataObject.h"
+#include <GameplayTagContainer.h>
 #include "ItemDataStruct.generated.h"
 
 class UTexture2D;
@@ -58,9 +59,9 @@ struct FItemDataRow : public FTableRowBase
 
 	// 使用此道具后应用给自己的GameplayEffect的类
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS")
-	TSoftClassPtr<UGameplayEffect> SelfEffectClass;
+	TSoftClassPtr<class UGameplayEffect> SelfEffectClass;
 
 	// 使用此道具后投掷到目标的GameplayEffect的类
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS")
-	TSoftClassPtr<UGameplayEffect> TargetEffectClass;
+	TSoftClassPtr<class UGameplayEffect> TargetEffectClass;
 };

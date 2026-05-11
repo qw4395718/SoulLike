@@ -47,6 +47,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level")
 		void GoToNextLevel();
 
+	UFUNCTION(BlueprintCallable, Category = "Level")
+		int32 GetCurrentLevelID() const { return CurrentLevelID; };
+
 protected:
 	// ===== UI显示 =====
 	void ShowLevelStartUI(int32 LevelID);
@@ -63,7 +66,7 @@ protected:
 
 	// ===== 存档管理 =====
 	void SaveGameProgress();
-	void UnlockNextLevel(int32 NextLevelID);
+	void UnlockNextLevel(int32 InNextLevelID);
 
 protected:
 	// ===== 配置 =====

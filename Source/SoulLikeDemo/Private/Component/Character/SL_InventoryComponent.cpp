@@ -23,7 +23,7 @@ void USL_InventoryComponent::BeginPlay()
 
 	// 延迟一帧初始化（确保所有子系统已就绪）
 	FTimerHandle DummyHandle;
-	GetWorld()->GetTimerManager()->SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
+	GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
 	{
 		InitializeInventory();
 	}));
@@ -279,7 +279,6 @@ bool USL_InventoryComponent::ActivateItemAbility(FName InItemID)
 	EventData.Target = GetOwner();
 	EventData.EventTag = ItemData.UseAbilityTag;
 	EventData.OptionalObject = nullptr;
-	EventData.ContextString = InItemID.ToString();
 
 	// 通过Event激活能力
 	bool bActivated = ASC->TriggerAbilityFromGameplayEvent(

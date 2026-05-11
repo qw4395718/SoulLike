@@ -161,6 +161,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitPartmentComponent();
 
+	// 获取背包组件引用
+	UFUNCTION(BlueprintPure, Category = "CharacterOperation")
+		USL_InventoryComponent* GetInventoryComponentRef() const { return InventoryCmp; }
+
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void BindGASDeathEvent();
 

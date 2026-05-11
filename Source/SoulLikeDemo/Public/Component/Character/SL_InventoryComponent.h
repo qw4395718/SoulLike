@@ -1,182 +1,117 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Public/Component/Character/SL_InventoryComponent.h
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "SoulLikeGameGlobal.h"
-#include "WeaponData.h"
-#include "ItemDataObject.h"
+#include "ItemDataStruct.h"
 #include "SL_InventoryComponent.generated.h"
 
-class UDataTable;
+class ASL_CharacterBase;
+class USL_GameplayAbilityUseItem;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemUsed, UItemData*, Item);
-
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+/**
+ * 库存组件（基于GAS + DataTable 重构版）
+ * 管理玩家持有的道具，提供使用、添加、移除等功能
+ * 能力生命周期：整个角色生命周期中只需授予一次 GA_UseItem
+ */
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SOULLIKEDEMO_API USL_InventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
+public:
 	USL_InventoryComponent();
 
-public:
 	/************************************************************************/
-	/*									外部调用                                   */
+	/*                               外部调用                               */
 	/************************************************************************/
-	// 初始化仓库组件信息
-	UFUNCTION()
-		void InitInventoryComponentInfo();
+	// 初始化库存组件
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+		void InitializeInventory();
 
-	// 初始化装备栏
-	UFUNCTION()
-		void InitEquipmentInfo(const TArray<int> WeaponList, const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex);
+	// ===== 道具管理 =====
+	// 添加道具（通过ID和数量）
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+		bool AddItemByID(FName InItemID, int32 InCount = 1);
 
-	// 初始化仓库信息
-	UFUNCTION()
-		void InitInventoryWeaponInfo(TArray<int> WeaponList);
+	// 移除道具（通过ID和数量）
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+		bool RemoveItemByID(FName InItemID, int32 InCount = 1);
 
-	UFUNCTION()
-		void InitInventoryEquippableItemInfo(TArray<int> EquippableItemList);
-
-	UFUNCTION()
-		void GetEquipmentInfoList(TArray<FWeaponData> & EquipmentInfoList);
-
-	// 获取所有库存物品（用于UI绑定）
+	// 获取道具数量
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-		TArray<UItemData*> GetInventoryItems() const { return InventoryItems; }
+		int32 GetItemCount(FName InItemID) const;
 
-	// 添加物品到库存
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		bool AddItem(UItemData* ItemToAdd);
-
-	// 添加物品通过ID（从数据表加载）
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		bool AddItemByID(FName ItemID, int32 Count = 1);
-
-	// 移除物品
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		bool RemoveItem(UItemData* ItemToRemove, int32 Count = 1);
-
-	// 移除物品通过索引
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		bool RemoveItemByIndex(int32 Index, int32 Count = 1);
-
-	// 查找物品
+	// 获取所有道具ID列表
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-		UItemData* FindItemByID(FName ItemID) const;
+		TArray<FName> GetAllItemIDs() const;
 
-	// 查找物品索引
-	UFUNCTION(BlueprintPure, Category = "Inventory")
-		int32 FindItemIndex(UItemData* Item) const;
-
-	// 获取物品数量
-	UFUNCTION(BlueprintPure, Category = "Inventory")
-		int32 GetItemCount(FName ItemID) const;
-
-	// 使用物品
+	// ===== 道具使用 =====
+	// 使用指定ID的道具（由UI或输入调用）
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		bool UseItem(UItemData* ItemToUse);
+		bool UseItemByID(FName InItemID);
 
-	// 使用物品通过索引
+	// 使用当前选中的道具（绑定到"E"键）
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		bool UseItemByIndex(int32 Index);
+		bool UseSelectedItem();
 
-	// 交换物品位置
+	// 设置当前选中的道具ID
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		bool SwapItems(int32 IndexA, int32 IndexB);
+		void SetSelectedItemID(FName InNewItemID) { SelectedItemID = InNewItemID; }
 
-	// 整理库存（按类型和稀有度排序）
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		void SortInventory();
-
-	// 获取总负重
+	// 获取当前选中的道具ID
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-		float GetTotalWeight() const;
+		FName GetSelectedItemID() const { return SelectedItemID; }
 
-	// 检查是否有空位
+	// 检查道具是否可使用
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-		bool HasEmptySlot() const;
+		bool CanUseItem(FName InItemID) const;
 
-	// 获取空位数量
-	UFUNCTION(BlueprintPure, Category = "Inventory")
-		int32 GetEmptySlotCount() const;
-
-	// 清空库存
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		void ClearInventory();
-
+protected:
+	/************************************************************************/
+	/*                               继承实现                               */
+	/************************************************************************/
 	virtual void BeginPlay() override;
-protected:
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	/************************************************************************/
-	/*                                  内部调用                                    */
+	/*                               内部调用                               */
 	/************************************************************************/
+	// 授予通用道具使用能力（角色一生只需授予一次）
+	void GrantUseItemAbility();
 
+	// 通过道具ID找到对应的GameplayTag并激活能力
+	bool ActivateItemAbility(FName InItemID);
 
-	//拟造数据
-	void UnitTest(const TArray<int> WeaponList);
+	// 监听道具使用事件，更新库存
+	UFUNCTION()
+		void OnItemUsedCallback(AActor* InUserActor, FName InItemID);
 
-	// 内部：尝试堆叠物品
-	bool TryStackItem(UItemData* ItemToAdd);
+	// 获取归属的Character
+	ASL_CharacterBase* GetOwningCharacter() const;
 
-	// 内部：创建物品实例
-	UItemData* CreateItemFromDataTable(FName ItemID) const;
-
-	// 内部：整理比较函数
-	static bool CompareItems(const UItemData& A, const UItemData& B);
-
-public:
-	/************************************************************************/
-	/*	                                 委托                                    */
-	/************************************************************************/
-	// 库存更新委托
-	UPROPERTY(BlueprintAssignable, Category = "Inventory")
-		FOnInventoryUpdated OnInventoryUpdated;
-
-	// 物品使用委托
-	UPROPERTY(BlueprintAssignable, Category = "Inventory")
-		FOnItemUsed OnItemUsed;
-
+	// 获取归属的ASC
+	class USL_AbilitySystemComponent* GetAbilitySystemComponent() const;
 
 protected:
 	/************************************************************************/
-	/*                                   变量                                   */
+	/*                               内部访问                               */
 	/************************************************************************/
-	// 当前装备栏激活索引
-	UPROPERTY()
-		TMap<EArrowKeyType,int> CurrentActiveEquipmentIndex;
+	// 通用道具使用能力的类
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory|GAS")
+		TSubclassOf<USL_GameplayAbilityUseItem> UseItemAbilityClass;
 
-	// 装备武器栏信息数组
-	UPROPERTY()
-		TArray<FWeaponData> EquipWeaponInfoList;
-
-	// 装备道具栏信息数组
-	UPROPERTY()
-		TArray<int> EquipItemInfoList;
-	
-	 // 目前其他装备先简单的来，建构一个简易的框架，待后续UI开始后，重新设计数据结构
-	UPROPERTY()
-		TArray<int> InventoryWeaponInfoList;
-
-	UPROPERTY()
-		TArray<int> InventoryEquippableItemInfoList;
-
-	// 头盔,护甲......
-
-		// 最大库存格子数
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory", meta = (ClampMin = "1", ClampMax = "500"))
-		int32 MaxInventorySlots;
-
-	// 当前库存物品列表
+	// 道具库存（道具ID -> 数量）
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TArray<UItemData*> InventoryItems;
+		TMap<FName, int32> ItemInventory;
 
-	// 数据表引用（用于通过ID创建物品）
-	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-		UDataTable* ItemDataTable;
+	// 当前选中的道具ID（用于"E"键使用）
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+		FName SelectedItemID;
 
+	// 委托句柄
+	FDelegateHandle OnItemUsedHandle;
 
+	// 标记能力是否已授予
+	bool bAbilityGranted;
 };

@@ -6,6 +6,7 @@
 #include "SL_GameModeBase.generated.h"
 
 class ALevelManager;
+class USL_GameSaveSubsystem;
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_GameModeBase : public AGameModeBase
@@ -18,7 +19,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	// ===== 关卡控制 =====
+	// ===== 关卡控制（供外部调用） =====
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
 		void StartCurrentLevel();
 
@@ -26,7 +27,16 @@ public:
 		void RestartLevel();
 
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
-		void LoadLevel(int32 LevelID);
+		void LoadLevel(int32 InLevelID);
+
+	// ===== 存档控制（供外部调用） =====
+	// 保存当前游戏进度
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+		void SaveCurrentProgress();
+
+	// 是否使用存档启动
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+		void SetUseSaveData(bool bUse) { bUseSaveData = bUse; }
 
 	// ===== 获取引用 =====
 	UFUNCTION(BlueprintPure, Category = "GameMode")
@@ -37,9 +47,12 @@ protected:
 	void CreateLevelManager();
 
 	/** 初始化玩家 */
-	void InitializePlayer(int32 PlayerClassID);
+	void InitializePlayer(int32 InPlayerClassID);
 
 protected:
+	/************************************************************************/
+	/*                               内部访问                               */
+	/************************************************************************/
 	UPROPERTY()
 		ALevelManager* LevelManager;
 
@@ -48,4 +61,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode|Config")
 		float LevelStartDelay = 2.0f;
+
+	// 是否使用存档数据（由主菜单设置）
+	bool bUseSaveData;
 };

@@ -47,14 +47,40 @@ void UGlobalDelegatesManager::ClearAllBinding()
 {
 	OnClickInterActBtnToDialog.RemoveAll(this);
 	OnClickInterMainMenuButton.RemoveAll(this);
+	OnItemUsed.RemoveAll(this);
+	OnItemEffectTriggered.RemoveAll(this);
+	OnItemCountChanged.RemoveAll(this);
 }
 
-void UGlobalDelegatesManager::BroadcastDialogShow(const FString& labelText, const FString& descText)
+/************************************************************************/
+/*                              委托广播方法                             */
+/************************************************************************/
+
+void UGlobalDelegatesManager::BroadcastDialogShow(const FString& InLabelText, const FString& InDescText)
 {
-	OnClickInterActBtnToDialog.Broadcast(labelText, descText);
+	OnClickInterActBtnToDialog.Broadcast(InLabelText, InDescText);
 }
 
-void UGlobalDelegatesManager::BroadcastOnClickMainMenuButton(const int widgetIndex)
+void UGlobalDelegatesManager::BroadcastOnClickMainMenuButton(const int InWidgetIndex)
 {
-	OnClickInterMainMenuButton.Broadcast(widgetIndex);
+	OnClickInterMainMenuButton.Broadcast(InWidgetIndex);
+}
+
+/************************************************************************/
+/*                              道具委托广播                             */
+/************************************************************************/
+
+void UGlobalDelegatesManager::BroadcastItemUsed(AActor* InUserActor, FName InItemID)
+{
+	OnItemUsed.Broadcast(InUserActor, InItemID);
+}
+
+void UGlobalDelegatesManager::BroadcastItemEffectTriggered(AActor* InUserActor, FName InItemID, AActor* InTargetActor)
+{
+	OnItemEffectTriggered.Broadcast(InUserActor, InItemID, InTargetActor);
+}
+
+void UGlobalDelegatesManager::BroadcastItemCountChanged(AActor* InOwnerActor, FName InItemID, int32 InNewCount)
+{
+	OnItemCountChanged.Broadcast(InOwnerActor, InItemID, InNewCount);
 }

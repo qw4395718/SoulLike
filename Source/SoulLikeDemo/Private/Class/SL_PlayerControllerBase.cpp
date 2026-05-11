@@ -1,7 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Private/Class/SL_PlayerControllerBase.cpp
 #include "SL_PlayerControllerBase.h"
 #include "SL_CharacterBase.h"
+#include "SL_InventoryComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Engine/World.h"
 #include <UIManagerSubsystem.h>
@@ -28,10 +28,9 @@ void ASL_PlayerControllerBase::BeginPlay()
 
 	// 获取子系统
 	UIManager = UUIManagerSubsystem::Get(this);
-	
+
 	// 创建通用UI(玩家状态栏,地图等)
 	CreatePlayerStatusUI();
-
 }
 
 // 当控制器控制一个Pawn时调用
@@ -43,14 +42,17 @@ void ASL_PlayerControllerBase::OnPossess(APawn* InPawn)
 	if (ASL_CharacterBase* MyCharacter = Cast<ASL_CharacterBase>(InPawn))
 	{
 		UE_LOG(LogTemp, Log, TEXT("PlayerController possessed: %s"), *MyCharacter->GetName());
-
 	}
 }
 
 // 当控制器放弃控制一个Pawn时调用
 void ASL_PlayerControllerBase::OnUnPossess()
 {
-	// 可以在这里处理角色死亡或切换时的UI逻辑
+	// 清除所有缓存引用
+	CachedComboManager.Reset();
+	CachedEquipmentComp.Reset();
+	CachedInventoryComp.Reset();
+
 	UE_LOG(LogTemp, Log, TEXT("PlayerController unpossessed"));
 
 	Super::OnUnPossess();
@@ -62,11 +64,11 @@ void ASL_PlayerControllerBase::SetupInputComponent()
 	if (!InputComponent) return;
 
 	// 方式一：使用 EInputEvent 精确控制按键时序
-	   // IE_Pressed:  按下瞬间
-	   // IE_Released: 松开瞬间
-	   // IE_Repeat:   按住持续触发
+	// IE_Pressed:  按下瞬间
+	// IE_Released: 松开瞬间
+	// IE_Repeat:   按住持续触发
 
-	   // 轻攻击（X键 / 鼠标左键）
+	// 轻攻击（X键 / 鼠标左键）
 	InputComponent->BindAction("LightAttack", IE_Pressed, this, &ASL_PlayerControllerBase::OnLightAttackPressed);
 	InputComponent->BindAction("LightAttack", IE_Released, this, &ASL_PlayerControllerBase::OnLightAttackReleased);
 
@@ -80,7 +82,13 @@ void ASL_PlayerControllerBase::SetupInputComponent()
 	// 闪避（A键）
 	InputComponent->BindAction("Dodge", IE_Pressed, this, &ASL_PlayerControllerBase::OnDodgePressed);
 
+	// ===== 新增：道具使用（E键）=====
+	InputComponent->BindAction("UseItem", IE_Pressed, this, &ASL_PlayerControllerBase::OnUseItemPressed);
 }
+
+/************************************************************************/
+/*                               外部调用                               */
+/************************************************************************/
 
 // 设置纯UI输入模式（鼠标控制UI）
 void ASL_PlayerControllerBase::SetInputModeUIOnly(UWidget* InWidgetToFocus)
@@ -125,7 +133,6 @@ void ASL_PlayerControllerBase::SetInputModeGameAndUI(UWidget* InWidgetToFocus, b
 	bEnableMouseOverEvents = true;
 }
 
-
 // 获取当前控制的角色
 ASL_CharacterBase* ASL_PlayerControllerBase::GetMyPlayerCharacter() const
 {
@@ -133,7 +140,7 @@ ASL_CharacterBase* ASL_PlayerControllerBase::GetMyPlayerCharacter() const
 }
 
 /************************************************************************/
-/*                               界面通用UI-玩家状态UI                                       */
+/*                               界面通用UI-玩家状态UI                   */
 /************************************************************************/
 
 // 创建玩家状态UI
@@ -171,6 +178,10 @@ void ASL_PlayerControllerBase::DestroyPlayerStatusUI()
 	UIManager->CloseWidget(EWidgetType::EWIDGET_PlayerStatus);
 }
 
+/************************************************************************/
+/*                               输入处理                               */
+/************************************************************************/
+
 void ASL_PlayerControllerBase::OnLightAttackPressed()
 {
 	ProcessComboInput(EComboInputActionType::EComboInputAction_Light);
@@ -201,6 +212,50 @@ void ASL_PlayerControllerBase::OnDodgePressed()
 
 }
 
+// ===== 新增：道具使用处理 =====
+void ASL_PlayerControllerBase::OnUseItemPressed()
+{
+	// 1. 获取背包组件
+	USL_InventoryComponent* Inventory = GetInventoryComponent();
+	if (!Inventory)
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - InventoryComponent not found"));
+		return;
+	}
+
+	// 2. 检查是否有选中的道具
+	FName SelectedItemID = Inventory->GetSelectedItemID();
+	if (SelectedItemID.IsNone())
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - No item selected"));
+		return;
+	}
+
+	// 3. 检查道具是否可使用
+	if (!Inventory->CanUseItem(SelectedItemID))
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - Item %s cannot be used now"),
+			*SelectedItemID.ToString());
+		return;
+	}
+
+	// 4. 使用道具
+	bool bSuccess = Inventory->UseSelectedItem();
+	if (bSuccess)
+	{
+		UE_LOG(LogTemp, Log, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - Used item: %s"), *SelectedItemID.ToString());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - Failed to use item: %s"),
+			*SelectedItemID.ToString());
+	}
+}
+
+/************************************************************************/
+/*                               组件获取                               */
+/************************************************************************/
+
 USL_ComboManagerComponent* ASL_PlayerControllerBase::GetComboManagerComponent() const
 {
 	// 使用缓存
@@ -217,7 +272,6 @@ USL_ComboManagerComponent* ASL_PlayerControllerBase::GetComboManagerComponent() 
 	}
 
 	return CachedComboManager.Get();
-
 }
 
 USL_EquipmentComponent* ASL_PlayerControllerBase::GetEquipmentComponent() const
@@ -238,9 +292,27 @@ USL_EquipmentComponent* ASL_PlayerControllerBase::GetEquipmentComponent() const
 	return CachedEquipmentComp.Get();
 }
 
+// ===== 新增：获取背包组件 =====
+USL_InventoryComponent* ASL_PlayerControllerBase::GetInventoryComponent() const
+{
+	// 使用缓存
+	if (CachedInventoryComp.IsValid())
+	{
+		return CachedInventoryComp.Get();
+	}
+
+	// 从当前控制的 Pawn 上查找
+	APawn* ControlledPawn = GetPawn();
+	if (ControlledPawn)
+	{
+		CachedInventoryComp = ControlledPawn->FindComponentByClass<USL_InventoryComponent>();
+	}
+
+	return CachedInventoryComp.Get();
+}
+
 void ASL_PlayerControllerBase::ProcessComboInput(EComboInputActionType InputType)
 {
-
 	USL_ComboManagerComponent* ComboMgr = GetComboManagerComponent();
 	if (ComboMgr)
 	{

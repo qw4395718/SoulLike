@@ -3,7 +3,6 @@
 #include "ItemDataObject.h"
 #include "ItemDataStruct.generated.h"
 
-
 class UTexture2D;
 
 USTRUCT(BlueprintType)
@@ -11,40 +10,57 @@ struct FItemDataRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	// 物品基础信息
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 	FName ItemID;
 
-	// 物品显示名称
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 	FText ItemName;
 
-	// 物品描述
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 	FText ItemDescription;
 
-	// 物品图标
-	UTexture2D* ItemIcon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+	TSoftObjectPtr<UTexture2D> ItemIcon;
 
-	// 物品数量
+	// 物品数量与堆叠
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stack")
 	int32 ItemCount;
 
-	// 最大堆叠数量
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stack")
 	int32 MaxStackCount;
 
-	// 物品稀有度
+	// 分类
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Classification")
 	EItemRarity Rarity;
 
-	// 物品类型
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Classification")
 	EItemType ItemType;
 
-	// 物品重量（用于负重系统）
+	// 经济系统
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Economy")
 	float ItemWeight;
 
-	// 物品价值（售价）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Economy")
 	int32 ItemValue;
 
-	// 是否可丢弃
+	// 行为标记
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behavior")
 	bool bCanDrop;
 
-	// 是否可使用
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behavior")
 	bool bCanUse;
 
-   
+	// ===== GAS能力相关 =====
+	// 使用此道具时触发的GameplayTag（对应GAS的ActivationTag）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS")
+	FGameplayTag UseAbilityTag;
+
+	// 使用此道具后应用给自己的GameplayEffect的类
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS")
+	TSoftClassPtr<UGameplayEffect> SelfEffectClass;
+
+	// 使用此道具后投掷到目标的GameplayEffect的类
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS")
+	TSoftClassPtr<UGameplayEffect> TargetEffectClass;
 };

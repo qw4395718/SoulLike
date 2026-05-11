@@ -268,12 +268,26 @@ void ALevelManager::PlayPlayerDiedEffect()
 
 void ALevelManager::SaveGameProgress()
 {
-	UE_LOG(LogTemp, Log, TEXT("LevelManager::SaveGameProgress - Saving game progress for Level %d"), CurrentLevelID);
-	// TODO: 实现存档系统
+	// 通过存档子系统保存
+	USL_GameSaveSubsystem* SaveSubsystem = USL_GameSaveSubsystem::Get(this);
+	if (SaveSubsystem)
+	{
+		bool bSuccess = SaveSubsystem->SaveGame(CurrentLevelID, CurrentPlayerClassID);
+		if (bSuccess)
+		{
+			UE_LOG(LogTemp, Log, TEXT("LevelManager::SaveGameProgress - Saved progress: Level=%d, ClassID=%d"),
+				CurrentLevelID, CurrentPlayerClassID);
+		}
+	}
 }
 
 void ALevelManager::UnlockNextLevel(int32 NextLevelID)
 {
-	UE_LOG(LogTemp, Log, TEXT("LevelManager::UnlockNextLevel - Level %d unlocked"), NextLevelID);
-	// TODO: 实现关卡解锁
+	// 更新当前关卡ID为下一关
+	CurrentLevelID = InNextLevelID;
+
+	UE_LOG(LogTemp, Log, TEXT("LevelManager::UnlockNextLevel - Next level ID: %d"), CurrentLevelID);
+
+	// 保存进度
+	SaveGameProgress();
 }

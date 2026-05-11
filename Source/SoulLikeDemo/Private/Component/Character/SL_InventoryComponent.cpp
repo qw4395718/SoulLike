@@ -1,406 +1,325 @@
+// Private/Component/Character/SL_InventoryComponent.cpp
 #include "SL_InventoryComponent.h"
-#include "DrawDebugHelpers.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "ItemDataObject.h"
-#include "ItemDataStruct.h"
-#include "Engine/DataTable.h"
+#include "SL_CharacterBase.h"
+#include "SL_AbilitySystemComponent.h"
+#include "SL_GameplayAbilityUseItem.h"
+#include "GlobalDelegatesManager.h"
+#include "DataTableManager.h"
+#include "ItemDataTable.h"
 
 USL_InventoryComponent::USL_InventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	MaxInventorySlots = 30;
+	bAbilityGranted = false;
 }
 
-void USL_InventoryComponent::InitInventoryComponentInfo()
-{
-	// 初始化装备表，道具表等本地数据接口
-	// 等数据表完成后再完善
-
-}
-
-void USL_InventoryComponent::InitEquipmentInfo(const TArray<int> WeaponList, const TArray<int> ItemList, TMap<EArrowKeyType, int> ActiveSlotIndex)
-{
-	//根据查表将 WeapList->EquipmentInfoList,暂时用拟造数据代替
-	UnitTest(WeaponList);
-	InventoryEquippableItemInfoList = ItemList;
-	CurrentActiveEquipmentIndex = ActiveSlotIndex;
-}
-
-void USL_InventoryComponent::InitInventoryWeaponInfo(TArray<int> WeaponList)
-{
-	InventoryWeaponInfoList = WeaponList;
-}
-
-void USL_InventoryComponent::InitInventoryEquippableItemInfo(TArray<int> EquippableItemList)
-{
-	InventoryEquippableItemInfoList = EquippableItemList;
-}
-
-void USL_InventoryComponent::GetEquipmentInfoList(TArray<FWeaponData>& EquipmentInfoList)
-{
-	EquipmentInfoList = EquipWeaponInfoList;
-}
-
-void USL_InventoryComponent::UnitTest(const TArray<int> WeaponList)
-{
-	//// 后续完成读表的初始化
-	//EquipWeaponInfoList.Reset();
-	//for(int WeaponID : WeaponList)
-	//{
-	//	FWeaponData UnitTestData;
-	//	UnitTestData.WeaponID = WeaponID;
-	//	UnitTestData.WeaponUniqueID = WeaponID * 100 + 1;
-	//	UnitTestData.Mesh = TEXT("/Game/InfinityBladeWeapons/Weapons/Blade/Swords/Blade_BlackKnight/SK_Blade_BlackKnight.SK_Blade_BlackKnight");
-	//	UnitTestData.SocketName = TEXT("ik_hand_r");
-	//	UnitTestData.AnimClass = TEXT("");
-	//	UnitTestData.AttackMentageName = TEXT("/Game/SoulLikeDemo/Anim/AM_Attack_Sword.AM_Attack_Sword");
-	//	UnitTestData.ComboSkillMentageName = TEXT("/Game/SoulLikeDemo/Anim/AM_CombatSkill_Sheild.AM_CombatSkill_Sheild");
-	//	UnitTestData.ExecuteMentageName = TEXT("/Game/SoulLikeDemo/Anim/AM_Execute_Sword.AM_Execute_Sword");
-	//	UnitTestData.BackStabMentageName = TEXT("/Game/SoulLikeDemo/Anim/AM_BackStab_Sword.AM_BackStab_Sword");
-	//	UnitTestData.WeaponCollisionBoxSize.X = 100.0f;
-	//	UnitTestData.WeaponCollisionBoxSize.Y = 5.0f;
-	//	UnitTestData.WeaponCollisionBoxSize.Z = 5.0f;
-	//	// 武器数据信息
-	//	FAbilityCostInfo AbilityCostInfo;
-	//	AbilityCostInfo.HealthCost = 20.0f;
-	//	AbilityCostInfo.StaminaCost = 20.0f;
-	//	AbilityCostInfo.MagicCost = 20.0f;
-	//	FComboCoordinatorInfo ComboCoordinatorInfo;
-	//	ComboCoordinatorInfo.BaseDamage = 20.0f;
-	//	ComboCoordinatorInfo.ComboMaxNum = 3;
-	//	ComboCoordinatorInfo.CurrentComboNum = 0;
-	//	ComboCoordinatorInfo.CanContinueCombo = false;
-	//	for (int i = 0; i <= ComboCoordinatorInfo.ComboMaxNum; i++)
-	//	{
-	//		ComboCoordinatorInfo.ComboDamageMultiplier.Add(i+1);
-	//		ComboCoordinatorInfo.ComboStateCostMultiplier.Add(i, AbilityCostInfo);
-	//	}
-	//	UnitTestData.ComboCoordinatorInfoMap.Reset();
-	//	UnitTestData.ComboCoordinatorInfoMap.Add(EWeaponModeTyoe::WEAPONMODE_Attack, ComboCoordinatorInfo);
-	//	UnitTestData.ComboCoordinatorInfoMap.Add(EWeaponModeTyoe::WEAPONMODE_Defence, ComboCoordinatorInfo);
-	//	UnitTestData.ComboCoordinatorInfoMap.Add(EWeaponModeTyoe::WEAPONMODE_ComboSkill, ComboCoordinatorInfo);
-	//	UnitTestData.ComboCoordinatorInfoMap.Add(EWeaponModeTyoe::WEAPONMODE_BackStab, ComboCoordinatorInfo);
-	//	UnitTestData.ComboCoordinatorInfoMap.Add(EWeaponModeTyoe::WEAPONMODE_Execute, ComboCoordinatorInfo);
-
-	//	UnitTestData.NeedLoadComponentInfoMap.Add(EWeaponComponentType::MeleeAttack, true);
-	//	UnitTestData.NeedLoadComponentInfoMap.Add(EWeaponComponentType::Parry, true);
-	//	UnitTestData.NeedLoadComponentInfoMap.Add(EWeaponComponentType::Execute, true);
-	//	UnitTestData.NeedLoadComponentInfoMap.Add(EWeaponComponentType::BackStab, true);
-
-	//	EquipWeaponInfoList.Add(UnitTestData);
-	//}
-
-	
-}
+/************************************************************************/
+/*                               继承实现                                */
+/************************************************************************/
 
 void USL_InventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 初始化库存数组大小
-	InventoryItems.SetNum(MaxInventorySlots);
+	// 延迟一帧初始化（确保所有子系统已就绪）
+	FTimerHandle DummyHandle;
+	GetWorld()->GetTimerManager()->SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
+	{
+		InitializeInventory();
+	}));
 }
 
-bool USL_InventoryComponent::AddItem(UItemData* ItemToAdd)
+void USL_InventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (!ItemToAdd || ItemToAdd->ItemCount <= 0)
+	// 清理委托绑定
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid item to add"));
-		return false;
-	}
-
-	// 首先尝试堆叠到已有物品
-	if (ItemToAdd->MaxStackCount > 1)
-	{
-		if (TryStackItem(ItemToAdd))
+		if (OnItemUsedHandle.IsValid())
 		{
-			OnInventoryUpdated.Broadcast();
-			return true;
+			DelegateMgr->OnItemUsed.Remove(OnItemUsedHandle);
+			OnItemUsedHandle.Reset();
 		}
 	}
 
-	// 寻找空位放置新物品
-	for (int32 i = 0; i < MaxInventorySlots; i++)
+	Super::EndPlay(EndPlayReason);
+}
+
+/************************************************************************/
+/*                               外部调用                                */
+/************************************************************************/
+
+void USL_InventoryComponent::InitializeInventory()
+{
+	// 1. 授予通用道具使用能力（角色一生只做一次）
+	if (!bAbilityGranted)
 	{
-		if (!InventoryItems[i])
+		GrantUseItemAbility();
+	}
+
+	// 2. 绑定道具使用事件（监听从GAS能力广播回来的事件）
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		if (!OnItemUsedHandle.IsValid())
 		{
-			InventoryItems[i] = ItemToAdd;
-			OnInventoryUpdated.Broadcast();
-			return true;
+			OnItemUsedHandle = DelegateMgr->OnItemUsed.AddUObject(
+				this, &USL_InventoryComponent::OnItemUsedCallback);
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Inventory is full!"));
-	return false;
+	UE_LOG(LogTemp, Log, TEXT("USL_InventoryComponent::InitializeInventory - Initialized"));
 }
 
-bool USL_InventoryComponent::AddItemByID(FName ItemID, int32 Count)
+bool USL_InventoryComponent::AddItemByID(FName InItemID, int32 InCount)
 {
-	if (Count <= 0) return false;
+	if (InItemID.IsNone() || InCount <= 0) return false;
 
-	UItemData* NewItem = CreateItemFromDataTable(ItemID);
-	if (!NewItem)
+	// 检查道具是否存在（通过DataTable验证）
+	UDataTableManager* TableManager = UDataTableManager::Get(this);
+	if (!TableManager) return false;
+
+	UItemDataTable* ItemTable = Cast<UItemDataTable>(
+		TableManager->GetDataTable(EDataTableType::DT_ItemConfigInfo));
+	if (!ItemTable) return false;
+
+	FItemDataRow ItemData;
+	if (!ItemTable->GetItemData(InItemID, ItemData))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Item ID not found: %s"), *ItemID.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("USL_InventoryComponent::AddItemByID - ItemID %s not found in table"), *InItemID.ToString());
 		return false;
 	}
 
-	NewItem->ItemCount = Count;
-	return AddItem(NewItem);
-}
+	// 添加到库存
+	int32& CurrentCount = ItemInventory.FindOrAdd(InItemID);
+	CurrentCount += InCount;
 
-bool USL_InventoryComponent::RemoveItem(UItemData* ItemToRemove, int32 Count)
-{
-	if (!ItemToRemove) return false;
-
-	int32 Index = FindItemIndex(ItemToRemove);
-	if (Index == INDEX_NONE) return false;
-
-	return RemoveItemByIndex(Index, Count);
-}
-
-bool USL_InventoryComponent::RemoveItemByIndex(int32 Index, int32 Count)
-{
-	if (Index < 0 || Index >= InventoryItems.Num() || !InventoryItems[Index])
+	// 广播数量变更
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
 	{
+		DelegateMgr->BroadcastItemCountChanged(GetOwner(), InItemID, CurrentCount);
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("USL_InventoryComponent::AddItemByID - Added %s x%d (total: %d)"),
+		*InItemID.ToString(), InCount, CurrentCount);
+	return true;
+}
+
+bool USL_InventoryComponent::RemoveItemByID(FName InItemID, int32 InCount)
+{
+	if (InItemID.IsNone() || InCount <= 0) return false;
+
+	int32* CurrentCount = ItemInventory.Find(InItemID);
+	if (!CurrentCount || *CurrentCount < InCount) return false;
+
+	*CurrentCount -= InCount;
+
+	if (*CurrentCount <= 0)
+	{
+		// 数量归零，移除条目
+		ItemInventory.Remove(InItemID);
+
+		// 如果是选中的道具，清空选择
+		if (SelectedItemID == InItemID)
+		{
+			SelectedItemID = NAME_None;
+		}
+	}
+
+	// 广播数量变更
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		DelegateMgr->BroadcastItemCountChanged(GetOwner(), InItemID, FMath::Max(0, *CurrentCount));
+	}
+
+	UE_LOG(LogTemp, Verbose, TEXT("USL_InventoryComponent::RemoveItemByID - Removed %s x%d"), *InItemID.ToString(), InCount);
+	return true;
+}
+
+int32 USL_InventoryComponent::GetItemCount(FName InItemID) const
+{
+	if (const int32* Found = ItemInventory.Find(InItemID))
+	{
+		return *Found;
+	}
+	return 0;
+}
+
+TArray<FName> USL_InventoryComponent::GetAllItemIDs() const
+{
+	TArray<FName> IDs;
+	ItemInventory.GetKeys(IDs);
+	return IDs;
+}
+
+bool USL_InventoryComponent::CanUseItem(FName InItemID) const
+{
+	// 1. 检查道具是否存在且数量 > 0
+	if (GetItemCount(InItemID) <= 0) return false;
+
+	// 2. 检查玩家是否存活
+	const ASL_CharacterBase* Character = GetOwningCharacter();
+	if (!Character || !Character->IsAlive()) return false;
+
+	// 3. 检查道具在数据表中是否标记为可用
+	UDataTableManager* TableManager = UDataTableManager::Get(
+		const_cast<USL_InventoryComponent*>(this));
+	if (!TableManager) return false;
+
+	UItemDataTable* ItemTable = Cast<UItemDataTable>(
+		TableManager->GetDataTable(EDataTableType::DT_ItemConfigInfo));
+	if (!ItemTable) return false;
+
+	FItemDataRow ItemData;
+	if (!ItemTable->GetItemData(InItemID, ItemData)) return false;
+
+	// 4. 道具必须标记为可用
+	return ItemData.bCanUse;
+}
+
+bool USL_InventoryComponent::UseItemByID(FName InItemID)
+{
+	if (!CanUseItem(InItemID)) return false;
+
+	// 激活通用道具使用能力，传递道具ID
+	return ActivateItemAbility(InItemID);
+}
+
+bool USL_InventoryComponent::UseSelectedItem()
+{
+	if (SelectedItemID.IsNone())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("USL_InventoryComponent::UseSelectedItem - No item selected"));
 		return false;
 	}
 
-	UItemData* Item = InventoryItems[Index];
+	return UseItemByID(SelectedItemID);
+}
 
-	if (Count >= Item->ItemCount || Count == 0)
+/************************************************************************/
+/*                               内部调用                                */
+/************************************************************************/
+
+void USL_InventoryComponent::GrantUseItemAbility()
+{
+	if (bAbilityGranted) return;
+
+	USL_AbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	if (!ASC)
 	{
-		// 移除整个物品
-		InventoryItems[Index] = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("USL_InventoryComponent::GrantUseItemAbility - ASC not found"));
+		return;
+	}
+
+	// 检查是否已配置能力类
+	if (!UseItemAbilityClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("USL_InventoryComponent::GrantUseItemAbility - UseItemAbilityClass is not set, using default"));
+
+		// 尝试从默认路径加载
+		UseItemAbilityClass = USL_GameplayAbilityUseItem::StaticClass();
+		if (!UseItemAbilityClass)
+		{
+			UE_LOG(LogTemp, Error, TEXT("USL_InventoryComponent::GrantUseItemAbility - Failed to get default ability class"));
+			return;
+		}
+	}
+
+	// 授予通用道具使用能力
+	FGameplayAbilitySpec Spec(UseItemAbilityClass, 1, INDEX_NONE, this);
+	ASC->GiveAbility(Spec);
+
+	bAbilityGranted = true;
+
+	UE_LOG(LogTemp, Log, TEXT("USL_InventoryComponent::GrantUseItemAbility - Granted GA_UseItem to %s"), *GetOwner()->GetName());
+}
+
+bool USL_InventoryComponent::ActivateItemAbility(FName InItemID)
+{
+	USL_AbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	if (!ASC) return false;
+
+	// 查表获取道具的GameplayTag
+	UDataTableManager* TableManager = UDataTableManager::Get(this);
+	if (!TableManager) return false;
+
+	UItemDataTable* ItemTable = Cast<UItemDataTable>(
+		TableManager->GetDataTable(EDataTableType::DT_ItemConfigInfo));
+	if (!ItemTable) return false;
+
+	FItemDataRow ItemData;
+	if (!ItemTable->GetItemData(InItemID, ItemData)) return false;
+
+	if (!ItemData.UseAbilityTag.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("USL_InventoryComponent::ActivateItemAbility - Item %s has no UseAbilityTag"), *InItemID.ToString());
+		return false;
+	}
+
+	// 查找通用道具使用能力
+	FGameplayAbilitySpec* FoundSpec = ASC->FindAbilitySpecFromTag(ItemData.UseAbilityTag);
+	if (!FoundSpec)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("USL_InventoryComponent::ActivateItemAbility - UseItem ability not found, try to activate by class"));
+
+		// 通过能力类查找
+		if (UseItemAbilityClass)
+		{
+			FoundSpec = ASC->FindAbilitySpecFromClass(UseItemAbilityClass);
+		}
+
+		if (!FoundSpec)
+		{
+			UE_LOG(LogTemp, Error, TEXT("USL_InventoryComponent::ActivateItemAbility - Failed to find any use item ability"));
+			return false;
+		}
+	}
+
+	// 通过事件数据传递道具ID
+	FGameplayEventData EventData;
+	EventData.Instigator = GetOwner();
+	EventData.Target = GetOwner();
+	EventData.EventTag = ItemData.UseAbilityTag;
+	EventData.OptionalObject = nullptr;
+	EventData.ContextString = InItemID.ToString();
+
+	// 通过Event激活能力
+	bool bActivated = ASC->TriggerAbilityFromGameplayEvent(
+		FoundSpec->Handle,
+		ASC->AbilityActorInfo.Get(),
+		ItemData.UseAbilityTag,
+		&EventData,
+		*ASC
+	);
+
+	if (bActivated)
+	{
+		UE_LOG(LogTemp, Log, TEXT("USL_InventoryComponent::ActivateItemAbility - Activated use item ability for %s"), *InItemID.ToString());
 	}
 	else
 	{
-		// 只减少数量
-		Item->ItemCount -= Count;
+		UE_LOG(LogTemp, Warning, TEXT("USL_InventoryComponent::ActivateItemAbility - Failed to activate ability for %s"), *InItemID.ToString());
 	}
 
-	OnInventoryUpdated.Broadcast();
-	return true;
+	return bActivated;
 }
 
-UItemData* USL_InventoryComponent::FindItemByID(FName ItemID) const
+void USL_InventoryComponent::OnItemUsedCallback(AActor* InUserActor, FName InItemID)
 {
-	for (UItemData* Item : InventoryItems)
-	{
-		if (Item && Item->ItemID == ItemID)
-		{
-			return Item;
-		}
-	}
-	return nullptr;
+	// 检查是否是自己用的道具
+	if (InUserActor != GetOwner()) return;
+
+	// 消耗道具数量
+	RemoveItemByID(InItemID, 1);
 }
 
-int32 USL_InventoryComponent::FindItemIndex(UItemData* Item) const
+ASL_CharacterBase* USL_InventoryComponent::GetOwningCharacter() const
 {
-	if (!Item) return INDEX_NONE;
-
-	return InventoryItems.Find(Item);
+	return Cast<ASL_CharacterBase>(GetOwner());
 }
 
-int32 USL_InventoryComponent::GetItemCount(FName ItemID) const
+USL_AbilitySystemComponent* USL_InventoryComponent::GetAbilitySystemComponent() const
 {
-	int32 TotalCount = 0;
+	ASL_CharacterBase* Character = GetOwningCharacter();
+	if (!Character) return nullptr;
 
-	for (UItemData* Item : InventoryItems)
-	{
-		if (Item && Item->ItemID == ItemID)
-		{
-			TotalCount += Item->ItemCount;
-		}
-	}
-
-	return TotalCount;
-}
-
-bool USL_InventoryComponent::UseItem(UItemData* ItemToUse)
-{
-	if (!ItemToUse || !ItemToUse->bCanUse) return false;
-
-	// 调用物品的使用方法
-	AActor* Owner = GetOwner();
-	ItemToUse->UseItem(Owner);
-
-	// 广播使用事件
-	OnItemUsed.Broadcast(ItemToUse);
-
-	// 如果是消耗品，减少数量
-	if (ItemToUse->ItemType == EItemType::Consumable)
-	{
-		RemoveItem(ItemToUse, 1);
-	}
-
-	return true;
-}
-
-bool USL_InventoryComponent::UseItemByIndex(int32 Index)
-{
-	if (Index < 0 || Index >= InventoryItems.Num() || !InventoryItems[Index])
-	{
-		return false;
-	}
-
-	return UseItem(InventoryItems[Index]);
-}
-
-bool USL_InventoryComponent::SwapItems(int32 IndexA, int32 IndexB)
-{
-	if (IndexA < 0 || IndexA >= InventoryItems.Num() ||
-		IndexB < 0 || IndexB >= InventoryItems.Num() ||
-		IndexA == IndexB)
-	{
-		return false;
-	}
-
-	// 交换物品
-	Swap(InventoryItems[IndexA], InventoryItems[IndexB]);
-
-	OnInventoryUpdated.Broadcast();
-	return true;
-}
-
-void USL_InventoryComponent::SortInventory()
-{
-	// 先按位置分组
-	TArray<UItemData*> SortedItems;
-	TArray<UItemData*> EmptySlots;
-
-	for (UItemData* Item : InventoryItems)
-	{
-		if (Item)
-		{
-			SortedItems.Add(Item);
-		}
-		else
-		{
-			EmptySlots.Add(nullptr);
-		}
-	}
-
-	// 排序非空物品
-	SortedItems.Sort([](const UItemData& A, const UItemData& B) {
-		// 先按类型排序
-		if (A.ItemType != B.ItemType)
-		{
-			return A.ItemType < B.ItemType;
-		}
-		// 然后按稀有度排序
-		if (A.Rarity != B.Rarity)
-		{
-			return A.Rarity < B.Rarity;
-		}
-		// 最后按名称排序
-		return A.ItemName.CompareTo(B.ItemName) < 0;
-		});
-
-	// 合并回原数组
-	SortedItems.Append(EmptySlots);
-
-	// 确保大小一致
-	if (SortedItems.Num() > MaxInventorySlots)
-	{
-		SortedItems.SetNum(MaxInventorySlots);
-	}
-	else if (SortedItems.Num() < MaxInventorySlots)
-	{
-		SortedItems.SetNum(MaxInventorySlots);
-	}
-
-	InventoryItems = SortedItems;
-	OnInventoryUpdated.Broadcast();
-}
-
-float USL_InventoryComponent::GetTotalWeight() const
-{
-	float TotalWeight = 0.0f;
-
-	for (UItemData* Item : InventoryItems)
-	{
-		if (Item)
-		{
-			TotalWeight += Item->ItemWeight * Item->ItemCount;
-		}
-	}
-
-	return TotalWeight;
-}
-
-bool USL_InventoryComponent::HasEmptySlot() const
-{
-	for (UItemData* Item : InventoryItems)
-	{
-		if (!Item) return true;
-	}
-	return false;
-}
-
-int32 USL_InventoryComponent::GetEmptySlotCount() const
-{
-	int32 EmptyCount = 0;
-
-	for (UItemData* Item : InventoryItems)
-	{
-		if (!Item) EmptyCount++;
-	}
-
-	return EmptyCount;
-}
-
-void USL_InventoryComponent::ClearInventory()
-{
-	for (int32 i = 0; i < InventoryItems.Num(); i++)
-	{
-		InventoryItems[i] = nullptr;
-	}
-
-	OnInventoryUpdated.Broadcast();
-}
-
-// 私有方法实现
-bool USL_InventoryComponent::TryStackItem(UItemData* ItemToAdd)
-{
-	for (UItemData* ExistingItem : InventoryItems)
-	{
-		if (ExistingItem && ExistingItem->CanStackWith(ItemToAdd))
-		{
-			ExistingItem->MergeStack(ItemToAdd);
-
-			// 如果添加的物品数量变为0，说明完全堆叠了
-			if (ItemToAdd->ItemCount <= 0)
-			{
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-UItemData* USL_InventoryComponent::CreateItemFromDataTable(FName ItemID) const
-{
-	if (!ItemDataTable) return nullptr;
-
-	FItemDataRow* RowData = ItemDataTable->FindRow<FItemDataRow>(ItemID, TEXT("CreateItemFromDataTable"));
-	if (!RowData) return nullptr;
-
-	// 创建物品实例
-	UItemData* NewItem = NewObject<UItemData>();
-	NewItem->ItemID = RowData->ItemID;
-	NewItem->ItemName = RowData->ItemName;
-	NewItem->ItemDescription = RowData->ItemDescription;
-	NewItem->ItemIcon = RowData->ItemIcon;
-	NewItem->MaxStackCount = RowData->MaxStackCount;
-	NewItem->Rarity = RowData->Rarity;
-	NewItem->ItemType = RowData->ItemType;
-	NewItem->ItemWeight = RowData->ItemWeight;
-	NewItem->ItemValue = RowData->ItemValue;
-	NewItem->bCanDrop = RowData->bCanDrop;
-	NewItem->bCanUse = RowData->bCanUse;
-
-	return NewItem;
+	return Cast<USL_AbilitySystemComponent>(Character->GetAbilitySystemComponent());
 }

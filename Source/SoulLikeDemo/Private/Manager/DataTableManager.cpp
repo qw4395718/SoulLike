@@ -88,6 +88,7 @@ void UDataTableManager::RegisterDefaultTableClasses()
 	RegisterTableClass(EDataTableType::DT_ClassConfigInfo, UClassConfigInfoTable::StaticClass());
 	RegisterTableClass(EDataTableType::DT_WaveConfigInfo, UWaveConfigInfoTable::StaticClass());
 	RegisterTableClass(EDataTableType::DT_EnemyConfigInfo, UEnemyConfigInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_ItemConfigInfo, UItemDataTable::StaticClass());
 
 	UE_LOG(LogTemp, Log, TEXT("DataTableManager::RegisterDefaultTableClasses - Default classes registered"));
 }

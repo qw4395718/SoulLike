@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Public/Class/SL_PlayerControllerBase.h
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,6 +9,7 @@
 class UUIManagerSubsystem;
 class USL_ComboManagerComponent;
 class USL_EquipmentComponent;
+class USL_InventoryComponent;		// ===== 新增：前向声明 =====
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_PlayerControllerBase : public APlayerController
@@ -22,9 +22,8 @@ public:
 
 protected:
 	/************************************************************************/
-	/*                               继承实现                                       */
+	/*                               继承实现                               */
 	/************************************************************************/
-
 	// 游戏开始或控制器生成时调用
 	virtual void BeginPlay() override;
 
@@ -38,9 +37,8 @@ protected:
 
 public:
 	/************************************************************************/
-	/*                               外部调用                                       */
+	/*                               外部调用                               */
 	/************************************************************************/
-
 	// 设置输入模式
 	UFUNCTION(BlueprintCallable, Category = "Input")
 		void SetInputModeUIOnly(UWidget* InWidgetToFocus = nullptr);
@@ -69,9 +67,8 @@ public:
 
 protected:
 	/************************************************************************/
-	/*                               内部调用                                       */
+	/*                               内部调用                               */
 	/************************************************************************/
-
 	void OnLightAttackPressed();
 	void OnLightAttackReleased();
 
@@ -82,10 +79,18 @@ protected:
 
 	void OnDodgePressed();
 
+	// ===== 新增：道具使用 =====
+	// 使用当前选中的道具（绑定"E"键）
+	void OnUseItemPressed();
+
 	/** 安全获取 ComboManager */
 	USL_ComboManagerComponent* GetComboManagerComponent() const;
 
 	USL_EquipmentComponent* GetEquipmentComponent() const;
+
+	// ===== 新增：获取背包组件 =====
+	// 安全获取 InventoryComponent
+	USL_InventoryComponent* GetInventoryComponent() const;
 
 	/** 通用输入处理，所有输入都走这个方法 */
 	void ProcessComboInput(EComboInputActionType InputType);
@@ -94,11 +99,15 @@ private:
 	// 是否已经创建UI
 	bool bIsUIInitialized;
 	UPROPERTY()
-	UUIManagerSubsystem* UIManager; 
+		UUIManagerSubsystem* UIManager;
 
 	// 缓存 ComboManager 引用，避免频繁 FindComponent
 	mutable TWeakObjectPtr<USL_ComboManagerComponent> CachedComboManager;
 
 	// 缓存 EquipmentComp 引用，避免频繁 FindComponent
 	mutable TWeakObjectPtr<USL_EquipmentComponent> CachedEquipmentComp;
+
+	// ===== 新增：缓存 =====
+	// 缓存 InventoryComp 引用，避免频繁 FindComponent
+	mutable TWeakObjectPtr<USL_InventoryComponent> CachedInventoryComp;
 };

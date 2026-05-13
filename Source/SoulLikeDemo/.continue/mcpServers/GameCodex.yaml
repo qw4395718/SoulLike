@@ -1,0 +1,10 @@
+name: GameCodex
+version: 0.0.1
+schema: v1
+mcpServers:
+  - name: gamecodex
+    command: npx
+    args:
+      - "-y"
+      - "gamecodex"
+    env: {}

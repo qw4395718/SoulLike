@@ -77,3 +77,4 @@ DerivedDataCache/*
 # 忽略整个文件夹
 Plugins/
 Content/SoulLikeDemo/MonsterAssert/
+SoulLikeDemo.sln

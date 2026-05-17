@@ -27,6 +27,9 @@ protected:
 	// 游戏开始或控制器生成时调用
 	virtual void BeginPlay() override;
 
+	// 控制器结束生命周期时调用
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	// 当控制器控制一个Pawn时调用
 	virtual void OnPossess(APawn* InPawn) override;
 
@@ -65,6 +68,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 		void DestroyPlayerStatusUI();
 
+	// 显示开始界面 
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    void ShowBeginPlayScreen();
+
+    // 隐藏开始界面 
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    void HideBeginPlayScreen();
+
+    // 检查是否已经显示开始界面 
+    UFUNCTION(BlueprintPure, Category = "UI")
+    bool IsBeginPlayScreenVisible() const { return BeginPlayScreen != nullptr; }
+
 protected:
 	/************************************************************************/
 	/*                               内部调用                               */
@@ -83,7 +98,7 @@ protected:
 	// 使用当前选中的道具（绑定"E"键）
 	void OnUseItemPressed();
 
-	/** 安全获取 ComboManager */
+	// 安全获取 ComboManager 
 	USL_ComboManagerComponent* GetComboManagerComponent() const;
 
 	USL_EquipmentComponent* GetEquipmentComponent() const;
@@ -92,10 +107,16 @@ protected:
 	// 安全获取 InventoryComponent
 	USL_InventoryComponent* GetInventoryComponent() const;
 
-	/** 通用输入处理，所有输入都走这个方法 */
+	// 通用输入处理，所有输入都走这个方法 
 	void ProcessComboInput(EComboInputActionType InputType);
 
+	// 检查是否有存档并初始化界面 
+    void CheckSaveDataAndInitScreen();
+
 private:
+    /************************************************************************/
+    /*                               内部访问                                */
+    /************************************************************************/
 	// 是否已经创建UI
 	bool bIsUIInitialized;
 	UPROPERTY()
@@ -110,4 +131,12 @@ private:
 	// ===== 新增：缓存 =====
 	// 缓存 InventoryComp 引用，避免频繁 FindComponent
 	mutable TWeakObjectPtr<USL_InventoryComponent> CachedInventoryComp;
+
+	 // 开始界面Widget类（可在蓝图中指定子类） 
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    TSubclassOf<class UHUD_BeginPlayScreen> BeginPlayScreenClass;
+
+    // 开始界面实例 
+    UPROPERTY()
+		class UHUD_BeginPlayScreen* BeginPlayScreen;
 };

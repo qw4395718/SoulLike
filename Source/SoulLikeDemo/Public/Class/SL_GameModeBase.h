@@ -23,6 +23,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
 		void StartCurrentLevel();
 
+	// 设置是否使用存档 
+    UFUNCTION(BlueprintCallable, Category = "GameMode")
+   		void SetUseSaveData(bool bInUseSaveData) { bUseSaveData = bInUseSaveData; }
+
+	// 获取是否使用存档 
+    UFUNCTION(BlueprintPure, Category = "GameMode")
+    	bool GetUseSaveData() const { return bUseSaveData; }
+
+    // 检查是否存在存档 
+    UFUNCTION(BlueprintPure, Category = "GameMode")
+  	  	bool HasSaveData() const;
+
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
 		void RestartLevel();
 
@@ -33,10 +45,6 @@ public:
 	// 保存当前游戏进度
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
 		void SaveCurrentProgress();
-
-	// 是否使用存档启动
-	UFUNCTION(BlueprintCallable, Category = "GameMode")
-		void SetUseSaveData(bool bUse) { bUseSaveData = bUse; }
 
 	// ===== 获取引用 =====
 	UFUNCTION(BlueprintPure, Category = "GameMode")

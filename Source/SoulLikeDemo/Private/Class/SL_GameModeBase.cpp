@@ -19,15 +19,6 @@ void ASL_GameModeBase::BeginPlay()
 
 	// 创建 LevelManager
 	CreateLevelManager();
-
-	// 延迟启动关卡
-	FTimerHandle StartDelayHandle;
-	GetWorld()->GetTimerManager().SetTimer(StartDelayHandle, FTimerDelegate::CreateLambda([this]()
-		{
-			StartCurrentLevel();
-		}), LevelStartDelay, false);
-
-	UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::BeginPlay - GameMode initialized"));
 }
 
 void ASL_GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -164,4 +155,13 @@ void ASL_GameModeBase::InitializePlayer(int32 InPlayerClassID)
 		PlayerCharacter->SetClassID(InPlayerClassID);
 		UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::InitializePlayer - Player initialized with class %d"), InPlayerClassID);
 	}
+}
+
+bool ASL_GameModeBase::HasSaveData() const
+{
+    if (USL_GameSaveSubsystem* SaveSubsystem = USL_GameSaveSubsystem::Get(this))
+    {
+        return SaveSubsystem->HasSaveData();
+    }
+    return false;
 }

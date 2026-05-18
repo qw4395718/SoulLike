@@ -266,6 +266,8 @@ enum class EWidgetType :uint8
 	EWIDGET_InterActPanel,
 	EWIDGET_NPCDialog,
 	EWIDGET_Inventory,
+	EWIDGET_BeginPlayScreen,
+	EWIDGET_LobbyScreen,
 	EWIDGET_Max
 };
 

@@ -38,6 +38,11 @@ void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	/************************************************************************/
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PawnStatusInScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PawnStatusInScreen.WBP_HUD_PawnStatusInScreen"));
 
+	/************************************************************************/
+	/*                          全屏界面                                      */
+	/************************************************************************/
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_BeginPlayScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_BeginPlayScreen.WBP_HUD_BeginPlayScreen"));
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_LobbyScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_LobbyScreen.WBP_HUD_LobbyScreen"));
 
 	UE_LOG(LogTemp, Log, TEXT("UIManagerSubsystem initialized"));
 }
@@ -117,11 +122,11 @@ void UUIManagerSubsystem::OpenWidget(const FUICreateParams& CreateParam)
 	}
 	else
 	{
-		OpenScreenWidget(CreateParam.Type);
+		OpenScreenWidget(CreateParam.Type, CreateParam.ZOrder);
 	}
 }
 
-void UUIManagerSubsystem::OpenScreenWidget(EWidgetType WidgetType)
+void UUIManagerSubsystem::OpenScreenWidget(EWidgetType WidgetType, int32 ZOrder)
 {
 	if (RegisteredWidgets.Contains(WidgetType))
 	{
@@ -135,8 +140,8 @@ void UUIManagerSubsystem::OpenScreenWidget(EWidgetType WidgetType)
 			UUserWidget* Widget = CreateWidget<UUserWidget>(GetWorld(), WidgetClass);
 			if (Widget)
 			{
-				// 添加到视口
-				Widget->AddToViewport();
+				// 添加到视口（ZOrder越大越靠前）
+				Widget->AddToViewport(ZOrder);
 				// 记录信息
 				ActiveWidgets.Add(WidgetType, Widget);
 			}
@@ -189,8 +194,12 @@ void UUIManagerSubsystem::OpenWorldWidgetWithActor(const FUICreateParams& Create
 
 void UUIManagerSubsystem::CloseWidget(EWidgetType WidgetType)
 {
-	if(ActiveWidgets.Contains(WidgetType))
+	if (ActiveWidgets.Contains(WidgetType))
 	{
+		if (UUserWidget* Widget = ActiveWidgets.FindRef(WidgetType))
+		{
+			Widget->RemoveFromParent();
+		}
 		ActiveWidgets.Remove(WidgetType);
 	}
 	PopWidget(WidgetType);
@@ -198,6 +207,13 @@ void UUIManagerSubsystem::CloseWidget(EWidgetType WidgetType)
 
 void UUIManagerSubsystem::CloseAllWidgets()
 {
+	for (auto& Pair : ActiveWidgets)
+	{
+		if (UUserWidget* Widget = Pair.Value)
+		{
+			Widget->RemoveFromParent();
+		}
+	}
 	ActiveWidgets.Reset();
 	WidgetStack.Reset();
 }

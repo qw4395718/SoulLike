@@ -155,67 +155,49 @@ ASL_CharacterBase* ASL_PlayerControllerBase::GetMyPlayerCharacter() const
 	return Cast<ASL_CharacterBase>(GetPawn());
 }
 
-
 void ASL_PlayerControllerBase::ShowBeginPlayScreen()
 {
-    // 防止重复创建
-    if (BeginPlayScreen)
+    UIManager = UUIManagerSubsystem::Get(this);
+    if (!UIManager)
     {
-        BeginPlayScreen->RemoveFromParent();
-        BeginPlayScreen = nullptr;
+        UE_LOG(LogTemp, Error, TEXT("SL_PlayerControllerBase::ShowBeginPlayScreen - UIManagerSubsystem not found!"));
+        return;
     }
 
-    // 如果没有指定Widget类，使用默认路径加载
-    if (!BeginPlayScreenClass)
+    // 通过UIManager打开界面（ZOrder=100确保在最上层）
+    UIManager->OpenScreenWidget(EWidgetType::EWIDGET_BeginPlayScreen, 100);
+
+    // 检查存档状态并初始化按钮
+    if (UUserWidget* Widget = UIManager->GetWidget(EWidgetType::EWIDGET_BeginPlayScreen))
     {
-        // UE4.26: 从蓝图路径加载
-        static ConstructorHelpers::FClassFinder<UHUD_BeginPlayScreen> WidgetBP(TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_BeginPlayScreen.WBP_HUD_BeginPlayScreen_C"));
-        if (WidgetBP.Succeeded())
+        if (UHUD_BeginPlayScreen* BeginPlay = Cast<UHUD_BeginPlayScreen>(Widget))
         {
-            BeginPlayScreenClass = WidgetBP.Class;
+            bool bHasSaveData = false;
+            if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(GetWorld()->GetAuthGameMode()))
+            {
+                bHasSaveData = GameMode->HasSaveData();
+            }
+            BeginPlay->InitializeScreen(bHasSaveData);
+
+            UE_LOG(LogTemp, Log, TEXT("SL_PlayerControllerBase::ShowBeginPlayScreen - BeginPlayScreen displayed, HasSaveData: %d"), bHasSaveData);
         }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("SL_PlayerControllerBase::ShowBeginPlayScreen - BeginPlayScreenClass not found!"));
-            return;
-        }
-    }
-
-    // 创建Widget实例
-    BeginPlayScreen = CreateWidget<UHUD_BeginPlayScreen>(this, BeginPlayScreenClass);
-    if (BeginPlayScreen)
-    {
-        // 检查是否有存档
-        bool bHasSaveData = false;
-        if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(GetWorld()->GetAuthGameMode()))
-        {
-            bHasSaveData = GameMode->HasSaveData();
-        }
-
-        // 初始化按钮状态
-        BeginPlayScreen->InitializeScreen(bHasSaveData);
-
-        // 添加到视口
-        BeginPlayScreen->AddToViewport(100); // Z-order: 100，确保在最上层
-
-        UE_LOG(LogTemp, Log, TEXT("SL_PlayerControllerBase::ShowBeginPlayScreen - BeginPlayScreen displayed, HasSaveData: %d"), bHasSaveData);
     }
 }
 
 void ASL_PlayerControllerBase::HideBeginPlayScreen()
 {
-    if (BeginPlayScreen)
+    if (UIManager)
     {
-        BeginPlayScreen->RemoveFromParent();
-        BeginPlayScreen = nullptr;
-
-        // 恢复游戏输入模式
-        FInputModeGameOnly InputMode;
-        SetInputMode(InputMode);
-        bShowMouseCursor = false;
+        // 通过UIManager关闭界面（Widget内部NativeDestruct自动处理输入模式恢复）
+        UIManager->CloseWidget(EWidgetType::EWIDGET_BeginPlayScreen);
 
         UE_LOG(LogTemp, Log, TEXT("SL_PlayerControllerBase::HideBeginPlayScreen - BeginPlayScreen hidden"));
     }
+}
+
+bool ASL_PlayerControllerBase::IsBeginPlayScreenVisible() const
+{
+    return UIManager && UIManager->IsWidgetOpen(EWidgetType::EWIDGET_BeginPlayScreen);
 }
 
 /************************************************************************/

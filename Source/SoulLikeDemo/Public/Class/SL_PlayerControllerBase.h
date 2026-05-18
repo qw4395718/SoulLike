@@ -78,7 +78,7 @@ public:
 
     // 检查是否已经显示开始界面 
     UFUNCTION(BlueprintPure, Category = "UI")
-    bool IsBeginPlayScreenVisible() const { return BeginPlayScreen != nullptr; }
+    bool IsBeginPlayScreenVisible() const;
 
 protected:
 	/************************************************************************/
@@ -131,12 +131,4 @@ private:
 	// ===== 新增：缓存 =====
 	// 缓存 InventoryComp 引用，避免频繁 FindComponent
 	mutable TWeakObjectPtr<USL_InventoryComponent> CachedInventoryComp;
-
-	 // 开始界面Widget类（可在蓝图中指定子类） 
-    UPROPERTY(EditDefaultsOnly, Category = "UI")
-    TSubclassOf<class UHUD_BeginPlayScreen> BeginPlayScreenClass;
-
-    // 开始界面实例 
-    UPROPERTY()
-		class UHUD_BeginPlayScreen* BeginPlayScreen;
 };

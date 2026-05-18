@@ -28,7 +28,11 @@ struct FUICreateParams
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FVector WorldOffset = FVector(0, 0, 150); // 头部偏移量，可配置
 
-		// 4. 动态销毁参数（用于解决你的问题2）
+		// 4. Z-Order（屏幕空间UI的层叠顺序，越大越靠前）
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 ZOrder = 0;
+
+		// 5. 动态销毁参数（用于解决你的问题2）
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bEnableDistanceCulling = true; // 是否根据距离销毁
 
@@ -91,7 +95,7 @@ public:
 	void OpenWidget(const FUICreateParams& CreateParam);
     
 	UFUNCTION(BlueprintCallable, Category = "UI Manager")
-	void OpenScreenWidget(EWidgetType WidgetType);
+	void OpenScreenWidget(EWidgetType WidgetType, int32 ZOrder = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "UI Manager")
 	void OpenWorldWidgetWithActor(const FUICreateParams& CreateParam);

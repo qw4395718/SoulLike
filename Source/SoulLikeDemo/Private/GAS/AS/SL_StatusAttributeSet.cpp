@@ -144,12 +144,12 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			const float ChangeNumber = OldValue - NewValue;
 			if (UAbilitySystemComponent* OwningAbilitySystemComponent = GetOwningAbilitySystemComponent())
 			{
-				// Broadcast a 'damage number' gameplay cue on the owning actor. Triggered on server, executes on all clients.
-				const FGameplayTag ChangeCueTag = FGameplayTag::RequestGameplayTag(FName("GameplayCue.DamageNumber"), /*ErrorIfNotFound=*/true);
-				FGameplayCueParameters ChangeCueParams;
-				ChangeCueParams.NormalizedMagnitude = 1.f;
-				ChangeCueParams.RawMagnitude = ChangeNumber;
-				OwningAbilitySystemComponent->ExecuteGameplayCue(ChangeCueTag, ChangeCueParams);
+				// [Temp Disabled] gameplay cue caused 1.76s hitch on first hit
+				// const FGameplayTag ChangeCueTag = FGameplayTag::RequestGameplayTag(FName("GameplayCue.DamageNumber"));
+				// FGameplayCueParameters ChangeCueParams;
+				// ChangeCueParams.NormalizedMagnitude = 1.f;
+				// ChangeCueParams.RawMagnitude = ChangeNumber;
+				// OwningAbilitySystemComponent->ExecuteGameplayCue(ChangeCueTag, ChangeCueParams);
 			}
 		}
 

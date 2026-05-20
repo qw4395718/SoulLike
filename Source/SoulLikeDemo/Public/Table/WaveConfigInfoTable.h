@@ -29,6 +29,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "WaveConfig")
 		int32 GetWaveCountForLevel(int32 LevelID) const;
 
+	/** 获取所有不重复的关卡ID列表（升序） */
+	UFUNCTION(BlueprintPure, Category = "WaveConfig")
+		TArray<int32> GetAllLevelIDs() const;
+
 protected:
 	/** 关卡索引：LevelID -> WaveID列表 */
 	TMap<int32, TArray<int32>> LevelWaveIndex;

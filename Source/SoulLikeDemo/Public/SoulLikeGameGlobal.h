@@ -268,6 +268,7 @@ enum class EWidgetType :uint8
 	EWIDGET_Inventory,
 	EWIDGET_BeginPlayScreen,
 	EWIDGET_LobbyScreen,
+	EWIDGET_PauseMenu,
 	EWIDGET_Max
 };
 
@@ -472,6 +473,21 @@ struct FWeaponDataInfo : public FTableRowBase
 		bool bIsLeftHanded = false;
 };
 
+// ===== 快捷栏道具信息 =====
+USTRUCT(BlueprintType)
+struct FSlotItemInfo
+{
+	GENERATED_BODY()
+
+		// 道具ID（对应 FItemDataRow::ItemID）
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+		FName ItemID;
+
+	// 道具初始数量（进入关卡时的默认持有量）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+		int32 InitialCount = 1;
+};
+
 // ===== 职业配置表结构 =====
 USTRUCT(BlueprintType)
 struct FClassConfigInfo : public FTableRowBase
@@ -528,10 +544,11 @@ struct FClassConfigInfo : public FTableRowBase
 		FName TwoHandSocketName = TEXT("None");
 
 	// ===== 道具配置 =====
-	/** 道具集IDs */
+	/** 快捷栏道具列表（道具ID + 初始数量） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-		TArray<int32> SlotItemIDs;
+		TArray<FSlotItemInfo> SlotItems;
 };
+
 
 // ===== 波次配置表结构 =====
 USTRUCT(BlueprintType)

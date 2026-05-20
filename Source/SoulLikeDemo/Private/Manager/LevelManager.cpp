@@ -36,13 +36,6 @@ void ALevelManager::BeginPlay()
 	WaveManagerSystem->OnWaveCompleted.AddDynamic(this, &ALevelManager::OnWaveCompleted);
 	WaveManagerSystem->OnAllWavesCompleted.AddDynamic(this, &ALevelManager::OnAllWavesCompleted);
 
-	// 延迟启动关卡
-	FTimerHandle StartDelayHandle;
-	GetWorld()->GetTimerManager().SetTimer(StartDelayHandle, FTimerDelegate::CreateLambda([this]()
-		{
-			StartLevel(CurrentLevelID, CurrentPlayerClassID);
-		}), 2.0f, false);
-
 	UE_LOG(LogTemp, Log, TEXT("LevelManager::BeginPlay - Level initialization started"));
 }
 

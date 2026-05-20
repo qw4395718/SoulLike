@@ -1,4 +1,4 @@
-﻿// Private/Table/WaveConfigInfoTable.cpp
+// Private/Table/WaveConfigInfoTable.cpp
 
 #include "WaveConfigInfoTable.h"
 #include "Engine/DataTable.h"
@@ -95,4 +95,12 @@ int32 UWaveConfigInfoTable::GetWaveCountForLevel(int32 LevelID) const
 {
 	const TArray<int32>* WaveIDs = LevelWaveIndex.Find(LevelID);
 	return WaveIDs ? WaveIDs->Num() : 0;
+}
+
+TArray<int32> UWaveConfigInfoTable::GetAllLevelIDs() const
+{
+	TArray<int32> OutIDs;
+	LevelWaveIndex.GetKeys(OutIDs);
+	OutIDs.Sort();
+	return OutIDs;
 }

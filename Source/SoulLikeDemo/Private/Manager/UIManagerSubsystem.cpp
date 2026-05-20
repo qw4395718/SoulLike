@@ -43,6 +43,7 @@ void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	/************************************************************************/
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_BeginPlayScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_BeginPlayScreen.WBP_HUD_BeginPlayScreen"));
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_LobbyScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_LobbyScreen.WBP_HUD_LobbyScreen"));
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PauseMenu, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PauseMenuScreen.WBP_HUD_PauseMenuScreen"));
 
 	UE_LOG(LogTemp, Log, TEXT("UIManagerSubsystem initialized"));
 }

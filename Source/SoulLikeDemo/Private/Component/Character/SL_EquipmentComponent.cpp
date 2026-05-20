@@ -57,7 +57,7 @@ void USL_EquipmentComponent::InitializeWithConfig(const FClassConfigInfo& ClassC
 	CurrentClassConfig = ClassConfig;
 
 	// 1. 设置道具ID
-	SlotItemIDList = ClassConfig.SlotItemIDs;
+	//SlotItemIDList = ClassConfig.SlotItemIDs;
 
 	// 2. 装备武器
 	EquipLeftHandWeapon(ClassConfig.LeftHandWeaponID);

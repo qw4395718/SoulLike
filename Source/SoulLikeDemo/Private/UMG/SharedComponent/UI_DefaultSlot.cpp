@@ -8,7 +8,8 @@
 #include "Components/Image.h"
 
 
-UUI_DefaultSlot::UUI_DefaultSlot()
+UUI_DefaultSlot::UUI_DefaultSlot(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 
 }

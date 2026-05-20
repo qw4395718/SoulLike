@@ -7,19 +7,28 @@
 #include "SL_EnemyBase.h"
 #include <Components/CapsuleComponent.h>
 
-USL_StatusAttributeSet::USL_StatusAttributeSet() 
+USL_StatusAttributeSet::USL_StatusAttributeSet()
 {
-	// 复活委托绑定
-	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
-	{
-		globalDelegatesManager->OnCharacterRevived.AddUObject(this,&USL_StatusAttributeSet::OnCharacterReLive);
-	}
+	// 委托绑定移到 BindReviveEvent() 中运行时调用
+	// 构造阶段没有有效的 World 上下文，Cook 时会导致 Cannot get World 错误
 }
 
 void USL_StatusAttributeSet::SetOwningActor(AActor* pOwnActor)
 {
 	RETURN_IF_TRUE(pOwnActor == nullptr);
 	OwningActor = pOwnActor;
+}
+
+/************************************************************************/
+/*                               外部调用                                */
+/************************************************************************/
+
+void USL_StatusAttributeSet::BindReviveEvent()
+{
+	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
+	{
+		globalDelegatesManager->OnCharacterRevived.AddUObject(this, &USL_StatusAttributeSet::OnCharacterReLive);
+	}
 }
 
 void USL_StatusAttributeSet::InitHealthAS_Implementation(float MinValue, float MaxValue)

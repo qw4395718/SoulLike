@@ -53,6 +53,7 @@ void ASL_EnemyBase::BeginPlay()
 	if (StatusAttributeSet)
 	{
 		StatusAttributeSet->SetOwningActor(this);
+		StatusAttributeSet->BindReviveEvent();
 	}
 }
 
@@ -324,10 +325,38 @@ void ASL_EnemyBase::LoadEnemyAppearance(const FEnemyConfigInfo& Config)
 	// 加载动画蓝图
 	if (!Config.AnimBlueprint.IsNull())
 	{
-		UAnimBlueprint* AnimBP = Config.AnimBlueprint.LoadSynchronous();
-		if (AnimBP && GetMesh())
+		const FString AnimBPPath = Config.AnimBlueprint.ToString();
+		UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::LoadEnemyAppearance - Loading AnimBP: %s"), *AnimBPPath);
+		
+		UClass* AnimClass = nullptr;
+		
+		// 尝试1: 直接加载 _C 类（Cook后UBlueprint可能被剥离，只剩生成的类）
+		FString ClassPath = AnimBPPath + TEXT("_C");
+		AnimClass = LoadObject<UClass>(nullptr, *ClassPath);
+		if (AnimClass)
 		{
-			GetMesh()->SetAnimInstanceClass(AnimBP->GetAnimBlueprintGeneratedClass());
+			UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::LoadEnemyAppearance - Loaded via _C path: %s"), *ClassPath);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ASL_EnemyBase::LoadEnemyAppearance - _C path failed: %s"), *ClassPath);
+			// 尝试2: 加载 UAnimBlueprint 对象
+			UAnimBlueprint* AnimBP = LoadObject<UAnimBlueprint>(nullptr, *AnimBPPath);
+			if (AnimBP)
+			{
+				AnimClass = AnimBP->GetAnimBlueprintGeneratedClass();
+				UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::LoadEnemyAppearance - Loaded via UAnimBlueprint"));
+			}
+		}
+		
+		if (AnimClass && GetMesh())
+		{
+			GetMesh()->SetAnimInstanceClass(AnimClass);
+			UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::LoadEnemyAppearance - AnimClass set successfully"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ASL_EnemyBase::LoadEnemyAppearance - AnimClass or Mesh is null, skip setting anim class"));
 		}
 	}
 }

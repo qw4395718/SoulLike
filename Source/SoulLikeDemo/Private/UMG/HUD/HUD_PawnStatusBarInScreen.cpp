@@ -13,7 +13,7 @@ UHUD_PawnStatusBarInScreen::UHUD_PawnStatusBarInScreen(const FObjectInitializer&
 	:Super(ObjectInitializer)
 {
 	OwningPawn = nullptr;
-	BindGlobalDelegatesEvent();
+	
 }
 
 void UHUD_PawnStatusBarInScreen::BindGlobalDelegatesEvent()

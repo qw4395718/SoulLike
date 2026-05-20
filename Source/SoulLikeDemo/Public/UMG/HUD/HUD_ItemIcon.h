@@ -19,7 +19,7 @@ class SOULLIKEDEMO_API UHUD_ItemIcon : public UUI_DefaultSlot
 {
 	GENERATED_BODY()
 public:
-	UHUD_ItemIcon();
+	UHUD_ItemIcon(const FObjectInitializer& ObjectInitializer);
 
 	/************************************************************************/
 	/* 继承实现																		*/

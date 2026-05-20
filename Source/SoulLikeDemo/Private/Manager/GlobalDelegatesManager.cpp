@@ -28,7 +28,7 @@ UGlobalDelegatesManager* UGlobalDelegatesManager::Get(const UObject* WorldContex
 	UWorld* World = WorldContextObject->GetWorld();
 	if (!World)
 	{
-		UE_LOG(LogTemp, Error, TEXT("UGlobalDelegatesManager::Get: Cannot get World"));
+		// Cook / 引擎初始化 / 打包阶段没有游戏 World，这是预期行为
 		return nullptr;
 	}
 

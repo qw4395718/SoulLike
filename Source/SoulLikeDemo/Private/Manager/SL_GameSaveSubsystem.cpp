@@ -34,7 +34,17 @@ USL_GameSaveSubsystem* USL_GameSaveSubsystem::Get(const UObject* WorldContextObj
 	}
 
 	UWorld* World = WorldContextObject->GetWorld();
-	if (!World) return nullptr;
+	if (!World)
+	{
+		// CDO / 默认子对象在 Cook 和引擎初始化阶段没有有效的 World 上下文
+		// 这是预期行为，不打印错误日志
+		if (WorldContextObject->IsTemplate())
+		{
+			return nullptr;
+		}
+		UE_LOG(LogTemp, Error, TEXT("UGlobalDelegatesManager::Get: Cannot get World"));
+		return nullptr;
+	}
 
 	UGameInstance* GameInstance = World->GetGameInstance();
 	if (!GameInstance) return nullptr;

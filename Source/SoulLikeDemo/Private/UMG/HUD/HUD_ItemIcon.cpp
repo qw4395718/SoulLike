@@ -7,14 +7,16 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
-UHUD_ItemIcon::UHUD_ItemIcon()
+UHUD_ItemIcon::UHUD_ItemIcon(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
+
 }
 
 void UHUD_ItemIcon::SetData(FStatusEffectInfo effectInfo)
 {
 	RETURN_IF_TRUE(m_stackNum == nullptr || m_showImage == nullptr);
-	// ���öѵ�����
+
 	m_stackNum->SetText(FText::AsNumber(effectInfo.Stacks));
 	m_showImage->SetBrushFromTexture(effectInfo.Icon);
 }

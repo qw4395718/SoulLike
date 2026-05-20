@@ -37,6 +37,8 @@ class SOULLIKEDEMO_API UGlobalDelegatesManager : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 	
 	// 获取单例实例
 	UFUNCTION(BlueprintPure, Category = "Global Delegates", meta = (WorldContext = "WorldContextObject"))
@@ -90,8 +92,6 @@ public:
 		void BroadcastItemCountChanged(AActor* InOwnerActor, FName InItemID, int32 InNewCount);
 
 protected:
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
 
 	// 解除所有委托绑定
 	void ClearAllBinding();

@@ -64,6 +64,7 @@ void ASL_CharacterBase::BeginPlay()
 	if (StatusAttributeSet)
 	{
 		StatusAttributeSet->SetOwningActor(this);
+		StatusAttributeSet->BindReviveEvent();
 	}
 	
 	if (!IsPlayerControlled())
@@ -381,6 +382,7 @@ void ASL_CharacterBase::InitCharacterWithClassID(int32 InPlayerClassID)
 
 	// 保存角色的配置
 	ClassConfig = Config;
+	PlayerClassID = InPlayerClassID;
 
 	// 应用配置
 	ApplyEnemyConfig(ClassConfig);

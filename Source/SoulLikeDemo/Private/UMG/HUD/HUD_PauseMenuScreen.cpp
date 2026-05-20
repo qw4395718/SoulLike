@@ -174,6 +174,7 @@ void UHUD_PauseMenuScreen::OnQuitClicked()
 
 void UHUD_PauseMenuScreen::SetUIInputMode()
 {
+	return;
 	if (APlayerController* PC = GetOwningPlayer())
 	{
 		FInputModeUIOnly InputMode;
@@ -187,6 +188,7 @@ void UHUD_PauseMenuScreen::SetUIInputMode()
 
 void UHUD_PauseMenuScreen::SetGameInputMode()
 {
+	return;
 	if (APlayerController* PC = GetOwningPlayer())
 	{
 		FInputModeGameOnly InputMode;

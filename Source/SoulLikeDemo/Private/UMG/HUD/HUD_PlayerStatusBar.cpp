@@ -11,7 +11,7 @@
 UHUD_PlayerStatusBar::UHUD_PlayerStatusBar(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	:Super(ObjectInitializer)
 {
-	BindGlobalDelegatesEvent();
+	
 }
 
 void UHUD_PlayerStatusBar::BindGlobalDelegatesEvent()

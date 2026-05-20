@@ -24,7 +24,7 @@ void USL_StaminaComponent::InitializeStaminaComponent()
 		/*CostEffectClass = CreateCostEffect()->GetClass();*/
 		CostEffectClass = LoadClass<UGameplayEffect>(
 			nullptr,
-			TEXT("/Game/SoulLikeDemo/GAS/GE/GE_StaminaCost.GE_StaminaCost_C")
+			TEXT("/Game/SoulLikeDemo/GAS/GE/Player/GE_StaminaCost.GE_StaminaCost_C")
 			);
 	}
 
@@ -33,7 +33,7 @@ void USL_StaminaComponent::InitializeStaminaComponent()
 		/*RegenEffectClass = CreateRegenEffect()->GetClass();*/
 		RegenEffectClass = LoadClass<UGameplayEffect>(
 			nullptr,
-			TEXT("/Game/SoulLikeDemo/GAS/GE/GE_StaminaRegen.GE_StaminaRegen_C")
+			TEXT("/Game/SoulLikeDemo/GAS/GE/Player/GE_StaminaRegen.GE_StaminaRegen_C")
 			);
 	}
 
@@ -42,7 +42,7 @@ void USL_StaminaComponent::InitializeStaminaComponent()
 		/*DelayEffectClass = CreateDelayEffect()->GetClass();*/
 		DelayEffectClass = LoadClass<UGameplayEffect>(
 			nullptr,
-			TEXT("/Game/SoulLikeDemo/GAS/GE/GE_StaminaDelayRegen.GE_StaminaDelayRegen_C")
+			TEXT("/Game/SoulLikeDemo/GAS/GE/Player/GE_StaminaDelayRegen.GE_StaminaDelayRegen_C")
 			);
 	}
 

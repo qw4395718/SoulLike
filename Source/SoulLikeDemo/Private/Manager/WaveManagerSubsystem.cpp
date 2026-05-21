@@ -195,9 +195,9 @@ void UWaveManagerSystem::SpawnWaveMonsters(FWaveConfigInfo& WaveConfig)
 			if (SpawnedCount >= PendingSpawnCount)
 			{
 				// 所有怪物生成完毕
-				GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
 				CurrentWaveState = EWaveState::Active;
 				UE_LOG(LogTemp, Log, TEXT("UWaveManagerSystem::SpawnWaveMonsters - All monsters spawned, entering Active state"));
+				GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
 				return;
 			}
 

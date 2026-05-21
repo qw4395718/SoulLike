@@ -92,8 +92,29 @@ void ASL_CharacterBase::BeginPlay()
 void ASL_CharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// 锁定旋转控制
+	if (LockOnCmp && LockOnCmp->IsLocked() && Controller)
+	{
+		FVector LockDir = LockOnCmp->GetLockDirection();
+		if (!LockDir.IsNearlyZero())
+		{
+			FRotator TargetRotation = LockDir.Rotation();
+			FRotator CurrentControlRot = Controller->GetControlRotation();
+			FRotator NewControlRot(CurrentControlRot.Pitch, TargetRotation.Yaw, CurrentControlRot.Roll);
+			Controller->SetControlRotation(NewControlRot);
+		}
+	}
 }
 
+
+void ASL_CharacterBase::OnLockOnPressed()
+{
+	if (LockOnCmp)
+	{
+		LockOnCmp->TryLockOnTarget();
+	}
+}
 void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -110,6 +131,12 @@ void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		true                    // 是否尝试将枚举值映射到输入ID
 	);
 	AbilitySystemComp->BindAbilityActivationToInputComponent(PlayerInputComponent, Binds);
+
+	// 索敌输入绑定
+	if (PlayerInputComponent)
+	{
+		PlayerInputComponent->BindAction("LockOn", IE_Pressed, this, &ASL_CharacterBase::OnLockOnPressed);
+	}
 }
 
 
@@ -327,6 +354,12 @@ void ASL_CharacterBase::InitPartmentComponent()
 	{
 		StaminaCmp = NewObject<USL_StaminaComponent>(this);
 		StaminaCmp->InitializeStaminaComponent();
+	}
+
+	if (LockOnCmp == nullptr && true)
+	{
+		LockOnCmp = NewObject<USL_LockOnComponent>(this);
+		LockOnCmp->InitializeLockOnComponent();
 	}
 
 	if (StateCmp == nullptr && true)

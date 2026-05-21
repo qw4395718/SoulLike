@@ -9,6 +9,7 @@
 #include "SL_HealthComponent.h"
 #include "SL_InventoryComponent.h"
 #include "SL_StaminaComponent.h"
+#include "SL_LockOnComponent.h"
 #include "SL_StateComponent.h"
 #include "SL_MovementComponent.h"
 #include "CharacterComponent_IF.h"
@@ -165,6 +166,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "CharacterOperation")
 		USL_InventoryComponent* GetInventoryComponentRef() const { return InventoryCmp; }
 
+	// 获取锁定组件引用
+	UFUNCTION(BlueprintPure, Category = "CharacterOperation")
+		USL_LockOnComponent* GetLockOnComponentRef() const { return LockOnCmp; }
+
+	/** 按下索敌键 */
+	UFUNCTION()
+		void OnLockOnPressed();
+
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void BindGASDeathEvent();
 
@@ -216,6 +225,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 		USL_StaminaComponent* StaminaCmp;
+
+	UPROPERTY()
+		USL_LockOnComponent* LockOnCmp;
 
 	UPROPERTY()
 		USL_StateComponent* StateCmp;

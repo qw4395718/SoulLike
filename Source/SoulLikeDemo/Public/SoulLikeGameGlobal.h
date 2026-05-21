@@ -269,6 +269,7 @@ enum class EWidgetType :uint8
 	EWIDGET_BeginPlayScreen,
 	EWIDGET_LobbyScreen,
 	EWIDGET_PauseMenu,
+	EWIDGET_LockOnIndicator,
 	EWIDGET_Max
 };
 

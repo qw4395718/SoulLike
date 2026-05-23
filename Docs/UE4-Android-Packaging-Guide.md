@@ -209,7 +209,19 @@ Edit → Project Settings → Platforms → Android → APK Packaging
 
 开发阶段留空，UE4 自动使用 debug keystore。
 
+### 5.5 游戏数据打包方式
+
+在 **APK Packaging** 页面的 **Advanced** 中找到：
+
+| 选项 | 推荐值 | 说明 |
+|------|--------|------|
+| **Package game data inside .apk** | **勾选 ✅** | 所有资源打进 APK，无需额外 obb 文件 |
+
+> ⚠️ **重要**：不勾选会额外生成 .obb 文件，传输和安装都多一步。勾选后一个 APK 文件就能搞定。
+
 ---
+
+
 
 ## 6. 打包 APK
 
@@ -236,6 +248,31 @@ java -version
 - 最终生成 SoulLikeDemo-Android-Shipping.apk
 
 > 注意：打包期间不要关闭编辑器和命令行窗口。
+
+### 6.4 Gradle 下载卡住处理
+
+打包进度卡在 `Downloading https://services.gradle.org/distributions/gradle-6.1.1-all.zip` 是常见情况。Gradle 6.1.1 约 100MB，正常网速 3-5 分钟下完。如果长时间不动：
+
+**方法一：手动下载 Gradle**
+
+1. 浏览器打开 https://services.gradle.org/distributions/gradle-6.1.1-all.zip
+2. 下载后查看缓存目录：
+   ```cmd
+   dir C:\Users\Administrator\.gradle\wrapper\dists\gradle-6.1.1-all\ /s
+   ```
+   会显示一个随机字符目录名，例如 `8ahg6...`。
+3. 把 `gradle-6.1.1-all.zip`（**不要解压**）放到该目录下
+4. 重新打包
+
+**方法二：查看下载进度**
+
+```cmd
+:loop
+dir C:\Users\Administrator\.gradle\wrapper\dists\gradle-6.1.1-all\ /s
+timeout /t 2
+goto loop
+```
+按 `Ctrl+C` 终止。文件大小在增长说明正在下载。
 
 ---
 

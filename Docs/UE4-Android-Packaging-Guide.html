@@ -394,6 +394,17 @@ D:\Software\Android\cmdline-tools\latest\bin</code></pre>
 
 <h3>5.4 签名</h3>
 <p>开发阶段留空，UE4 自动使用 debug keystore。</p>
+
+<h3>5.5 游戏数据打包方式</h3>
+<p>在 <strong>APK Packaging</strong> 页面的 <strong>Advanced</strong> 中找到：</p>
+<table>
+  <tr><th>选项</th><th>推荐值</th><th>说明</th></tr>
+  <tr><td>Package game data inside .apk</td><td><strong>勾选 ✅</strong></td><td>所有资源打进 APK，无需额外 obb 文件</td></tr>
+</table>
+<div class="alert">
+<strong>⚠️ 重要</strong><br>
+不勾选会额外生成 .obb 文件，传输和安装都多一步。勾选后一个 APK 文件就能搞定。
+</div>
 </div>
 
 <!-- ========== 6 ========== -->
@@ -415,6 +426,27 @@ D:\Software\Android\cmdline-tools\latest\bin</code></pre>
   <li>最终生成：<code>SoulLikeDemo-Android-Shipping.apk</code></li>
 </ul>
 <p><strong>注意</strong>：打包期间不要关闭编辑器和命令行窗口。</p>
+
+<h3>6.4 Gradle 下载卡住处理</h3>
+<p>打包进度卡在 <code>Downloading https://services.gradle.org/distributions/gradle-6.1.1-all.zip</code> 是常见情况。Gradle 6.1.1 约 100MB，正常网速 3-5 分钟下完。</p>
+
+<p><strong>方法一：手动下载 Gradle</strong></p>
+<ol>
+  <li>浏览器打开 <a href="https://services.gradle.org/distributions/gradle-6.1.1-all.zip" target="_blank">gradle-6.1.1-all.zip</a></li>
+  <li>查看缓存目录路径：
+    <pre><code>dir C:\Users\Administrator\.gradle\wrapper\dists\gradle-6.1.1-all\ /s</code></pre>
+    会显示一个随机字符目录名，例如 <code>8ahg6...</code>
+  </li>
+  <li>把 <code>gradle-6.1.1-all.zip</code>（<strong>不要解压</strong>）放到该目录下</li>
+  <li>重新打包</li>
+</ol>
+
+<p><strong>方法二：查看下载进度</strong></p>
+<pre><code>:loop
+dir C:\Users\Administrator\.gradle\wrapper\dists\gradle-6.1.1-all\ /s
+timeout /t 2
+goto loop</code></pre>
+<p>按 <code>Ctrl+C</code> 终止。文件大小在增长说明正在下载。</p>
 </div>
 
 <!-- ========== 7 ========== -->

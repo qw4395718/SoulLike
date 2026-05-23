@@ -376,6 +376,29 @@ struct FComboInfo : public FTableRowBase
         float DamageMultiplier = 1.0f;
 };
 
+// 连击查询用复合Key（拍平双层Map为单层，避免UPROPERTY不支持嵌套容器）
+USTRUCT(BlueprintType)
+struct FComboLookupKey
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FGameplayTag WindowTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		EComboInputActionType InputType;
+
+	bool operator==(const FComboLookupKey& Other) const
+	{
+		return WindowTag == Other.WindowTag && InputType == Other.InputType;
+	}
+};
+
+FORCEINLINE uint32 GetTypeHash(const FComboLookupKey& Key)
+{
+	return HashCombine(GetTypeHash(Key.WindowTag), static_cast<uint32>(Key.InputType));
+}
+
 // ===== 武器类型枚举 =====
 UENUM(BlueprintType)
 enum class EWeaponType : uint8

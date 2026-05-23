@@ -32,20 +32,21 @@ bool UComboInfoTable::InitializeFromAsset(TSoftObjectPtr<UDataTable> TableAsset)
 		FComboInfo* ComboInfoRow = DataTable->FindRow<FComboInfo>(RowName, TEXT("InitializeFromAsset"));
 		if (ComboInfoRow)
 		{
-			// 构建映射表：Tag -> (InputActionType -> ComboInfo)
-			FGameplayTag RequiredTag = ComboInfoRow->ActiveRequireWindowTag;
-			EComboInputActionType InputType = ComboInfoRow->InputActionType;
+			// 构建Key: Tag + InputType
+			FComboLookupKey LookupKey;
+			LookupKey.WindowTag = ComboInfoRow->ActiveRequireWindowTag;
+			LookupKey.InputType = ComboInfoRow->InputActionType;
 
 			// 检查Tag是否有效
-			if (!RequiredTag.IsValid())
+			if (!LookupKey.WindowTag.IsValid())
 			{
 				UE_LOG(LogTemp, Warning, TEXT("UComboInfoTable::InitializeFromAsset - Invalid tag in row %s"), *RowName.ToString());
 				continue;
 			}
 
 			// 检查InputType是否有效
-			if (InputType == EComboInputActionType::EComboInputAction_None ||
-				InputType >= EComboInputActionType::EComboInputAction_Max)
+			if (LookupKey.InputType == EComboInputActionType::EComboInputAction_None ||
+				LookupKey.InputType >= EComboInputActionType::EComboInputAction_Max)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("UComboInfoTable::InitializeFromAsset - Invalid InputActionType in row %s"), *RowName.ToString());
 				continue;
@@ -57,23 +58,21 @@ bool UComboInfoTable::InitializeFromAsset(TSoftObjectPtr<UDataTable> TableAsset)
 				continue;
 			}
 
-			// 添加到映射表
-			TMap<EComboInputActionType, FComboInfo>& InputActionMap = ComboInfoMap.FindOrAdd(RequiredTag);
-
-			// 检查是否重复添加
-			if (InputActionMap.Contains(InputType))
+			// 检查是否重复添加（平坦化Map，Key内已包含Tag+InputType）
+			if (ComboInfoMap.Contains(LookupKey))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("UComboInfoTable::InitializeFromAsset - Duplicate combo info for Tag: %s, InputType: %d"),
-					*RequiredTag.ToString(), static_cast<int32>(InputType));
+					*LookupKey.WindowTag.ToString(), static_cast<int32>(LookupKey.InputType));
 				continue;
 			}
 
-			InputActionMap.Add(InputType, *ComboInfoRow);
+			// 添加到平坦化映射表
+			ComboInfoMap.Add(LookupKey, *ComboInfoRow);
 
 		}
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("UComboInfoTable::InitializeFromAsset - Successfully loaded %d tags"),
+	UE_LOG(LogTemp, Log, TEXT("UComboInfoTable::InitializeFromAsset - Successfully loaded %d entries"),
 		ComboInfoMap.Num());
 
 	return true;
@@ -92,18 +91,12 @@ UBaseDataTable* UComboInfoTable::GetDataTable() const
 
 bool UComboInfoTable::FindNextComboInfo(const FGameplayTagContainer& Tags, EComboInputActionType InputActionType, FComboInfo& ComboInfo)
 {
-	// 遍历ComboInfoMap
 	for (const auto& pair : ComboInfoMap)
 	{
-		if (Tags.HasTag(pair.Key))
+		if (Tags.HasTag(pair.Key.WindowTag) && pair.Key.InputType == InputActionType)
 		{
-			const auto& subPair = pair.Value;
-			if (subPair.Contains(InputActionType))
-			{
-				// 获取对应的信息
-				ComboInfo = subPair[InputActionType];
-				return true;
-			}
+			ComboInfo = pair.Value;
+			return true;
 		}
 	}
 	return false;

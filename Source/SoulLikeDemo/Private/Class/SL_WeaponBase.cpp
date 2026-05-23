@@ -67,7 +67,6 @@ void ASL_WeaponBase::InitializeWeaponWithID(int32 InWeaponID, FName InSocketName
 			{
 				SocketName = InSocketName;
 				InitializeFromDataRow(OutData);
-				return;
 			}
 		}
 	}

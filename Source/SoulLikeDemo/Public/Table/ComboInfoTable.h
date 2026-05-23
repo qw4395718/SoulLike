@@ -34,7 +34,8 @@ public:
 
 protected:
 
-	// 连击系统相关数据(此处的FGameplayTag 为激活的连击窗口Tag
-	TMap<FGameplayTag, TMap<EComboInputActionType, FComboInfo>> ComboInfoMap;
+	// 连击系统相关数据(复合Key: 窗口Tag + 输入类型)
+	UPROPERTY()
+	TMap<FComboLookupKey, FComboInfo> ComboInfoMap;
 
 };

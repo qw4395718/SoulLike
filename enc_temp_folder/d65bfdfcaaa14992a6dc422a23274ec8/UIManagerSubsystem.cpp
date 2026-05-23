@@ -180,7 +180,7 @@ void UUIManagerSubsystem::OpenWorldWidgetWithActor(const FUICreateParams& Create
 								ScreenWidgetTarget->SetOwningPawn(CreateParam.TargetActor);
 							}
 							// 记录信息
-							FString Key = CreateParam.TargetActor->GetName() + FString::FromInt(static_cast<int32>(CreateParam.Type));
+							FString Key = CreateParam.TargetActor->GetName() + FString::FromInt(int32(CreateParam.Type));
 							ActiveWorldWidgets.Add(Key, Widget);
 							return;
 						}

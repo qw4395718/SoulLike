@@ -12,7 +12,7 @@ UWeaponComboCoordinatorComponent::UWeaponComboCoordinatorComponent()
 float UWeaponComboCoordinatorComponent::GetAttackComboDamage(int type)
 {
 	// 检测type是否合法
-	RETURN_VALUE_IF_FALSE(type>= static_cast<int>(EWeaponModeTyoe::WEAPONMODE_Max) || type<= static_cast<int>(EWeaponModeTyoe::WEAPONMODE_Min),0.0f);
+	RETURN_VALUE_IF_FALSE(type>=int(EWeaponModeTyoe::WEAPONMODE_Max) || type<= int(EWeaponModeTyoe::WEAPONMODE_Min),0.0f);
 	if (ComboCoordinatorInfoMap.Find(EWeaponModeTyoe(type)))
 	{
 		FComboCoordinatorInfo Info = ComboCoordinatorInfoMap.FindRef(EWeaponModeTyoe(type));
@@ -27,8 +27,8 @@ float UWeaponComboCoordinatorComponent::GetAttackComboDamage(int type)
 float UWeaponComboCoordinatorComponent::GetAttackStateCost(int type,int CostType)
 {
 	// 检测type,costtype是否合法
-	RETURN_VALUE_IF_FALSE(type >= static_cast<int>(EWeaponModeTyoe::WEAPONMODE_Max) || type <= static_cast<int>(EWeaponModeTyoe::WEAPONMODE_Min), 0.0f);
-	RETURN_VALUE_IF_FALSE(CostType >= static_cast<int>(EWeaponActionCostType::EWeaponAction_Max) || CostType <= static_cast<int>(EWeaponActionCostType::EWeaponAction_Min), 0.0f);
+	RETURN_VALUE_IF_FALSE(type >= int(EWeaponModeTyoe::WEAPONMODE_Max) || type <= int(EWeaponModeTyoe::WEAPONMODE_Min), 0.0f);
+	RETURN_VALUE_IF_FALSE(CostType >= int(EWeaponActionCostType::EWeaponAction_Max) || CostType <= int(EWeaponActionCostType::EWeaponAction_Min), 0.0f);
 
 	if (ComboCoordinatorInfoMap.Find(EWeaponModeTyoe(type)))
 	{
@@ -39,9 +39,9 @@ float UWeaponComboCoordinatorComponent::GetAttackStateCost(int type,int CostType
 			float CostValue = 0.0f;
 			switch (CostType)
 			{
-			case static_cast<int>(EWeaponActionCostType::EWeaponAction_Health) :{CostValue = AbilityCostInfo.HealthCost;};break;
-			case static_cast<int>(EWeaponActionCostType::EWeaponAction_Stamina) :{CostValue = AbilityCostInfo.StaminaCost;};break;
-			case static_cast<int>(EWeaponActionCostType::EWeaponAction_Magic) : {CostValue = AbilityCostInfo.MagicCost;}; break;
+			case int(EWeaponActionCostType::EWeaponAction_Health) :{CostValue = AbilityCostInfo.HealthCost;};break;
+			case int(EWeaponActionCostType::EWeaponAction_Stamina) :{CostValue = AbilityCostInfo.StaminaCost;};break;
+			case int(EWeaponActionCostType::EWeaponAction_Magic) : {CostValue = AbilityCostInfo.MagicCost;}; break;
 			default:break;
 			}
 			return CostValue;

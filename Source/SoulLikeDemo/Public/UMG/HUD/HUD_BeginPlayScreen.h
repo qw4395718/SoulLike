@@ -28,6 +28,8 @@ public:
     UFUNCTION(BlueprintCallable, Category = "BeginPlayScreen")
     void InitializeScreen(bool bHasSaveData);
 
+    // 跳转到大厅界面
+    void ShowLobbyScreen();
 protected:
     /************************************************************************/
     /*                               按钮事件                                */
@@ -49,6 +51,9 @@ protected:
     /************************************************************************/
     /*                               内部访问                                */
     /************************************************************************/
+
+	UPROPERTY()
+		class UUIManagerSubsystem* UIManager;
 
     /** 新游戏按钮 */
     UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "BeginPlayScreen")

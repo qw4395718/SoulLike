@@ -31,12 +31,14 @@ void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	/************************************************************************/
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_InterActPanel,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_InterActPanel.WBP_PU_InterActPanel"));
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_MainMenu,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_MainMenu.WBP_PU_MainMenu"));
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_DeathScreen,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_DeathScreen.WBP_PU_DeathScreen"));
 	//RegisterWidgetFromBPPath(EWidgetType::EWIDGET_Inventory,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_NotifyMessage.WBP_PU_NotifyMessage"));
 	
 	/************************************************************************/
 	/*                             Screen                                         */
 	/************************************************************************/
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PawnStatusInScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PawnStatusInScreen.WBP_HUD_PawnStatusInScreen"));
+	//RegisterWidgetFromBPPath(EWidgetType::EWIDGET_LockOnIndicator, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_LockOnIndicator.WBP_HUD_LockOnIndicator"));
 
 	/************************************************************************/
 	/*                          全屏界面                                      */

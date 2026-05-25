@@ -113,14 +113,8 @@ void ALevelManager::OnPlayerDied()
 	}
 
 	PlayPlayerDiedEffect();
-	ShowPlayerDiedUI();
 
-	// 延迟后重试
-	FTimerHandle RetryTimer;
-	GetWorld()->GetTimerManager().SetTimer(RetryTimer, FTimerDelegate::CreateLambda([this]()
-		{
-			RetryLevel();
-		}), 3.0f, false);
+	UE_LOG(LogTemp, Log, TEXT("LevelManager::OnPlayerDied - Waiting for death screen input"));
 }
 
 void ALevelManager::RetryLevel()

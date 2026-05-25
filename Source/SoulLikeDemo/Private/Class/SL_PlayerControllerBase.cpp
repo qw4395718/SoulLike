@@ -8,6 +8,10 @@
 #include <SL_ComboManagerComponent.h>
 #include <HUD_BeginPlayScreen.h>
 #include <SL_GameModeBase.h>
+#include <GlobalDelegatesManager.h>
+#include "LevelManager.h"
+#include "Pop_DeathScreen.h"
+#include "Kismet/GameplayStatics.h"
 
 // 构造函数
 ASL_PlayerControllerBase::ASL_PlayerControllerBase()
@@ -37,6 +41,9 @@ void ASL_PlayerControllerBase::BeginPlay()
     {
         // 显示开始界面
         ShowBeginPlayScreen();
+
+        // 绑定角色死亡事件监听（需在 GameMode 初始化完成后）
+        BindPlayerDeathEvent();
     }), 0.1f, false);
 
 }
@@ -385,4 +392,72 @@ void ASL_PlayerControllerBase::CheckSaveDataAndInitScreen()
 {
     // 实际逻辑已在 ShowBeginPlayScreen 中实现
     // 这里保留接口方便后续扩展
+}
+
+/************************************************************************/
+/*                               死亡事件                               */
+/************************************************************************/
+
+// 内部调用：绑定角色死亡事件监听
+void ASL_PlayerControllerBase::BindPlayerDeathEvent()
+{
+    UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this);
+    if (DelegateMgr)
+    {
+        // 防止重复绑定
+        if (!OnPlayerDiedHandle.IsValid())
+        {
+            OnPlayerDiedHandle = DelegateMgr->OnCharacterDied.AddUObject(
+                this, &ASL_PlayerControllerBase::OnPlayerDiedHandler);
+            UE_LOG(LogTemp, Log, TEXT("PlayerController: Bound to OnCharacterDied event"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("PlayerController: Failed to get GlobalDelegatesManager"));
+    }
+}
+
+// 内部调用：角色死亡事件响应
+void ASL_PlayerControllerBase::OnPlayerDiedHandler(AActor* InDeadActor, AActor* InInstigator)
+{
+    // 只处理自己控制的角色死亡
+    if (InDeadActor != GetPawn()) return;
+
+    UE_LOG(LogTemp, Log, TEXT("PlayerController: Player character died - closing UI"));
+
+    // 1. 关闭所有 UI 界面
+    if (UIManager)
+    {
+        UIManager->CloseAllWidgets();
+    }
+
+    // 2. 禁用玩家输入（UI Only 模式）
+    SetInputModeUIOnly(nullptr);
+
+    // 3. 通知 LevelManager 处理死亡逻辑（暂停波次、播放死亡特效）
+    ALevelManager* LevelMgr = Cast<ALevelManager>(
+        UGameplayStatics::GetActorOfClass(GetWorld(), ALevelManager::StaticClass()));
+    if (LevelMgr)
+    {
+        LevelMgr->OnPlayerDied();
+    }
+
+    // 4. 延迟显示死亡界面（给布娃娃动画播放时间）
+    FTimerHandle DeathScreenDelayHandle;
+    GetWorld()->GetTimerManager().SetTimer(
+        DeathScreenDelayHandle,
+        FTimerDelegate::CreateLambda([this]()
+        {
+            UE_LOG(LogTemp, Log, TEXT("PlayerController: Showing death screen after delay"));
+            if (UIManager && UIManager->IsWidgetOpen(EWidgetType::EWIDGET_DeathScreen))
+            {
+                // 死亡界面已显示，跳过
+                return;
+            }
+            UIManager->OpenScreenWidget(EWidgetType::EWIDGET_DeathScreen, 200);
+        }),
+        2.5f,  // 延迟 2.5 秒
+        false  // 只执行一次
+    );
 }

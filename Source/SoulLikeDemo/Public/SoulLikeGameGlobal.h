@@ -270,6 +270,7 @@ enum class EWidgetType :uint8
 	EWIDGET_LobbyScreen,
 	EWIDGET_PauseMenu,
 	EWIDGET_LockOnIndicator,
+	EWIDGET_DeathScreen,
 	EWIDGET_Max
 };
 

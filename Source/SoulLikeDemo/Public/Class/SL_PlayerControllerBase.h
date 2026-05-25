@@ -80,6 +80,14 @@ public:
     UFUNCTION(BlueprintPure, Category = "UI")
     bool IsBeginPlayScreenVisible() const;
 
+    // ===== 死亡事件 =====
+    // 绑定角色死亡事件监听
+    void BindPlayerDeathEvent();
+
+    // 角色死亡事件响应
+    UFUNCTION()
+    void OnPlayerDiedHandler(AActor* InDeadActor, AActor* InInstigator);
+
 protected:
 	/************************************************************************/
 	/*                               内部调用                               */
@@ -131,4 +139,8 @@ private:
 	// ===== 新增：缓存 =====
 	// 缓存 InventoryComp 引用，避免频繁 FindComponent
 	mutable TWeakObjectPtr<USL_InventoryComponent> CachedInventoryComp;
+
+	// ===== 死亡事件 =====
+	// 死亡委托句柄（防止重复绑定）
+	FDelegateHandle OnPlayerDiedHandle;
 };

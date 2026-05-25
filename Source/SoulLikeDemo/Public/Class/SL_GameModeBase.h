@@ -23,6 +23,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
 		void StartCurrentLevel();
 
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+		void StartTargetLevel(int32 InLevelID,int32 InPlayerClassID = 1001);
+
 	// 设置是否使用存档 
     UFUNCTION(BlueprintCallable, Category = "GameMode")
    		void SetUseSaveData(bool bInUseSaveData) { bUseSaveData = bInUseSaveData; }

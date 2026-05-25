@@ -57,6 +57,8 @@ protected:
 	// 关卡按钮点击响应
 	void OnLevelClicked(int32 InLevelID);
 
+	void SetUIInputMode();
+	void SetGameInputMode();
 	// 所有按钮共用的点击回调
 	UFUNCTION()
 	void OnLevelButtonClicked();

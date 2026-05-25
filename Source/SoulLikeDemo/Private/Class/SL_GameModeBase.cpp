@@ -99,6 +99,15 @@ void ASL_GameModeBase::StartCurrentLevel()
 	UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::StartCurrentLevel - Level %d started"), LevelID);
 }
 
+void ASL_GameModeBase::StartTargetLevel(int32 InLevelID, int32 InPlayerClassID)
+{
+	// 初始化玩家装备
+	InitializePlayer(InPlayerClassID);
+
+	// 开始关卡
+	LevelManager->StartLevel(InLevelID, InPlayerClassID);
+}
+
 void ASL_GameModeBase::RestartLevel()
 {
 	if (LevelManager)

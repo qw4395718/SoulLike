@@ -10,6 +10,7 @@
 #include "Table/ClassConfigInfoTable.h"
 #include "Table/WaveConfigInfoTable.h"
 #include "SoulLikeGameGlobal.h"
+#include "SL_GameModeBase.h"
 
 UHUD_LobbyScreen::UHUD_LobbyScreen(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -30,6 +31,10 @@ void UHUD_LobbyScreen::NativeOnInitialized()
 void UHUD_LobbyScreen::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	// 设置输入模式：只显示UI，阻止玩家输入
+	SetUIInputMode();
+
 	InitializeLobby();
 }
 
@@ -206,30 +211,12 @@ UButton* UHUD_LobbyScreen::CreateLevelButton(int32 InLevelID, int32 InSavedLevel
 
 void UHUD_LobbyScreen::OnLevelButtonClicked()
 {
-	// 通过鼠标位置确定实际点击的按钮
-	APlayerController* PC = GetOwningPlayer();
-	if (!PC)
-	{
-		return;
-	}
-
-	float MouseX = 0.0f, MouseY = 0.0f;
-	if (!PC->GetMousePosition(MouseX, MouseY))
-	{
-		return;
-	}
-	const FVector2D MousePos(MouseX, MouseY);
-
+	// 通过按钮映射表 + 悬停状态确定实际点击的按钮
+	// 相比通过鼠标坐标（GetMousePosition + IsUnderLocation）更可靠
 	for (const auto& Pair : m_buttonLevelMap)
 	{
 		UButton* Btn = Pair.Key;
-		if (!Btn || !Btn->GetIsEnabled())
-		{
-			continue;
-		}
-
-		const FGeometry BtnGeom = Btn->GetCachedGeometry();
-		if (BtnGeom.IsUnderLocation(MousePos))
+		if (Btn && Btn->IsHovered())
 		{
 			OnLevelClicked(Pair.Value);
 			return;
@@ -243,5 +230,46 @@ void UHUD_LobbyScreen::OnLevelClicked(int32 InLevelID)
 	UE_LOG(LogTemp, Log, TEXT("UHUD_LobbyScreen::OnLevelClicked - Level %d selected"), InLevelID);
 
 	// 预留：通过关卡ID加载对应关卡
-	// UGameplayStatics::OpenLevel(this, LevelName);
+		// 获取GameMode并加载存档
+	if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
+	{
+		// 移除当前界面
+		RemoveFromParent();
+		
+		// 从存档加载游戏
+		GameMode->StartTargetLevel(InLevelID);
+	}
+}
+
+/************************************************************************/
+/*                               输入模式                                */
+/************************************************************************/
+
+void UHUD_LobbyScreen::SetUIInputMode()
+{
+	if (APlayerController* PlayerController = GetOwningPlayer())
+	{
+		// UE4.26: 设置输入模式为UI Only
+		// 只显示鼠标，不处理游戏输入
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PlayerController->SetInputMode(InputMode);
+
+		// 显示鼠标光标
+		PlayerController->bShowMouseCursor = true;
+	}
+}
+
+void UHUD_LobbyScreen::SetGameInputMode()
+{
+	if (APlayerController* PlayerController = GetOwningPlayer())
+	{
+		// UE4.26: 恢复为游戏输入模式
+		FInputModeGameOnly InputMode;
+		PlayerController->SetInputMode(InputMode);
+
+		// 隐藏鼠标光标
+		PlayerController->bShowMouseCursor = false;
+	}
 }

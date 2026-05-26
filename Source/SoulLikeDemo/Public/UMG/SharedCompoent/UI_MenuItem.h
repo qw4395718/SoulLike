@@ -1,45 +1,34 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UI_BaseSlot.h"
+#include "UI_ListItemBase.h"
 #include "UI_MenuItem.generated.h"
 
 class UImage;
-class UButton;
-class UTextBlock;
 
 /**
- * 
+ * 菜单功能项
+ *
+ * 继承自 UUI_ListItemBase，在通用列表项基础上增加新获取提示标记。
+ * 蓝图中应外套 SizeBox 以控制固定尺寸。
  */
 UCLASS()
-class SOULLIKEDEMO_API UUI_MenuItem : public UUI_BaseSlot
+class SOULLIKEDEMO_API UUI_MenuItem : public UUI_ListItemBase
 {
 	GENERATED_BODY()
+
 public:
-	UUI_MenuItem();
-	/************************************************************************/
-	/* 继承实现																		*/
-	/************************************************************************/
+	UUI_MenuItem(const FObjectInitializer& ObjectInitializer);
 
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	UFUNCTION()
-		void SetNewAcquireImageVisible(bool visible);
+	void SetNewAcquireImageVisible(bool visible);
 
 	UFUNCTION()
-		void SetCenterTitle(FString title);
-
-	UFUNCTION()
-		FName GetButtonFlag();
-
-protected:
-	/************************************************************************/
-	/* 内部调用                                                                     */
-	/************************************************************************/
+	FName GetButtonFlag();
 
 protected:
 	/************************************************************************/
@@ -47,15 +36,7 @@ protected:
 	/************************************************************************/
 	// 新获取提示图标
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UImage* m_newTipImage;
-	
-	// 交互行为按钮
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UButton* m_actionButton;
-
-	// 按钮文本
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		UTextBlock* m_btnLabel;
+	UImage* m_newTipImage;
 
 	// 在容器标识
 	FName m_menuFuncName;

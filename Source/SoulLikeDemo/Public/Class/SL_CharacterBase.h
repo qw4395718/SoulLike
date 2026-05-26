@@ -170,10 +170,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "CharacterOperation")
 		USL_LockOnComponent* GetLockOnComponentRef() const { return LockOnCmp; }
 
-	/** 按下索敌键 */
-	UFUNCTION()
-		void OnLockOnPressed();
-
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void BindGASDeathEvent();
 

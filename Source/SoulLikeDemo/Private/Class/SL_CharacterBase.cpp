@@ -108,13 +108,6 @@ void ASL_CharacterBase::Tick(float DeltaTime)
 }
 
 
-void ASL_CharacterBase::OnLockOnPressed()
-{
-	if (LockOnCmp)
-	{
-		LockOnCmp->TryLockOnTarget();
-	}
-}
 void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -132,11 +125,6 @@ void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	);
 	AbilitySystemComp->BindAbilityActivationToInputComponent(PlayerInputComponent, Binds);
 
-	// 索敌输入绑定
-	if (PlayerInputComponent)
-	{
-		PlayerInputComponent->BindAction("LockOn", IE_Pressed, this, &ASL_CharacterBase::OnLockOnPressed);
-	}
 }
 
 

@@ -11,6 +11,7 @@
 #include "Table/WaveConfigInfoTable.h"
 #include "SoulLikeGameGlobal.h"
 #include "SL_GameModeBase.h"
+#include <UI_ListItemBase.h>
 
 UHUD_LobbyScreen::UHUD_LobbyScreen(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -36,6 +37,14 @@ void UHUD_LobbyScreen::NativeConstruct()
 	SetUIInputMode();
 
 	InitializeLobby();
+}
+
+
+void UHUD_LobbyScreen::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	SetGameInputMode();
 }
 
 /************************************************************************/
@@ -158,70 +167,59 @@ void UHUD_LobbyScreen::BuildLevelSelection()
 			}
 		}
 
-		UButton* NewButton = CreateLevelButton(LevelID, m_savedLevelID, DisplayName);
-		if (NewButton)
+		UUI_ListItemBase* NewLevelItem = CreateLevelButton(LevelID, m_savedLevelID, DisplayName);
+		if (NewLevelItem)
 		{
 			// 添加到容器
-			UHorizontalBoxSlot* HSlot = m_levelButtonContainer->AddChildToHorizontalBox(NewButton);
+			UHorizontalBoxSlot* HSlot = m_levelButtonContainer->AddChildToHorizontalBox(NewLevelItem);
 			if (HSlot)
 			{
 				HSlot->SetPadding(FMargin(8.0f, 0.0f));
 			}
 
 			// 注册
-			m_levelButtons.Add(NewButton);
-			m_buttonLevelMap.Add(NewButton, LevelID);
+			m_levelButtons.Add(NewLevelItem);
+			m_buttonLevelMap.Add(NewLevelItem, LevelID);
 
 			// 绑定点击事件
-			NewButton->OnClicked.AddDynamic(this, &UHUD_LobbyScreen::OnLevelButtonClicked);
+			NewLevelItem->OnItemClicked.BindUObject(this, &UHUD_LobbyScreen::OnLevelClicked);
 		}
 	}
 }
 
-UButton* UHUD_LobbyScreen::CreateLevelButton(int32 InLevelID, int32 InSavedLevelID, const FText& InDisplayName)
+UUI_ListItemBase* UHUD_LobbyScreen::CreateLevelButton(int32 InLevelID, int32 InSavedLevelID, const FText& InDisplayName)
 {
 	// 创建按钮
-	UButton* Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(),
-		FName(*FString::Printf(TEXT("LevelBtn_%d"), InLevelID)));
-	if (!Button)
+	if (m_LevelSelectItemWidgetClass && GEngine->GameViewport)
 	{
-		return nullptr;
-	}
+		UUI_ListItemBase* newListItem = CreateWidget<UUI_ListItemBase>(
+			GetWorld(),
+			m_LevelSelectItemWidgetClass
+			);
 
-	// 创建按钮内的文本
-	UTextBlock* ButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(),
-		FName(*FString::Printf(TEXT("LevelBtnText_%d"), InLevelID)));
-	if (ButtonText)
-	{
-		ButtonText->SetText(InDisplayName);
-		ButtonText->SetJustification(ETextJustify::Center);
-		Button->SetContent(ButtonText);
-	}
+		if (!newListItem)
+		{
+			return nullptr;
+		}
 
-	// 根据关卡状态设置按钮属性
-	if (InLevelID > InSavedLevelID)
-	{
-		// 未解锁
-		Button->SetIsEnabled(false);
-	}
-	// 已通过（InLevelID < InSavedLevelID）和可挑战（InLevelID == InSavedLevelID）保持启用
+		newListItem->SetDisplayText(InDisplayName);
+		newListItem->SetItemData(InLevelID);
+		// 根据关卡状态设置按钮属性
+		if (InLevelID > InSavedLevelID)
+		{
+			// 未解锁
+			newListItem->SetItemEnabled(false);
+		}
+		// 已通过（InLevelID < InSavedLevelID）和可挑战（InLevelID == InSavedLevelID）保持启用
 
-	return Button;
+		return newListItem;
+	}
+	return nullptr;
 }
 
-void UHUD_LobbyScreen::OnLevelButtonClicked()
+void UHUD_LobbyScreen::OnLevelButtonClicked(int32 InLevelIndex)
 {
-	// 通过按钮映射表 + 悬停状态确定实际点击的按钮
-	// 相比通过鼠标坐标（GetMousePosition + IsUnderLocation）更可靠
-	for (const auto& Pair : m_buttonLevelMap)
-	{
-		UButton* Btn = Pair.Key;
-		if (Btn && Btn->IsHovered())
-		{
-			OnLevelClicked(Pair.Value);
-			return;
-		}
-	}
+	OnLevelClicked(InLevelIndex);
 }
 
 void UHUD_LobbyScreen::OnLevelClicked(int32 InLevelID)

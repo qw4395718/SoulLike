@@ -254,13 +254,26 @@ enum class EHUDEquipmentSlotType :uint8
 	EHUDEquipmentSlotType_Max,
 };
 
+// 运行平台类型
+UENUM(BlueprintType)
+enum class EPlatformType : uint8
+{
+	PC			UMETA(DisplayName = "PC"),
+	Mobile		UMETA(DisplayName = "Mobile"),
+	Console		UMETA(DisplayName = "Console"),
+	Max			UMETA(Hidden)
+};
+
 // 界面类型
 UENUM(BlueprintType)
 enum class EWidgetType :uint8
 {
 	EWIDGET_None,
-	EWIDGET_PlayerStatus,
+	EWIDGET_WorldWidgetStart,
 	EWIDGET_PawnStatusInScreen,
+	EWIDGET_LockOnIndicator,
+	EWIDGET_WorldWidgetEnd,
+	EWIDGET_PlayerStatus,
 	EWIDGET_BossStatus,
 	EWIDGET_MainMenu,
 	EWIDGET_InterActPanel,
@@ -269,7 +282,6 @@ enum class EWidgetType :uint8
 	EWIDGET_BeginPlayScreen,
 	EWIDGET_LobbyScreen,
 	EWIDGET_PauseMenu,
-	EWIDGET_LockOnIndicator,
 	EWIDGET_DeathScreen,
 	EWIDGET_Max
 };
@@ -303,6 +315,18 @@ enum class EComboInputActionType :uint8
 	EComboInputAction_Max			UMETA(Hidden),
 };
 
+
+// 技能执行类型
+UENUM(BlueprintType)
+enum class EComboExecuteType : uint8
+{
+	Instant     UMETA(DisplayName = "Instant"),     // 瞬发型：按下立即执行
+	Charge      UMETA(DisplayName = "Charge"),      // 蓄力型：按住蓄力，释放触发
+	Channel     UMETA(DisplayName = "Channel"),     // 持续型：按住持续生效
+	Max         UMETA(Hidden)
+};
+
+/**************************************************************/
 
 /************************************************************************/
 /*                              Struct                                         */
@@ -358,23 +382,44 @@ struct FComboInfo : public FTableRowBase
 
 	// 当前连击所需要的Tag窗口名
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FGameplayTag	ActiveRequireWindowTag;
+	FGameplayTag ActiveRequireWindowTag;
 
 	// 连击所绑定的输入按键
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		EComboInputActionType	InputActionType;
+	EComboInputActionType InputActionType;
+
+	// 技能执行类型
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Execution")
+	EComboExecuteType ExecuteType;
 
 	// 连击所属GA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TSubclassOf<UGameplayAbility> NextAbilityClass;
+	TSubclassOf<UGameplayAbility> NextAbilityClass;
 
 	// 本次连击消耗的体力值
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cost")
-		float StaminaCost = 20.0f;
+	float StaminaCost = 20.0f;
 
 	// 本次连击的伤害倍率
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-        float DamageMultiplier = 1.0f;
+	float DamageMultiplier = 1.0f;
+
+	// ===== 蓄力参数（仅 ExecuteType == Charge 时有效）=====
+	// 最短蓄力时间（秒）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Charge")
+	float MinChargeTime = 0.5f;
+
+	// 满蓄力时间（秒）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Charge")
+	float MaxChargeTime = 2.0f;
+
+	// 满蓄力伤害倍率上限
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Charge")
+	float MaxChargeDamageMultiplier = 2.5f;
+
+	// 蓄力占位 GA（按住期间持续激活，播放蓄力姿态动画）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Charge")
+	TSubclassOf<UGameplayAbility> ChargeHoldAbilityClass;
 };
 
 // 连击查询用复合Key（拍平双层Map为单层，避免UPROPERTY不支持嵌套容器）

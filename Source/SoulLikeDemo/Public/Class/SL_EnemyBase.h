@@ -174,6 +174,9 @@ protected:
 	UPROPERTY()
 		class USL_StatusAttributeSet* StatusAttributeSet;
 
+	UPROPERTY()
+		class UWidgetComponent* ScreenWidgetCmp;
+
 	// 死亡委托的句柄
 	FDelegateHandle OnCharacterDiedHandle;
 

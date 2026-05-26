@@ -17,6 +17,7 @@
 #include <SL_EnemyAIController.h>
 #include <SL_GameplayAbilityNPCBase.h>
 #include <SL_WeaponBase.h>
+#include <Components/WidgetComponent.h>
 
 ASL_EnemyBase::ASL_EnemyBase()
 {
@@ -38,6 +39,20 @@ ASL_EnemyBase::ASL_EnemyBase()
 	AbilitySystemComp = CreateDefaultSubobject<USL_AbilitySystemComponent>(TEXT("AbilitySystem"));
 	// AS(CharacterCombatState)
 	StatusAttributeSet = CreateDefaultSubobject<USL_StatusAttributeSet>(TEXT("StatusSet"));
+
+	// 
+	ScreenWidgetCmp = CreateDefaultSubobject<UWidgetComponent>(TEXT("ScreenWidgetCmp"));
+	ScreenWidgetCmp->SetupAttachment(GetMesh()); // 挂在骨骼上
+	ScreenWidgetCmp->SetWidgetSpace(EWidgetSpace::Screen);
+	ScreenWidgetCmp->SetDrawSize(FVector2D(200, 30));
+	ScreenWidgetCmp->SetRelativeLocation(FVector(0, 0, 180)); // 头部偏移
+
+	// 设置组件标签（重要！用于查找）
+	ScreenWidgetCmp->ComponentTags.Add(FName("HeadUI"));
+
+	// 默认不激活Widget，等UIManager来设置
+	ScreenWidgetCmp->SetWidget(nullptr);
+	ScreenWidgetCmp->SetVisibility(false);
 }
 
 void ASL_EnemyBase::BeginPlay()

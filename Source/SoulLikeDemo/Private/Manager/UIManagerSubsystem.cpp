@@ -38,7 +38,7 @@ void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	/*                             Screen                                         */
 	/************************************************************************/
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PawnStatusInScreen, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PawnStatusInScreen.WBP_HUD_PawnStatusInScreen"));
-	//RegisterWidgetFromBPPath(EWidgetType::EWIDGET_LockOnIndicator, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_LockOnIndicator.WBP_HUD_LockOnIndicator"));
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_LockOnIndicator, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_LockOnIndicator.WBP_HUD_LockOnIndicator"));
 
 	/************************************************************************/
 	/*                          全屏界面                                      */
@@ -48,6 +48,37 @@ void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_PauseMenu, TEXT("/Game/SoulLikeDemo/UI/BluePrint/HUDLayer/WBP_HUD_PauseMenuScreen.WBP_HUD_PauseMenuScreen"));
 
 	UE_LOG(LogTemp, Log, TEXT("UIManagerSubsystem initialized"));
+}
+
+/************************************************************************/
+/* 平台识别                                                                     */
+/************************************************************************/
+
+EPlatformType UUIManagerSubsystem::GetPlatform() const
+{
+#if PLATFORM_ANDROID || PLATFORM_IOS
+	return EPlatformType::Mobile;
+#elif PLATFORM_XBOXONE || PLATFORM_PS4
+	return EPlatformType::Console;
+#else
+	return EPlatformType::PC;
+#endif
+}
+
+TSubclassOf<UUserWidget> UUIManagerSubsystem::GetWidgetClassForPlatform(EWidgetType WidgetType) const
+{
+	TSubclassOf<UUserWidget> WidgetClass;
+	const EPlatformType Platform = const_cast<UUIManagerSubsystem*>(this)->GetPlatform();
+
+	if (Platform == EPlatformType::Mobile && MobileWidgets.Contains(WidgetType))
+		WidgetClass = MobileWidgets.FindRef(WidgetType);
+	else if (Platform == EPlatformType::Console && ConsoleWidgets.Contains(WidgetType))
+		WidgetClass = ConsoleWidgets.FindRef(WidgetType);
+
+	if (!WidgetClass)
+		WidgetClass = RegisteredWidgets.FindRef(WidgetType); // fallback to PC
+
+	return WidgetClass;
 }
 
 void UUIManagerSubsystem::Deinitialize()
@@ -104,6 +135,32 @@ void UUIManagerSubsystem::RegisterWidgetFromBPPath(EWidgetType WidgetType,const 
 	}
 }
 
+void UUIManagerSubsystem::RegisterPlatformWidgetFromBPPath(EWidgetType WidgetType, const FString& WidgetClassPathStr, EPlatformType InPlatform)
+{
+	FString ClassPath = WidgetClassPathStr;
+	if (!ClassPath.EndsWith("_C"))
+	{
+		ClassPath += "_C";
+	}
+
+	UClass* WidgetClass = LoadClass<UUserWidget>(nullptr, *ClassPath);
+	if (WidgetClass)
+	{
+		TMap<EWidgetType, TSubclassOf<UUserWidget>>* TargetMap = nullptr;
+		if (InPlatform == EPlatformType::Mobile)
+			TargetMap = &MobileWidgets;
+		else if (InPlatform == EPlatformType::Console)
+			TargetMap = &ConsoleWidgets;
+
+		if (TargetMap)
+			TargetMap->Add(WidgetType, WidgetClass);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load widget class for platform: %s"), *WidgetClassPathStr);
+	}
+}
+
 void UUIManagerSubsystem::RegisterWidget(EWidgetType WidgetType,TSubclassOf<UUserWidget> WidgetClass)
 {
 	RegisteredWidgets.Add(WidgetType,WidgetClass);
@@ -131,14 +188,24 @@ void UUIManagerSubsystem::OpenWidget(const FUICreateParams& CreateParam)
 
 void UUIManagerSubsystem::OpenScreenWidget(EWidgetType WidgetType, int32 ZOrder)
 {
-	if (RegisteredWidgets.Contains(WidgetType))
+	TSubclassOf<UUserWidget> WidgetClass = GetWidgetClassForPlatform(WidgetType);
+	if (!WidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UUIManagerSubsystem::OpenScreenWidget - Widget type %d not registered for any platform"),
+			static_cast<int32>(WidgetType));
+		return;
+	}
+
+	if (RegisteredWidgets.Contains(WidgetType) ||
+		MobileWidgets.Contains(WidgetType) ||
+		ConsoleWidgets.Contains(WidgetType))
 	{
 		if (ActiveWidgets.Contains(WidgetType))
 		{
 			CloseWidget(WidgetType);
 		}
 
-		if (TSubclassOf<UUserWidget> WidgetClass = RegisteredWidgets.FindRef(WidgetType))
+		if (WidgetClass)
 		{
 			UUserWidget* Widget = CreateWidget<UUserWidget>(GetWorld(), WidgetClass);
 			if (Widget)
@@ -244,7 +311,8 @@ bool UUIManagerSubsystem::IsWidgetOpen(EWidgetType WidgetType) const
 
 bool UUIManagerSubsystem::IsWorldWidget(EWidgetType WidgetType) const
 {
-	if (WidgetType == EWidgetType::EWIDGET_PawnStatusInScreen)
+	if (static_cast<int>(WidgetType) > static_cast<int>(EWidgetType::EWIDGET_WorldWidgetStart) &&
+		static_cast<int>(WidgetType) < static_cast<int>(EWidgetType::EWIDGET_WorldWidgetEnd))
 	{
 		return true;
 	}

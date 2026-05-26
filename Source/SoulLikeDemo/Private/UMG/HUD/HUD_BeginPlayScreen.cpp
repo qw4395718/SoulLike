@@ -49,7 +49,7 @@ void UHUD_BeginPlayScreen::NativeDestruct()
     Super::NativeDestruct();
 
     // 恢复输入模式
-    SetGameInputMode();
+    //SetGameInputMode();
 }
 
 void UHUD_BeginPlayScreen::InitializeScreen(bool bHasSaveData)

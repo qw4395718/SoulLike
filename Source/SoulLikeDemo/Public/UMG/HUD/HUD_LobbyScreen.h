@@ -6,7 +6,8 @@
 
 class UTextBlock;
 class UHorizontalBox;
-class UButton;
+class UUI_ListItemBase;
+class UScrollBox;
 
 /**
  * 大厅界面Widget（完全重写版）
@@ -33,6 +34,7 @@ public:
 	/************************************************************************/
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 	/************************************************************************/
 	/* 外部调用                                                                     */
@@ -52,7 +54,7 @@ protected:
 	void BuildLevelSelection();
 
 	// 为指定关卡ID创建单个选择按钮
-	UButton* CreateLevelButton(int32 InLevelID, int32 InSavedLevelID, const FText& InDisplayName);
+	UUI_ListItemBase* CreateLevelButton(int32 InLevelID, int32 InSavedLevelID, const FText& InDisplayName);
 
 	// 关卡按钮点击响应
 	void OnLevelClicked(int32 InLevelID);
@@ -61,7 +63,7 @@ protected:
 	void SetGameInputMode();
 	// 所有按钮共用的点击回调
 	UFUNCTION()
-	void OnLevelButtonClicked();
+	void OnLevelButtonClicked(int32 InLevelIndex);
 
 protected:
 	/************************************************************************/
@@ -70,11 +72,18 @@ protected:
 
 	// 左上角 - 职业名文本
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "LobbyScreen")
-	UTextBlock* m_classNameText;
+		UTextBlock* m_classNameText;
+
+	// 中间 - 水平框的容器
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UScrollBox* m_scrollBox;
 
 	// 中间 - 关卡选择按钮水平容器
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "LobbyScreen")
-	UHorizontalBox* m_levelButtonContainer;
+		UHorizontalBox* m_levelButtonContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LobbyScreen")
+		TSubclassOf<UUI_ListItemBase> m_LevelSelectItemWidgetClass;
 
 protected:
 	/************************************************************************/
@@ -89,9 +98,9 @@ protected:
 
 	// 已创建的关卡按钮列表（按LevelID升序）
 	UPROPERTY()
-	TArray<UButton*> m_levelButtons;
+	TArray<UUI_ListItemBase*> m_levelButtons;
 
 	// 按钮 -> 关卡ID 映射（用于点击回调识别）
 	UPROPERTY()
-	TMap<UButton*, int32> m_buttonLevelMap;
+	TMap<UUI_ListItemBase*, int32> m_buttonLevelMap;
 };

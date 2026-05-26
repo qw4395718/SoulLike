@@ -10,6 +10,7 @@
 #include <SL_GameModeBase.h>
 #include <GlobalDelegatesManager.h>
 #include "LevelManager.h"
+#include "HUD_PauseMenuScreen.h"
 #include "Pop_DeathScreen.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -86,6 +87,11 @@ void ASL_PlayerControllerBase::SetupInputComponent()
 	Super::SetupInputComponent();
 	if (!InputComponent) return;
 
+	// LockOn / 索敌
+	InputComponent->BindAction("LockOn", IE_Pressed, this, &ASL_PlayerControllerBase::OnLockOnPressed);
+	// 暂停菜单
+	InputComponent->BindAction("OpenPauseMenu", IE_Pressed, this, &ASL_PlayerControllerBase::OnOpenPauseMenuPressed);
+
 	// 方式一：使用 EInputEvent 精确控制按键时序
 	// IE_Pressed:  按下瞬间
 	// IE_Released: 松开瞬间
@@ -110,6 +116,27 @@ void ASL_PlayerControllerBase::SetupInputComponent()
 }
 
 /************************************************************************/
+/************************************************************************/
+/* 输入回调                                                                     */
+/************************************************************************/
+
+void ASL_PlayerControllerBase::OnLockOnPressed()
+{
+	ASL_CharacterBase* MyCharacter = GetMyPlayerCharacter();
+	if (!MyCharacter) return;
+
+	USL_LockOnComponent* LockOnCmp = MyCharacter->GetLockOnComponentRef();
+	if (LockOnCmp)
+	{
+		LockOnCmp->TryLockOnTarget();
+	}
+}
+
+void ASL_PlayerControllerBase::OnOpenPauseMenuPressed()
+{
+	UHUD_PauseMenuScreen::OpenPauseMenu(this);
+}
+
 /*                               外部调用                               */
 /************************************************************************/
 
@@ -267,7 +294,11 @@ void ASL_PlayerControllerBase::OnHeavyAttackPressed()
 
 void ASL_PlayerControllerBase::OnHeavyAttackReleased()
 {
-
+	USL_ComboManagerComponent* ComboMgr = GetComboManagerComponent();
+	if (ComboMgr && ComboMgr->IsCharging())
+	{
+		ComboMgr->ReleaseCharge();
+	}
 }
 
 void ASL_PlayerControllerBase::OnSpecialAttackPressed()

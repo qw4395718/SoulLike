@@ -71,6 +71,13 @@ class SOULLIKEDEMO_API UUIManagerSubsystem : public UGameInstanceSubsystem
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
+
+	/************************************************************************/
+	/* 平台识别                                                                     */
+	/************************************************************************/
+	// 获取当前运行平台
+	UFUNCTION(BlueprintPure, Category = "UI Manager")
+	EPlatformType GetPlatform() const;
 	
 	// 获取单例实例
 	UFUNCTION(BlueprintPure, Category = "UIManagerSubsystem", meta = (WorldContext = "WorldContextObject"))
@@ -78,7 +85,14 @@ public:
     
     // 根据路径加载BP资源
 	UFUNCTION(BlueprintCallable, Category = "UI Manager")
-		void RegisterWidgetFromBPPath(EWidgetType WidgetType,const FString& WidgetClassPathstr);
+	void RegisterWidgetFromBPPath(EWidgetType WidgetType, const FString& WidgetClassPathstr);
+
+	// 注册指定平台的 Widget（路径格式同 RegisterWidgetFromBPPath）
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
+	void RegisterPlatformWidgetFromBPPath(EWidgetType WidgetType, const FString& WidgetClassPathstr, EPlatformType InPlatform);
+
+	// 根据平台获取已注册的 Widget 类
+	TSubclassOf<UUserWidget> GetWidgetClassForPlatform(EWidgetType WidgetType) const;
 
     /************************************************************************/
     /*                                通用方法                                      */
@@ -147,6 +161,13 @@ private:
     // 存储所有注册的界面-蓝图调用
     UPROPERTY()
     TMap<EWidgetType, TSubclassOf<UUserWidget>> RegisteredWidgets;
+
+    // 移动端专用 Widget
+    UPROPERTY()
+    TMap<EWidgetType, TSubclassOf<UUserWidget>> MobileWidgets;
+
+    UPROPERTY()
+    TMap<EWidgetType, TSubclassOf<UUserWidget>> ConsoleWidgets;
     
     // 屏幕空间-活动界面（当前打开的）
     UPROPERTY()

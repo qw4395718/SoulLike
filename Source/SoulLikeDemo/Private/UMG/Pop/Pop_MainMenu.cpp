@@ -14,12 +14,29 @@
 #include "Components/WrapBox.h"
 #include "UIManagerSubsystem.h"
 
+void UPop_MainMenu::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+}
+
 void UPop_MainMenu::NativeConstruct()
 {
     Super::NativeConstruct();
 
     // 完成初始化
     
+}
+
+void UPop_MainMenu::NativeDestruct()
+{
+    // 通知 UIManager 关闭（更新 ActiveWidgets 状态）
+    UIManager = UUIManagerSubsystem::Get(this);
+    if (UIManager)
+    {
+        UIManager->CloseScreenWidget(EWidgetType::EWIDGET_MainMenu);
+    }
+
+    Super::NativeDestruct();
 }
 
 void UPop_MainMenu::InitMainMenu()
@@ -30,7 +47,7 @@ void UPop_MainMenu::InitMainMenu()
 
 void UPop_MainMenu::OnMenuButtonClicked(const FName ButtonTag)
 {
-    UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this);
+    UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)
 	{
         for (const FMenuButtonInfo& buttonInfo : m_arrButtonInfos)

@@ -9,9 +9,11 @@
 #include "Manager/DataTableManager.h"
 #include "Table/ClassConfigInfoTable.h"
 #include "Table/WaveConfigInfoTable.h"
+#include "Table/LevelConfigInfoTable.h"
 #include "SoulLikeGameGlobal.h"
 #include "SL_GameModeBase.h"
 #include <UI_ListItemBase.h>
+#include "UIManagerSubsystem.h"
 
 UHUD_LobbyScreen::UHUD_LobbyScreen(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -42,9 +44,17 @@ void UHUD_LobbyScreen::NativeConstruct()
 
 void UHUD_LobbyScreen::NativeDestruct()
 {
-	Super::NativeDestruct();
-
+	// 先恢复输入模式
 	SetGameInputMode();
+
+	// 通知 UIManager 关闭（更新 ActiveWidgets 状态）
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
+	{
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_LobbyScreen);
+	}
+
+	Super::NativeDestruct();
 }
 
 /************************************************************************/
@@ -134,37 +144,31 @@ void UHUD_LobbyScreen::BuildLevelSelection()
 		return;
 	}
 
-	UWaveConfigInfoTable* WaveTable = Cast<UWaveConfigInfoTable>(
-		DTManager->GetDataTable(EDataTableType::DT_WaveConfigInfo));
+	// 优先使用关卡配置表获取关卡信息
+	ULevelConfigInfoTable* LevelTable = Cast<ULevelConfigInfoTable>(
+		DTManager->GetDataTable(EDataTableType::DT_LevelConfigInfo));
 
-	if (!WaveTable)
+	if (!LevelTable)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UHUD_LobbyScreen::BuildLevelSelection - WaveConfigInfoTable not found"));
+		UE_LOG(LogTemp, Warning, TEXT("UHUD_LobbyScreen::BuildLevelSelection - LevelConfigInfoTable not found"));
 		return;
 	}
 
 	// 获取所有关卡ID（升序）
-	TArray<int32> LevelIDs = WaveTable->GetAllLevelIDs();
-	if (LevelIDs.Num() == 0)
-	{
-		return;
-	}
+	TArray<int32> LevelIDs = LevelTable->GetAllLevelIDs();
+
+	UWaveConfigInfoTable* WaveTable = Cast<UWaveConfigInfoTable>(
+		DTManager->GetDataTable(EDataTableType::DT_WaveConfigInfo));
 
 	// 为每个关卡创建按钮
 	for (int32 LevelID : LevelIDs)
 	{
-		// 获取关卡显示名：取该关卡第一波次的名称
-		FText DisplayName;
+		// 获取关卡显示名：优先使用关卡表配置的名称
+		FText DisplayName = FText::FromName(LevelTable->GetLevelName(LevelID));
+
+		if (DisplayName.IsEmpty())
 		{
-			TArray<FWaveConfigInfo> Waves;
-			if (WaveTable->GetWavesForLevel(LevelID, Waves) && Waves.Num() > 0)
-			{
-				DisplayName = FText::FromName(Waves[0].WaveName);
-			}
-			else
-			{
-				DisplayName = FText::Format(NSLOCTEXT("LobbyScreen", "LevelFallback", "关卡 {0}"), LevelID);
-			}
+			DisplayName = FText::Format(NSLOCTEXT("LobbyScreen", "LevelFallback", "关卡 {0}"), LevelID);
 		}
 
 		UUI_ListItemBase* NewLevelItem = CreateLevelButton(LevelID, m_savedLevelID, DisplayName);
@@ -231,11 +235,15 @@ void UHUD_LobbyScreen::OnLevelClicked(int32 InLevelID)
 		// 获取GameMode并加载存档
 	if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
-		// 移除当前界面
-		RemoveFromParent();
-		
 		// 从存档加载游戏
 		GameMode->StartTargetLevel(InLevelID);
+	}
+
+	// 最后关闭当前界面（更新UIManager内部状态）
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
+	{
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_LobbyScreen);
 	}
 }
 

@@ -51,10 +51,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PauseMenu", meta = (WorldContext = "WorldContextObject"))
 	static void OpenPauseMenu(const UObject* WorldContextObject);
 
-	// 关闭暂停菜单
-	UFUNCTION(BlueprintCallable, Category = "PauseMenu")
-	void ClosePauseMenu();
-
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
@@ -108,4 +104,8 @@ protected:
 	// 退出游戏按钮
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "PauseMenu")
 	UButton* m_quitButton;
+
+	// UIManager 子系统引用
+	UPROPERTY()
+	class UUIManagerSubsystem* UIManager;
 };

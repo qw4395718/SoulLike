@@ -89,7 +89,9 @@ protected:
 	void ClearAllMenuItems();
 
 protected:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 	// 按钮点击处理
 	UFUNCTION()
@@ -128,4 +130,8 @@ private:
 	// 按钮控件映射
 	UPROPERTY()
 		TMap<FName, UUI_MenuItem*> m_mapButtonWidgets;
+
+	// UIManager 子系统引用
+	UPROPERTY()
+		class UUIManagerSubsystem* UIManager;
 };

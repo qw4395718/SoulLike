@@ -192,7 +192,7 @@ ASL_CharacterBase* ASL_PlayerControllerBase::GetMyPlayerCharacter() const
 void ASL_PlayerControllerBase::ShowBeginPlayScreen()
 {
     UIManager = UUIManagerSubsystem::Get(this);
-    if (!UIManager)
+	if (UIManager == nullptr)
     {
         UE_LOG(LogTemp, Error, TEXT("SL_PlayerControllerBase::ShowBeginPlayScreen - UIManagerSubsystem not found!"));
         return;
@@ -223,7 +223,7 @@ void ASL_PlayerControllerBase::HideBeginPlayScreen()
     if (UIManager)
     {
         // 通过UIManager关闭界面（Widget内部NativeDestruct自动处理输入模式恢复）
-        UIManager->CloseWidget(EWidgetType::EWIDGET_BeginPlayScreen);
+        UIManager->CloseScreenWidget(EWidgetType::EWIDGET_BeginPlayScreen);
 
         UE_LOG(LogTemp, Log, TEXT("SL_PlayerControllerBase::HideBeginPlayScreen - BeginPlayScreen hidden"));
     }
@@ -270,7 +270,7 @@ void ASL_PlayerControllerBase::DestroyPlayerStatusUI()
 		UE_LOG(LogTemp, Verbose, TEXT("DestroyPlayerStatusUI :Can not Get Valid UUIManagerSubsystem Refence"));
 		return;
 	}
-	UIManager->CloseWidget(EWidgetType::EWIDGET_PlayerStatus);
+	UIManager->CloseScreenWidget(EWidgetType::EWIDGET_PlayerStatus);
 }
 
 /************************************************************************/

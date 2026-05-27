@@ -69,6 +69,13 @@ void UHUD_PauseMenuScreen::NativeDestruct()
 	// 恢复游戏输入模式
 	SetGameInputMode();
 
+	// 通知 UIManager 关闭（更新 ActiveWidgets 状态）
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
+	{
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_PauseMenu);
+	}
+
 	Super::NativeDestruct();
 
 	UE_LOG(LogTemp, Log, TEXT("UHUD_PauseMenuScreen::NativeDestruct - Pause menu closed"));
@@ -122,43 +129,38 @@ void UHUD_PauseMenuScreen::OpenPauseMenu(const UObject* WorldContextObject)
 	UIManager->OpenScreenWidget(EWidgetType::EWIDGET_PauseMenu);
 }
 
-void UHUD_PauseMenuScreen::ClosePauseMenu()
-{
-	// 从视口移除自身（会触发 NativeDestruct → 恢复游戏）
-	RemoveFromParent();
-}
-
 /************************************************************************/
 /* 按钮事件                                                                     */
 /************************************************************************/
 
 void UHUD_PauseMenuScreen::OnContinueClicked()
 {
-	ClosePauseMenu();
+	// 通过 UIManager 打开大厅界面
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager != nullptr)
+	{
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_PauseMenu);
+	}
 }
 
 void UHUD_PauseMenuScreen::OnLobbyClicked()
 {
-	// 先关闭暂停菜单（会 unpause）
-	ClosePauseMenu();
-
 	// 通过 UIManager 打开大厅界面
-	if (UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this))
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager != nullptr)
 	{
-		UIManager->CloseWidget(EWidgetType::EWIDGET_PauseMenu);
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_PauseMenu);
 		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_LobbyScreen);
 	}
 }
 
 void UHUD_PauseMenuScreen::OnMainMenuClicked()
 {
-	// 先关闭暂停菜单（会 unpause）
-	ClosePauseMenu();
-
 	// 通过 UIManager 打开初始界面
-	if (UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this))
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager != nullptr)
 	{
-		UIManager->CloseWidget(EWidgetType::EWIDGET_PauseMenu);
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_PauseMenu);
 		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_BeginPlayScreen);
 	}
 }
@@ -174,7 +176,6 @@ void UHUD_PauseMenuScreen::OnQuitClicked()
 
 void UHUD_PauseMenuScreen::SetUIInputMode()
 {
-	return;
 	if (APlayerController* PC = GetOwningPlayer())
 	{
 		FInputModeUIOnly InputMode;
@@ -184,11 +185,11 @@ void UHUD_PauseMenuScreen::SetUIInputMode()
 
 		PC->bShowMouseCursor = true;
 	}
+	return;
 }
 
 void UHUD_PauseMenuScreen::SetGameInputMode()
 {
-	return;
 	if (APlayerController* PC = GetOwningPlayer())
 	{
 		FInputModeGameOnly InputMode;
@@ -196,4 +197,5 @@ void UHUD_PauseMenuScreen::SetGameInputMode()
 
 		PC->bShowMouseCursor = false;
 	}
+	return;
 }

@@ -44,6 +44,13 @@ void UPop_DeathScreen::NativeConstruct()
 
 void UPop_DeathScreen::NativeDestruct()
 {
+	// 通知 UIManager 关闭（更新 ActiveWidgets 状态）
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
+	{
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_DeathScreen);
+	}
+
 	Super::NativeDestruct();
 
 	UE_LOG(LogTemp, Log, TEXT("Pop_DeathScreen::NativeDestruct - Death screen removed"));
@@ -61,15 +68,19 @@ void UPop_DeathScreen::OnRetryClicked()
 	// 1. 恢复 Game Only 输入模式（RetryLevel 会重新初始化角色）
 	SetGameInputMode();
 
-	// 2. 移除死亡界面
-	RemoveFromParent();
-
-	// 3. 获取 LevelManager 执行重新挑战
+	// 2. 获取 LevelManager 执行重新挑战
 	ALevelManager* LevelMgr = Cast<ALevelManager>(
 		UGameplayStatics::GetActorOfClass(GetWorld(), ALevelManager::StaticClass()));
 	if (LevelMgr)
 	{
 		LevelMgr->RetryLevel();
+	}
+
+	// 3. 最后关闭死亡界面（更新UIManager内部状态）
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
+	{
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_DeathScreen);
 	}
 }
 
@@ -81,12 +92,10 @@ void UPop_DeathScreen::OnLobbyClicked()
 	// 1. 恢复 Game Only 输入模式
 	SetGameInputMode();
 
-	// 2. 移除死亡界面
-	RemoveFromParent();
-
-	// 3. 关闭所有界面，打开 LobbyScreen
+	// 2. 关闭所有界面，打开 LobbyScreen
 	// TODO: 后续大厅地图实现后，改为 UGameplayStatics::OpenLevel(GetWorld(), "LobbyMap");
-	if (UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this))
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
 	{
 		UIManager->CloseAllWidgets();
 		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_LobbyScreen, 100);

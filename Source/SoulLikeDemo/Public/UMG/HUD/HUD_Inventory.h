@@ -34,6 +34,7 @@ public:
     void ToggleInventory();
 
 protected:
+    virtual void NativeOnInitialized() override;
     virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
@@ -61,20 +62,25 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
     TSubclassOf<UUI_InventorySlot> SlotWidgetClass;
 
+	// 库存组件引用
+	UPROPERTY()
+		USL_InventoryComponent* InventoryComponent;
+
+	// 当前选中的格子
+	UPROPERTY()
+		UUI_InventorySlot* SelectedSlot;
+
+	// 是否正在拖拽
+	bool bIsDragging;
+
+	// 拖拽开始位置
+	FVector2D DragStartPosition;
+
+	// UIManager 子系统引用
+	UPROPERTY()
+		class UUIManagerSubsystem* UIManager;
+
 private:
-    // 库存组件引用
-    UPROPERTY()
-    USL_InventoryComponent* InventoryComponent;
-
-    // 当前选中的格子
-    UPROPERTY()
-    UUI_InventorySlot* SelectedSlot;
-
-    // 是否正在拖拽
-    bool bIsDragging;
-
-    // 拖拽开始位置
-    FVector2D DragStartPosition;
 
     // 初始化UI
     void InitializeUI();

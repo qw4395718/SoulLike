@@ -259,7 +259,7 @@ void USL_StatusAttributeSet::OnCharacterReLive(AActor* ReviveActor)
 	ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Dead"));
 	ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Alive")); 
 
-	 // 2. 广播死亡事件
+	 // 2. 广播复活事件
     if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
     {
         DelegateMgr->OnCharacterRevived.Broadcast(OwnerActor);

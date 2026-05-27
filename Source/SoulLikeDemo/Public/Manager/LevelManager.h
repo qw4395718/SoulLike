@@ -6,10 +6,12 @@
 #include "GameFramework/Actor.h"
 #include "SoulLikeGameGlobal.h"
 #include "WaveManagerSystem.h"
+#include "LevelConfigInfoTable.h"
 #include "LevelManager.generated.h"
 
 class UParticleSystem;
 class USoundBase;
+class UDataTableManager;
 
 UCLASS()
 class SOULLIKEDEMO_API ALevelManager : public AActor
@@ -50,6 +52,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level")
 		int32 GetCurrentLevelID() const { return CurrentLevelID; };
 
+	UFUNCTION(BlueprintCallable, Category = "Level")
+		int32 GetNextLevelID() const { return CurrentLevelConfig.NextLevelID; };
+
+	UFUNCTION(BlueprintCallable, Category = "Level")
+		int32 GetCurrentPlayerClassID() const { return CurrentPlayerClassID; };
+
 protected:
 	// ===== UI显示 =====
 	void ShowLevelStartUI(int32 LevelID);
@@ -58,6 +66,13 @@ protected:
 	void ShowLevelCompleteUI();
 	void ShowPlayerDiedUI();
 	void UpdateWaveHUD();
+
+	// ===== 玩家状态管理 =====
+	/** 重置玩家状态（传送回出生点 + 全恢复） */
+	void ResetPlayerState();
+
+	/** 将玩家传送到出生点 */
+	void TeleportPlayerToStart(class ASL_CharacterBase* InPlayerCharacter);
 
 	// ===== 特效控制 =====
 	void PlayWaveCompleteEffect();
@@ -72,9 +87,19 @@ protected:
 	// ===== 配置 =====
 	UPROPERTY(EditDefaultsOnly, Category = "Level|Config")
 		int32 CurrentLevelID;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Level|Config")
+		FLevelConfigInfo CurrentLevelConfig;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Level|Config")
 		int32 CurrentPlayerClassID;
+
+	/** 关卡配置表缓存引用 */
+	UPROPERTY()
+		ULevelConfigInfoTable* LevelConfigTable;
+
+	/** 从 LevelTable 加载关卡配置 */
+	void LoadLevelConfig(int32 LevelID);
 
 	// ===== 特效 =====
 	UPROPERTY(EditDefaultsOnly, Category = "Level|Effects")

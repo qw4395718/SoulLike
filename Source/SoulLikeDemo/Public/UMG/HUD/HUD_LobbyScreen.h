@@ -90,6 +90,9 @@ protected:
 	/* 内部变量 - 数据                                                             */
 	/************************************************************************/
 
+	UPROPERTY()
+		class UUIManagerSubsystem* UIManager;
+
 	// 存档中的可挑战关卡ID
 	int32 m_savedLevelID;
 

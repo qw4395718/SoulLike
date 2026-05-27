@@ -117,4 +117,8 @@ protected:
 
 	// 是否已绑定委托
 	bool m_bDelegatesBound;
+
+	// UIManager 子系统引用
+	UPROPERTY()
+	class UUIManagerSubsystem* UIManager;
 };

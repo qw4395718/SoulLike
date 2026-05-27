@@ -10,6 +10,10 @@
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundBase.h"
 #include <Manager/SL_GameSaveSubsystem.h>
+#include <DataTableManager.h>
+#include <LevelConfigInfoTable.h>
+#include <GameFramework/PlayerStart.h>
+#include <GlobalDelegatesManager.h>
 
 ALevelManager::ALevelManager()
 {
@@ -39,6 +43,10 @@ void ALevelManager::BeginPlay()
 	UE_LOG(LogTemp, Log, TEXT("LevelManager::BeginPlay - Level initialization started"));
 }
 
+/************************************************************************/
+/*                              关卡控制                                */
+/************************************************************************/
+
 void ALevelManager::StartLevel(int32 LevelID, int32 PlayerClassID)
 {
 	CurrentLevelID = LevelID;
@@ -48,13 +56,11 @@ void ALevelManager::StartLevel(int32 LevelID, int32 PlayerClassID)
 	UWaveManagerSystem* WaveManagerSystem = GetWorld()->GetSubsystem<UWaveManagerSystem>();
 	if (!WaveManagerSystem) return;
 
-	// 初始化玩家装备
-	ASL_CharacterBase* PlayerCharacter = Cast<ASL_CharacterBase>(
-		UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	if (PlayerCharacter)
-	{
-		PlayerCharacter->InitCharacterWithClassID(PlayerClassID);
-	}
+	// 加载关卡配置（复活点、地图名等）
+	LoadLevelConfig(LevelID);
+
+	// 重置玩家状态（职业初始化 + 传送 + 满血满体）
+	ResetPlayerState();
 
 	// 开始关卡流程
 	WaveManagerSystem->StartLevel(LevelID);
@@ -63,6 +69,85 @@ void ALevelManager::StartLevel(int32 LevelID, int32 PlayerClassID)
 	ShowLevelStartUI(LevelID);
 
 	UE_LOG(LogTemp, Log, TEXT("LevelManager::StartLevel - Level %d started with Class %d"), LevelID, PlayerClassID);
+}
+
+/************************************************************************/
+/*                         关卡配置加载                                 */
+/************************************************************************/
+
+void ALevelManager::LoadLevelConfig(int32 LevelID)
+{
+	LevelConfigTable = Cast<ULevelConfigInfoTable>(
+		UDataTableManager::Get(this)->GetDataTable(EDataTableType::DT_LevelConfigInfo));
+
+	if (LevelConfigTable)
+	{
+		LevelConfigTable->GetLevelConfig(LevelID, CurrentLevelConfig);
+	}
+}
+
+/************************************************************************/
+/*                              玩家状态管理                             */
+/************************************************************************/
+
+void ALevelManager::ResetPlayerState()
+{
+	ASL_CharacterBase* PlayerCharacter = Cast<ASL_CharacterBase>(
+		UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (!PlayerCharacter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LevelManager::ResetPlayerState - PlayerCharacter not found"));
+		return;
+	}
+
+	// 1. 查找玩家出生点并传送
+	TeleportPlayerToStart(PlayerCharacter);
+
+	// 2. 职业初始化（含血量/体力/魔法满值重置 + 装备加载）
+	PlayerCharacter->InitCharacterWithClassID(CurrentPlayerClassID);
+
+	// 3. 检查是否处于死亡状态
+	if (PlayerCharacter->IsDie())
+	{
+		if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
+		{
+			globalDelegatesManager->OnCharacterRevived.Broadcast(PlayerCharacter);
+		}
+	}
+
+}
+
+/************************************************************************/
+/*                              出生点传送                              */
+/************************************************************************/
+
+void ALevelManager::TeleportPlayerToStart(ASL_CharacterBase* InPlayerCharacter)
+{
+	if (!InPlayerCharacter || !GetWorld())
+	{
+		return;
+	}
+
+	// 从关卡配置读取出生点坐标
+	FVector TargetLocation = CurrentLevelConfig.PlayerSpawnLocation;
+	FRotator TargetRotation = CurrentLevelConfig.PlayerSpawnRotation;
+
+	// 如果坐标为默认零向量，回退到地图上的第一个 PlayerStart
+	if (TargetLocation.IsZero())
+	{
+		AActor* StartSpot = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass());
+
+		if (StartSpot)
+		{
+			TargetLocation = StartSpot->GetActorLocation();
+			TargetRotation = StartSpot->GetActorRotation();
+		}
+	}
+
+	// 执行传送
+	InPlayerCharacter->SetActorLocationAndRotation(TargetLocation, TargetRotation, false, nullptr, ETeleportType::TeleportPhysics);
+
+	UE_LOG(LogTemp, Log, TEXT("LevelManager::TeleportPlayerToStart - Teleported to %s"), *TargetLocation.ToString());
 }
 
 void ALevelManager::OnWaveStarted(int32 WaveID)
@@ -97,8 +182,13 @@ void ALevelManager::OnAllWavesCompleted()
 
 	ShowLevelCompleteUI();
 	PlayLevelCompleteEffect();
-	UnlockNextLevel(CurrentLevelID + 1);
-	SaveGameProgress();
+
+	// 有下一关才更新存档
+	if (GetNextLevelID() > 0)
+	{
+		UnlockNextLevel(GetNextLevelID());
+		SaveGameProgress();
+	}
 }
 
 void ALevelManager::OnPlayerDied()
@@ -125,13 +215,50 @@ void ALevelManager::RetryLevel()
 		WaveManagerSystem->ResetLevel();
 	}
 
-	StartLevel(CurrentLevelID, CurrentPlayerClassID);
+	// 重置玩家状态（传送 + 全恢复）
+	ResetPlayerState();
+
+	// 重启波次
+	if (WaveManagerSystem)
+	{
+		WaveManagerSystem->StartLevel(CurrentLevelID);
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("LevelManager::RetryLevel - Level %d retry started"), CurrentLevelID);
 }
+
+/************************************************************************/
+/*                              下一关                                  */
+/************************************************************************/
 
 void ALevelManager::GoToNextLevel()
 {
-	// TODO: 加载下一关地图
-	// UGameplayStatics::OpenLevel(GetWorld(), NextLevelName);
+	int32 NextLevelID = GetNextLevelID();
+	if (NextLevelID <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LevelManager::GoToNextLevel - No next level (NextLevelID=%d)"), NextLevelID);
+		return;
+	}
+
+	// 读取下一关配置
+	FLevelConfigInfo NextLevelConfig;
+	if (LevelConfigTable && LevelConfigTable->GetLevelConfig(NextLevelID, NextLevelConfig))
+	{
+		// 检查是否需要跨地图
+		if (NextLevelConfig.MapName != NAME_None)
+		{
+			// 先存档（把 NextLevelID 写进存档），新地图 GameMode 从存档读取
+			CurrentLevelID = NextLevelID;
+			SaveGameProgress();
+
+			UGameplayStatics::OpenLevel(GetWorld(), NextLevelConfig.MapName);
+		}
+		else
+		{
+			// 同地图内下一关
+			StartLevel(NextLevelID, CurrentPlayerClassID);
+		}
+	}
 }
 
 // ==================== UI控制 ====================
@@ -155,8 +282,7 @@ void ALevelManager::ShowLevelStartUI(int32 LevelID)
 		}
 	}
 
-	UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this);
-	if (UIManager)
+	if (UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this))
 	{
 		// TODO: 通过UIManager创建UI
 		UE_LOG(LogTemp, Log, TEXT("LevelManager::ShowLevelStartUI - Level %d, Waves: %d, Monsters: %d"),
@@ -173,8 +299,7 @@ void ALevelManager::ShowLevelStartUI(int32 LevelID)
 
 void ALevelManager::ShowWaveStartUI(const FWaveConfigInfo& WaveConfig)
 {
-	UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this);
-	if (UIManager)
+	if (UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this))
 	{
 		UE_LOG(LogTemp, Log, TEXT("LevelManager::ShowWaveStartUI - Wave: %s"), *WaveConfig.WaveName.ToString());
 	}
@@ -194,13 +319,17 @@ void ALevelManager::ShowWaveCompleteUI(int32 WaveID)
 
 void ALevelManager::ShowLevelCompleteUI()
 {
+	if (UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this))
+	{
+		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_LevelComplete, 200);
 
+		UE_LOG(LogTemp, Log, TEXT("LevelManager::ShowLevelCompleteUI - Level %d complete screen opened"), CurrentLevelID);
+	}
 }
 
 void ALevelManager::ShowPlayerDiedUI()
 {
-	UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this);
-	if (UIManager)
+	if (UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this))
 	{
 		UE_LOG(LogTemp, Log, TEXT("LevelManager::ShowPlayerDiedUI - Showing death screen"));
 	}

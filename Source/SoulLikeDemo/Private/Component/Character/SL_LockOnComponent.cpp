@@ -203,8 +203,14 @@ void USL_LockOnComponent::UpdateLockOnIndicator(bool bShow)
 	}
 	else
 	{
+		// 在锁定目标上创建世界空间UI
+		FUICreateParams Params = FUICreateParams::ForWorldActor(
+			LockOnIndicatorWidgetType,
+			LockedTarget.Get(),
+			LockOnRange * EscapeRangeMultiplier * 1.5f
+		);
 		// 移除锁定指示器
-		UIManager->CloseWidget(LockOnIndicatorWidgetType);
+		UIManager->CloseWidget(Params);
 	}
 }
 

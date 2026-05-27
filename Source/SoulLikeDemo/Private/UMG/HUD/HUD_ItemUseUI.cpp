@@ -5,6 +5,7 @@
 #include "Manager/DataTableManager.h"
 #include "Manager/GlobalDelegatesManager.h"
 #include "Table/ClassConfigInfoTable.h"
+#include "UIManagerSubsystem.h"
 
 UHUD_ItemUseUI::UHUD_ItemUseUI(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -47,6 +48,13 @@ void UHUD_ItemUseUI::NativeDestruct()
 {
 	// 解除委托绑定
 	UnbindDelegates();
+
+	// 通知 UIManager 关闭（更新 ActiveWidgets 状态）
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
+	{
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_None);
+	}
 
 	Super::NativeDestruct();
 }

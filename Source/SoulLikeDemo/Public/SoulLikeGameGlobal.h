@@ -283,6 +283,7 @@ enum class EWidgetType :uint8
 	EWIDGET_LobbyScreen,
 	EWIDGET_PauseMenu,
 	EWIDGET_DeathScreen,
+	EWIDGET_LevelComplete,
 	EWIDGET_Max
 };
 
@@ -618,6 +619,40 @@ struct FClassConfigInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 		TArray<FSlotItemInfo> SlotItems;
 };
+
+// ===== 关卡配置表结构 =====
+USTRUCT(BlueprintType)
+struct FLevelConfigInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
+		int32 LevelID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
+		FName LevelName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
+		int32 NextLevelID;
+
+	/** 地图包名（为空表示同地图内关卡切换，非空表示跨地图 OpenLevel） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
+		FName MapName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level|Spawn")
+		FVector PlayerSpawnLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level|Spawn")
+		FRotator PlayerSpawnRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
+		FString Description;
+
+	FLevelConfigInfo()
+		: LevelID(0), PlayerSpawnLocation(FVector::ZeroVector), PlayerSpawnRotation(FRotator::ZeroRotator)
+	{}
+};
+
 
 
 // ===== 波次配置表结构 =====

@@ -48,6 +48,12 @@ void UHUD_BeginPlayScreen::NativeDestruct()
 {
     Super::NativeDestruct();
 
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
+	{
+        UIManager->CloseScreenWidget(EWidgetType::EWIDGET_BeginPlayScreen);
+	}
+
     // 恢复输入模式
     //SetGameInputMode();
 }
@@ -72,9 +78,6 @@ void UHUD_BeginPlayScreen::ShowLobbyScreen()
 		return;
 	}
 
-    // 移除当前界面
-    RemoveFromParent();
-
 	// 通过UIManager打开界面（ZOrder=100确保在最上层）
 	UIManager->OpenScreenWidget(EWidgetType::EWIDGET_LobbyScreen, 100);
 
@@ -83,6 +86,8 @@ void UHUD_BeginPlayScreen::ShowLobbyScreen()
 	{
         UE_LOG(LogTemp, Log, TEXT("SL_PlayerControllerBase::ShowLobbyScreen - LobbyScreen displayed"));
 	}
+
+    UIManager->CloseScreenWidget(EWidgetType::EWIDGET_BeginPlayScreen);
 }
 
 /************************************************************************/

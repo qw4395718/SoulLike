@@ -19,6 +19,17 @@ void ASL_GameModeBase::BeginPlay()
 
 	// 创建 LevelManager
 	CreateLevelManager();
+
+	// 如果存在存档（跨地图跳转场景），自动从存档恢复关卡进度
+	USL_GameSaveSubsystem* SaveSubsystem = USL_GameSaveSubsystem::Get(this);
+	if (SaveSubsystem && SaveSubsystem->HasSaveData())
+	{
+		bUseSaveData = true;
+
+		// 延迟一帧执行，确保 LevelManager 已经完成初始化
+		FTimerHandle DelayHandle;
+		GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &ASL_GameModeBase::StartCurrentLevel, 0.1f, false);
+	}
 }
 
 void ASL_GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)

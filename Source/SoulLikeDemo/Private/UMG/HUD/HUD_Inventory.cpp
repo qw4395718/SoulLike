@@ -7,6 +7,13 @@
 #include "UI_InventorySlot.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include <UIManagerSubsystem.h>
+#include <SoulLikeGameGlobal.h>
+
+void UHUD_Inventory::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+}
 
 void UHUD_Inventory::NativeConstruct()
 {
@@ -24,10 +31,14 @@ void UHUD_Inventory::NativeConstruct()
 
 void UHUD_Inventory::NativeDestruct()
 {
+	// 通知 UIManager 关闭（更新 ActiveWidgets 状态）
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
+	{
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_MainMenu);
+	}
+
     Super::NativeDestruct();
-
-    // 清理绑定
-
 }
 
 FReply UHUD_Inventory::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)

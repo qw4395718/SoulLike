@@ -11,33 +11,47 @@ USTRUCT(BlueprintType)
 struct FUICreateParams
 {
 	GENERATED_BODY()
-
-		// 1. 基础信息：所有UI都可能需要
-		UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		EWidgetType Type; // 你原来的枚举
-
+	/************************************************************************/
+	/*                                基础信息                                      */
+	/************************************************************************/
+	// UI类型
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UObject* WorldContextObject = nullptr; // 用于获取世界
-
-		// 2. 玩家专属的屏幕UI（旧系统）可能不需要额外参数
-
-		// 3. 世界空间UI专用参数
+		EWidgetType Type;
+	
+	// 用于获取世界
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		AActor* TargetActor = nullptr; // 要跟随的玩家角色
+		UObject* WorldContextObject = nullptr; 
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		FVector WorldOffset = FVector(0, 0, 150); // 头部偏移量，可配置
-
-		// 4. Z-Order（屏幕空间UI的层叠顺序，越大越靠前）
+	// Z-Order（屏幕空间UI的层叠顺序，越大越靠前）
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		int32 ZOrder = 0;
 
-		// 5. 动态销毁参数（用于解决你的问题2）
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		bool bEnableDistanceCulling = true; // 是否根据距离销毁
+	/************************************************************************/
+	/*                                视口UI所需信息                                      */
+	/************************************************************************/
 
+
+	/************************************************************************/
+	/*                                世界UI所需信息                                      */
+	/************************************************************************/
+	// 要跟随的玩家角色
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		float DestroyDistance = 3000.0f; // 销毁距离
+		AActor* TargetActor = nullptr; 
+
+	// 绑定在玩家哪个部位
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FName TargetBodyTag = FName("HeadUI");
+	// 绑定部位的偏移
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FVector WorldOffset = FVector(0, 0, 150);
+
+	// 动态销毁参数-是否可开启距离检测
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bEnableDistanceCulling = true; 
+
+	// 销毁距离
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float DestroyDistance = 3000.0f; 
 
 		// 构造函数方便快速创建
 	FUICreateParams() {}
@@ -115,7 +129,13 @@ public:
 	void OpenWorldWidgetWithActor(const FUICreateParams& CreateParam);
 
 	UFUNCTION(BlueprintCallable, Category = "UI Manager")
-    void CloseWidget(EWidgetType WidgetType);
+    void CloseWidget(const FUICreateParams& CreateParam);
+
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
+	void CloseScreenWidget(EWidgetType WidgetType);
+
+	UFUNCTION(BlueprintCallable, Category = "UI Manager")
+	void CloseWorldWidgetWithActor(const FUICreateParams& CreateParam);
     
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
     void CloseAllWidgets();

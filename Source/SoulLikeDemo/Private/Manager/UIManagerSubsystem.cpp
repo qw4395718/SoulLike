@@ -32,6 +32,7 @@ void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_InterActPanel,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_InterActPanel.WBP_PU_InterActPanel"));
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_MainMenu,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_MainMenu.WBP_PU_MainMenu"));
 	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_DeathScreen,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_DeathScreen.WBP_PU_DeathScreen"));
+	RegisterWidgetFromBPPath(EWidgetType::EWIDGET_LevelComplete,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_LevelComplete.WBP_PU_LevelComplete"));
 	//RegisterWidgetFromBPPath(EWidgetType::EWIDGET_Inventory,TEXT("/Game/SoulLikeDemo/UI/BluePrint/PopLayer/WBP_PU_NotifyMessage.WBP_PU_NotifyMessage"));
 	
 	/************************************************************************/
@@ -202,7 +203,7 @@ void UUIManagerSubsystem::OpenScreenWidget(EWidgetType WidgetType, int32 ZOrder)
 	{
 		if (ActiveWidgets.Contains(WidgetType))
 		{
-			CloseWidget(WidgetType);
+			CloseScreenWidget(WidgetType);
 		}
 
 		if (WidgetClass)
@@ -237,7 +238,7 @@ void UUIManagerSubsystem::OpenWorldWidgetWithActor(const FUICreateParams& Create
 					for (UWidgetComponent* Comp : WidgetComponents)
 					{
 						// 通过组件标签识别（推荐）
-						if (Comp->ComponentHasTag(FName("HeadUI")) &&
+						if (Comp->ComponentHasTag(CreateParam.TargetBodyTag) &&
 							Comp->IsRegistered())
 						{
 							// 添加到指定区域
@@ -262,7 +263,19 @@ void UUIManagerSubsystem::OpenWorldWidgetWithActor(const FUICreateParams& Create
 	}
 }
 
-void UUIManagerSubsystem::CloseWidget(EWidgetType WidgetType)
+void UUIManagerSubsystem::CloseWidget(const FUICreateParams& CloseParam)
+{
+	if (CloseParam.TargetActor != nullptr)
+	{
+		CloseWorldWidgetWithActor(CloseParam);
+	}
+	else
+	{
+		CloseScreenWidget(CloseParam.Type);
+	}
+}
+
+void UUIManagerSubsystem::CloseScreenWidget(EWidgetType WidgetType)
 {
 	if (ActiveWidgets.Contains(WidgetType))
 	{
@@ -275,6 +288,34 @@ void UUIManagerSubsystem::CloseWidget(EWidgetType WidgetType)
 	PopWidget(WidgetType);
 }
 
+
+void UUIManagerSubsystem::CloseWorldWidgetWithActor(const FUICreateParams& CloseParam)
+{
+	FString Key = CloseParam.TargetActor->GetName() + FString::FromInt(static_cast<int32>(CloseParam.Type));
+	if (ActiveWorldWidgets.Contains(Key))
+	{
+		if (UUserWidget* Widget = ActiveWorldWidgets.FindRef(Key))
+		{
+			// 获取指定组件插槽
+			TArray<UWidgetComponent*> WidgetComponents;
+			CloseParam.TargetActor->GetComponents<UWidgetComponent>(WidgetComponents);
+			for (UWidgetComponent* Comp : WidgetComponents)
+			{
+				// 通过组件标签识别（推荐）
+				if (Comp->ComponentHasTag(CloseParam.TargetBodyTag) &&
+					Comp->IsRegistered())
+				{
+					Comp->SetVisibility(false);
+	
+					// 记录信息
+					ActiveWorldWidgets.Remove(Key);
+					return;
+				}
+			}
+		}
+	}
+}
+
 void UUIManagerSubsystem::CloseAllWidgets()
 {
 	for (auto& Pair : ActiveWidgets)
@@ -285,6 +326,16 @@ void UUIManagerSubsystem::CloseAllWidgets()
 		}
 	}
 	ActiveWidgets.Reset();
+
+	for (auto& Pair : ActiveWorldWidgets)
+	{
+		if (UUserWidget* Widget = Pair.Value)
+		{
+			Widget->RemoveFromParent();
+		}
+	}
+	ActiveWorldWidgets.Reset();
+
 	WidgetStack.Reset();
 }
 

@@ -1,26 +1,28 @@
-// Pop_DeathScreen.h
+// Pop_LevelComplete.h
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
-#include "Pop_DeathScreen.generated.h"
+#include "Pop_LevelComplete.generated.h"
 
 /**
- * 死亡界面 Widget
+ * 关卡完成界面 Widget
+ *
+ * 触发时机：OnAllWavesCompleted() 后自动弹出
  *
  * 布局（蓝图侧）：
- *   视野中央：Image（死亡图标）
- *   下方：三个 Button —— 重新挑战 / 返回大厅 / 退出游戏
+ *   视野中央：Image / Text（关卡完成提示）
+ *   下方：三个 Button —— 挑战下一关 / 返回大厅 / 退出游戏
  *
  * 按钮逻辑（C++ 侧）：
- *   重新挑战 → LevelManager::RetryLevel()
- *   返回大厅 → 打开 LobbyScreen（后续切换为大厅地图 OpenLevel）
- *   退出游戏 → UKismetSystemLibrary::QuitGame()
+ *   挑战下一关 → LevelManager::StartLevel(CurrentLevelID + 1)
+ *   返回大厅    → 打开 LobbyScreen
+ *   退出游戏    → UKismetSystemLibrary::QuitGame()
  */
 UCLASS(Blueprintable, BlueprintType, Abstract)
-class SOULLIKEDEMO_API UPop_DeathScreen : public UUserWidget
+class SOULLIKEDEMO_API UPop_LevelComplete : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -42,11 +44,14 @@ protected:
 	// 恢复 Game Only 输入模式
 	void SetGameInputMode();
 
+	// 根据是否有下一关更新按钮状态
+	void UpdateButtonStates();
+
 	/************************************************************************/
 	/*                               按钮事件                               */
 	/************************************************************************/
 	UFUNCTION()
-	void OnRetryClicked();
+	void OnNextLevelClicked();
 
 	UFUNCTION()
 	void OnLobbyClicked();
@@ -58,9 +63,9 @@ protected:
 	/************************************************************************/
 	/*                          BindWidget 控件                             */
 	/************************************************************************/
-	// 重新挑战按钮
+	// 挑战下一关按钮
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UButton* m_retryButton;
+	UButton* m_nextLevelButton;
 
 	// 返回大厅按钮
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))

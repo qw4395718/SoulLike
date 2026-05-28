@@ -64,6 +64,7 @@ public:
 
 	virtual bool IsAlive() const override;
 	virtual bool IsDie() const override;
+	virtual void Destroyed() override;
 
 	/*
 	 * 公开给AIController访问

@@ -117,7 +117,7 @@ void UWaveManagerSystem::ResetLevel()
 	{
 		if (Enemy && !Enemy->IsPendingKillPending())
 		{
-			Enemy->Destroy();
+			Enemy->Destroyed();
 		}
 	}
 

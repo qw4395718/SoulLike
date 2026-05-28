@@ -283,6 +283,8 @@ enum class EWidgetType :uint8
 	EWIDGET_LobbyScreen,
 	EWIDGET_PauseMenu,
 	EWIDGET_DeathScreen,
+	EWIDGET_ClassSelectScreen,
+	EWIDGET_ItemUseUI,
 	EWIDGET_LevelComplete,
 	EWIDGET_Max
 };
@@ -571,6 +573,14 @@ struct FClassConfigInfo : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 		FName ClassName;
+
+	/** 职业描述文本 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		FText ClassDescription;
+
+	/** 职业预览图片（用于 UI 选择界面的右侧预览区） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		TSoftObjectPtr<UTexture2D> ClassPreviewImage;
 
 	// ===== 属性配置 =====
 /** 基础生命值 */

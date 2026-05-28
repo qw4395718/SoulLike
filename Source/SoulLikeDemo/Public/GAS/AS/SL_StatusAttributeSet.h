@@ -40,9 +40,6 @@ public:
 	/************************************************************************/
 	void SetOwningActor(AActor* pOwnActor);
 
-	// 运行时绑定复活事件（不能在构造函数中绑，因 Cook 时无 World 上下文）
-	void BindReviveEvent();
-
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "StatusAttributeSet")
 		void InitHealthAS(float MinValue, float MaxValue);
 	virtual void InitHealthAS_Implementation(float MinValue, float MaxValue);
@@ -65,8 +62,6 @@ protected:
     virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
-	void OnCharacterDeath(AActor* DeathActor);
-	void OnCharacterReLive(AActor* ReviveActor);
 public:
 	/************************************************************************/
 	/*                              外部可访问                                       */
@@ -97,7 +92,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Stamina")
 		FGameplayAttributeData StaminaRegen;
 
+	void OnCharacterDeath(AActor* DeathActor);
 
+	void OnCharacterReLive(AActor* ReviveActor);
 
 private:
 	/************************************************************************/

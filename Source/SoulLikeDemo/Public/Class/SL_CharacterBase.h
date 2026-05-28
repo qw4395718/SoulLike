@@ -117,6 +117,7 @@ public:
 
 	virtual bool IsAlive() const override;
 	virtual bool IsDie() const override;
+	virtual void Destroyed() override;
 
 	/************************************************************************/
 	/*                               Unlua相关                                      */
@@ -173,6 +174,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void BindGASDeathEvent();
 
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void BindGASReviveEvent();
+
 	// GAS角色死亡回调
 	UFUNCTION()
 		void OnGASCharacterDied(AActor* DiedActor, AActor* KillerActor);
@@ -201,9 +205,6 @@ protected:
 
 	UPROPERTY()
 		USL_StatusAttributeSet* StatusAttributeSet;
-
-	UPROPERTY()
-		USL_StatusAttributeSet* PlayerStatusSet;
 
 	// 先不设计组件管理器，直接创建组件使用
 	// 战斗组件
@@ -249,4 +250,7 @@ protected:
 
 	// 死亡委托的句柄
 	FDelegateHandle OnCharacterDiedHandle;
+
+	// 复活委托的句柄
+	FDelegateHandle OnCharacterLivedHandle;
 };

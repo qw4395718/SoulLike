@@ -25,4 +25,5 @@ public:
 	
 	virtual bool IsAlive() const = 0;
 	virtual bool IsDie() const = 0;
+	virtual void Destroyed() = 0;
 };

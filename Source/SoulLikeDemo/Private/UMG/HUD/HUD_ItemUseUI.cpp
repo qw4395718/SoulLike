@@ -53,7 +53,7 @@ void UHUD_ItemUseUI::NativeDestruct()
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)
 	{
-		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_None);
+		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_ItemUseUI);
 	}
 
 	Super::NativeDestruct();

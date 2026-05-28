@@ -64,7 +64,6 @@ void ASL_CharacterBase::BeginPlay()
 	if (StatusAttributeSet)
 	{
 		StatusAttributeSet->SetOwningActor(this);
-		StatusAttributeSet->BindReviveEvent();
 	}
 	
 	if (!IsPlayerControlled())
@@ -409,6 +408,13 @@ void ASL_CharacterBase::InitCharacterWithClassID(int32 InPlayerClassID)
 	ApplyEnemyConfig(ClassConfig);
 
 	BindGASDeathEvent();
+	BindGASReviveEvent();
+
+	// 检测玩家当前是否是已死亡状态
+	if (IsDie() && StatusAttributeSet)
+	{
+		StatusAttributeSet->OnCharacterReLive(this);
+	}
 
 	// Todo:切换职业的时候需要广播,改变能力值和Tag
 }
@@ -448,6 +454,19 @@ void ASL_CharacterBase::BindGASDeathEvent()
 		if (!OnCharacterDiedHandle.IsValid())
 		{
 			OnCharacterDiedHandle = DelegateMgr->OnCharacterDied.AddUObject(this, &ASL_CharacterBase::OnGASCharacterDied);
+		}
+	}
+}
+
+void ASL_CharacterBase::BindGASReviveEvent()
+{
+	// 绑定GAS的复活
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		// 防止重复绑定
+		if (!OnCharacterLivedHandle.IsValid())
+		{
+			OnCharacterLivedHandle = DelegateMgr->OnCharacterRevived.AddUObject(this, &ASL_CharacterBase::OnGASCharacterRevive);
 		}
 	}
 }
@@ -558,6 +577,11 @@ bool ASL_CharacterBase::IsDie() const
 	FGameplayTagContainer currentTags;
 	AbilitySystemComp->GetOwnedGameplayTags(currentTags);
 	return currentTags.HasTag(FGameplayTag::RequestGameplayTag(TEXT("State.Dead")));
+
+}
+
+void ASL_CharacterBase::Destroyed()
+{
 
 }
 

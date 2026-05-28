@@ -68,7 +68,6 @@ void ASL_EnemyBase::BeginPlay()
 	if (StatusAttributeSet)
 	{
 		StatusAttributeSet->SetOwningActor(this);
-		StatusAttributeSet->BindReviveEvent();
 	}
 }
 
@@ -503,6 +502,24 @@ ASL_WeaponBase* ASL_EnemyBase::GetWeaponByHand(int32 HandIndex) const
     if (HandIndex == 0) return LeftHandWeapon;
     if (HandIndex == 1) return RightHandWeapon;
     return nullptr;
+}
+
+// ===== 继承实现 =====
+void ASL_EnemyBase::Destroyed()
+{
+	// 销毁附属武器，防止 ResetLevel 直接 Destroy 时武器悬空
+	if (LeftHandWeapon)
+	{
+		LeftHandWeapon->Destroy();
+		LeftHandWeapon = nullptr;
+	}
+	if (RightHandWeapon)
+	{
+		RightHandWeapon->Destroy();
+		RightHandWeapon = nullptr;
+	}
+
+	Destroy();
 }
 
 // IAbilitySystemInterface 接口实现

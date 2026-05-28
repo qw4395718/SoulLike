@@ -68,6 +68,7 @@ void ALevelManager::StartLevel(int32 LevelID, int32 PlayerClassID)
 	// 显示关卡开始UI
 	ShowLevelStartUI(LevelID);
 
+
 	UE_LOG(LogTemp, Log, TEXT("LevelManager::StartLevel - Level %d started with Class %d"), LevelID, PlayerClassID);
 }
 
@@ -105,15 +106,6 @@ void ALevelManager::ResetPlayerState()
 
 	// 2. 职业初始化（含血量/体力/魔法满值重置 + 装备加载）
 	PlayerCharacter->InitCharacterWithClassID(CurrentPlayerClassID);
-
-	// 3. 检查是否处于死亡状态
-	if (PlayerCharacter->IsDie())
-	{
-		if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
-		{
-			globalDelegatesManager->OnCharacterRevived.Broadcast(PlayerCharacter);
-		}
-	}
 
 }
 
@@ -285,6 +277,10 @@ void ALevelManager::ShowLevelStartUI(int32 LevelID)
 	if (UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(this))
 	{
 		// TODO: 通过UIManager创建UI
+		// 打开血量UI
+		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_PlayerStatus,100);
+		// 打开道具使用UI
+		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_ItemUseUI, 100);
 		UE_LOG(LogTemp, Log, TEXT("LevelManager::ShowLevelStartUI - Level %d, Waves: %d, Monsters: %d"),
 			LevelID, Waves.Num(), TotalMonsters);
 	}

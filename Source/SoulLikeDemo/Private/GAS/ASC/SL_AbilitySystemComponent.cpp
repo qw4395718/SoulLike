@@ -1,4 +1,4 @@
-﻿#include <SL_AbilitySystemComponent.h>
+#include <SL_AbilitySystemComponent.h>
 #include <GameplayAbilitySpec.h>
 
 USL_AbilitySystemComponent::USL_AbilitySystemComponent()
@@ -153,6 +153,5 @@ FGameplayAbilitySpec* USL_AbilitySystemComponent::FindAbilitySpecFromTag(const F
 
 void USL_AbilitySystemComponent::SetAliveTag()
 {
-	RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Dead"));
 	AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Alive")); 
 }

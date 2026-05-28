@@ -7,6 +7,7 @@
 class UTextBlock;
 class UHorizontalBox;
 class UUI_ListItemBase;
+class UButton;
 class UScrollBox;
 
 /**
@@ -43,6 +44,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LobbyScreen")
 	void InitializeLobby();
 
+	// 供 ClassSelectScreen 在切换职业后调用，刷新职业名显示
+	void RefreshClassDisplay();
+
 protected:
 	/************************************************************************/
 	/* 内部调用                                                                     */
@@ -55,6 +59,9 @@ protected:
 
 	// 为指定关卡ID创建单个选择按钮
 	UUI_ListItemBase* CreateLevelButton(int32 InLevelID, int32 InSavedLevelID, const FText& InDisplayName);
+
+	// 打开职业选择界面
+	void OnSwitchClassClicked();
 
 	// 关卡按钮点击响应
 	void OnLevelClicked(int32 InLevelID);
@@ -73,6 +80,10 @@ protected:
 	// 左上角 - 职业名文本
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "LobbyScreen")
 		UTextBlock* m_classNameText;
+
+	// 左上角 - 切换职业按钮
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "LobbyScreen")
+		UButton* m_switchClassButton;
 
 	// 中间 - 水平框的容器
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))

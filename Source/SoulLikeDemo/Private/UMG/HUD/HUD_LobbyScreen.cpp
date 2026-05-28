@@ -14,6 +14,7 @@
 #include "SL_GameModeBase.h"
 #include <UI_ListItemBase.h>
 #include "UIManagerSubsystem.h"
+#include "HUD_ClassSelectScreen.h"
 
 UHUD_LobbyScreen::UHUD_LobbyScreen(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -39,6 +40,12 @@ void UHUD_LobbyScreen::NativeConstruct()
 	SetUIInputMode();
 
 	InitializeLobby();
+
+	// 绑定切换职业按钮
+	if (m_switchClassButton)
+	{
+		m_switchClassButton->OnClicked.AddDynamic(this, &UHUD_LobbyScreen::OnSwitchClassClicked);
+	}
 }
 
 
@@ -86,6 +93,40 @@ void UHUD_LobbyScreen::InitializeLobby()
 	// 3. 构建关卡选择列表
 	BuildLevelSelection();
 }
+
+/************************************************************************/
+/* 内部调用                                                                     */
+/************************************************************************/
+
+void UHUD_LobbyScreen::OnSwitchClassClicked()
+{
+	// 打开职业选择界面（ZOrder=150 确保在 LobbyScreen 之上）
+	UIManager = UUIManagerSubsystem::Get(this);
+	if (UIManager)
+	{
+		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_ClassSelectScreen, 150);
+	}
+}
+
+
+/************************************************************************/
+/* 外部调用                                                                     */
+/************************************************************************/
+
+void UHUD_LobbyScreen::RefreshClassDisplay()
+{
+	// 从存档重新读取职业ID（可能已被 ClassSelectScreen 修改）
+	USL_GameSaveSubsystem* SaveSystem = USL_GameSaveSubsystem::Get(this);
+	if (SaveSystem)
+	{
+		int32 LoadedLevelID = 1;
+		int32 LoadedClassID = 1001;
+		SaveSystem->LoadGame(LoadedLevelID, LoadedClassID);
+		m_playerClassID = LoadedClassID;
+	}
+	UpdateClassNameDisplay();
+}
+
 
 /************************************************************************/
 /* 内部调用                                                                     */

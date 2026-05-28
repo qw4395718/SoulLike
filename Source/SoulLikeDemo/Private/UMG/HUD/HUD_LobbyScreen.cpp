@@ -21,6 +21,8 @@ UHUD_LobbyScreen::UHUD_LobbyScreen(const FObjectInitializer& ObjectInitializer)
 	, m_savedLevelID(1)
 	, m_playerClassID(1001)
 {
+	bIsFocusable = true;
+
 }
 
 /************************************************************************/
@@ -30,6 +32,13 @@ UHUD_LobbyScreen::UHUD_LobbyScreen(const FObjectInitializer& ObjectInitializer)
 void UHUD_LobbyScreen::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+
+	// 绑定切换职业按钮
+	if (m_switchClassButton)
+	{
+		m_switchClassButton->OnClicked.AddDynamic(this, &UHUD_LobbyScreen::OnSwitchClassClicked);
+	}
+
 }
 
 void UHUD_LobbyScreen::NativeConstruct()
@@ -40,12 +49,6 @@ void UHUD_LobbyScreen::NativeConstruct()
 	SetUIInputMode();
 
 	InitializeLobby();
-
-	// 绑定切换职业按钮
-	if (m_switchClassButton)
-	{
-		m_switchClassButton->OnClicked.AddDynamic(this, &UHUD_LobbyScreen::OnSwitchClassClicked);
-	}
 }
 
 

@@ -10,6 +10,8 @@
 UHUD_PauseMenuScreen::UHUD_PauseMenuScreen(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	bIsFocusable = true;
+
 }
 
 /************************************************************************/

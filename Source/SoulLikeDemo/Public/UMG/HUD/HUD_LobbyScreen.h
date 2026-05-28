@@ -61,6 +61,7 @@ protected:
 	UUI_ListItemBase* CreateLevelButton(int32 InLevelID, int32 InSavedLevelID, const FText& InDisplayName);
 
 	// 打开职业选择界面
+	UFUNCTION()
 	void OnSwitchClassClicked();
 
 	// 关卡按钮点击响应

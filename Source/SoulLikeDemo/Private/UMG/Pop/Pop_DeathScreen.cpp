@@ -7,6 +7,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "SoulLikeGameGlobal.h"
 
+UPop_DeathScreen::UPop_DeathScreen(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	bIsFocusable = true;
+}
+
 /************************************************************************/
 /*                               继承实现                               */
 /************************************************************************/

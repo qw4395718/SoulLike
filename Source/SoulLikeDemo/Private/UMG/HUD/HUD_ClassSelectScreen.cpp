@@ -22,6 +22,7 @@ UHUD_ClassSelectScreen::UHUD_ClassSelectScreen(const FObjectInitializer& ObjectI
 	, m_selectedClassID(1001)
 	, m_lastSelectedButton(nullptr)
 {
+	bIsFocusable = true;
 }
 
 /************************************************************************/
@@ -31,14 +32,6 @@ UHUD_ClassSelectScreen::UHUD_ClassSelectScreen(const FObjectInitializer& ObjectI
 void UHUD_ClassSelectScreen::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-}
-
-void UHUD_ClassSelectScreen::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	// 设置输入模式
-	SetUIInputMode();
 
 	// 绑定关闭按钮
 	if (m_closeButton)
@@ -51,6 +44,14 @@ void UHUD_ClassSelectScreen::NativeConstruct()
 	{
 		m_confirmButton->OnClicked.AddDynamic(this, &UHUD_ClassSelectScreen::OnConfirmClicked);
 	}
+}
+
+void UHUD_ClassSelectScreen::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	// 设置输入模式
+	SetUIInputMode();
 
 	// 初始化界面
 	InitializeSelectScreen();

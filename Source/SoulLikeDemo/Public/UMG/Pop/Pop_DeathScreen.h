@@ -25,6 +25,8 @@ class SOULLIKEDEMO_API UPop_DeathScreen : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UPop_DeathScreen(const FObjectInitializer& ObjectInitializer);
+
 	/************************************************************************/
 	/*                               继承实现                               */
 	/************************************************************************/

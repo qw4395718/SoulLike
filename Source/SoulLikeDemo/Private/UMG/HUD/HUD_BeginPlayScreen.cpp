@@ -11,6 +11,7 @@
 UHUD_BeginPlayScreen::UHUD_BeginPlayScreen(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
+    bIsFocusable = true;
 }
 
 void UHUD_BeginPlayScreen::NativeOnInitialized()

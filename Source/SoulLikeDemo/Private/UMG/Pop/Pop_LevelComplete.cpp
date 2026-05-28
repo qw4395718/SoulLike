@@ -7,6 +7,12 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
+UPop_LevelComplete::UPop_LevelComplete(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	bIsFocusable = true;
+}
+
 /************************************************************************/
 /*                               继承实现                               */
 /************************************************************************/

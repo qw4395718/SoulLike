@@ -27,6 +27,8 @@ class SOULLIKEDEMO_API UPop_LevelComplete : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UPop_LevelComplete(const FObjectInitializer& ObjectInitializer);
+
 	/************************************************************************/
 	/*                               继承实现                               */
 	/************************************************************************/

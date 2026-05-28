@@ -355,6 +355,46 @@ java.lang.UnsupportedClassVersionError: com/android/sdklib/tool/sdkmanager/SdkMa
 
 ---
 
+### ❌ 坑7：META-INF 文件冲突（Entry name collided）
+
+**现象**：
+```
+Entry name 'META-INF/android.arch.lifecycle_extensions.version' collided
+```
+打包中断，报资源合并冲突。
+
+**原因**：
+Android 打包时，Gradle/AAPT2 将多个 AAR/JAR 依赖解包并合并资源。不同依赖包（如不同版本的 Android Architecture Components）可能各自携带同名的 `META-INF` 文件。当版本不一致或同一依赖被多次引入时，AAPT2 检测到同名文件内容不一致，即报 collided。
+
+UE4 将预处理过的安卓依赖缓存到 `Intermediate\Android` 目录。以下情况下该缓存会"过期"或产生冲突：
+
+- 更新了插件（如联网/广告/社交插件引入了新版 AndroidX 依赖）
+- 切换了 Git 分支，导致插件或依赖配置变更
+- UE4 引擎或 SDK 在两次打包之间产生了不一致的缓存残留
+- 旧的 `META-INF` 文件未被清理，与新下载的依赖版本不匹配
+
+**解决**：
+
+**方法一（最直接，已验证有效）**：
+
+1. 关闭 UE4 编辑器
+2. 删除 `Intermediate\Android` 目录（整个删）
+3. 重新打开 UE4 编辑器，再次打包
+
+UE4 检测到缓存不存在后会重新下载并展开所有安卓依赖，此时所有 `META-INF` 文件来自同一套配置，不会冲突。
+
+**方法二（根治）**：
+
+如果该问题频繁出现，需检查项目依赖中是否存在重复的 AndroidX / Support 生命周期库引用：
+
+- 检查 `Build/Android/` 下的 Gradle 配置文件（如 `AppDeveloperConfig.xml`、`ProjectBuildBeforeGradle.xml`）
+- 逐一排查插件目录下是否有 `.AAR` 或 `.JAR` 文件引入了 `android.arch.lifecycle`（旧版）和 `androidx.lifecycle`（新版）两套组件
+- 如果某个插件已迁移到 AndroidX，移除旧版 `android.arch.*` 的依赖引用
+
+> **建议**：开发迭代阶段，清 `Intermediate\Android` 是最省力的手段。上线打包前若仍有冲突，再用方法二根治。
+
+---
+
 ## 环境变量速查表
 
 | 变量名 | 值 |

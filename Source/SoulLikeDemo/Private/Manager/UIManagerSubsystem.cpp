@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include <Components/WidgetComponent.h>
 #include <HUD_PawnStatusBarInScreen.h>
+#include "SL_UserWidgetBase.h"
 
 void UUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -189,6 +190,9 @@ void UUIManagerSubsystem::OpenWidget(const FUICreateParams& CreateParam)
 	}
 }
 
+/************************************************************************/
+/* 打开屏幕Widget（保留原始接口，支持自动ZOrder（ZOrder < 0 时从Layer计算））                */
+/************************************************************************/
 void UUIManagerSubsystem::OpenScreenWidget(EWidgetType WidgetType, int32 ZOrder)
 {
 	TSubclassOf<UUserWidget> WidgetClass = GetWidgetClassForPlatform(WidgetType);
@@ -213,10 +217,45 @@ void UUIManagerSubsystem::OpenScreenWidget(EWidgetType WidgetType, int32 ZOrder)
 			UUserWidget* Widget = CreateWidget<UUserWidget>(GetWorld(), WidgetClass);
 			if (Widget)
 			{
+				// 设置USL_UserWidgetBase基类属性
+				if (USL_UserWidgetBase* BaseWidget = Cast<USL_UserWidgetBase>(Widget))
+				{
+					BaseWidget->SetWidgetType(WidgetType);
+					BaseWidget->SetUILayer(UILayerUtils::GetLayerForWidgetType(WidgetType));
+				}
+
+				// 计算ZOrder：负数视为自动，从Layer计算
+				int32 FinalZOrder = ZOrder;
+				if (FinalZOrder < 0)
+				{
+					FinalZOrder = CalculateZOrderForWidget(WidgetType);
+				}
+
 				// 添加到视口（ZOrder越大越靠前）
-				Widget->AddToViewport(ZOrder);
+				Widget->AddToViewport(FinalZOrder);
 				// 记录信息
 				ActiveWidgets.Add(WidgetType, Widget);
+
+				// 自动管理InputMode
+				ApplyInputModeForWidget(Widget, WidgetType);
+
+				// 导航栈管理
+				if (ShouldPushToNavigation(WidgetType, Widget))
+				{
+					FUINavigationEntry Entry;
+					Entry.WidgetType = WidgetType;
+					Entry.Widget = Widget;
+					Entry.EnteredTime = FPlatformTime::Seconds();
+					NavigationStack.Push(Entry);
+
+					// 触发导航事件
+					if (USL_UserWidgetBase* BaseWidget = Cast<USL_UserWidgetBase>(Widget))
+					{
+						FUINavigationContext Context;
+						Context.TargetType = WidgetType;
+						BaseWidget->OnNavigatedTo(Context);
+					}
+				}
 			}
 		}
 	}
@@ -277,17 +316,55 @@ void UUIManagerSubsystem::CloseWidget(const FUICreateParams& CloseParam)
 	}
 }
 
+/************************************************************************/
+/* 关闭屏幕Widget（新增：自动恢复InputMode + 导航事件）                                   */
+/************************************************************************/
 void UUIManagerSubsystem::CloseScreenWidget(EWidgetType WidgetType)
 {
-	if (ActiveWidgets.Contains(WidgetType))
+	UUserWidget* Widget = ActiveWidgets.FindRef(WidgetType);
+
+	if (Widget)
 	{
-		if (UUserWidget* Widget = ActiveWidgets.FindRef(WidgetType))
+		// 通知导航离开
+		if (USL_UserWidgetBase* BaseWidget = Cast<USL_UserWidgetBase>(Widget))
 		{
-			Widget->RemoveFromParent();
+			FUINavigationContext Context;
+			Context.SourceType = WidgetType;
+			BaseWidget->OnNavigatedFrom(Context);
 		}
-		ActiveWidgets.Remove(WidgetType);
+
+		Widget->RemoveFromParent();
 	}
-	PopWidget(WidgetType);
+	else
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("UUIManagerSubsystem::CloseScreenWidget - Widget %d not open"),
+			static_cast<int32>(WidgetType));
+	}
+
+	ActiveWidgets.Remove(WidgetType);
+
+	// 从导航栈中移除
+	RemoveFromNavigationStack(WidgetType);
+
+	// 恢复InputMode
+	RestorePreviousInputMode();
+
+	// 触发新栈顶的恢复事件
+	if (NavigationStack.Num() > 0)
+	{
+		FUINavigationEntry& TopEntry = NavigationStack.Top();
+		if (UUserWidget* TopWidget = TopEntry.Widget.Get())
+		{
+			if (USL_UserWidgetBase* BaseWidget = Cast<USL_UserWidgetBase>(TopWidget))
+			{
+				FUINavigationContext Context;
+				Context.bIsBackNavigation = true;
+				Context.TargetType = TopEntry.WidgetType;
+				Context.Payload = TopEntry.Payload;
+				BaseWidget->OnNavigatedBack(Context);
+			}
+		}
+	}
 }
 
 
@@ -338,7 +415,10 @@ void UUIManagerSubsystem::CloseAllWidgets()
 	}
 	ActiveWorldWidgets.Reset();
 
-	WidgetStack.Reset();
+	// 清理栈
+	InputModeStack.Reset();
+	NavigationStack.Reset();
+	FocusedWidgetName = EWidgetType::EWIDGET_None;
 }
 
 void UUIManagerSubsystem::SetWidgetVisible(EWidgetType WidgetType)
@@ -372,39 +452,371 @@ bool UUIManagerSubsystem::IsWorldWidget(EWidgetType WidgetType) const
 	else{return false;}
 }
 
+/************************************************************************/
+/* 页面栈管理（旧接口，委托给导航系统）                                                  */
+/************************************************************************/
 void UUIManagerSubsystem::PushWidget(EWidgetType WidgetType)
 {
-	if(WidgetStack.Find(WidgetType) != INDEX_NONE)
-	{
-		PopWidget(WidgetType);
-	}
-	else
-	{
-		WidgetStack.Add(WidgetType);
-	}
-
+	NavigateTo(WidgetType);
 }
 
 void UUIManagerSubsystem::PopWidget(EWidgetType WidgetType)
 {
-	int findIndex = WidgetStack.Find(WidgetType);
-	int stackNum = WidgetStack.Num();
-	if( findIndex != INDEX_NONE)
-	{
-		WidgetStack.RemoveAt(findIndex,stackNum);
-	}
+	// 旧语义：如果在栈中就移除（不关闭Widget），现在委托给NavigateBack
+	RemoveFromNavigationStack(WidgetType);
 }
 
+/************************************************************************/
+/* 焦点管理                                                                     */
+/************************************************************************/
 void UUIManagerSubsystem::SetFocusToWidget(EWidgetType WidgetType)
 {
+	if (!ActiveWidgets.Contains(WidgetType))
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("UUIManagerSubsystem::SetFocusToWidget - Widget %d not open"),
+			static_cast<int32>(WidgetType));
+		return;
+	}
+
+	UUserWidget* Widget = ActiveWidgets.FindRef(WidgetType);
+	if (!Widget) return;
+
+	APlayerController* PC = GetPlayerController();
+	if (!PC) return;
+
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(Widget->TakeWidget());
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	PC->SetInputMode(InputMode);
+	PC->bShowMouseCursor = true;
+	PC->bEnableClickEvents = true;
+	PC->bEnableMouseOverEvents = true;
+
+	FocusedWidgetName = WidgetType;
 }
 
 FName UUIManagerSubsystem::GetFocusedWidgetName() const
 {
-    return FName();
+	return StaticEnum<EWidgetType>()->GetNameByValue(static_cast<int64>(FocusedWidgetName));
 }
 
 void UUIManagerSubsystem::UpdateHealthUI(float NewHealth)
 {
 	
+}
+
+/************************************************************************/
+/* 导航系统                                                                     */
+/************************************************************************/
+void UUIManagerSubsystem::NavigateTo(EWidgetType WidgetType,
+	const FUINavigationPayload& InPayload, EUINavigationMode InMode)
+{
+	switch (InMode)
+	{
+	case EUINavigationMode::ReplaceTop:
+	{
+		// 关闭当前栈顶，打开目标页面替换之（栈深度不变）
+		if (NavigationStack.Num() > 0)
+		{
+			FUINavigationEntry CurrentTop = NavigationStack.Top();
+			NavigationStack.Pop();
+
+			if (UUserWidget* Widget = CurrentTop.Widget.Get())
+			{
+				if (USL_UserWidgetBase* BaseWidget = Cast<USL_UserWidgetBase>(Widget))
+				{
+					FUINavigationContext Ctx;
+					Ctx.SourceType = CurrentTop.WidgetType;
+					Ctx.bIsBackNavigation = false;
+					BaseWidget->OnNavigatedFrom(Ctx);
+				}
+				Widget->RemoveFromParent();
+				ActiveWidgets.Remove(CurrentTop.WidgetType);
+			}
+			RestorePreviousInputMode();
+		}
+		OpenScreenWidget(WidgetType, -1);
+		break;
+	}
+	case EUINavigationMode::ClearStack:
+	{
+		// 从栈顶到栈底逐个关闭所有导航页面，清空栈
+		while (NavigationStack.Num() > 0)
+		{
+			FUINavigationEntry Entry = NavigationStack.Top();
+			NavigationStack.Pop();
+
+			if (UUserWidget* Widget = Entry.Widget.Get())
+			{
+				if (USL_UserWidgetBase* BaseWidget = Cast<USL_UserWidgetBase>(Widget))
+				{
+					FUINavigationContext Ctx;
+					Ctx.SourceType = Entry.WidgetType;
+					Ctx.bIsBackNavigation = true;
+					BaseWidget->OnNavigatedFrom(Ctx);
+				}
+				Widget->RemoveFromParent();
+				ActiveWidgets.Remove(Entry.WidgetType);
+			}
+			RestorePreviousInputMode();
+		}
+		InputModeStack.Reset(); // 清空InputMode栈，新页面从干净状态开始
+		OpenScreenWidget(WidgetType, -1); // 新页面作为根
+		break;
+	}
+	default: // Push
+	{
+		OpenScreenWidget(WidgetType, -1);
+		break;
+	}
+	}
+
+	// 更新载荷（三种模式共用）
+	if (!InPayload.IsEmpty() && NavigationStack.Num() > 0)
+	{
+		NavigationStack.Last().Payload = InPayload;
+	}
+}
+
+void UUIManagerSubsystem::NavigateBack(int32 InStep)
+{
+	if (NavigationStack.Num() <= 1)
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("UUIManagerSubsystem::NavigateBack - Nothing to pop (stack size %d)"),
+			NavigationStack.Num());
+		return;
+	}
+
+	const int32 StepsToPop = FMath::Min(InStep, NavigationStack.Num() - 1);
+	for (int32 i = 0; i < StepsToPop; ++i)
+	{
+		FUINavigationEntry Entry = NavigationStack.Top();
+		NavigationStack.Pop();
+
+		if (UUserWidget* Widget = Entry.Widget.Get())
+		{
+			// 通知导航离开
+			if (USL_UserWidgetBase* BaseWidget = Cast<USL_UserWidgetBase>(Widget))
+			{
+				FUINavigationContext Context;
+				Context.SourceType = Entry.WidgetType;
+				Context.bIsBackNavigation = true;
+				BaseWidget->OnNavigatedFrom(Context);
+			}
+
+			Widget->RemoveFromParent();
+			ActiveWidgets.Remove(Entry.WidgetType);
+		}
+
+		// 恢复InputMode
+		RestorePreviousInputMode();
+	}
+
+	// 通知新栈顶恢复
+	if (NavigationStack.Num() > 0)
+	{
+		FUINavigationEntry& NewTop = NavigationStack.Top();
+		if (UUserWidget* Widget = NewTop.Widget.Get())
+		{
+			if (USL_UserWidgetBase* BaseWidget = Cast<USL_UserWidgetBase>(Widget))
+			{
+				FUINavigationContext Context;
+				Context.bIsBackNavigation = true;
+				Context.TargetType = NewTop.WidgetType;
+				Context.Payload = NewTop.Payload;
+				BaseWidget->OnNavigatedBack(Context);
+			}
+		}
+	}
+}
+
+int32 UUIManagerSubsystem::GetNavigationStackSize() const
+{
+	return NavigationStack.Num();
+}
+
+EWidgetType UUIManagerSubsystem::GetTopNavigationWidgetType() const
+{
+	if (NavigationStack.Num() > 0)
+	{
+		return NavigationStack.Top().WidgetType;
+	}
+	return EWidgetType::EWIDGET_None;
+}
+
+/************************************************************************/
+/* 内部辅助：获取PlayerController                                                  */
+/************************************************************************/
+APlayerController* UUIManagerSubsystem::GetPlayerController() const
+{
+	UWorld* World = GetWorld();
+	if (!World) return nullptr;
+	return World->GetFirstPlayerController();
+}
+
+/************************************************************************/
+/* 内部辅助：计算自动ZOrder                                                         */
+/************************************************************************/
+int32 UUIManagerSubsystem::CalculateZOrderForWidget(EWidgetType WidgetType) const
+{
+	const int32 BaseZ = UILayerUtils::GetBaseZOrderForWidget(WidgetType);
+	const EUILayer Layer = UILayerUtils::GetLayerForWidgetType(WidgetType);
+
+	// 统计同一层级已打开的Widget数量
+	int32 LayerCount = 0;
+	for (const auto& Pair : ActiveWidgets)
+	{
+		if (UILayerUtils::GetLayerForWidgetType(Pair.Key) == Layer)
+		{
+			++LayerCount;
+		}
+	}
+	return BaseZ + LayerCount;
+}
+
+/************************************************************************/
+/* 内部辅助：判断是否应入导航栈                                                       */
+/************************************************************************/
+bool UUIManagerSubsystem::ShouldPushToNavigation(EWidgetType WidgetType, UUserWidget* InWidget) const
+{
+	if (USL_UserWidgetBase* BaseWidget = Cast<USL_UserWidgetBase>(InWidget))
+	{
+		return BaseWidget->IsNavigationPage();
+	}
+	// 未继承基类的Widget，根据层级判断（>= Popup 的页面才入栈）
+	return UILayerUtils::GetLayerForWidgetType(WidgetType) >= EUILayer::Popup;
+}
+
+/************************************************************************/
+/* 内部辅助：从导航栈中移除                                                           */
+/************************************************************************/
+void UUIManagerSubsystem::RemoveFromNavigationStack(EWidgetType WidgetType)
+{
+	for (int32 i = NavigationStack.Num() - 1; i >= 0; --i)
+	{
+		if (NavigationStack[i].WidgetType == WidgetType)
+		{
+			NavigationStack.RemoveAt(i);
+			break;
+		}
+	}
+}
+
+/************************************************************************/
+/* 内部辅助：应用InputMode                                                            */
+/************************************************************************/
+void UUIManagerSubsystem::ApplyInputModeForWidget(UUserWidget* InWidget, EWidgetType InWidgetType)
+{
+	APlayerController* PC = GetPlayerController();
+	if (!PC || !InWidget) return;
+
+	// 获取该Widget的InputMode需求
+	EUIInputModeRequirement Req;
+	if (USL_UserWidgetBase* BaseWidget = Cast<USL_UserWidgetBase>(InWidget))
+	{
+		Req = BaseWidget->GetResolvedInputModeRequirement();
+	}
+	else
+	{
+		Req = UILayerUtils::GetLayerConfig(
+			UILayerUtils::GetLayerForWidgetType(InWidgetType)).DefaultInputMode;
+	}
+
+	// Inherit / GameOnly 不需要改变输入模式
+	if (Req == EUIInputModeRequirement::Inherit || Req == EUIInputModeRequirement::GameOnly)
+		return;
+
+	// 保存当前状态
+	FUISavedInputState SavedState;
+	SavedState.bShowMouseCursor = PC->bShowMouseCursor ? 1 : 0;
+	SavedState.bEnableClickEvents = PC->bEnableClickEvents ? 1 : 0;
+	SavedState.bEnableMouseOverEvents = PC->bEnableMouseOverEvents ? 1 : 0;
+	if (!PC->bShowMouseCursor)
+		SavedState.ModeType = 0;
+	else if (PC->bEnableClickEvents)
+		SavedState.ModeType = 1;
+	else
+		SavedState.ModeType = 2;
+
+	InputModeStack.Push(SavedState);
+
+	// 设置新InputMode
+	switch (Req)
+	{
+	case EUIInputModeRequirement::GameAndUI:
+	{
+		FInputModeGameAndUI InputMode;
+		InputMode.SetWidgetToFocus(InWidget->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		InputMode.SetHideCursorDuringCapture(false);
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = true;
+		PC->bEnableClickEvents = true;
+		PC->bEnableMouseOverEvents = true;
+		break;
+	}
+	case EUIInputModeRequirement::UIOnly:
+	{
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(InWidget->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = true;
+		PC->bEnableClickEvents = true;
+		PC->bEnableMouseOverEvents = true;
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+/************************************************************************/
+/* 内部辅助：恢复前一个InputMode                                                        */
+/************************************************************************/
+void UUIManagerSubsystem::RestorePreviousInputMode()
+{
+	APlayerController* PC = GetPlayerController();
+	if (!PC) return;
+
+	if (InputModeStack.Num() > 0)
+	{
+		FUISavedInputState SavedState = InputModeStack.Pop();
+		PC->bShowMouseCursor = SavedState.bShowMouseCursor != 0;
+		PC->bEnableClickEvents = SavedState.bEnableClickEvents != 0;
+		PC->bEnableMouseOverEvents = SavedState.bEnableMouseOverEvents != 0;
+
+		switch (SavedState.ModeType)
+		{
+		case 0: // GameOnly
+			PC->SetInputMode(FInputModeGameOnly());
+			break;
+		case 1: // GameAndUI
+		{
+			FInputModeGameAndUI InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			InputMode.SetHideCursorDuringCapture(false);
+			PC->SetInputMode(InputMode);
+			break;
+		}
+		case 2: // UIOnly
+		{
+			FInputModeUIOnly InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			PC->SetInputMode(InputMode);
+			break;
+		}
+		default:
+			PC->SetInputMode(FInputModeGameOnly());
+			break;
+		}
+	}
+	else
+	{
+		// 栈空 → 恢复默认GameOnly
+		PC->SetInputMode(FInputModeGameOnly());
+		PC->bShowMouseCursor = false;
+		PC->bEnableClickEvents = false;
+		PC->bEnableMouseOverEvents = false;
+	}
 }

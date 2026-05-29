@@ -49,7 +49,8 @@ public:
 	void SetItemEnabled(bool bInEnabled);
 
 	// 设置选中状态
-	void SetSelected(bool bInSelected);
+	UFUNCTION(BlueprintNativeEvent)
+		void SetSelected(bool bInSelected);
 
 	// 点击回调委托（父级绑定）
 	FOnListItemClickedSignature OnItemClicked;

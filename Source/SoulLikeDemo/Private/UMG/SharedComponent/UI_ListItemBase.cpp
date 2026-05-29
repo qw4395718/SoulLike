@@ -62,7 +62,7 @@ void UUI_ListItemBase::SetItemEnabled(bool bInEnabled)
 	}
 }
 
-void UUI_ListItemBase::SetSelected(bool bInSelected)
+void UUI_ListItemBase::SetSelected_Implementation(bool bInSelected)
 {
 	m_bSelected = bInSelected;
 	// 选中态视觉由蓝图扩展

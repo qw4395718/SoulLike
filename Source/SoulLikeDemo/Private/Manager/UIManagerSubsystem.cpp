@@ -347,8 +347,9 @@ void UUIManagerSubsystem::CloseScreenWidget(EWidgetType WidgetType)
 	// 从导航栈中移除
 	RemoveFromNavigationStack(WidgetType);
 
-	// 恢复InputMode
-	RestorePreviousInputMode();
+	// 移除该Widget的InputMode条目 + 应用栈顶
+	RemoveFromInputModeStack(WidgetType);
+	ApplyCurrentInputMode();
 
 	// 触发新栈顶的恢复事件
 	if (NavigationStack.Num() > 0)
@@ -398,18 +399,25 @@ void UUIManagerSubsystem::CloseWorldWidgetWithActor(const FUICreateParams& Close
 
 void UUIManagerSubsystem::CloseAllWidgets()
 {
-	for (auto& Pair : ActiveWidgets)
+	// 先拷贝出所有Widget指针，避免迭代中容器被修改
+	TArray<UUserWidget*> AllWidgets;
+	ActiveWidgets.GenerateValueArray(AllWidgets);
+
+	for (UUserWidget* Widget : AllWidgets)
 	{
-		if (UUserWidget* Widget = Pair.Value)
+		if (Widget)
 		{
 			Widget->RemoveFromParent();
 		}
 	}
 	ActiveWidgets.Reset();
 
-	for (auto& Pair : ActiveWorldWidgets)
+	TArray<UUserWidget*> AllWorldWidgets;
+	ActiveWorldWidgets.GenerateValueArray(AllWorldWidgets);
+
+	for (UUserWidget* Widget : AllWorldWidgets)
 	{
-		if (UUserWidget* Widget = Pair.Value)
+		if (Widget)
 		{
 			Widget->RemoveFromParent();
 		}
@@ -451,21 +459,6 @@ bool UUIManagerSubsystem::IsWorldWidget(EWidgetType WidgetType) const
 		return true;
 	}
 	else{return false;}
-}
-
-/************************************************************************/
-/* 页面栈管理（旧接口，委托给导航系统）                                                  */
-/************************************************************************/
-void UUIManagerSubsystem::PushWidget(EWidgetType WidgetType)
-{
-	FUINavigationPayload navPayLoad;
-	NavigateTo(WidgetType, navPayLoad);
-}
-
-void UUIManagerSubsystem::PopWidget(EWidgetType WidgetType)
-{
-	// 旧语义：如果在栈中就移除（不关闭Widget），现在委托给NavigateBack
-	RemoveFromNavigationStack(WidgetType);
 }
 
 /************************************************************************/
@@ -534,7 +527,7 @@ void UUIManagerSubsystem::NavigateTo(EWidgetType WidgetType, const FUINavigation
 				Widget->RemoveFromParent();
 				ActiveWidgets.Remove(CurrentTop.WidgetType);
 			}
-			RestorePreviousInputMode();
+			RemoveFromInputModeStack(CurrentTop.WidgetType);
 		}
 		OpenScreenWidget(WidgetType, -1);
 		break;
@@ -559,7 +552,6 @@ void UUIManagerSubsystem::NavigateTo(EWidgetType WidgetType, const FUINavigation
 				Widget->RemoveFromParent();
 				ActiveWidgets.Remove(Entry.WidgetType);
 			}
-			RestorePreviousInputMode();
 		}
 		InputModeStack.Reset(); // 清空InputMode栈，新页面从干净状态开始
 		OpenScreenWidget(WidgetType, -1); // 新页面作为根
@@ -610,10 +602,12 @@ void UUIManagerSubsystem::NavigateBack(int32 InStep)
 			ActiveWidgets.Remove(Entry.WidgetType);
 		}
 
-		// 恢复InputMode
-		RestorePreviousInputMode();
+		// 移除该Widget的InputMode条目
+		RemoveFromInputModeStack(Entry.WidgetType);
 	}
 
+	// 应用当前栈顶的InputMode
+	ApplyCurrentInputMode();
 	// 通知新栈顶恢复
 	if (NavigationStack.Num() > 0)
 	{
@@ -738,6 +732,7 @@ void UUIManagerSubsystem::ApplyInputModeForWidget(UUserWidget* InWidget, EWidget
 	else
 		SavedState.ModeType = 2;
 
+	SavedState.SourceWidgetType = InWidgetType;
 	InputModeStack.Push(SavedState);
 
 	// 设置新InputMode
@@ -772,51 +767,68 @@ void UUIManagerSubsystem::ApplyInputModeForWidget(UUserWidget* InWidget, EWidget
 }
 
 /************************************************************************/
-/* 内部辅助：恢复前一个InputMode                                                        */
+/* 内部辅助：按WidgetType移除InputMode条目                                              */
 /************************************************************************/
-void UUIManagerSubsystem::RestorePreviousInputMode()
+void UUIManagerSubsystem::RemoveFromInputModeStack(EWidgetType InWidgetType)
 {
 	APlayerController* PC = GetPlayerController();
 	if (!PC) return;
 
-	if (InputModeStack.Num() > 0)
+	for (int32 i = InputModeStack.Num() - 1; i >= 0; --i)
 	{
-		FUISavedInputState SavedState = InputModeStack.Pop();
-		PC->bShowMouseCursor = SavedState.bShowMouseCursor != 0;
-		PC->bEnableClickEvents = SavedState.bEnableClickEvents != 0;
-		PC->bEnableMouseOverEvents = SavedState.bEnableMouseOverEvents != 0;
-
-		switch (SavedState.ModeType)
+		if (InputModeStack[i].SourceWidgetType == InWidgetType)
 		{
-		case 0: // GameOnly
-			PC->SetInputMode(FInputModeGameOnly());
-			break;
-		case 1: // GameAndUI
-		{
-			FInputModeGameAndUI InputMode;
-			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			InputMode.SetHideCursorDuringCapture(false);
-			PC->SetInputMode(InputMode);
-			break;
-		}
-		case 2: // UIOnly
-		{
-			FInputModeUIOnly InputMode;
-			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			PC->SetInputMode(InputMode);
-			break;
-		}
-		default:
-			PC->SetInputMode(FInputModeGameOnly());
-			break;
+			InputModeStack.RemoveAt(i);
+			return;
 		}
 	}
-	else
+}
+
+/************************************************************************/
+/* 内部辅助：应用当前栈顶的InputMode或默认值                                            */
+/************************************************************************/
+void UUIManagerSubsystem::ApplyCurrentInputMode()
+{
+	APlayerController* PC = GetPlayerController();
+	if (!PC) return;
+
+	if (InputModeStack.Num() == 0)
 	{
 		// 栈空 → 恢复默认GameOnly
 		PC->SetInputMode(FInputModeGameOnly());
 		PC->bShowMouseCursor = false;
 		PC->bEnableClickEvents = false;
 		PC->bEnableMouseOverEvents = false;
+		return;
+	}
+
+	FUISavedInputState SavedState = InputModeStack.Top();
+	PC->bShowMouseCursor = SavedState.bShowMouseCursor != 0;
+	PC->bEnableClickEvents = SavedState.bEnableClickEvents != 0;
+	PC->bEnableMouseOverEvents = SavedState.bEnableMouseOverEvents != 0;
+
+	switch (SavedState.ModeType)
+	{
+	case 0: // GameOnly
+		PC->SetInputMode(FInputModeGameOnly());
+		break;
+	case 1: // GameAndUI
+	{
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		InputMode.SetHideCursorDuringCapture(false);
+		PC->SetInputMode(InputMode);
+		break;
+	}
+	case 2: // UIOnly
+	{
+		FInputModeUIOnly InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PC->SetInputMode(InputMode);
+		break;
+	}
+	default:
+		PC->SetInputMode(FInputModeGameOnly());
+		break;
 	}
 }

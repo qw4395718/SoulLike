@@ -159,13 +159,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI Manager")
 	bool IsWorldWidget(EWidgetType WidgetType) const;
 
-    // 页面栈管理（旧接口，委托给导航系统）
-    UFUNCTION(BlueprintCallable, Category = "UI Manager")
-    void PushWidget(EWidgetType WidgetType);
-
-    UFUNCTION(BlueprintCallable, Category = "UI Manager")
-    void PopWidget(EWidgetType WidgetType);
-
     // 焦点管理
     UFUNCTION(BlueprintCallable, Category = "UI Manager")
     void SetFocusToWidget(EWidgetType WidgetType);
@@ -234,6 +227,7 @@ private:
 		uint8 bEnableClickEvents : 1;
 		uint8 bEnableMouseOverEvents : 1;
 		uint8 ModeType : 2; // 0=GameOnly 1=GameAndUI 2=UIOnly
+		EWidgetType SourceWidgetType = EWidgetType::EWIDGET_None;
 	};
 
 	// InputMode栈（嵌套UI正确恢复）
@@ -245,7 +239,8 @@ private:
 	// 内部辅助方法
 	APlayerController* GetPlayerController() const;
 	void ApplyInputModeForWidget(UUserWidget* InWidget, EWidgetType InWidgetType);
-	void RestorePreviousInputMode();
+	void RemoveFromInputModeStack(EWidgetType InWidgetType);
+	void ApplyCurrentInputMode();
 	int32 CalculateZOrderForWidget(EWidgetType WidgetType) const;
 	bool ShouldPushToNavigation(EWidgetType WidgetType, UUserWidget* InWidget) const;
 	void RemoveFromNavigationStack(EWidgetType WidgetType);

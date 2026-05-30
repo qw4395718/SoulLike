@@ -65,10 +65,6 @@ protected:
 	// 关闭界面
 	void CloseScreen();
 
-	// 输入模式
-	void SetUIInputMode();
-	void SetGameInputMode();
-
 	// 按钮点击回调
 	UFUNCTION()
 	void OnClassButtonClicked(int32 InClassID);

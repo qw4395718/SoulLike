@@ -42,8 +42,6 @@ void UPop_DeathScreen::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// 设置 UI Only 输入模式，禁用玩家输入
-	SetUIInputMode();
 
 	UE_LOG(LogTemp, Log, TEXT("Pop_DeathScreen::NativeConstruct - Death screen displayed"));
 }
@@ -71,9 +69,6 @@ void UPop_DeathScreen::OnRetryClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("Pop_DeathScreen::OnRetryClicked - Retry level"));
 
-	// 1. 恢复 Game Only 输入模式（RetryLevel 会重新初始化角色）
-	SetGameInputMode();
-
 	// 2. 获取 LevelManager 执行重新挑战
 	ALevelManager* LevelMgr = Cast<ALevelManager>(
 		UGameplayStatics::GetActorOfClass(GetWorld(), ALevelManager::StaticClass()));
@@ -95,9 +90,6 @@ void UPop_DeathScreen::OnLobbyClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("Pop_DeathScreen::OnLobbyClicked - Go to lobby"));
 
-	// 1. 恢复 Game Only 输入模式
-	SetGameInputMode();
-
 	// 2. 关闭所有界面，打开 LobbyScreen
 	// TODO: 后续大厅地图实现后，改为 UGameplayStatics::OpenLevel(GetWorld(), "LobbyMap");
 	UIManager = UUIManagerSubsystem::Get(this);
@@ -118,32 +110,4 @@ void UPop_DeathScreen::OnQuitClicked()
 		GetOwningPlayer(),
 		EQuitPreference::Quit,
 		false);
-}
-
-/************************************************************************/
-/*                               输入模式                               */
-/************************************************************************/
-
-// 内部调用：设置 UI Only 输入模式
-void UPop_DeathScreen::SetUIInputMode()
-{
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(TakeWidget());
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		PC->SetInputMode(InputMode);
-		PC->bShowMouseCursor = true;
-	}
-}
-
-// 内部调用：恢复 Game Only 输入模式
-void UPop_DeathScreen::SetGameInputMode()
-{
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		FInputModeGameOnly InputMode;
-		PC->SetInputMode(InputMode);
-		PC->bShowMouseCursor = false;
-	}
 }

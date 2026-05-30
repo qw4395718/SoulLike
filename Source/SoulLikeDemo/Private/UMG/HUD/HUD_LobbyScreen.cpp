@@ -45,18 +45,12 @@ void UHUD_LobbyScreen::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// 设置输入模式：只显示UI，阻止玩家输入
-	SetUIInputMode();
-
 	InitializeLobby();
 }
 
 
 void UHUD_LobbyScreen::NativeDestruct()
 {
-	// 先恢复输入模式
-	SetGameInputMode();
-
 	// 通知 UIManager 关闭（更新 ActiveWidgets 状态）
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)
@@ -288,38 +282,5 @@ void UHUD_LobbyScreen::OnLevelClicked(int32 InLevelID)
 	if (UIManager)
 	{
 		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_LobbyScreen);
-	}
-}
-
-/************************************************************************/
-/*                               输入模式                                */
-/************************************************************************/
-
-void UHUD_LobbyScreen::SetUIInputMode()
-{
-	if (APlayerController* PlayerController = GetOwningPlayer())
-	{
-		// UE4.26: 设置输入模式为UI Only
-		// 只显示鼠标，不处理游戏输入
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(TakeWidget());
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		PlayerController->SetInputMode(InputMode);
-
-		// 显示鼠标光标
-		PlayerController->bShowMouseCursor = true;
-	}
-}
-
-void UHUD_LobbyScreen::SetGameInputMode()
-{
-	if (APlayerController* PlayerController = GetOwningPlayer())
-	{
-		// UE4.26: 恢复为游戏输入模式
-		FInputModeGameOnly InputMode;
-		PlayerController->SetInputMode(InputMode);
-
-		// 隐藏鼠标光标
-		PlayerController->bShowMouseCursor = false;
 	}
 }

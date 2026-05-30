@@ -339,6 +339,7 @@ void UUIManagerSubsystem::CloseScreenWidget(EWidgetType WidgetType)
 	{
 		UE_LOG(LogTemp, Verbose, TEXT("UUIManagerSubsystem::CloseScreenWidget - Widget %d not open"),
 			static_cast<int32>(WidgetType));
+		return;
 	}
 
 	ActiveWidgets.Remove(WidgetType);
@@ -457,7 +458,8 @@ bool UUIManagerSubsystem::IsWorldWidget(EWidgetType WidgetType) const
 /************************************************************************/
 void UUIManagerSubsystem::PushWidget(EWidgetType WidgetType)
 {
-	NavigateTo(WidgetType);
+	FUINavigationPayload navPayLoad;
+	NavigateTo(WidgetType, navPayLoad);
 }
 
 void UUIManagerSubsystem::PopWidget(EWidgetType WidgetType)
@@ -508,8 +510,7 @@ void UUIManagerSubsystem::UpdateHealthUI(float NewHealth)
 /************************************************************************/
 /* 导航系统                                                                     */
 /************************************************************************/
-void UUIManagerSubsystem::NavigateTo(EWidgetType WidgetType,
-	const FUINavigationPayload& InPayload, EUINavigationMode InMode)
+void UUIManagerSubsystem::NavigateTo(EWidgetType WidgetType, const FUINavigationPayload& InPayload, EUINavigationMode InMode /*= EUINavigationMode::Push*/)
 {
 	switch (InMode)
 	{
@@ -572,7 +573,8 @@ void UUIManagerSubsystem::NavigateTo(EWidgetType WidgetType,
 	}
 
 	// 更新载荷（三种模式共用）
-	if (!InPayload.IsEmpty() && NavigationStack.Num() > 0)
+	if (!InPayload.IsEmpty() &&
+		NavigationStack.Num() > 0)
 	{
 		NavigationStack.Last().Payload = InPayload;
 	}
@@ -722,19 +724,17 @@ void UUIManagerSubsystem::ApplyInputModeForWidget(UUserWidget* InWidget, EWidget
 			UILayerUtils::GetLayerForWidgetType(InWidgetType)).DefaultInputMode;
 	}
 
-	// Inherit / GameOnly 不需要改变输入模式
-	if (Req == EUIInputModeRequirement::Inherit || Req == EUIInputModeRequirement::GameOnly)
-		return;
-
 	// 保存当前状态
 	FUISavedInputState SavedState;
-	SavedState.bShowMouseCursor = PC->bShowMouseCursor ? 1 : 0;
-	SavedState.bEnableClickEvents = PC->bEnableClickEvents ? 1 : 0;
-	SavedState.bEnableMouseOverEvents = PC->bEnableMouseOverEvents ? 1 : 0;
-	if (!PC->bShowMouseCursor)
+	SavedState.bShowMouseCursor = Req != EUIInputModeRequirement::GameOnly ? 1 : 0;
+	SavedState.bEnableClickEvents = Req != EUIInputModeRequirement::GameOnly ? 1 : 0;
+	SavedState.bEnableMouseOverEvents = Req != EUIInputModeRequirement::GameOnly ? 1 : 0;
+	if (Req == EUIInputModeRequirement::GameOnly)
 		SavedState.ModeType = 0;
-	else if (PC->bEnableClickEvents)
+	else if (Req == EUIInputModeRequirement::GameAndUI)
 		SavedState.ModeType = 1;
+	else if (Req == EUIInputModeRequirement::UIOnly)
+		SavedState.ModeType = 2;
 	else
 		SavedState.ModeType = 2;
 

@@ -50,18 +50,12 @@ void UHUD_ClassSelectScreen::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// 设置输入模式
-	SetUIInputMode();
-
 	// 初始化界面
 	InitializeSelectScreen();
 }
 
 void UHUD_ClassSelectScreen::NativeDestruct()
 {
-	// 恢复输入模式
-	SetGameInputMode();
-
 	// 通知 UIManager
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)
@@ -350,31 +344,5 @@ void UHUD_ClassSelectScreen::CloseScreen()
 	if (UIManager)
 	{
 		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_ClassSelectScreen);
-	}
-}
-
-/************************************************************************/
-/* 输入模式                                                                     */
-/************************************************************************/
-
-void UHUD_ClassSelectScreen::SetUIInputMode()
-{
-	if (APlayerController* PlayerController = GetOwningPlayer())
-	{
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(TakeWidget());
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		PlayerController->SetInputMode(InputMode);
-		PlayerController->bShowMouseCursor = true;
-	}
-}
-
-void UHUD_ClassSelectScreen::SetGameInputMode()
-{
-	if (APlayerController* PlayerController = GetOwningPlayer())
-	{
-		FInputModeGameOnly InputMode;
-		PlayerController->SetInputMode(InputMode);
-		PlayerController->bShowMouseCursor = false;
 	}
 }

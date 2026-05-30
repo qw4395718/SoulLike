@@ -68,9 +68,5 @@ protected:
     UButton* QuitGameButton;
 
 private:
-    /** 设置输入模式（只显示UI，不处理玩家输入） */
-    void SetUIInputMode();
 
-    /** 恢复输入模式（让玩家可以操作角色） */
-    void SetGameInputMode();
 };

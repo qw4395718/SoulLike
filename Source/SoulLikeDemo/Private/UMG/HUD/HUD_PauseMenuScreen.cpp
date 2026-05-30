@@ -54,9 +54,6 @@ void UHUD_PauseMenuScreen::NativeConstruct()
 		PC->SetPause(true);
 	}
 
-	// 设置 UI Only 输入模式
-	SetUIInputMode();
-
 	UE_LOG(LogTemp, Log, TEXT("UHUD_PauseMenuScreen::NativeConstruct - Pause menu opened"));
 }
 
@@ -67,9 +64,6 @@ void UHUD_PauseMenuScreen::NativeDestruct()
 	{
 		PC->SetPause(false);
 	}
-
-	// 恢复游戏输入模式
-	SetGameInputMode();
 
 	// 通知 UIManager 关闭（更新 ActiveWidgets 状态）
 	UIManager = UUIManagerSubsystem::Get(this);
@@ -170,34 +164,4 @@ void UHUD_PauseMenuScreen::OnMainMenuClicked()
 void UHUD_PauseMenuScreen::OnQuitClicked()
 {
 	UKismetSystemLibrary::QuitGame(GetWorld(), GetOwningPlayer(), EQuitPreference::Quit, false);
-}
-
-/************************************************************************/
-/* 输入模式                                                                     */
-/************************************************************************/
-
-void UHUD_PauseMenuScreen::SetUIInputMode()
-{
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(TakeWidget());
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		PC->SetInputMode(InputMode);
-
-		PC->bShowMouseCursor = true;
-	}
-	return;
-}
-
-void UHUD_PauseMenuScreen::SetGameInputMode()
-{
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		FInputModeGameOnly InputMode;
-		PC->SetInputMode(InputMode);
-
-		PC->bShowMouseCursor = false;
-	}
-	return;
 }

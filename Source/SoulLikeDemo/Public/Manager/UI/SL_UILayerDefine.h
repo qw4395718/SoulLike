@@ -76,12 +76,12 @@ namespace UILayerUtils
 			break;
 		case EUILayer::Overlay:
 			Config.BaseZOrder = 100;
-			Config.DefaultInputMode = EUIInputModeRequirement::GameAndUI;
+			Config.DefaultInputMode = EUIInputModeRequirement::UIOnly;
 			Config.bBlockUnderlying = false;
 			break;
 		case EUILayer::Popup:
 			Config.BaseZOrder = 150;
-			Config.DefaultInputMode = EUIInputModeRequirement::GameAndUI;
+			Config.DefaultInputMode = EUIInputModeRequirement::UIOnly;
 			Config.bBlockUnderlying = true;
 			break;
 		case EUILayer::Modal:
@@ -111,10 +111,8 @@ namespace UILayerUtils
 
 		case EWidgetType::EWIDGET_PlayerStatus:
 		case EWidgetType::EWIDGET_BossStatus:
-			return EUILayer::HUD;
-
 		case EWidgetType::EWIDGET_ItemUseUI:
-			return EUILayer::Overlay;
+			return EUILayer::HUD;
 
 		case EWidgetType::EWIDGET_InterActPanel:
 		case EWidgetType::EWIDGET_NPCDialog:
@@ -144,4 +142,5 @@ namespace UILayerUtils
 	{
 		return GetLayerConfig(GetLayerForWidgetType(InType)).BaseZOrder;
 	}
+
 }

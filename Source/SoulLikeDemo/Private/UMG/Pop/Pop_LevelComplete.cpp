@@ -42,9 +42,6 @@ void UPop_LevelComplete::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// 设置 UI Only 输入模式，禁用玩家输入
-	SetUIInputMode();
-
 	// 根据下一关是否存在更新按钮状态
 	UpdateButtonStates();
 
@@ -104,9 +101,6 @@ void UPop_LevelComplete::OnNextLevelClicked()
 		return;
 	}
 
-	// 1. 恢复 Game Only 输入模式
-	SetGameInputMode();
-
 	// 2. 启动下一关
 	LevelMgr->GoToNextLevel();
 
@@ -122,9 +116,6 @@ void UPop_LevelComplete::OnNextLevelClicked()
 void UPop_LevelComplete::OnLobbyClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("Pop_LevelComplete::OnLobbyClicked - Go to lobby"));
-
-	// 1. 恢复 Game Only 输入模式
-	SetGameInputMode();
 
 	// 2. 关闭所有界面，打开 LobbyScreen
 	UIManager = UUIManagerSubsystem::Get(this);
@@ -153,30 +144,3 @@ void UPop_LevelComplete::OnQuitClicked()
 		false);
 }
 
-/************************************************************************/
-/*                               输入模式                               */
-/************************************************************************/
-
-// 内部调用：设置 UI Only 输入模式
-void UPop_LevelComplete::SetUIInputMode()
-{
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(TakeWidget());
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		PC->SetInputMode(InputMode);
-		PC->bShowMouseCursor = true;
-	}
-}
-
-// 内部调用：恢复 Game Only 输入模式
-void UPop_LevelComplete::SetGameInputMode()
-{
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		FInputModeGameOnly InputMode;
-		PC->SetInputMode(InputMode);
-		PC->bShowMouseCursor = false;
-	}
-}

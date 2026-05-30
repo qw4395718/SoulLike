@@ -180,7 +180,7 @@ public:
 	// InMode: Push(压栈), ReplaceTop(替换栈顶), ClearStack(清空栈后压入)
 	UFUNCTION(BlueprintCallable, Category = "UI|Navigation")
 	void NavigateTo(EWidgetType WidgetType,
-		const FUINavigationPayload& InPayload = FUINavigationPayload(),
+		const FUINavigationPayload& InPayload,
 		EUINavigationMode InMode = EUINavigationMode::Push);
 
 	// 返回上一页 / 上N页

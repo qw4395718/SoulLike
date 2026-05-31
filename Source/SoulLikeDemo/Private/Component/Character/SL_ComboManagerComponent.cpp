@@ -7,6 +7,9 @@
 #include <GameplayTagContainer.h>
 #include "DataTableManager.h"
 #include "ComboInfoTable.h"
+#include <WeaponAccessory_IF.h>
+#include <SL_WeaponBase.h>
+#include <SL_WeaponAnimSet.h>
 #include <AT/AbilityTask_ComboMontage.h>
 #include <SL_StaminaComponent.h>
 
@@ -32,6 +35,48 @@ void USL_ComboManagerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 }
 
 /************************************************************************/
+/*                              武器连招表查询                                  */
+/************************************************************************/
+
+UComboInfoTable* USL_ComboManagerComponent::GetCurrentWeaponComboTable() const
+{
+	AActor* Owner = GetOwner();
+	if (!Owner) return nullptr;
+
+	IWeaponAccessory_IF* WeaponAccessory = Cast<IWeaponAccessory_IF>(Owner);
+	if (!WeaponAccessory) return nullptr;
+
+	ASL_WeaponBase* Weapon = WeaponAccessory->GetRightHandWeapon();
+	if (!Weapon) return nullptr;
+
+	USL_WeaponAnimSet* AnimSet = Weapon->GetWeaponAnimSet();
+	if (!AnimSet) return nullptr;
+
+	if (AnimSet->ComboInfoTable.IsNull()) return nullptr;
+	return Cast<UComboInfoTable>(AnimSet->ComboInfoTable.LoadSynchronous());
+}
+
+UAnimMontage* USL_ComboManagerComponent::ResolveCurrentMontage() const
+{
+	if (!CurrentComboInfo.OutputMontageTag.IsValid())
+		return nullptr;
+
+	AActor* Owner = GetOwner();
+	if (!Owner) return nullptr;
+
+	IWeaponAccessory_IF* WeaponAccessory = Cast<IWeaponAccessory_IF>(Owner);
+	if (!WeaponAccessory) return nullptr;
+
+	ASL_WeaponBase* Weapon = WeaponAccessory->GetRightHandWeapon();
+	if (!Weapon) return nullptr;
+
+	USL_WeaponAnimSet* AnimSet = Weapon->GetWeaponAnimSet();
+	if (!AnimSet) return nullptr;
+
+	return AnimSet->GetComboMontageByTag(CurrentComboInfo.OutputMontageTag);
+}
+
+/************************************************************************/
 /*                              外部调用                                        */
 /************************************************************************/
 
@@ -42,109 +87,113 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 	if (UAbilitySystemComponent* ASC = GetCachedASC())
 	{
 		ASC->GetOwnedGameplayTags(currentTags);
-		if (UDataTableManager* tableManager = UDataTableManager::Get(this))
+
+		// === 优先查武器专属连招表，降级到全局默认表 ===
+		UComboInfoTable* comboInfoTable = GetCurrentWeaponComboTable();
+		if (!comboInfoTable)
 		{
-			if (UComboInfoTable* comboInfoTable = Cast<UComboInfoTable>(tableManager->GetDataTable(EDataTableType::DT_ComboInfo)))
+			if (UDataTableManager* tableManager = UDataTableManager::Get(this))
 			{
-				// 检查是否有任何 State.Window.* Tag 存在
-				const FGameplayTag ComboWindowRoot = FGameplayTag::RequestGameplayTag(TEXT("State.Window"));
-				bool bInComboWindow = currentTags.HasTag(ComboWindowRoot);
+				comboInfoTable = Cast<UComboInfoTable>(tableManager->GetDataTable(EDataTableType::DT_ComboInfo));
+			}
+		}
 
-				FComboInfo FoundComboInfo;
-				bool bFound = false;
+		if (comboInfoTable)
+		{
+			// 检查是否有任何 State.Window.* Tag 存在
+			const FGameplayTag ComboWindowRoot = FGameplayTag::RequestGameplayTag(TEXT("State.Window"));
+			bool bInComboWindow = currentTags.HasTag(ComboWindowRoot);
 
-				if (bInComboWindow)
-				{
-					bFound = comboInfoTable->FindNextComboInfo(currentTags, InputType, FoundComboInfo);
-				}
-				else
-				{
-					// 没有正在执行的 TASK，执行初始连段
-					FGameplayTagContainer firstAttackTags;
-					firstAttackTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("State.Window.None")));
-					bFound = comboInfoTable->FindNextComboInfo(firstAttackTags, InputType, FoundComboInfo);
-				}
+			FComboInfo FoundComboInfo;
+			bool bFound = false;
 
-				if (bFound)
+			if (bInComboWindow)
+			{
+				bFound = comboInfoTable->FindNextComboInfo(currentTags, InputType, FoundComboInfo);
+			}
+			else
+			{
+				// 没有正在执行的 TASK，执行初始连段
+				FGameplayTagContainer firstAttackTags;
+				firstAttackTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("State.Window.None")));
+				bFound = comboInfoTable->FindNextComboInfo(firstAttackTags, InputType, FoundComboInfo);
+			}
+
+			if (bFound)
+			{
+				// ===== 按执行类型分流 =====
+				switch (FoundComboInfo.ExecuteType)
 				{
-					// ===== 按执行类型分流 =====
-					switch (FoundComboInfo.ExecuteType)
+				case EComboExecuteType::Instant:
+				{
+					// 体力检查
+					if (CachedStaminaComp.IsValid() && !CachedStaminaComp->CanAffordCost(FoundComboInfo.StaminaCost))
 					{
-					case EComboExecuteType::Instant:
-					{
-						// 体力检查
-						if (CachedStaminaComp.IsValid() && !CachedStaminaComp->CanAffordCost(FoundComboInfo.StaminaCost))
-						{
-							UE_LOG(LogTemp, Verbose, TEXT("Stamina: 体力不足"));
-							return;
-						}
-
-						if (bInComboWindow)
-						{
-							nextComboInfo = FoundComboInfo;
-							UAbilityTask_ComboMontage* ComboTask = ActiveComboTask.Get();
-							if (ComboTask && IsValid(ComboTask))
-							{
-								EComboInputHandledResult AcceptType = ComboTask->OnInputReceived(InputType);
-								if (AcceptType == EComboInputHandledResult::Accepted)
-								{
-									ComboTask->OnInterrupted.RemoveAll(this);
-									ComboTask->OnInterrupted.AddUniqueDynamic(this, &USL_ComboManagerComponent::OnMontageBlendOut);
-								}
-								else if (AcceptType == EComboInputHandledResult::AcceptedAndBlended)
-								{
-									OnMontageBlendOut();
-								}
-							}
-						}
-						else
-						{
-							// 初始连段
-							CurrentComboInfo = FoundComboInfo;
-							ASC->TryActivateAbilityByClass(FoundComboInfo.NextAbilityClass);
-
-							if (USL_StaminaComponent* StaminaComp = GetCachedStaminaComp())
-							{
-								StaminaComp->OnComboStarted();
-								StaminaComp->ConsumeStamina(FoundComboInfo.StaminaCost);
-							}
-						}
-						break;
+						UE_LOG(LogTemp, Verbose, TEXT("Stamina: 体力不足"));
+						return;
 					}
 
-					case EComboExecuteType::Charge:
+					if (bInComboWindow)
 					{
-						// 蓄力型：不立即执行，进入蓄力流程
-						if (bInComboWindow)
+						nextComboInfo = FoundComboInfo;
+						UAbilityTask_ComboMontage* ComboTask = ActiveComboTask.Get();
+						if (ComboTask && IsValid(ComboTask))
 						{
-							// 连招窗口中的蓄力：传递给当前 Task 做蒙太奇衔接
-							nextComboInfo = FoundComboInfo;
-							UAbilityTask_ComboMontage* ComboTask = ActiveComboTask.Get();
-							if (ComboTask && IsValid(ComboTask))
+							EComboInputHandledResult AcceptType = ComboTask->OnInputReceived(InputType);
+							if (AcceptType == EComboInputHandledResult::Accepted)
 							{
 								ComboTask->OnInterrupted.RemoveAll(this);
 								ComboTask->OnInterrupted.AddUniqueDynamic(this, &USL_ComboManagerComponent::OnMontageBlendOut);
 							}
+							else if (AcceptType == EComboInputHandledResult::AcceptedAndBlended)
+							{
+								OnMontageBlendOut();
+							}
 						}
-						else
-						{
-							// 初始蓄力
-							StartCharge(InputType, FoundComboInfo);
-						}
-						break;
 					}
-
-					case EComboExecuteType::Channel:
+					else
 					{
-						// 持续型：直接激活 ability（Ability 内部管理持续逻辑）
+						// 初始连段
 						CurrentComboInfo = FoundComboInfo;
 						ASC->TryActivateAbilityByClass(FoundComboInfo.NextAbilityClass);
-						break;
-					}
 
-					default:
-						break;
+						if (USL_StaminaComponent* StaminaComp = GetCachedStaminaComp())
+						{
+							StaminaComp->OnComboStarted();
+							StaminaComp->ConsumeStamina(FoundComboInfo.StaminaCost);
+						}
 					}
+					break;
+				}
+
+				case EComboExecuteType::Charge:
+				{
+					if (bInComboWindow)
+					{
+						nextComboInfo = FoundComboInfo;
+						UAbilityTask_ComboMontage* ComboTask = ActiveComboTask.Get();
+						if (ComboTask && IsValid(ComboTask))
+						{
+							ComboTask->OnInterrupted.RemoveAll(this);
+							ComboTask->OnInterrupted.AddUniqueDynamic(this, &USL_ComboManagerComponent::OnMontageBlendOut);
+						}
+					}
+					else
+					{
+						StartCharge(InputType, FoundComboInfo);
+					}
+					break;
+				}
+
+				case EComboExecuteType::Channel:
+				{
+					CurrentComboInfo = FoundComboInfo;
+					ASC->TryActivateAbilityByClass(FoundComboInfo.NextAbilityClass);
+					break;
+				}
+
+				default:
+					break;
 				}
 			}
 		}
@@ -273,11 +322,14 @@ void USL_ComboManagerComponent::ReleaseCharge()
 		? FGameplayTag::RequestGameplayTag(TEXT("State.Charge.Full"))
 		: FGameplayTag::RequestGameplayTag(TEXT("State.Charge.Partial"));
 
-	// 查表找到对应的释放 ability
-	UComboInfoTable* ComboTable = nullptr;
-	if (UDataTableManager* tableManager = UDataTableManager::Get(this))
+	// === 查武器专属连招表找释放 ability ===
+	UComboInfoTable* ComboTable = GetCurrentWeaponComboTable();
+	if (!ComboTable)
 	{
-		ComboTable = Cast<UComboInfoTable>(tableManager->GetDataTable(EDataTableType::DT_ComboInfo));
+		if (UDataTableManager* tableManager = UDataTableManager::Get(this))
+		{
+			ComboTable = Cast<UComboInfoTable>(tableManager->GetDataTable(EDataTableType::DT_ComboInfo));
+		}
 	}
 
 	FComboInfo ReleaseInfo;

@@ -9,6 +9,7 @@
 #include "DataTableManager.h"
 #include "WeaponDataTable.h"
 #include <SL_CharacterBase.h>
+#include <SL_WeaponAnimSet.h>
 #include <AbilitySystemInterface.h>
 #include <AbilitySystemComponent.h>
 #include <ActorState_IF.h>
@@ -470,4 +471,12 @@ void ASL_WeaponBase::ApplyParryToOverlappingActors()
 			//}
 		}
 	}
+}
+
+// ==================== WeaponAnimSet ====================
+
+USL_WeaponAnimSet* ASL_WeaponBase::GetWeaponAnimSet() const
+{
+	if (WeaponData.WeaponAnimSet.IsNull()) return nullptr;
+	return WeaponData.WeaponAnimSet.LoadSynchronous();
 }

@@ -15,6 +15,7 @@ class USL_ComboManagerComponent;
 class USL_StaminaComponent;
 class ASL_CharacterBase;
 class UGameplayEffect;
+class USL_WeaponAnimSet;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponHitDelegate, AActor*, TargetActor, const FHitResult&, HitResult, const FWeaponDataInfo&, WeaponData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponParryDelegate, AActor*, TargetActor);
@@ -30,32 +31,25 @@ public:
 	virtual void SetOwner(AActor* NewOwner) override;
 
 	// ===== 初始化接口 =====
-	/** 根据武器ID初始化武器 */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void InitializeWeaponWithID(int32 InWeaponID, FName InSocketName);
 
-	/** 直接从数据行初始化（用于测试/动态武器） */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void InitializeFromDataRow(const FWeaponDataInfo& InWeaponData);
 
 	// ===== 碰撞控制 =====
-	/** 开启攻击碰撞检测 */
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Collision")
 		void EnableAttackCollision();
 
-	/** 关闭攻击碰撞检测 */
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Collision")
 		void DisableAttackCollision();
 
-	/** 开启弹反窗口 */
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Parry")
 		void EnableParryWindow(float Duration);
 
-	/** 关闭弹反窗口 */
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Parry")
 		void DisableParryWindow();
 
-	/** 是否在弹反窗口内 */
 	UFUNCTION(BlueprintPure, Category = "Weapon|Parry")
 		bool IsParryWindowActive() const { return bIsParryWindowActive; }
 
@@ -72,14 +66,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapon|Stamina")
 		float GetStaminaCostMultiplier() const { return WeaponData.StaminaCostMultiplier; }
 
+	// 获取武器动画数据集
+	UFUNCTION(BlueprintPure, Category = "Weapon|Animation")
+		class USL_WeaponAnimSet* GetWeaponAnimSet() const;
 
 public:
 	// ===== 委托 =====
-	/** 武器命中目标时广播 */
 	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
 		FOnWeaponHitDelegate OnWeaponHitDelegate;
 
-	/** 武器弹反成功时广播 */
 	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
 		FOnWeaponParryDelegate OnWeaponParryDelegate;
 
@@ -95,29 +90,21 @@ protected:
 		void OnCollisionOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	/** 定时器回调：对重叠的Actor应用伤害 */
 	void ApplyDamageToOverlappingActors();
 
-	// 计算伤害
 	float CalculateFinalDamage(AActor* InTargetActor) const;
 
-	/** 定时器回调：对重叠的Actor应用弹反 */
 	void ApplyParryToOverlappingActors();
 
 	// ===== 辅助方法 =====
-	/** 初始化资源（网格体、音效、特效） */
 	void LoadWeaponAssets();
 
-	// 设置动画蓝图
 	void SetupAnimClass();
 
-	// 设置旋转
 	void SetupRotator();
 
-	// 设置偏移
 	void SetupOffset();
 
-	/** 设置碰撞盒大小 */
 	void SetupCollisionBox();
 
 protected:
@@ -132,54 +119,41 @@ protected:
 		UStaticMeshComponent* StaticWeaponMesh;
 
 	// ===== 数据 =====
-	/** 当前武器配置数据 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Data")
 		FWeaponDataInfo WeaponData;
 
-	// 伤害EffectClass 通过SetByCaller确定修改值
 	UPROPERTY(EditDefaultsOnly, Category = "Damage|Config")
 		TSubclassOf<UGameplayEffect> DamageEffectClass;
 
-	/** 持有者角色 */
 	UPROPERTY()
 		class ACharacter* OwningCharacter;
 
 	// ===== 状态 =====
-	/** 弹反窗口是否激活 */
 	bool bIsParryWindowActive;
 
-	/** 是否使用静态网格体 */
 	bool bIsStaticMesh;
 
 	// ===== 碰撞系统 =====
-	/** 攻击碰撞定时器 */
 	FTimerHandle DamageTimerHandle;
 
-	/** 弹反碰撞定时器 */
 	FTimerHandle ParryTimerHandle;
 
-	/** 攻击重叠Actor列表 */
 	UPROPERTY()
 		TArray<AActor*> AttackOverlappingActors;
 
-	/** 弹反重叠Actor列表 */
 	UPROPERTY()
 		TArray<AActor*> ParryOverlappingActors;
 
-	/** 已命中的Actor列表（防止重复伤害） */
 	UPROPERTY()
 		TSet<AActor*> AlreadyHitActors;
 
-	/** 已弹反的Actor列表 */
 	UPROPERTY()
 		TSet<AActor*> AlreadyParryActors;
 
 	// ===== 配置 =====
-	/** 伤害检测间隔 需要<= 一帧 */
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Config")
 		float DamageInterval = 0.03f;
 
-	/** 弹反检测间隔 */
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Config")
 		float ParryInterval = 0.05f;
 

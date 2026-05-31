@@ -408,7 +408,10 @@ struct FComboInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cost")
 	float StaminaCost = 20.0f;
 
-	// 本次连击的伤害倍率
+	// 从 WeaponAnimSet 中查询蒙太奇用的标签
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	FGameplayTag OutputMontageTag;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	float DamageMultiplier = 1.0f;
 
@@ -549,6 +552,11 @@ struct FWeaponDataInfo : public FTableRowBase
 	// ===== 是否左手武器 =====
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 		bool bIsLeftHanded = false;
+
+	// ===== 动画配置 =====
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+		TSoftObjectPtr<class USL_WeaponAnimSet> WeaponAnimSet;
+
 };
 
 // ===== 快捷栏道具信息 =====

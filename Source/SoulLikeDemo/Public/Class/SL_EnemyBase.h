@@ -61,6 +61,8 @@ public:
 	/************************************************************************/
 	/*                    IActorState_IF 接口实现                        */
 	/************************************************************************/
+	virtual int32 GetTeamID() const override;
+	virtual void SetTeamID(int32 InTeamID) override;
 
 	virtual bool IsAlive() const override;
 	virtual bool IsDie() const override;
@@ -185,6 +187,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Equipment|Config")
 		TSubclassOf<ASL_WeaponBase> WeaponBaseClass;
 
+	// 所属队伍
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy")
+		int32 TeamID;
+	
 	    // ===== 新增：敌人持有的武器 =====
     /** 左手武器实例（在 ApplyEnemyConfig 中创建） */
     UPROPERTY()

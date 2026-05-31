@@ -199,6 +199,16 @@ void ASL_EnemyBase::RagDollStart()
 	}
 }
 
+int32 ASL_EnemyBase::GetTeamID() const
+{
+	return TeamID;
+}
+
+void ASL_EnemyBase::SetTeamID(int32 InTeamID)
+{
+	TeamID = InTeamID;
+}
+
 void ASL_EnemyBase::RagDollEnd()
 {
 	// 移除布娃娃系统,恢复正常的碰撞
@@ -316,6 +326,9 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
 			}
 		}
 	}
+
+	// 6.1 设置队伍归属
+	SetTeamID(Config.TeamID);
 
 	// 7. 绑定GAS死亡事件
 	BindGASDeathEvent();

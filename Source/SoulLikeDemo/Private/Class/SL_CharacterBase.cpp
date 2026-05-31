@@ -437,6 +437,9 @@ void ASL_CharacterBase::ApplyEnemyConfig(const FClassConfigInfo& Config)
 			// 注意：Stamina、Attack、Defense等需要额外配置GE
 		}
 	}
+	// 2. 设置队伍归属
+	SetTeamID(Config.TeamID);
+
 	if (EquipmentCmp)
 	{
 		EquipmentCmp->InitializeWithClassID(PlayerClassID);
@@ -585,6 +588,16 @@ void ASL_CharacterBase::Destroyed()
 
 }
 
+int32 ASL_CharacterBase::GetTeamID() const
+{
+	return TeamID;
+}
+
+void ASL_CharacterBase::SetTeamID(int32 InTeamID)
+{
+	TeamID = InTeamID;
+}
+
 FString ASL_CharacterBase::GetNetworkGUIDString(AActor* InActor)
 {
 	if(InActor == nullptr){return TEXT("InActor InValid"); }
@@ -654,7 +667,6 @@ ASL_WeaponBase* ASL_CharacterBase::GetWeaponByHand(int32 HandIndex) const
     }
     return EquipmentCmp->GetWeaponByHand(HandIndex);
 }
-
 
 
 

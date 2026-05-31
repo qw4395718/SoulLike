@@ -219,6 +219,15 @@ void ALevelManager::RetryLevel()
 	UE_LOG(LogTemp, Log, TEXT("LevelManager::RetryLevel - Level %d retry started"), CurrentLevelID);
 }
 
+void ALevelManager::CleanLevel()
+{
+	UWaveManagerSystem* WaveManagerSystem = GetWorld()->GetSubsystem<UWaveManagerSystem>();
+	if (WaveManagerSystem)
+	{
+		WaveManagerSystem->ResetLevel();
+	}
+}
+
 /************************************************************************/
 /*                              下一关                                  */
 /************************************************************************/

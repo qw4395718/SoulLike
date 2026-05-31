@@ -26,4 +26,8 @@ public:
 	virtual bool IsAlive() const = 0;
 	virtual bool IsDie() const = 0;
 	virtual void Destroyed() = 0;
+
+	// 队伍归属
+	virtual int32 GetTeamID() const = 0;
+	virtual void SetTeamID(int32 InTeamID) = 0;
 };

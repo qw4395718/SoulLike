@@ -90,13 +90,21 @@ void UPop_DeathScreen::OnLobbyClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("Pop_DeathScreen::OnLobbyClicked - Go to lobby"));
 
+	// 1. 清理关卡状态（销毁所有怪物 + 重置波次）
+	ALevelManager* LevelMgr = Cast<ALevelManager>(
+		UGameplayStatics::GetActorOfClass(GetWorld(), ALevelManager::StaticClass()));
+	if (LevelMgr)
+	{
+		LevelMgr->CleanLevel();
+	}
+
 	// 2. 关闭所有界面，打开 LobbyScreen
 	// TODO: 后续大厅地图实现后，改为 UGameplayStatics::OpenLevel(GetWorld(), "LobbyMap");
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)
 	{
 		UIManager->CloseAllWidgets();
-		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_LobbyScreen, 100);
+		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_LobbyScreen);
 	}
 }
 

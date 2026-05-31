@@ -114,6 +114,8 @@ public:
 	/************************************************************************/
 	/*                    IActorState_IF 接口实现                        */
 	/************************************************************************/
+	virtual int32 GetTeamID() const override;
+	virtual void SetTeamID(int32 InTeamID) override;
 
 	virtual bool IsAlive() const override;
 	virtual bool IsDie() const override;
@@ -247,6 +249,10 @@ protected:
 		FClassConfigInfo ClassConfig;
 
 	int32 PlayerClassID;
+
+	// 所属队伍
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+		int32 TeamID;
 
 	// 死亡委托的句柄
 	FDelegateHandle OnCharacterDiedHandle;

@@ -47,6 +47,9 @@ public:
 		void RetryLevel();
 
 	UFUNCTION(BlueprintCallable, Category = "Level")
+		void CleanLevel();
+
+	UFUNCTION(BlueprintCallable, Category = "Level")
 		void GoToNextLevel();
 
 	UFUNCTION(BlueprintCallable, Category = "Level")

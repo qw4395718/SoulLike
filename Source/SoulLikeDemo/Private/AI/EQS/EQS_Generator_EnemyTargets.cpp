@@ -19,7 +19,7 @@ void UEQS_Generator_EnemyTargets::GenerateItems(FEnvQueryInstance& QueryInstance
 {
 	// 获取搜索中心位置
 	TArray<FVector> CenterLocation;
-	CenterLocation.Add(FVector::ZeroVector);
+	//CenterLocation.Add(FVector::ZeroVector);
 	if (!QueryInstance.PrepareContext(SearchCenter, CenterLocation))
 	{
 		return;

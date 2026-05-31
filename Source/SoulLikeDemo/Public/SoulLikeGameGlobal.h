@@ -37,6 +37,11 @@ const int INVENTORYTYPE_NUM = 12;
 // 仓库单栏类型容纳数量
 const int INVENTORY_SINGLE_CAPACITY = 100;
 
+// 队伍常量
+const int32 TEAM_PLAYER  = 0;
+const int32 TEAM_ENEMY   = 1;
+const int32 TEAM_NEUTRAL = 2;
+
 // 减伤最大上限
 const float REDUCE_DAMAGE_PERCENTAGE = 0.9f;
 
@@ -624,6 +629,11 @@ struct FClassConfigInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 		FName TwoHandSocketName = TEXT("None");
 
+	// ===== 队伍配置 =====
+	/** 所属阵营 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		int32 TeamID = TEAM_PLAYER;
+
 	// ===== 道具配置 =====
 	/** 快捷栏道具列表（道具ID + 初始数量） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
@@ -764,6 +774,10 @@ struct FEnemyConfigInfo : public FTableRowBase
 	/** 攻击方式 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 		EEnemyAttackType AttackType;
+
+	/** 所属阵营 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		int32 TeamID = TEAM_ENEMY;
 
 	// ===== 属性配置 =====
 	/** 基础生命值 */

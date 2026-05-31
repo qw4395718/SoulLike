@@ -50,6 +50,9 @@ void UWaveManagerSystem::StartLevel(int32 LevelID)
 
 	UE_LOG(LogTemp, Log, TEXT("UWaveManagerSystem::StartLevel - Level=%d, TotalWaves=%d"), LevelID, TotalWaveCount);
 
+	// 重置关卡状态
+	ResetLevel();
+
 	// 开始第一波
 	CurrentWaveIndex = 0;
 	StartNextWave();

@@ -117,6 +117,14 @@ void UPop_LevelComplete::OnLobbyClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("Pop_LevelComplete::OnLobbyClicked - Go to lobby"));
 
+	// 1. 清理关卡状态（销毁所有怪物 + 重置波次）
+	ALevelManager* LevelMgr = Cast<ALevelManager>(
+		UGameplayStatics::GetActorOfClass(GetWorld(), ALevelManager::StaticClass()));
+	if (LevelMgr)
+	{
+		LevelMgr->CleanLevel();
+	}
+
 	// 2. 关闭所有界面，打开 LobbyScreen
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)
@@ -143,4 +151,3 @@ void UPop_LevelComplete::OnQuitClicked()
 		EQuitPreference::Quit,
 		false);
 }
-

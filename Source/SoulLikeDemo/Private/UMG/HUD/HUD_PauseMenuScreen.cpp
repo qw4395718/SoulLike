@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Manager/UIManagerSubsystem.h"
+#include <LevelManager.h>
 
 UHUD_PauseMenuScreen::UHUD_PauseMenuScreen(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -141,22 +142,39 @@ void UHUD_PauseMenuScreen::OnContinueClicked()
 
 void UHUD_PauseMenuScreen::OnLobbyClicked()
 {
-	// 通过 UIManager 打开大厅界面
+
+	// 1. 清理关卡状态（销毁所有怪物 + 重置波次）
+	ALevelManager* LevelMgr = Cast<ALevelManager>(
+		UGameplayStatics::GetActorOfClass(GetWorld(), ALevelManager::StaticClass()));
+	if (LevelMgr)
+	{
+		LevelMgr->CleanLevel();
+	}
+
+	// 2.通过 UIManager 打开大厅界面
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager != nullptr)
 	{
-		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_PauseMenu);
+		UIManager->CloseAllWidgets();
 		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_LobbyScreen);
 	}
 }
 
 void UHUD_PauseMenuScreen::OnMainMenuClicked()
 {
-	// 通过 UIManager 打开初始界面
+	// 1. 清理关卡状态（销毁所有怪物 + 重置波次）
+	ALevelManager* LevelMgr = Cast<ALevelManager>(
+		UGameplayStatics::GetActorOfClass(GetWorld(), ALevelManager::StaticClass()));
+	if (LevelMgr)
+	{
+		LevelMgr->CleanLevel();
+	}
+
+	// 2. 通过 UIManager 打开初始界面
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager != nullptr)
 	{
-		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_PauseMenu);
+		UIManager->CloseAllWidgets();
 		UIManager->OpenScreenWidget(EWidgetType::EWIDGET_BeginPlayScreen);
 	}
 }

@@ -11,6 +11,7 @@
 #include <SL_CharacterBase.h>
 #include <AbilitySystemInterface.h>
 #include <AbilitySystemComponent.h>
+#include <ActorState_IF.h>
 #include <SL_ComboManagerComponent.h>
 
 ASL_WeaponBase::ASL_WeaponBase()
@@ -345,11 +346,29 @@ void ASL_WeaponBase::ApplyDamageToOverlappingActors()
 	UE_LOG(LogTemp, Warning, TEXT("WeaponBase:ApplyDamageToOverlappingActors 1"))
 	// 此处需要考虑玩家死亡后从容器中移除了
 	TArray<AActor*> ActorsCopy = AttackOverlappingActors;
+
+	// === 获取攻击者的队伍ID（循环外取一次） ===
+	int32 AttackerTeamID = INDEX_NONE;
+	if (const IActorState_IF* AttackerState = Cast<IActorState_IF>(OwningCharacter))
+	{
+		AttackerTeamID = AttackerState->GetTeamID();
+	}
+
 	for (AActor* Actor : ActorsCopy)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("WeaponBase:ApplyDamageToOverlappingActors 2"))
 		if (!Actor || Actor == OwningCharacter || AlreadyHitActors.Contains(Actor))
 			continue;
+
+		// === 队伍检查：同一队伍不传递伤害 ===
+		if (AttackerTeamID != INDEX_NONE)
+		{
+			if (const IActorState_IF* TargetState = Cast<IActorState_IF>(Actor))
+			{
+				if (TargetState->GetTeamID() == AttackerTeamID)
+					continue;
+			}
+		}
 
 		UE_LOG(LogTemp, Warning, TEXT("WeaponBase:ApplyDamageToOverlappingActors 3"))
 		// 1. 检查目标是否具有GAS系统（新的SL_CharacterBase/SL_enemyBase）

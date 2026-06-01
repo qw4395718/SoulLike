@@ -151,7 +151,7 @@ void ALevelManager::OnWaveStarted(int32 WaveID)
 		UDataTableManager::Get(this)->GetDataTable(EDataTableType::DT_WaveConfigInfo));
 
 	FWaveConfigInfo WaveConfig;
-	if (WaveTable && WaveTable->GetWaveConfig(WaveID, WaveConfig))
+	if (WaveTable && WaveTable->GetWaveConfig(CurrentLevelID, WaveID, WaveConfig))
 	{
 		ShowWaveStartUI(WaveConfig);
 	}

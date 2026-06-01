@@ -33,7 +33,8 @@ bool UWaveConfigInfoTable::InitializeFromAsset(TSoftObjectPtr<UDataTable> TableA
 				continue;
 			}
 
-			WaveConfigMap.Add(WaveRow->WaveID, *WaveRow);
+			const int32 CompositeKey = WaveRow->LevelID * 10000 + WaveRow->WaveID;
+			WaveConfigMap.Add(CompositeKey, *WaveRow);
 
 			// 构建关卡索引
 			TArray<int32>& WaveIDs = LevelWaveIndex.FindOrAdd(WaveRow->LevelID);
@@ -72,7 +73,8 @@ bool UWaveConfigInfoTable::GetWavesForLevel(int32 LevelID, TArray<FWaveConfigInf
 
 	for (int32 WaveID : *WaveIDs)
 	{
-		if (const FWaveConfigInfo* Wave = WaveConfigMap.Find(WaveID))
+		const int32 CompositeKey = LevelID * 10000 + WaveID;
+		if (const FWaveConfigInfo* Wave = WaveConfigMap.Find(CompositeKey))
 		{
 			OutWaves.Add(*Wave);
 		}
@@ -81,9 +83,10 @@ bool UWaveConfigInfoTable::GetWavesForLevel(int32 LevelID, TArray<FWaveConfigInf
 	return OutWaves.Num() > 0;
 }
 
-bool UWaveConfigInfoTable::GetWaveConfig(int32 WaveID, FWaveConfigInfo& OutConfig) const
+bool UWaveConfigInfoTable::GetWaveConfig(int32 LevelID, int32 WaveID, FWaveConfigInfo& OutConfig) const
 {
-	if (const FWaveConfigInfo* Found = WaveConfigMap.Find(WaveID))
+	const int32 CompositeKey = LevelID * 10000 + WaveID;
+	if (const FWaveConfigInfo* Found = WaveConfigMap.Find(CompositeKey))
 	{
 		OutConfig = *Found;
 		return true;

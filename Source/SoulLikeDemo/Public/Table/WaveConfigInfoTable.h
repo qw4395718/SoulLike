@@ -23,7 +23,7 @@ public:
 
 	/** 根据波次ID获取波次配置 */
 	UFUNCTION(BlueprintPure, Category = "WaveConfig")
-		bool GetWaveConfig(int32 WaveID, FWaveConfigInfo& OutConfig) const;
+		bool GetWaveConfig(int32 LevelID, int32 WaveID, FWaveConfigInfo& OutConfig) const;
 
 	/** 获取指定关卡的波次数量 */
 	UFUNCTION(BlueprintPure, Category = "WaveConfig")

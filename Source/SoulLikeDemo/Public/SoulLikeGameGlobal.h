@@ -467,6 +467,7 @@ enum class EWeaponType : uint8
 	Shield		UMETA(DisplayName = "盾牌"),
 	Bow			UMETA(DisplayName = "弓"),
 	Staff		UMETA(DisplayName = "法杖"),
+	DualBlades	UMETA(DisplayName = "双剑"),
 	Max			UMETA(Hidden)
 };
 

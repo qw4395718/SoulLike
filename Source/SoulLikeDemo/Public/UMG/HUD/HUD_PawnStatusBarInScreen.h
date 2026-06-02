@@ -22,12 +22,23 @@ class SOULLIKEDEMO_API UHUD_PawnStatusBarInScreen : public UUserWidget,public IS
 	GENERATED_BODY()
 public:
 	UHUD_PawnStatusBarInScreen(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	
+	/************************************************************************/
+	/* 继承实现                                                                     */
+	/************************************************************************/
+	virtual void NativeOnInitialized() override;
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+	
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	// 绑定委托
 	UFUNCTION()
 	void BindGlobalDelegatesEvent();
+
+	UFUNCTION()
+	void UnbindGlobalDelegatesEvent();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
 		void SetProgressBarLimit(EPlayerStatusAttributeType AttributeType, float Min, float Max);

@@ -86,6 +86,14 @@ void UDataTableManager::RegisterDefaultTableClasses()
 	// 系统会自动使用UBaseDataTable作为默认类
 
 	RegisterTableClass(EDataTableType::DT_ComboInfo, UComboInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_ComboInfo_Sword, UComboInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_ComboInfo_Dagger, UComboInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_ComboInfo_Spear, UComboInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_ComboInfo_GreatSword, UComboInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_ComboInfo_Shield, UComboInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_ComboInfo_Bow, UComboInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_ComboInfo_Staff, UComboInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_ComboInfo_DualBlades, UComboInfoTable::StaticClass());
 	RegisterTableClass(EDataTableType::DT_WeaponDataInfo, UWeaponDataTable::StaticClass());
 	RegisterTableClass(EDataTableType::DT_ClassConfigInfo, UClassConfigInfoTable::StaticClass());
 	RegisterTableClass(EDataTableType::DT_WaveConfigInfo, UWaveConfigInfoTable::StaticClass());

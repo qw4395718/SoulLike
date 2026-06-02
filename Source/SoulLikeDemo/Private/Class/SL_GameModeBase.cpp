@@ -51,61 +51,29 @@ void ASL_GameModeBase::CreateLevelManager()
 /************************************************************************/
 /*                               关卡控制                                */
 /************************************************************************/
-
-void ASL_GameModeBase::StartCurrentLevel()
+void ASL_GameModeBase::StartTargetLevel(int32 InLevelID)
 {
-	if (!LevelManager) return;
+	RETURN_IF_TRUE(LevelManager == nullptr);
 
-	// 从存档读取或使用默认值
 	int32 PlayerClassID = 1001;
 	int32 LevelID = 1;
 
-	if (bUseSaveData)
+	// ===== 尝试从存档读取 =====
+	USL_GameSaveSubsystem* SaveSubsystem = USL_GameSaveSubsystem::Get(this);
+	if (SaveSubsystem)
 	{
-		// ===== 尝试从存档读取 =====
-		USL_GameSaveSubsystem* SaveSubsystem = USL_GameSaveSubsystem::Get(this);
-		if (SaveSubsystem)
+		bool bHasSave = SaveSubsystem->LoadGame(LevelID, PlayerClassID);
+		if (!bHasSave)
 		{
-			bool bHasSave = SaveSubsystem->LoadGame(LevelID, PlayerClassID);
-			if (bHasSave)
-			{
-				UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::StartCurrentLevel - Loaded from save: Level=%d, ClassID=%d"),
-					LevelID, PlayerClassID);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::StartCurrentLevel - No save data, using defaults"));
-				// 无存档时使用默认值（后续可跳转新游戏流程）
-				LevelID = 1;
-				PlayerClassID = 1001;
-			}
+			PlayerClassID = 1001;
 		}
-	}
-	else
-	{
-		// 不使用存档，使用默认值（新游戏）
-		LevelID = 1;
-		PlayerClassID = 1001;
-		UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::StartCurrentLevel - New game: Level=%d, ClassID=%d"),
-			LevelID, PlayerClassID);
 	}
 
 	// 初始化玩家装备
 	InitializePlayer(PlayerClassID);
 
 	// 开始关卡
-	LevelManager->StartLevel(LevelID, PlayerClassID);
-
-	UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::StartCurrentLevel - Level %d started"), LevelID);
-}
-
-void ASL_GameModeBase::StartTargetLevel(int32 InLevelID, int32 InPlayerClassID)
-{
-	// 初始化玩家装备
-	InitializePlayer(InPlayerClassID);
-
-	// 开始关卡
-	LevelManager->StartLevel(InLevelID, InPlayerClassID);
+	LevelManager->StartLevel(InLevelID, PlayerClassID);
 }
 
 void ASL_GameModeBase::RestartLevel()

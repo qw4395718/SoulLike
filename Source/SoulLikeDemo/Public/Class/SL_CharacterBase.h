@@ -190,6 +190,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	// ===== 属性值访问器 =====
+	UFUNCTION(BlueprintPure, Category = "Attributes")
+	float GetCurrentHealth() const;
+	UFUNCTION(BlueprintPure, Category = "Attributes")
+	float GetMaxHealth() const;
+	UFUNCTION(BlueprintPure, Category = "Attributes")
+	float GetCurrentStamina() const;
+	UFUNCTION(BlueprintPure, Category = "Attributes")
+	float GetMaxStamina() const;
+
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitCharacterWithClassID(int32 InPlayerClassID);
 

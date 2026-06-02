@@ -16,22 +16,38 @@ UHUD_PawnStatusBarInScreen::UHUD_PawnStatusBarInScreen(const FObjectInitializer&
 	
 }
 
+void UHUD_PawnStatusBarInScreen::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+}
+
+void UHUD_PawnStatusBarInScreen::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// 缁戝畾
+	BindGlobalDelegatesEvent();
+}
+
+void UHUD_PawnStatusBarInScreen::NativeDestruct()
+{
+	// 瑙ｇ粦
+	UnbindGlobalDelegatesEvent();
+	Super::NativeDestruct();
+}
+
 void UHUD_PawnStatusBarInScreen::BindGlobalDelegatesEvent()
 {
 	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
 	{
-		EPlayerStatusAttributeType targetAttributeType = EPlayerStatusAttributeType::EPlayerStatusAttribute_Health;
 
-		// 使用AddLambda替代AddDynamic
-		globalDelegatesManager->OnAttributeHealthChanged.AddLambda([this, targetAttributeType](AActor* TargetPlayer, float OldHealth, float NewHealth, float MinHealth, float MaxHealth)
-			{
-				// 检测是否为该目标
-				if (TargetPlayer && OwningPawn && TargetPlayer == OwningPawn)
-				{
-					SetProgressBarLimit(targetAttributeType, MinHealth, MaxHealth);
-					UpdateProgressInfo(targetAttributeType, OldHealth, NewHealth);
-				}
-			});
+	}
+}
+
+void UHUD_PawnStatusBarInScreen::UnbindGlobalDelegatesEvent()
+{
+	if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
+	{
+
 	}
 }
 

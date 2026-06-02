@@ -50,6 +50,21 @@ void UPop_LevelComplete::NativeConstruct()
 
 void UPop_LevelComplete::NativeDestruct()
 {
+	if (m_nextLevelButton)
+	{
+		m_nextLevelButton->OnClicked.RemoveDynamic(this, &UPop_LevelComplete::OnNextLevelClicked);
+	}
+
+	if (m_lobbyButton)
+	{
+		m_lobbyButton->OnClicked.RemoveDynamic(this, &UPop_LevelComplete::OnLobbyClicked);
+	}
+
+	if (m_quitButton)
+	{
+		m_quitButton->OnClicked.RemoveDynamic(this, &UPop_LevelComplete::OnQuitClicked);
+	}
+
 	// 通知 UIManager 关闭（更新 ActiveWidgets 状态）
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)

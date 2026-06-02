@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "SoulLikeGameGlobal.h"
+#include "DataTableConfig.h"
 #include "SL_WeaponAnimSet.generated.h"
 
 UCLASS(BlueprintType)
@@ -20,8 +21,9 @@ public:
     TMap<FGameplayTag, TSoftObjectPtr<UAnimMontage>> ComboMontages;
 
     // ===== 连招表 =====
+    /** 此武器使用的连招表类型，DT_ComboInfo 走全局默认 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combo")
-    TSoftObjectPtr<class UComboInfoTable> ComboInfoTable;
+    EDataTableType ComboTableType = EDataTableType::DT_ComboInfo;
 
     // ===== 待机姿态 =====
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pose")

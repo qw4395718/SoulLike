@@ -71,7 +71,7 @@ void USL_EquipmentComponent::InitializeWithConfig(const FClassConfigInfo& ClassC
 
 // ==================== 武器派生 ====================
 
-ASL_WeaponBase* USL_EquipmentComponent::SpawnWeaponByID(int32 WeaponID)
+ASL_WeaponBase* USL_EquipmentComponent::SpawnWeaponByID(int32 WeaponID, bool IsRightHand /*= true*/)
 {
 	if (!OwningCharacter || !GetWorld() || WeaponID <= 0) return nullptr;
 
@@ -93,18 +93,15 @@ ASL_WeaponBase* USL_EquipmentComponent::SpawnWeaponByID(int32 WeaponID)
 	{
 		// 初始化武器
 		FName SocketName;
-		if (CurrentClassConfig.LeftHandWeaponID != 0 && CurrentClassConfig.RightHandWeaponID != 0)
-		{
-			SocketName = CurrentClassConfig.TwoHandSocketName;
-		}
-		else if (CurrentClassConfig.LeftHandWeaponID != 0)
-		{
-			SocketName = CurrentClassConfig.LeftHandSocketName;
-		}
-		else
+		if (IsRightHand)
 		{
 			SocketName = CurrentClassConfig.RightHandSocketName;
 		}
+		else
+		{
+			SocketName = CurrentClassConfig.LeftHandSocketName;
+		}
+		
 		Weapon->InitializeWeaponWithID(WeaponID, SocketName);
 		Weapon->SetOwner(OwningCharacter);
 		Weapon->FinishSpawning(FTransform::Identity);
@@ -139,7 +136,7 @@ void USL_EquipmentComponent::EquipLeftHandWeapon(int32 WeaponID)
 	}
 
 	// 3. 派生新武器
-	CurrentLeftHandWeapon = SpawnWeaponByID(WeaponID);
+	CurrentLeftHandWeapon = SpawnWeaponByID(WeaponID,false);
 
 	// 4. 广播事件
 	OnLeftHandWeaponEquipped.Broadcast(CurrentLeftHandWeapon, EArrowKeyType::ARROWKEY_Left);
@@ -159,7 +156,7 @@ void USL_EquipmentComponent::EquipRightHandWeapon(int32 WeaponID)
 	}
 
 	// 3. 派生新武器
-	CurrentRightHandWeapon = SpawnWeaponByID(WeaponID);
+	CurrentRightHandWeapon = SpawnWeaponByID(WeaponID,true);
 
 	// 4. 广播事件
 	OnRightHandWeaponEquipped.Broadcast(CurrentRightHandWeapon, EArrowKeyType::ARROWKEY_Right);

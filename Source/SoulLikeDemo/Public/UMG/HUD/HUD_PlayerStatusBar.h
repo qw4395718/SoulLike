@@ -31,12 +31,23 @@ class SOULLIKEDEMO_API UHUD_PlayerStatusBar : public UUserWidget
 	GENERATED_BODY()
 public:
 	UHUD_PlayerStatusBar(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	
+	/************************************************************************/
+	/* 继承实现                                                                     */
+	/************************************************************************/
+	virtual void NativeOnInitialized() override;
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+	
 	/************************************************************************/
 	/* 外部调用                                                                     */
 	/************************************************************************/
 	// 绑定委托
 	UFUNCTION()
 	void BindGlobalDelegatesEvent();
+
+	UFUNCTION()
+	void UnbindGlobalDelegatesEvent();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Player StatusBar")
 		void SetProgressBarLimit(EPlayerStatusAttributeType AttributeType, float Min, float Max);
@@ -82,6 +93,11 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UTextBlock* m_magicText;
+
+	// 保存委托句柄用于解绑
+	FDelegateHandle HealthChangedHandle;
+	FDelegateHandle StaminChangedHandle;
+
 
 };
 

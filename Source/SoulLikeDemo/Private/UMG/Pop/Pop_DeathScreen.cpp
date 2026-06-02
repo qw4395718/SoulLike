@@ -48,6 +48,22 @@ void UPop_DeathScreen::NativeConstruct()
 
 void UPop_DeathScreen::NativeDestruct()
 {
+	// 绑定按钮点击事件
+	if (m_retryButton)
+	{
+		m_retryButton->OnClicked.RemoveDynamic(this, &UPop_DeathScreen::OnRetryClicked);
+	}
+
+	if (m_lobbyButton)
+	{
+		m_lobbyButton->OnClicked.RemoveDynamic(this, &UPop_DeathScreen::OnLobbyClicked);
+	}
+
+	if (m_quitButton)
+	{
+		m_quitButton->OnClicked.RemoveDynamic(this, &UPop_DeathScreen::OnQuitClicked);
+	}
+
 	// 通知 UIManager 关闭（更新 ActiveWidgets 状态）
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)

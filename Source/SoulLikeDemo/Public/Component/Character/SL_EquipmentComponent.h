@@ -92,7 +92,7 @@ protected:
 	/*                               内部调用                               */
 	/************************************************************************/
 	/** 根据武器ID派生武器实例 */
-	ASL_WeaponBase* SpawnWeaponByID(int32 WeaponID);
+	ASL_WeaponBase* SpawnWeaponByID(int32 WeaponID,bool IsRightHand = true);
 
 	/** 销毁武器实例 */
 	void DestroyWeapon(ASL_WeaponBase* Weapon);

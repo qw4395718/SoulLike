@@ -58,6 +58,12 @@ void UHUD_LobbyScreen::NativeDestruct()
 		UIManager->CloseScreenWidget(EWidgetType::EWIDGET_LobbyScreen);
 	}
 
+	// 绑定切换职业按钮
+	if (m_switchClassButton)
+	{
+		m_switchClassButton->OnClicked.RemoveDynamic(this, &UHUD_LobbyScreen::OnSwitchClassClicked);
+	}
+
 	Super::NativeDestruct();
 }
 

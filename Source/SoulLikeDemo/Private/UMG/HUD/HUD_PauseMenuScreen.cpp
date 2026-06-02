@@ -66,6 +66,27 @@ void UHUD_PauseMenuScreen::NativeDestruct()
 		PC->SetPause(false);
 	}
 
+	// 绑定按钮点击事件
+	if (m_continueButton)
+	{
+		m_continueButton->OnClicked.RemoveDynamic(this, &UHUD_PauseMenuScreen::OnContinueClicked);
+	}
+
+	if (m_lobbyButton)
+	{
+		m_lobbyButton->OnClicked.RemoveDynamic(this, &UHUD_PauseMenuScreen::OnLobbyClicked);
+	}
+
+	if (m_mainMenuButton)
+	{
+		m_mainMenuButton->OnClicked.RemoveDynamic(this, &UHUD_PauseMenuScreen::OnMainMenuClicked);
+	}
+
+	if (m_quitButton)
+	{
+		m_quitButton->OnClicked.RemoveDynamic(this, &UHUD_PauseMenuScreen::OnQuitClicked);
+	}
+
 	// 通知 UIManager 关闭（更新 ActiveWidgets 状态）
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)

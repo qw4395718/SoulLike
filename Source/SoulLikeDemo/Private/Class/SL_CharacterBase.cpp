@@ -371,6 +371,28 @@ UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComp;
 }
 
+// ==================== 属性值访问器 ====================
+
+float ASL_CharacterBase::GetCurrentHealth() const
+{
+	return StatusAttributeSet ? StatusAttributeSet->GetHealth() : 0.0f;
+}
+
+float ASL_CharacterBase::GetMaxHealth() const
+{
+	return StatusAttributeSet ? StatusAttributeSet->GetMaxHealth() : 0.0f;
+}
+
+float ASL_CharacterBase::GetCurrentStamina() const
+{
+	return StatusAttributeSet ? StatusAttributeSet->GetStamina() : 0.0f;
+}
+
+float ASL_CharacterBase::GetMaxStamina() const
+{
+	return StatusAttributeSet ? StatusAttributeSet->GetMaxStamina() : 0.0f;
+}
+
 void ASL_CharacterBase::SetClassID(int32 InPlayerClassID)
 {
 	PlayerClassID = InPlayerClassID;
@@ -667,6 +689,5 @@ ASL_WeaponBase* ASL_CharacterBase::GetWeaponByHand(int32 HandIndex) const
     }
     return EquipmentCmp->GetWeaponByHand(HandIndex);
 }
-
 
 

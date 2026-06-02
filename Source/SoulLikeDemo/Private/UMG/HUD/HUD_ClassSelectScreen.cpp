@@ -56,6 +56,16 @@ void UHUD_ClassSelectScreen::NativeConstruct()
 
 void UHUD_ClassSelectScreen::NativeDestruct()
 {
+	if (m_closeButton)
+	{
+		m_closeButton->OnClicked.RemoveDynamic(this, &UHUD_ClassSelectScreen::OnCloseClicked);
+	}
+
+	if (m_confirmButton)
+	{
+		m_confirmButton->OnClicked.RemoveDynamic(this, &UHUD_ClassSelectScreen::OnConfirmClicked);
+	}
+
 	// 通知 UIManager
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)

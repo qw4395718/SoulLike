@@ -40,20 +40,15 @@ void USL_ComboManagerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 
 UComboInfoTable* USL_ComboManagerComponent::GetCurrentWeaponComboTable() const
 {
-	AActor* Owner = GetOwner();
-	if (!Owner) return nullptr;
-
-	IWeaponAccessory_IF* WeaponAccessory = Cast<IWeaponAccessory_IF>(Owner);
+	IWeaponAccessory_IF* WeaponAccessory = Cast<IWeaponAccessory_IF>(GetOwner());
 	if (!WeaponAccessory) return nullptr;
 
 	ASL_WeaponBase* Weapon = WeaponAccessory->GetRightHandWeapon();
-	if (!Weapon) return nullptr;
+	USL_WeaponAnimSet* AnimSet = Weapon ? Weapon->GetWeaponAnimSet() : nullptr;
+	if (!AnimSet || AnimSet->ComboTableType == EDataTableType::DT_None) return nullptr;
 
-	USL_WeaponAnimSet* AnimSet = Weapon->GetWeaponAnimSet();
-	if (!AnimSet) return nullptr;
-
-	if (AnimSet->ComboInfoTable.IsNull()) return nullptr;
-	return Cast<UComboInfoTable>(AnimSet->ComboInfoTable.LoadSynchronous());
+	UDataTableManager* TM = UDataTableManager::Get(this);
+	return TM ? Cast<UComboInfoTable>(TM->GetDataTable(AnimSet->ComboTableType)) : nullptr;
 }
 
 UAnimMontage* USL_ComboManagerComponent::ResolveCurrentMontage() const

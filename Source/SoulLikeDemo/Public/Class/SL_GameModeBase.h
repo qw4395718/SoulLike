@@ -21,10 +21,7 @@ public:
 
 	// ===== 关卡控制（供外部调用） =====
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
-		void StartCurrentLevel();
-
-	UFUNCTION(BlueprintCallable, Category = "GameMode")
-		void StartTargetLevel(int32 InLevelID,int32 InPlayerClassID = 1001);
+		void StartTargetLevel(int32 InLevelID);
 
 	// 设置是否使用存档 
     UFUNCTION(BlueprintCallable, Category = "GameMode")

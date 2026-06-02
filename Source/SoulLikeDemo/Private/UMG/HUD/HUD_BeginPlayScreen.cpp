@@ -44,7 +44,21 @@ void UHUD_BeginPlayScreen::NativeConstruct()
 
 void UHUD_BeginPlayScreen::NativeDestruct()
 {
-    Super::NativeDestruct();
+	// 绑定按钮点击事件
+	if (NewGameButton)
+	{
+		NewGameButton->OnClicked.RemoveDynamic(this, &UHUD_BeginPlayScreen::OnNewGameClicked);
+	}
+
+	if (LoadGameButton)
+	{
+		LoadGameButton->OnClicked.RemoveDynamic(this, &UHUD_BeginPlayScreen::OnLoadGameClicked);
+	}
+
+	if (QuitGameButton)
+	{
+		QuitGameButton->OnClicked.RemoveDynamic(this, &UHUD_BeginPlayScreen::OnQuitGameClicked);
+	}
 
 	UIManager = UUIManagerSubsystem::Get(this);
 	if (UIManager)
@@ -52,6 +66,7 @@ void UHUD_BeginPlayScreen::NativeDestruct()
         UIManager->CloseScreenWidget(EWidgetType::EWIDGET_BeginPlayScreen);
 	}
 
+	Super::NativeDestruct();
 }
 
 void UHUD_BeginPlayScreen::InitializeScreen(bool bHasSaveData)

@@ -8,12 +8,12 @@
 UENUM(BlueprintType)
 enum class EComboWindowEvent : uint8
 {
-	BeginWindow     UMETA(DisplayName = "连招窗口开始"),
-	AllowBlend      UMETA(DisplayName = "允许混合打断"),
-	EndWindow       UMETA(DisplayName = "连招窗口结束")
+	BeginWindow     UMETA(DisplayName = "ComboWindowStart"),
+	AllowBlend      UMETA(DisplayName = "ComboWindowBlendStart"),
+	EndWindow       UMETA(DisplayName = "ComboWindowEnd")
 };
 
-UCLASS(meta = (DisplayName = "连招窗口通知"))
+UCLASS(meta = (DisplayName = "杩炴嫑绐楀彛閫氱煡"))
 class SOULLIKEDEMO_API USL_ComboWindow_ANS : public UAnimNotify
 {
 	GENERATED_BODY()

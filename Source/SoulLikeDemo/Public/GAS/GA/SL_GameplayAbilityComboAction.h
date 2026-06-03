@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
-#include "GA_ComboAction.generated.h"
+#include "SL_GameplayAbilityComboAction.generated.h"
 
 UCLASS()
-class SOULLIKEDEMO_API UGA_ComboAction : public UGameplayAbility
+class SOULLIKEDEMO_API USL_GameplayAbilityComboAction : public UGameplayAbility
 {
     GENERATED_BODY()
 

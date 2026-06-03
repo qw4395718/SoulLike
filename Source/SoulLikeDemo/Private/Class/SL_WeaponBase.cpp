@@ -32,10 +32,14 @@ ASL_WeaponBase::ASL_WeaponBase()
 	// 骨骼网格体
 	SkeletalWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalWeaponMesh->SetupAttachment(RootComponent);
+	SkeletalWeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SkeletalWeaponMesh->SetGenerateOverlapEvents(false);
 
 	// 静态网格体
 	StaticWeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticWeaponMesh->SetupAttachment(RootComponent);
+	StaticWeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	StaticWeaponMesh->SetGenerateOverlapEvents(false);
 }
 
 void ASL_WeaponBase::BeginPlay()

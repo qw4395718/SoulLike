@@ -322,6 +322,14 @@ void ASL_EnemyBase::ApplyEnemyConfig(const FEnemyConfigInfo& Config)
                     }
                 }
 
+                // 检查是否已授予过，避免重复
+                if (AbilitySystemComp->FindAbilitySpecFromClass(AbilityClass))
+                {
+                    UE_LOG(LogTemp, Verbose, TEXT("Enemy %s: Ability %s already granted, skipping"), 
+                        *GetName(), *AbilityClass->GetName());
+                    continue;
+                }
+
                 AbilitySystemComp->GiveAbility(Spec);			
 			}
 		}

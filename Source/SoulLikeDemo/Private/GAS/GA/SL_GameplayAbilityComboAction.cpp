@@ -1,9 +1,9 @@
-#include "GA_ComboAction.h"
+#include "SL_GameplayAbilityComboAction.h"
 #include "AbilitySystemComponent.h"
 #include <SL_ComboManagerComponent.h>
 #include <AT/AbilityTask_ComboMontage.h>
 
-void UGA_ComboAction::ActivateAbility(
+void USL_GameplayAbilityComboAction::ActivateAbility(
     const FGameplayAbilitySpecHandle Handle,
     const FGameplayAbilityActorInfo* ActorInfo,
     const FGameplayAbilityActivationInfo ActivationInfo,
@@ -45,14 +45,14 @@ void UGA_ComboAction::ActivateAbility(
     ComboMgr->RegisterActiveComboTask(ComboTask);
 
     // 绑定回调
-    ComboTask->OnCompleted.AddDynamic(this, &UGA_ComboAction::OnComboMontageCompleted);
-    ComboTask->OnInterrupted.AddDynamic(this, &UGA_ComboAction::OnComboMontageInterrupted);
+    ComboTask->OnCompleted.AddDynamic(this, &USL_GameplayAbilityComboAction::OnComboMontageCompleted);
+    ComboTask->OnInterrupted.AddDynamic(this, &USL_GameplayAbilityComboAction::OnComboMontageInterrupted);
 
     // 启动 Task
     ComboTask->ReadyForActivation();
 }
 
-void UGA_ComboAction::CancelAbility(
+void USL_GameplayAbilityComboAction::CancelAbility(
     const FGameplayAbilitySpecHandle Handle,
     const FGameplayAbilityActorInfo* ActorInfo,
     const FGameplayAbilityActivationInfo ActivationInfo,
@@ -65,7 +65,7 @@ void UGA_ComboAction::CancelAbility(
     Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 }
 
-void UGA_ComboAction::OnComboMontageCompleted()
+void USL_GameplayAbilityComboAction::OnComboMontageCompleted()
 {
     AActor* Avatar = GetAvatarActorFromActorInfo();
     if (Avatar)
@@ -83,7 +83,7 @@ void UGA_ComboAction::OnComboMontageCompleted()
     EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicateEnd, bWasCancelled);
 }
 
-void UGA_ComboAction::OnComboMontageInterrupted()
+void USL_GameplayAbilityComboAction::OnComboMontageInterrupted()
 {
     AActor* Avatar = GetAvatarActorFromActorInfo();
     if (Avatar)

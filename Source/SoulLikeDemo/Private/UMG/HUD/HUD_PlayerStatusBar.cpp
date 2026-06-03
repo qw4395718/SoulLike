@@ -92,7 +92,7 @@ void UHUD_PlayerStatusBar::UnbindGlobalDelegatesEvent()
 		}
 		if (StaminChangedHandle.IsValid())
 		{
-			globalDelegatesManager->OnAttributeHealthChanged.Remove(StaminChangedHandle);
+			globalDelegatesManager->OnAttributeStaminaChanged.Remove(StaminChangedHandle);
 			StaminChangedHandle.Reset();
 		}
 	}

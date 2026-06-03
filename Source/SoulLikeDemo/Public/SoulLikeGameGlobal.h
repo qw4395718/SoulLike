@@ -643,6 +643,11 @@ struct FClassConfigInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 		int32 TeamID = TEAM_PLAYER;
 
+	// ===== GAS能力配置 =====
+	/** GAS能力列表（通过数据表配置，替代蓝图中手动授予） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS")
+		TArray<TSubclassOf<UGameplayAbility>> GrantedAbilities;
+
 	// ===== 道具配置 =====
 	/** 快捷栏道具列表（道具ID + 初始数量） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")

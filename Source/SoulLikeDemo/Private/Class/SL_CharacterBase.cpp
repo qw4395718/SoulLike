@@ -53,7 +53,6 @@ void ASL_CharacterBase::BeginPlay()
 	Super::BeginPlay();
 	// 初始化角色(包含组件)
 	InitializeCharacter();
-	InitCharacterWithClassID(1001);
 
 	// 为ASC设置持有者和化身
 	if (AbilitySystemComp)
@@ -66,18 +65,18 @@ void ASL_CharacterBase::BeginPlay()
 		StatusAttributeSet->SetOwningActor(this);
 	}
 	
-	if (!IsPlayerControlled())
-	{// 非自身SL_CharacterBase实例
-		if (UUIManagerSubsystem* pUIManagerSystem = UUIManagerSubsystem::Get(this))
-		{
-			// 创建结构体
-			FUICreateParams createParam;
-			createParam.Type = EWidgetType::EWIDGET_PawnStatusInScreen;
-			createParam.TargetActor = this;
+	//if (!IsPlayerControlled())
+	//{// 非自身SL_CharacterBase实例
+	//	if (UUIManagerSubsystem* pUIManagerSystem = UUIManagerSubsystem::Get(this))
+	//	{
+	//		// 创建结构体
+	//		FUICreateParams createParam;
+	//		createParam.Type = EWidgetType::EWIDGET_PawnStatusInScreen;
+	//		createParam.TargetActor = this;
 
-			pUIManagerSystem->OpenWidget(createParam);
-		}
-	}
+	//		pUIManagerSystem->OpenWidget(createParam);
+	//	}
+	//}
 
 	UE_LOG(LogTemp, Display, TEXT("ZYF_C++_ASL_CharacterBase::BeginPlay()"));
 
@@ -400,6 +399,32 @@ void ASL_CharacterBase::SetClassID(int32 InPlayerClassID)
 	InitCharacterWithClassID(PlayerClassID);
 }
 
+// ==================== GAS能力授予 ====================
+
+void ASL_CharacterBase::GrantAbilities(const TArray<TSubclassOf<UGameplayAbility>>& InAbilities)
+{
+	if (!AbilitySystemComp || !HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ASL_CharacterBase::GrantAbilities - Skipped (no ASC or no authority)"));
+		return;
+	}
+
+	for (const TSubclassOf<UGameplayAbility>& AbilityClass : InAbilities)
+	{
+		if (!AbilityClass) continue;
+
+		// 检查是否已授予过，避免重复
+		if (AbilitySystemComp->FindAbilitySpecFromClass(AbilityClass))
+		{
+			UE_LOG(LogTemp, Verbose, TEXT("GrantAbilities - Ability %s already granted, skipping"), *AbilityClass->GetName());
+			continue;
+		}
+
+		FGameplayAbilitySpec Spec(AbilityClass, 1, INDEX_NONE, this);
+		AbilitySystemComp->GiveAbility(Spec);
+	}
+}
+
 void ASL_CharacterBase::InitCharacterWithClassID(int32 InPlayerClassID)
 {
 	UDataTableManager* TableManager = UDataTableManager::Get(this);
@@ -467,7 +492,9 @@ void ASL_CharacterBase::ApplyEnemyConfig(const FClassConfigInfo& Config)
 		EquipmentCmp->InitializeWithClassID(PlayerClassID);
 	}
 
-	
+	// 3. 授予GAS能力（可配置在数据表中）
+	GrantAbilities(Config.GrantedAbilities);
+
 }
 
 void ASL_CharacterBase::BindGASDeathEvent()
@@ -689,5 +716,4 @@ ASL_WeaponBase* ASL_CharacterBase::GetWeaponByHand(int32 HandIndex) const
     }
     return EquipmentCmp->GetWeaponByHand(HandIndex);
 }
-
 

@@ -206,6 +206,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void SetClassID(int32 InPlayerClassID);
 
+	/** 根据职业配置授予GAS能力（替代蓝图中手动GiveAbility） */
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void GrantAbilities(const TArray<TSubclassOf<UGameplayAbility>>& InAbilities);
+
 	FString GetNetworkGUIDString(AActor* InActor);
 protected:
 	/************************************************************************/

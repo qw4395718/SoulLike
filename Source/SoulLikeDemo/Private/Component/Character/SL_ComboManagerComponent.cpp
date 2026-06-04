@@ -13,6 +13,10 @@
 #include <AT/AbilityTask_ComboMontage.h>
 #include <SL_StaminaComponent.h>
 
+#include "Stats/Stats.h"
+
+DECLARE_CYCLE_STAT(TEXT("ComboManagerComponent_FirstCombo"), STAT_ComboManagerComponent_FirstCombo, STATGROUP_Game);
+
 USL_ComboManagerComponent::USL_ComboManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -148,6 +152,7 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 					}
 					else
 					{
+						SCOPE_CYCLE_COUNTER(STAT_ComboManagerComponent_FirstCombo);
 						// 初始连段
 						CurrentComboInfo = FoundComboInfo;
 						ASC->TryActivateAbilityByClass(FoundComboInfo.NextAbilityClass);

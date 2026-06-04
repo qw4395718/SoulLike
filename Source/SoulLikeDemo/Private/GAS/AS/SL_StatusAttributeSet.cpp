@@ -7,6 +7,13 @@
 #include "SL_EnemyBase.h"
 #include <Components/CapsuleComponent.h>
 
+#include "Stats/Stats.h"
+
+DECLARE_CYCLE_STAT(TEXT("SL_StatusAttributeSet_PostGameplayEffectExecute"), STAT_SL_StatusAttributeSet_PostGameplayEffectExecute, STATGROUP_Game);
+DECLARE_CYCLE_STAT(TEXT("SL_StatusAttributeSet_PostGameplayEffectExecute_Damage"), STAT_SL_StatusAttributeSet_PostGameplayEffectExecute_Damage, STATGROUP_Game);
+DECLARE_CYCLE_STAT(TEXT("SL_StatusAttributeSet_PostGameplayEffectExecute_StaminaCost"), STAT_SL_StatusAttributeSet_PostGameplayEffectExecute_StaminaCost, STATGROUP_Game);
+DECLARE_CYCLE_STAT(TEXT("SL_StatusAttributeSet_PostGameplayEffectExecute_StaminaCost_ExecuteGameplayCue"), STAT_SL_StatusAttributeSet_PostGameplayEffectExecute_StaminaCost_ExecuteGameplayCue, STATGROUP_Game);
+
 USL_StatusAttributeSet::USL_StatusAttributeSet()
 {
 	// 构造阶段没有有效的 World 上下文，Cook 时会导致 Cannot get World 错误
@@ -109,6 +116,7 @@ void USL_StatusAttributeSet::PreAttributeChange(const FGameplayAttribute& Attrib
 
 void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
+	SCOPE_CYCLE_COUNTER(STAT_SL_StatusAttributeSet_PostGameplayEffectExecute);
 	Super::PostGameplayEffectExecute(Data);
 	//UE_LOG(LogTemp, Warning, TEXT("PostChange: Attribute -> %.2f"), Data.EvaluatedData.Magnitude);
 
@@ -121,6 +129,7 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	}
 	else if (Data.EvaluatedData.Attribute == GetDamageAttribute())
 	{
+		SCOPE_CYCLE_COUNTER(STAT_SL_StatusAttributeSet_PostGameplayEffectExecute_Damage);
 		// Convert into -Health and then clamp
 		const float ChangeValue = GetDamage();
 		const float OldValue = GetHealth();
@@ -143,8 +152,8 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			// Calculate 'actual' damage applied that respects min and max health
 			const float ChangeNumber = OldValue - NewValue;
 			if (UAbilitySystemComponent* OwningAbilitySystemComponent = GetOwningAbilitySystemComponent())
-			{
-				// [Temp Disabled] gameplay cue caused 1.76s hitch on first hit
+			{	
+				// 在PIE阶段,这个是运行时进行编译,所以会导致卡顿,打包后不会发生
 				// const FGameplayTag ChangeCueTag = FGameplayTag::RequestGameplayTag(FName("GameplayCue.DamageNumber"));
 				// FGameplayCueParameters ChangeCueParams;
 				// ChangeCueParams.NormalizedMagnitude = 1.f;
@@ -158,6 +167,7 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	}
 	else if (Data.EvaluatedData.Attribute == GetStaminaCostAttribute())
 	{
+		SCOPE_CYCLE_COUNTER(STAT_SL_StatusAttributeSet_PostGameplayEffectExecute_StaminaCost);
 		// Convert into -Health and then clamp
 		const float ChangeValue = GetStaminaCost();
 		const float OldValue = GetStamina();
@@ -179,12 +189,14 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			const float ChangeNumber = OldValue - NewValue;
 			if (UAbilitySystemComponent* OwningAbilitySystemComponent = GetOwningAbilitySystemComponent())
 			{
-				// Broadcast a 'damage number' gameplay cue on the owning actor. Triggered on server, executes on all clients.
-				const FGameplayTag ChangeCueTag = FGameplayTag::RequestGameplayTag(FName("GameplayCue.StaminaCostNumber"), /*ErrorIfNotFound=*/true);
-				FGameplayCueParameters ChangeCueParams;
-				ChangeCueParams.NormalizedMagnitude = 1.f;
-				ChangeCueParams.RawMagnitude = ChangeValue;
-				OwningAbilitySystemComponent->ExecuteGameplayCue(ChangeCueTag, ChangeCueParams);
+				// 在PIE阶段,这个是运行时进行编译,所以会导致卡顿,打包后不会发生
+				//SCOPE_CYCLE_COUNTER(STAT_SL_StatusAttributeSet_PostGameplayEffectExecute_StaminaCost_ExecuteGameplayCue);
+				//// Broadcast a 'damage number' gameplay cue on the owning actor. Triggered on server, executes on all clients.
+				//const FGameplayTag ChangeCueTag = FGameplayTag::RequestGameplayTag(FName("GameplayCue.StaminaCostNumber"), /*ErrorIfNotFound=*/true);
+				//FGameplayCueParameters ChangeCueParams;
+				//ChangeCueParams.NormalizedMagnitude = 1.f;
+				//ChangeCueParams.RawMagnitude = ChangeValue;
+				//OwningAbilitySystemComponent->ExecuteGameplayCue(ChangeCueTag, ChangeCueParams);
 			}
 		}
 

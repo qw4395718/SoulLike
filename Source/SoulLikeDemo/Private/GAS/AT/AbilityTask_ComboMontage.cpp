@@ -5,6 +5,10 @@
 #include <Animation/AnimInstance.h>
 #include <AbilitySystemInterface.h>
 
+#include "Stats/Stats.h"
+
+DECLARE_CYCLE_STAT(TEXT("ComboMontage_Activate"), STAT_ComboMontage_Activate, STATGROUP_Game);
+
 UAbilityTask_ComboMontage* UAbilityTask_ComboMontage::CreateComboMontageTask(
 	UGameplayAbility* OwningAbility,
 	UAnimMontage* MontageToPlay,
@@ -59,6 +63,7 @@ EComboInputHandledResult UAbilityTask_ComboMontage::OnInputReceived(EComboInputA
 void UAbilityTask_ComboMontage::Activate()
 {
 	Super::Activate();
+	SCOPE_CYCLE_COUNTER(STAT_ComboMontage_Activate);
 
 	if (!Ability || !Montage)
 	{
@@ -177,4 +182,3 @@ void UAbilityTask_ComboMontage::RemoveAllDelegates()
 	OnCompleted.Clear();
 	OnInterrupted.Clear();
 }
-

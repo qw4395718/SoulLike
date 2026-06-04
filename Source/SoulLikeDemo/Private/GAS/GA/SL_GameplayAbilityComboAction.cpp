@@ -3,12 +3,17 @@
 #include <SL_ComboManagerComponent.h>
 #include <AT/AbilityTask_ComboMontage.h>
 
+#include "Stats/Stats.h"
+
+DECLARE_CYCLE_STAT(TEXT("ActivateAbility"), STAT_ComboAction_ActivateAbility, STATGROUP_Game);
+
 void USL_GameplayAbilityComboAction::ActivateAbility(
     const FGameplayAbilitySpecHandle Handle,
     const FGameplayAbilityActorInfo* ActorInfo,
     const FGameplayAbilityActivationInfo ActivationInfo,
     const FGameplayEventData* TriggerEventData)
 {
+    SCOPE_CYCLE_COUNTER(STAT_ComboAction_ActivateAbility);
     AActor* Avatar = GetAvatarActorFromActorInfo();
     if (!Avatar)
     {

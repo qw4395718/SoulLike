@@ -18,6 +18,8 @@
 #include <SL_GameplayAbilityNPCBase.h>
 #include <SL_WeaponBase.h>
 #include <Components/WidgetComponent.h>
+#include <Animation/AnimBlueprint.h>
+#include <Animation/AnimBlueprintGeneratedClass.h>
 
 ASL_EnemyBase::ASL_EnemyBase()
 {
@@ -378,8 +380,8 @@ void ASL_EnemyBase::LoadEnemyAppearance(const FEnemyConfigInfo& Config)
 			// 尝试2: 加载 UAnimBlueprint 对象
 			UAnimBlueprint* AnimBP = LoadObject<UAnimBlueprint>(nullptr, *AnimBPPath);
 			if (AnimBP)
-			{
-				AnimClass = AnimBP->GetAnimBlueprintGeneratedClass();
+			{ 
+				AnimClass = Cast<UClass>(AnimBP->GetAnimBlueprintGeneratedClass());
 				UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::LoadEnemyAppearance - Loaded via UAnimBlueprint"));
 			}
 		}

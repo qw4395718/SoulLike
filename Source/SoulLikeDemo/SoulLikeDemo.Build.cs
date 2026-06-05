@@ -37,6 +37,11 @@ public class SoulLikeDemo : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "Lua" });
 
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.Add("UnrealEd");
+		}
+
 		// Uncomment if you are using Slate UI
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 		

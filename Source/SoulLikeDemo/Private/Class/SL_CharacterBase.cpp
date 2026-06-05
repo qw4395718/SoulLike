@@ -18,6 +18,7 @@
 #include <Components/CapsuleComponent.h>
 #include <GameFramework/CharacterMovementComponent.h>
 #include "Components/SkeletalMeshComponent.h"
+#include <Engine/NetConnection.h>
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 

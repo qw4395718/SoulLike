@@ -18,7 +18,9 @@
   - [2.4 定位流程](#24-定位流程)
   - [2.5 如何读懂 stat dumphitches 输出](#25-如何读懂-stat-dumphitches-输出)
   - [2.6 Unreal Insights 面板导航](#26-unreal-insights-面板导航)
-  - [2.7 自定义函数监控](#27-自定义函数监控)
+  - [2.7 Incl 与 Excl：读懂 Timers 面板的两种耗时](#27-incl-与-excl读懂-timers-面板的两种耗时)
+  - [2.8 自定义函数监控](#28-自定义函数监控)
+  - [2.9 LinkerLoad 系列函数解读](#29-linkerload-系列函数解读)
 - [三、实战回放：受击卡顿排查全过程](#三实战回放受击卡顿排查全过程)
   - [3.1 问题现象](#31-问题现象)
   - [3.2 stat unit 宏观查看](#32-stat-unit-宏观查看)
@@ -28,12 +30,13 @@
 - [四、修复方案](#四修复方案)
   - [4.1 立即修复](#41-立即修复)
   - [4.2 验证方法](#42-验证方法)
-- [五、踩坑汇总](#五踩坑汇总)
-- [六、附录](#六附录)
-  - [6.1 关键日志](#61-关键日志)
-  - [6.2 常用命令速查](#62-常用命令速查)
-  - [6.3 参考文章与外部链接](#63-参考文章与外部链接)
-  - [6.4 术语对照](#64-术语对照)
+- [五、PIE 启动卡顿排查](#五pie-启动卡顿排查)
+- [六、踩坑汇总](#六踩坑汇总)
+- [七、附录](#七附录)
+  - [7.1 关键日志](#71-关键日志)
+  - [7.2 常用命令速查](#72-常用命令速查)
+  - [7.3 参考文章与外部链接](#73-参考文章与外部链接)
+  - [7.4 术语对照](#74-术语对照)
 
 ---
 
@@ -134,7 +137,7 @@ trace.stop                           // 停止并保存 .utrace 文件
 
 `stat dumphitches` 的输出是纯文本格式的性能剖面，第一次接触容易看不懂。按这个顺序读就不会被噪声淹没。
 
-#### 2.7.1 输出结构
+#### 2.8.1 输出结构
 
 一段完整的 dumphitches 输出由三部分组成：
 
@@ -146,7 +149,7 @@ trace.stop                           // 停止并保存 .utrace 文件
 ③ 触发链（Trigger Chain）→ 定位谁发起的
 ```
 
-#### 2.7.2 第一步：看标题行
+#### 2.8.2 第一步：看标题行
 
 ```
 ------------------ Thread Hitch 1, Frame 11604  2403.2ms ---------------
@@ -154,7 +157,7 @@ trace.stop                           // 停止并保存 .utrace 文件
 
 这告诉你：**第 1 个卡顿，在第 11604 帧，花了 2403ms**。正常情况下 60fps 一帧是 16.67ms，2403ms = 0.4fps，画面卡住不动了。
 
-#### 2.7.3 第二步：看树状统计（找最贵的）
+#### 2.8.3 第二步：看树状统计（找最贵的）
 
 ```
 2384.420ms (   2)  -  ObjectLibrary/Engine/Transient.ObjectLibrary    ← 最顶层，资源类型
@@ -175,7 +178,7 @@ trace.stop                           // 停止并保存 .utrace 文件
 
 **关键信号：** 看到 `KismetCompiler` 或 `StaticDuplicateObject` 出现，说明这是在**编辑器 PIE 中**打包后的游戏不会有这两项。如果打包后测试没有卡顿，问题不大。
 
-#### 2.7.4 第三步：看触发链（从下往上读）
+#### 2.8.4 第三步：看触发链（从下往上读）
 
 ```
 Trigger: ... ← LoadObject ← ObjectLibrary ← Loading Library ← PostGameplayEffectExecute
@@ -221,19 +224,19 @@ Trigger: ... ← LoadObject ← ObjectLibrary ← Loading Library ← PostGamepl
 
 拿到 .utrace 文件后，在 Insights 中找到根因资产的操作顺序：
 
-#### 2.7.1 第一步：Frames 面板找长帧
+#### 2.8.1 第一步：Frames 面板找长帧
 
 打开 .utrace 后，左上角的 **Frames 面板**显示每帧耗时，每根竖条代表一帧。正常帧是细线（16ms），卡顿帧是一根巨柱。点击选中它。
 
-#### 2.7.2 第二步：Timers 面板看调用树
+#### 2.8.2 第二步：Timers 面板看调用树
 
 左下角的 **Timers 面板**显示按耗时从高到低的函数调用树。展开 LoadObject 等顶层项，看子节点中有没有 LoadPackageInternal。如果有，展开看 PackageName 字段。
 
-#### 2.7.3 第三步：Timing View 看时序
+#### 2.8.3 第三步：Timing View 看时序
 
 中间的 **Timing View** 显示线程时间线。展开 GameThread 行，找到最长的那根耗时条，鼠标悬停看 Tooltip 中的 Object: 或 PackageName:。
 
-#### 2.7.4 第四步：Asset Loading 面板找请求者
+#### 2.8.4 第四步：Asset Loading 面板找请求者
 
 在左侧标签栏找到 **Asset Loading** 面板（如果录入了 File 通道）。其中有一个表格，按 Load Time 降序排序后，排第一的包就是单次加载最贵的。它的 Requested By 列显示谁触发了这次加载。
 
@@ -251,22 +254,59 @@ Trigger: ... ← LoadObject ← ObjectLibrary ← Loading Library ← PostGamepl
 | Asset Loading | 包加载详情——看"具体哪个资产被加载" | File 通道 |
 | Callers / Callees | 调用/被调用链——验证因果关系 | 基于 Timers 选中项 |
 
-### 2.7 为什么看不到自己的函数 + 如何让代码出现在调用链中
+### 2.7 Incl 与 Excl：读懂 Timers 面板的两种耗时
 
-#### 2.7.1 stat named events 的局限
+Insights 的 **Timers 面板**中每个函数显示两列耗时数据，它们的含义不同：
+
+| 列名 | 全称 | 含义 |
+|------|------|------|
+| **Incl** | Inclusive | 函数自身 + 内部调用的所有子函数的总耗时 |
+| **Excl** | Exclusive | 函数自身执行耗时，**不包含子函数** |
+
+**怎么用：**
+
+- 找 **Excl 大**的节点 — 那是真正在干活的函数，是直接瓶颈
+- Excl ≈ Incl 的节点 — 叶子函数，时间全是自己的，优先优化
+- Incl 巨大但 Excl 极小 — 只是入口/协调者，展开子节点找瓶颈
+- 如果 Excl 不大但 **Count 很高** — 频率过高，考虑减少调用次数
+
+**实战示例：**
+
+一个 LoadObject 调用链的实际数据：
+
+| Name | Count | Incl | Excl | 判断 |
+|------|-------|------|------|------|
+| LoadObject | 46 | 6.4s | 275μs | ❌ 入口，Excl 极小，忽略 |
+| LinkerLoad_CreateLoader | 357 | 2.3s | **2.3s** | ✅ Excl ≈ Incl，真正的活 |
+| LinkerLoad_LoadAllObjects | 357 | 2.7s | **976.9ms** | ✅ Excl 大，做反序列化 |
+| LinkerLoad_VerifyImportInner | 36,013 | 5.1s | 44.5ms | ⭕ 单次小，但频率极高 |
+
+解读：`LinkerLoad_CreateLoader` 读磁盘 2.3s，`LinkerLoad_LoadAllObjects` 反序列化 977ms，这是卡顿的直接贡献者。`VerifyImportInner` 单次 44.5ms 但执行了 36,013 次，提示包间引用极度密集。
+
+**三步定位法：**
+
+1. 找 **Incl 最大**的行 → 锁定宏观瓶颈段
+2. 展开子节点，找 **Excl 最大**的 → 定位具体在干活的函数
+3. 如果 Excl 小但 Count 极大 → 关注调用频率，看能否合并/减少
+
+---
+
+### 2.8 为什么看不到自己的函数 + 如何让代码出现在调用链中
+
+#### 2.8.1 stat named events 的局限
 
 Insights 的 Timers 面板和 Timing View 中，默认只显示**有 SCOPE_CYCLE_COUNTER 宏标记的函数**。引擎函数（如 LoadObject、PostGameplayEffectExecute）都有这个宏，但你的自定义函数（如 HandleInputPressed、ActivateAbility）没有加，所以不会出现。
 
 这不是 bug，是 UE4 stat 系统的设计：**只有你声明了要统计的函数，它才会出现**，避免无关函数淹没有用信息。
 
-#### 2.7.2 两种数据类型对比
+#### 2.8.2 两种数据类型对比
 
 - **Stat Named Events**：只显示加了宏的函数，精确计时（纳秒级），开销低。通过 -statnamedevents 或 stat namedevents 开启
 - **CPU Sampling（cputrace）**：显示完整的 CPU 调用栈（包括你的自定义函数），采样近似（毫秒级），开销较高。通过 -cputrace 或 trace.start ... cputrace 开启
 
 两者互补，不是互斥。同时开启后 Insights 中既有精确计时数据，也有完整调用栈。
 
-#### 2.7.3 方法一：加 SCOPE_CYCLE_COUNTER 宏（推荐）
+#### 2.8.3 方法一：加 SCOPE_CYCLE_COUNTER 宏（推荐）
 
 在你想监控的函数体第一行加入：
 
@@ -290,7 +330,7 @@ DECLARE_CYCLE_STAT(TEXT("HandleInputPressed"), STAT_Combo_HandleInput, STATGROUP
 - STAT_Combo_HandleInput → 代码中引用的标识符
 - STATGROUP_Game → 所属 stat 分组
 
-#### 2.7.4 方法二：用 SCOPED_NAMED_EVENT（轻量方案）
+#### 2.8.4 方法二：用 SCOPED_NAMED_EVENT（轻量方案）
 
 ```cpp
 {
@@ -301,6 +341,30 @@ DECLARE_CYCLE_STAT(TEXT("HandleInputPressed"), STAT_Combo_HandleInput, STATGROUP
 
 优点：不需要提前 DECLARE，自动出现在 CPU profiling 调用栈中。
 缺点：精度不如 SCOPE_CYCLE_COUNTER，且只出现在 CPU Sampling 数据中。
+
+---
+
+### 2.9 LinkerLoad 系列函数解读
+
+当在 Timers 面板中展开 `LoadObject` 后，会看到 `LoadPackageInternal` 和 `LinkerLoad` 系列的调用链。这几个函数是 UE4 资源加载系统的核心路径：
+
+| 函数名 | 职责 | 分析要点 |
+|--------|------|---------|
+| `LoadObject` | 顶层入口，按路径加载一个 UObject | Incl 大但 Excl 极小 → 瓶颈在下游，展开子节点 |
+| `LoadPackageInternal` | 打开一个 `.uasset` 包文件 | Count = 加载的包总数 |
+| `LinkerLoad_CreateLoader` | 读取文件头、解析 ExportMap/ImportMap | **Excl ≈ Incl** → 纯磁盘 I/O 耗时 |
+| `LinkerLoad_LoadAllObjects` | 反序列化包内的所有 UObject | Excl 大 → 对象反序列化开销 |
+| `LinkerLoad_VerifyImportInner` | 验证当前包依赖的外部包是否已加载 | Count 极高 → 包间引用密集 |
+| `LinkerLoad_FinalizeCreation` | 完成 Linker 初始化 | Incl 大但 Excl 极小 → 工作全在子函数 |
+
+**配合 Incl/Excl 方法论分析加载卡顿：**
+
+1. 在 Timers 面板找到 `LoadObject`，看它的 **Incl** — 如果占了卡顿帧的大头，说明是资源加载导致
+2. 展开 `LoadObject`，找 **Excl 最大**的子节点 — 那是在真正干活的函数
+3. - 如果 `CreateLoader` 的 Excl 最大 → 瓶颈在**磁盘 I/O**（文件读取慢、包体大、包数量多）
+4. - 如果 `LoadAllObjects` 的 Excl 最大 → 瓶颈在**反序列化**（对象数量多、CDO 复杂）
+5. - 如果 `VerifyImportInner` 的 Count 极大 → 包间**引用密度太高**，考虑减少跨包依赖
+6. 看 **Count 列** — `CreateLoader` / `LoadAllObjects` / `FinalizeCreation` 的 Count 相同，等于本次加载涉及的**总包数**
 
 ---
 
@@ -404,7 +468,67 @@ stat dumphitches
 
 ---
 
-## 五、踩坑汇总
+
+
+---
+
+## 五、PIE 启动卡顿排查
+
+> PIE 启动卡顿和运行时卡顿是两类不同性质的问题，排查思路和工具侧重完全不同。
+
+### 5.1 问题特征
+
+| 特征 | PIE 启动卡顿 | 运行时卡顿 |
+|------|-------------|-----------|
+| 发生时机 | 点击 PIE 按钮后、游戏画面出现前 | 游戏运行过程中 |
+| 打包后是否重现 | ❌ 不重现 | ✅ 通常重现 |
+| 核心原因 | CDO 硬引用链导致链式加载 | 运行时同步加载、逻辑耗时、GC 等 |
+| 第一排查工具 | Unreal Insights（File + LoadTime 通道） | stat dumphitches / stat unit |
+
+### 5.2 核心机制：CDO 硬引用链
+
+PIE 启动时，引擎会为每个蓝图类创建一份副本到临时包中：
+
+```
+StaticDuplicateObject(蓝图 CDO)
+  → CDO 中持有 UObject* 引用（如 DefaultPawnClass）
+    → 递归拷贝被引用对象的 CDO
+      → 被引用对象又持有更多引用
+        → 链式加载所有依赖资源
+```
+
+关键点：**蓝图编辑器中通过类选择器（Class Picker）选择的类会形成硬引用**，`TSubclassOf` 和 `UObject*` 类型的属性都会导致链式拷贝。
+
+### 5.3 Signature：如何判断是 CDO 硬引用链
+
+Insight 数据中同时出现以下特征：
+
+- `LoadObject` 的 **Count 少但 Incl 极大**（如 Count=46, Incl=6.4s）
+- `LinkerLoad_CreateLoader` / `LoadAllObjects` / `FinalizeCreation` 的 **Count 相同且较大**（如 357）
+- `LinkerLoad_VerifyImportInner` 的 **Count 数十倍于总包数**（如 36,013 / 357 ≈ 100）
+- 按包名排序，加载的包是**以某个蓝图类为根节点的树状依赖**（GameMode → 角色蓝图 → 动画/组件/GAS → ...）
+
+### 5.4 快速验证法
+
+不需要改代码，直接在 Content Browser 中手动打开怀疑是根源的蓝图资源（GameMode / 角色蓝图 / 玩家控制器），然后关闭标签页、再点 PIE：
+
+- **卡顿消失** → 根因确认，资源不在内存中导致磁盘 I/O
+- **卡顿不变** → 可能是 CDO 拷贝本身（StaticDuplicateObject）的复杂度问题
+
+### 5.5 解决路径
+
+根据验证结果选择方向：
+
+| 验证结果 | 解决方向 | 原理 |
+|---------|---------|------|
+| 手动加载后 PIE 不卡 | 编辑器启动时异步预加载核心蓝图 | 让资源在 PIE 前进入内存，跳过磁盘 I/O |
+| 手动加载后 PIE 仍然卡 | 阻断 CDO 硬引用链 | 将蓝图引用改为软路径 + 运行时动态加载 |
+
+---
+
+## 六、踩坑汇总
+
+
 
 以下为本次排查过程中记录的所有踩坑记录：
 
@@ -427,9 +551,9 @@ stat dumphitches
 
 ---
 
-## 六、附录
+## 七、附录
 
-### 6.1 关键日志 — stat dumphitches 捕获的卡顿帧
+### 7.1 关键日志 — stat dumphitches 捕获的卡顿帧
 
 ```
 LogStats: ------------------Thread Hitch 1, Frame 2491  1768.9ms ---------------
@@ -454,7 +578,7 @@ LogStats:                                   478.516ms (  17)  -  Process uber
 LogStats:                                     271.380ms ( 280)  -  STAT_StaticDuplicateObject
 ```
 
-### 6.2 常用命令速查
+### 7.2 常用命令速查
 
 **宏观监控**
 | 命令 | 用途 |
@@ -482,7 +606,7 @@ LogStats:                                     271.380ms ( 280)  -  STAT_StaticDu
 | `log LogGameplayCueManager Verbose` | 开启 GameplayCue 日志 |
 | `showdebug abilitysystem` | 画面左上角叠加 GAS 实时信息（Ability/Effects/Tags） |
 
-### 6.3 参考文章与外部链接
+### 7.3 参考文章与外部链接
 
 | # | 标题 | 链接 | 说明 |
 |:---:|:---|:---|:---|
@@ -491,7 +615,7 @@ LogStats:                                     271.380ms ( 280)  -  STAT_StaticDu
 | 3 | UE4 Profiler 性能分析工具原理和实现机制 | [zhuanlan.zhihu.com](https://zhuanlan.zhihu.com/p/416863993) | Profiler 底层原理 |
 | 4 | 基于 Stat 和 Trace 扩展代码性能统计 | [zhuanlan.zhihu.com](https://zhuanlan.zhihu.com/p/716644594) | Stat + Trace 扩展实践 |
 
-### 6.4 Unreal Insights 术语对照
+### 7.4 Unreal Insights 术语对照
 
 | 中文 | 英文 | 说明 |
 |:---|:---|:---|
@@ -503,6 +627,6 @@ LogStats:                                     271.380ms ( 280)  -  STAT_StaticDu
 
 ---
 
-> **文档编制日期：** 2026-06-04（持续更新中）
+> **文档编制日期：** 2026-06-05（持续更新中）
 > **相关项目：** SoulLikeDemo (UE 4.26.2) / GAS + ALSv4 + UnLua
 > **原始记录来源：** DeepSeek Web 端对话记录

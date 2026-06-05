@@ -244,6 +244,8 @@ Trigger: ... ← LoadObject ← ObjectLibrary ← Loading Library ← PostGamepl
 
 在 Timers 中选中某一项后，**Callers 面板**（通常在界面右侧或底部）显示它的调用链。**从下往上读**——下层是原因，上层是结果。**Callees 面板**显示它内部调用了什么。
 
+> **注意**：Callers / Callees 面板的数据源同时依赖 **Frames 面板选中的帧范围**和 **Timers 面板选中的函数**。如果面板为空，先检查 Frames 面板中是否选中了目标帧（点击卡顿帧的那根竖条），再确认 Timers 中是否选中了函数。只点击 Tracks 时间线上的事件块不会触发面板更新。
+
 #### 2.7.6 各面板用途速查
 
 | 面板 | 用途 | 数据来源 |
@@ -614,6 +616,8 @@ LogStats:                                     271.380ms ( 280)  -  STAT_StaticDu
 | 2 | SCOPE_CYCLE_COUNTER 性能统计宏 | [zhihu.com](https://www.zhihu.com/search?type=content&q=SCOPE_CYCLE_COUNTER) | 性能统计宏相关文章汇总 |
 | 3 | UE4 Profiler 性能分析工具原理和实现机制 | [zhuanlan.zhihu.com](https://zhuanlan.zhihu.com/p/416863993) | Profiler 底层原理 |
 | 4 | 基于 Stat 和 Trace 扩展代码性能统计 | [zhuanlan.zhihu.com](https://zhuanlan.zhihu.com/p/716644594) | Stat + Trace 扩展实践 |
+| 5 | Unreal Insights 参考文档（官方） | [dev.epicgames.com](https://dev.epicgames.com/documentation/unreal-engine/unreal-insights-reference?application_version=4.27&lang=zh-CN) | 官方 Insight 文档，含面板说明和通道配置 |
+| 6 | Unreal Insights 使用教程 | [zhuanlan.zhihu.com](https://zhuanlan.zhihu.com/p/676596654) | Insight 入门教程，含面板导航和录制方法 |
 
 ### 7.4 Unreal Insights 术语对照
 

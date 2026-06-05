@@ -48,6 +48,7 @@ void USL_GameplayAbilityComboAction::ActivateAbility(
 
     // 注册到 ComboManager
     ComboMgr->RegisterActiveComboTask(ComboTask);
+    ComboMgr->ClearTargetWindowTag();
 
     // 绑定回调
     ComboTask->OnCompleted.AddDynamic(this, &USL_GameplayAbilityComboAction::OnComboMontageCompleted);

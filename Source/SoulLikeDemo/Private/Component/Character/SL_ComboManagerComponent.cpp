@@ -202,6 +202,8 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 
 void USL_ComboManagerComponent::OnMontageBlendOut()
 {
+	// 更新当前连招信息
+	CurrentComboInfo = nextComboInfo;
 	if (UAbilitySystemComponent* ASC = GetCachedASC())
 	{
 		ASC->TryActivateAbilityByClass(nextComboInfo.NextAbilityClass);

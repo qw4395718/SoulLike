@@ -5,10 +5,11 @@
 #include "Components/TextBlock.h"
 //#include "Engine/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Private/Tests/UnrealAudioTestGenerators.h"
 
 A_DamageFloatingTextActor::A_DamageFloatingTextActor()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	m_widgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("DamageWidget"));
@@ -53,8 +54,37 @@ void A_DamageFloatingTextActor::EndPlay(const EEndPlayReason::Type EndPlayReason
 void A_DamageFloatingTextActor::ShowText(const FDamageFloatingTextData& InData)
 {
 	CurrentData = InData;
-	SetActorLocation(InData.HitWorldLocation);
 	ElapsedTime = 0.0f;
+
+	FVector RandomOffset;
+	FVector FloatDirection = FVector::UpVector;
+	if (!InData.AttackSourceLocation.IsZero())
+	{
+		// 基准方向 = 攻击者 →→ 受击点
+		const FVector BaseDirection = (InData.HitWorldLocation - InData.AttackSourceLocation).GetSafeNormal();
+
+		// 飘散方向 = 基准方向 + 随机锥体偏差
+		FloatDirection = BaseDirection;
+		if (ScatterConeHalfAngle > 0.0f)
+		{
+			FloatDirection = FMath::VRandCone(FloatDirection, FMath::DegreesToRadians(ScatterConeHalfAngle));
+		}
+
+		// 初始位置：从受击点沿 -基准方向 回退（向攻击者方向），确保在受击者前方
+		const float BackwardDist = FMath::FRandRange(0.0f, RandomOffsetRadius);
+		RandomOffset = -BaseDirection * BackwardDist;
+	}
+	else
+	{
+		// 无攻击者时回退到水平面随机偏移
+		const float Angle = FMath::FRandRange(0.0f, TWO_PI);
+		const float Radius = FMath::FRandRange(0.0f, RandomOffsetRadius);
+		RandomOffset = FVector(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius, 0.0f);
+	}
+
+	StartLocation = InData.HitWorldLocation + RandomOffset;
+	GoalLocation = StartLocation + FloatDirection * FloatHeight;
+	SetActorLocation(StartLocation);
 
 	UUserWidget* Widget = GetDamageWidget();
 	if (Widget)
@@ -150,10 +180,14 @@ void A_DamageFloatingTextActor::BillboardToCamera()
 
 void A_DamageFloatingTextActor::UpdateFloatAndLifetime(float DeltaTime)
 {
-	const FVector FloatOffset = FVector::UpVector * FloatSpeed * DeltaTime;
-	AddActorWorldOffset(FloatOffset);
-
 	ElapsedTime += DeltaTime;
+	const float Alpha = FMath::Clamp(ElapsedTime / Lifetime, 0.0f, 1.0f);
+
+	// 目标导向插值：用缓动曲线控制速度，ease-out = 开始快、终点慢
+	const float EasedAlpha = 1.0f - FMath::Pow(1.0f - Alpha, FloatEaseExponent);
+	const FVector NewLocation = FMath::Lerp(StartLocation, GoalLocation, EasedAlpha);
+	SetActorLocation(NewLocation);
+
 	if (ElapsedTime >= Lifetime)
 	{
 		HideAndRelease();

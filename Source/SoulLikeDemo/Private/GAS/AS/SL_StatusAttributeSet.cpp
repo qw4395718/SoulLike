@@ -170,6 +170,16 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 					TextData.HitWorldLocation = OwningActor->GetActorLocation();
 				}
 
+				// 提取攻击者位置
+				if (AActor* InstigatorActor = Data.EffectSpec.GetContext().GetInstigator())
+				{
+					TextData.AttackSourceLocation = InstigatorActor->GetActorLocation();
+				}
+				else if (AActor* EffectCauser = Data.EffectSpec.GetContext().GetEffectCauser())
+				{
+					TextData.AttackSourceLocation = EffectCauser->GetActorLocation();
+				}
+ 
 				// 暴击判定：通过 GE 携带的 Tag "Combat.CriticalHit" 识别
 				TextData.bIsCriticalHit = true/*Data.EffectSpec.CapturedSourceTags.GetAggregatedTags()->HasTag(
 					FGameplayTag::RequestGameplayTag(FName("Combat.CriticalHit")))*/;

@@ -295,12 +295,17 @@ struct FDamageFloatingTextData
 	UPROPERTY(BlueprintReadWrite)
 	AActor* TargetActor;
 
+	// 攻击者位置（用于计算飘字飘散方向，ZeroVector 则回退到垂直上飘）
+	UPROPERTY(BlueprintReadWrite)
+	FVector AttackSourceLocation;
+
 	FDamageFloatingTextData()
 		: DamageValue(0.0f)
 		, HitWorldLocation(FVector::ZeroVector)
 		, bIsCriticalHit(false)
 		, DamageType(EDamageType::SLASH)
 		, TargetActor(nullptr)
+		, AttackSourceLocation(FVector::ZeroVector)
 	{}
 };
 

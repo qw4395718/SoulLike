@@ -31,6 +31,9 @@ DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnItemEffectTriggeredEvent, AActor* User
 // 道具数量变更
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnItemCountChangedEvent, AActor* OwnerActor, FName ItemID, int32 NewCount);
 
+// 伤害飘字事件委托
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageFloatingTextEvent, const struct FDamageFloatingTextData&);
+
 UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UGlobalDelegatesManager : public UGameInstanceSubsystem
 {
@@ -67,6 +70,9 @@ public:
 	// 道具数量变更事件
 	FOnItemCountChangedEvent OnItemCountChanged;
 
+	// 伤害飘字事件
+	FOnDamageFloatingTextEvent OnDamageFloatingText;
+
 	/**
 	 * 委托响应函数
 	 */
@@ -90,6 +96,11 @@ public:
 	// 广播道具数量变更事件
 	UFUNCTION(BlueprintCallable, Category = "Global Delegates|Item")
 		void BroadcastItemCountChanged(AActor* InOwnerActor, FName InItemID, int32 InNewCount);
+
+	// ===== 伤害飘字委托广播 =====
+	// 广播伤害飘字请求
+	UFUNCTION(BlueprintCallable, Category = "Global Delegates|Combat")
+		void BroadcastDamageFloatingText(const struct FDamageFloatingTextData& InData);
 
 protected:
 

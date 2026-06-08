@@ -269,6 +269,41 @@ enum class EPlatformType : uint8
 	Max			UMETA(Hidden)
 };
 
+// 伤害飘字数据
+USTRUCT(BlueprintType)
+struct FDamageFloatingTextData
+{
+	GENERATED_BODY()
+
+	// 显示的伤害数值（正数 = 受伤，负数 = 治疗）
+	UPROPERTY(BlueprintReadWrite)
+	float DamageValue;
+
+	// 受击世界位置（飘字生成点）
+	UPROPERTY(BlueprintReadWrite)
+	FVector HitWorldLocation;
+
+	// 是否暴击（控制字体大小缩放动画）
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsCriticalHit;
+
+	// 伤害类型（未来可用于颜色区分）
+	UPROPERTY(BlueprintReadWrite)
+	EDamageType DamageType;
+
+	// 受击者
+	UPROPERTY(BlueprintReadWrite)
+	AActor* TargetActor;
+
+	FDamageFloatingTextData()
+		: DamageValue(0.0f)
+		, HitWorldLocation(FVector::ZeroVector)
+		, bIsCriticalHit(false)
+		, DamageType(EDamageType::SLASH)
+		, TargetActor(nullptr)
+	{}
+};
+
 // 界面类型
 UENUM(BlueprintType)
 enum class EWidgetType :uint8

@@ -142,7 +142,8 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			// Set the new health after clamping to min-max
 			SetHealth(NewValue);
 			const float CurrentValue = GetHealth();
-			if (UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this))
+			UGlobalDelegatesManager* globalDelegatesManager = UGlobalDelegatesManager::Get(this);
+			if (globalDelegatesManager != nullptr)
 			{
 				globalDelegatesManager->OnAttributeHealthChanged.Broadcast(OwningActor, OldValue, CurrentValue, MinValue, MaxValue);
 				// 血量归零
@@ -151,6 +152,31 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 
 			// Calculate 'actual' damage applied that respects min and max health
 			const float ChangeNumber = OldValue - NewValue;
+
+			// 广播伤害飘字
+			if (ChangeNumber > 0.0f && globalDelegatesManager != nullptr)
+			{
+				FDamageFloatingTextData TextData;
+				TextData.DamageValue = ChangeNumber;
+				TextData.TargetActor = OwningActor;
+
+				// 从 GE 上下文中提取受击位置
+				if (const FHitResult* HitResult = Data.EffectSpec.GetContext().GetHitResult())
+				{
+					TextData.HitWorldLocation = HitResult->Location;
+				}
+				else
+				{
+					TextData.HitWorldLocation = OwningActor->GetActorLocation();
+				}
+
+				// 暴击判定：通过 GE 携带的 Tag "Combat.CriticalHit" 识别
+				TextData.bIsCriticalHit = true/*Data.EffectSpec.CapturedSourceTags.GetAggregatedTags()->HasTag(
+					FGameplayTag::RequestGameplayTag(FName("Combat.CriticalHit")))*/;
+
+				globalDelegatesManager->BroadcastDamageFloatingText(TextData);
+			}
+
 			if (UAbilitySystemComponent* OwningAbilitySystemComponent = GetOwningAbilitySystemComponent())
 			{	
 				// 在PIE阶段,这个是运行时进行编译,所以会导致卡顿,打包后不会发生

@@ -39,7 +39,7 @@ UGlobalDelegatesManager* UGlobalDelegatesManager::Get(const UObject* WorldContex
 		return nullptr;
 	}
 
-	// ✅ 正确方式：通过Subsystem系统获取
+	// 正确方式：通过Subsystem系统获取
 	return GameInstance->GetSubsystem<UGlobalDelegatesManager>();
 }
 
@@ -50,6 +50,7 @@ void UGlobalDelegatesManager::ClearAllBinding()
 	OnItemUsed.RemoveAll(this);
 	OnItemEffectTriggered.RemoveAll(this);
 	OnItemCountChanged.RemoveAll(this);
+	OnDamageFloatingText.RemoveAll(this);
 }
 
 /************************************************************************/
@@ -83,4 +84,13 @@ void UGlobalDelegatesManager::BroadcastItemEffectTriggered(AActor* InUserActor, 
 void UGlobalDelegatesManager::BroadcastItemCountChanged(AActor* InOwnerActor, FName InItemID, int32 InNewCount)
 {
 	OnItemCountChanged.Broadcast(InOwnerActor, InItemID, InNewCount);
+}
+
+/************************************************************************/
+/*                              伤害飘字委托广播                         */
+/************************************************************************/
+
+void UGlobalDelegatesManager::BroadcastDamageFloatingText(const FDamageFloatingTextData& InData)
+{
+	OnDamageFloatingText.Broadcast(InData);
 }

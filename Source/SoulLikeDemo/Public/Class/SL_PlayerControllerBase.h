@@ -10,6 +10,7 @@ class UUIManagerSubsystem;
 class USL_ComboManagerComponent;
 class USL_EquipmentComponent;
 class USL_InventoryComponent;		// ===== 新增：前向声明 =====
+class UDamageFloatingTextManagerComponent;
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_PlayerControllerBase : public APlayerController
@@ -127,6 +128,14 @@ protected:
 
 	// 检查是否有存档并初始化界面 
     void CheckSaveDataAndInitScreen();
+
+protected:
+	/************************************************************************/
+	/*                               内部访问                                */
+	/************************************************************************/
+	// 伤害飘字管理器
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		UDamageFloatingTextManagerComponent* FloatingTextManager;
 
 private:
     /************************************************************************/

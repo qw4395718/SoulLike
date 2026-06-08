@@ -13,6 +13,7 @@
 #include "HUD_PauseMenuScreen.h"
 #include "Pop_DeathScreen.h"
 #include "Kismet/GameplayStatics.h"
+#include "DamageFloatingTextManagerComponent.h"
 
 // 构造函数
 ASL_PlayerControllerBase::ASL_PlayerControllerBase()
@@ -23,12 +24,21 @@ ASL_PlayerControllerBase::ASL_PlayerControllerBase()
 	bEnableMouseOverEvents = false;
 	UIManager = nullptr;
 	bIsUIInitialized = false;
+	FloatingTextManager = nullptr;
 }
 
 // 游戏开始
 void ASL_PlayerControllerBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 创建伤害飘字管理器
+	FloatingTextManager = NewObject<UDamageFloatingTextManagerComponent>(this, TEXT("FloatingTextManager"));
+	if (FloatingTextManager)
+	{
+		FloatingTextManager->RegisterComponent();
+		UE_LOG(LogTemp, Log, TEXT("DamageFloatingTextManagerComponent created"));
+	}
 
 	// 设置初始输入模式为游戏模式
 	SetInputModeGameOnly();

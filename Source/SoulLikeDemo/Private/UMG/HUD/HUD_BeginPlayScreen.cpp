@@ -3,7 +3,7 @@
 #include "HUD_BeginPlayScreen.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
-#include "SL_GameModeBase.h"
+#include "SL_PlayerControllerBase.h"
 #include "SL_GameSaveSubsystem.h"
 #include "UIManagerSubsystem.h"
 #include "SoulLikeGameGlobal.h"
@@ -109,36 +109,34 @@ void UHUD_BeginPlayScreen::OnNewGameClicked()
 {
     UE_LOG(LogTemp, Log, TEXT("HUD_BeginPlayScreen::OnNewGameClicked - New Game"));
 
-    // 获取GameMode并开始新游戏
-    if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
+    // 清除存档数据（客户端可执行）
+    if (USL_GameSaveSubsystem* SaveSubsystem = USL_GameSaveSubsystem::Get(this))
     {
-        // 清除存档数据（新游戏不需要旧的存档）
-        if (USL_GameSaveSubsystem* SaveSubsystem = USL_GameSaveSubsystem::Get(this))
-        {
-            SaveSubsystem->DeleteSaveData();
-        }
-
-        // 开始新游戏（从第1关开始）
-        GameMode->SetUseSaveData(false);
-        
-        // 加载大厅界面
-        ShowLobbyScreen();
+        SaveSubsystem->DeleteSaveData();
     }
+
+    // 通过 PlayerController 通知服务器执行 GameMode 操作
+    if (ASL_PlayerControllerBase* PC = Cast<ASL_PlayerControllerBase>(GetOwningPlayer()))
+    {
+        PC->RequestNewGame();
+    }
+
+    // 加载大厅界面
+    ShowLobbyScreen();
 }
 
 void UHUD_BeginPlayScreen::OnLoadGameClicked()
 {
     UE_LOG(LogTemp, Log, TEXT("HUD_BeginPlayScreen::OnLoadGameClicked - Load Game"));
 
-    // 获取GameMode并加载存档
-    if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
+    // 通过 PlayerController 通知服务器执行 GameMode 操作
+    if (ASL_PlayerControllerBase* PC = Cast<ASL_PlayerControllerBase>(GetOwningPlayer()))
     {
-        // 从存档加载游戏
-        GameMode->SetUseSaveData(true);
-		
-        // 加载大厅界面
-        ShowLobbyScreen();
-	}
+        PC->RequestLoadGame();
+    }
+
+    // 加载大厅界面
+    ShowLobbyScreen();
 }
 
 void UHUD_BeginPlayScreen::OnQuitGameClicked()
@@ -154,5 +152,4 @@ void UHUD_BeginPlayScreen::OnQuitGameClicked()
         UKismetSystemLibrary::QuitGame(GetWorld(), PlayerController, EQuitPreference::Quit, false);
     }
 }
-
 

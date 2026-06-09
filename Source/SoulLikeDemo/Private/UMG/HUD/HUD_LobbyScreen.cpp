@@ -11,7 +11,7 @@
 #include "Table/WaveConfigInfoTable.h"
 #include "Table/LevelConfigInfoTable.h"
 #include "SoulLikeGameGlobal.h"
-#include "SL_GameModeBase.h"
+#include "SL_PlayerControllerBase.h"
 #include <UI_ListItemBase.h>
 #include "UIManagerSubsystem.h"
 #include "HUD_ClassSelectScreen.h"
@@ -275,12 +275,10 @@ void UHUD_LobbyScreen::OnLevelClicked(int32 InLevelID)
 	// 关卡选择后的跳转逻辑（由蓝图侧扩展或在此实现）
 	UE_LOG(LogTemp, Log, TEXT("UHUD_LobbyScreen::OnLevelClicked - Level %d selected"), InLevelID);
 
-	// 预留：通过关卡ID加载对应关卡
-		// 获取GameMode并加载存档
-	if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
+	// 通过 PlayerController 通知服务器执行关卡加载
+	if (ASL_PlayerControllerBase* PC = Cast<ASL_PlayerControllerBase>(GetOwningPlayer()))
 	{
-		// 从存档加载游戏
-		GameMode->StartTargetLevel(InLevelID);
+		PC->RequestLoadLevel(InLevelID);
 	}
 
 	// 最后关闭当前界面（更新UIManager内部状态）

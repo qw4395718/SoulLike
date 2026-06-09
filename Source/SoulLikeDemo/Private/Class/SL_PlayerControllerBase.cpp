@@ -360,7 +360,7 @@ void ASL_PlayerControllerBase::OnUseItemPressed()
 		return;
 	}
 
-	// 3. 检查道具是否可使用
+	// 3. 客户端做轻量检查（快速过滤）
 	if (!Inventory->CanUseItem(SelectedItemID))
 	{
 		UE_LOG(LogTemp, Verbose, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - Item %s cannot be used now"),
@@ -368,20 +368,26 @@ void ASL_PlayerControllerBase::OnUseItemPressed()
 		return;
 	}
 
-	// 3b. 将当前选中的道具ID记录到背包组件（GA从中读取）
-	Inventory->SetSelectedItemID(SelectedItemID);
+	// 4. 发 RPC 到服务器再做权威检查并执行
+	Server_UseItem(SelectedItemID);
 
-	// 4. 使用道具
-	bool bSuccess = Inventory->UseItemByID(SelectedItemID);
-	if (bSuccess)
-	{
-		UE_LOG(LogTemp, Log, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - Used item: %s"), *SelectedItemID.ToString());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - Failed to use item: %s"),
-			*SelectedItemID.ToString());
-	}
+	UE_LOG(LogTemp, Log, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - Item use requested: %s"), *SelectedItemID.ToString());
+}
+
+bool ASL_PlayerControllerBase::Server_UseItem_Validate(FName InItemID)
+{
+	return !InItemID.IsNone();
+}
+
+void ASL_PlayerControllerBase::Server_UseItem_Implementation(FName InItemID)
+{
+	USL_InventoryComponent* Inventory = GetInventoryComponent();
+	if (!Inventory || !Inventory->CanUseItem(InItemID)) return;
+
+	Inventory->SetSelectedItemID(InItemID);
+	Inventory->UseItemByID(InItemID);
+
+	UE_LOG(LogTemp, Log, TEXT("ASL_PlayerControllerBase::Server_UseItem - Server executed item use: %s"), *InItemID.ToString());
 }
 
 void ASL_PlayerControllerBase::OnSelectPrevItemPressed()
@@ -552,4 +558,92 @@ void ASL_PlayerControllerBase::OnPlayerDiedHandler(AActor* InDeadActor, AActor* 
         2.5f,  // 延迟 2.5 秒
         false  // 只执行一次
     );
+}
+
+/************************************************************************/
+/*                         联机RPC：游戏状态操作                         */
+/************************************************************************/
+
+void ASL_PlayerControllerBase::RequestNewGame()
+{
+	if (HasAuthority())
+	{
+		if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(GetWorld()->GetAuthGameMode()))
+		{
+			GameMode->SetUseSaveData(false);
+		}
+	}
+	else
+	{
+		Server_RequestNewGame();
+	}
+}
+
+bool ASL_PlayerControllerBase::Server_RequestNewGame_Validate()
+{
+	return true;
+}
+
+void ASL_PlayerControllerBase::Server_RequestNewGame_Implementation()
+{
+	if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->SetUseSaveData(false);
+	}
+}
+
+void ASL_PlayerControllerBase::RequestLoadGame()
+{
+	if (HasAuthority())
+	{
+		if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(GetWorld()->GetAuthGameMode()))
+		{
+			GameMode->SetUseSaveData(true);
+		}
+	}
+	else
+	{
+		Server_RequestLoadGame();
+	}
+}
+
+bool ASL_PlayerControllerBase::Server_RequestLoadGame_Validate()
+{
+	return true;
+}
+
+void ASL_PlayerControllerBase::Server_RequestLoadGame_Implementation()
+{
+	if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->SetUseSaveData(true);
+	}
+}
+
+void ASL_PlayerControllerBase::RequestLoadLevel(int32 InLevelID)
+{
+	if (HasAuthority())
+	{
+		if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(GetWorld()->GetAuthGameMode()))
+		{
+			GameMode->StartTargetLevel(InLevelID);
+		}
+	}
+	else
+	{
+		Server_RequestLoadLevel(InLevelID);
+	}
+}
+
+bool ASL_PlayerControllerBase::Server_RequestLoadLevel_Validate(int32 InLevelID)
+{
+	return InLevelID >= 0;
+}
+
+void ASL_PlayerControllerBase::Server_RequestLoadLevel_Implementation(int32 InLevelID)
+{
+	if (ASL_GameModeBase* GameMode = Cast<ASL_GameModeBase>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->StartTargetLevel(InLevelID);
+	}
 }

@@ -98,6 +98,38 @@ public:
     UFUNCTION()
     void OnPlayerDiedHandler(AActor* InDeadActor, AActor* InInstigator);
 
+    /************************************************************************/
+    /*                         联机RPC：游戏状态操作                         */
+    /************************************************************************/
+
+    // 路由入口：请求新游戏（客户端→Server RPC，服务器→直接调用）
+    UFUNCTION(BlueprintCallable, Category = "Game")
+    void RequestNewGame();
+
+    // 路由入口：请求加载存档
+    UFUNCTION(BlueprintCallable, Category = "Game")
+    void RequestLoadGame();
+
+    // 路由入口：请求加载指定关卡
+    UFUNCTION(BlueprintCallable, Category = "Game")
+    void RequestLoadLevel(int32 InLevelID);
+
+    // Server RPC：客户端请求新游戏
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_RequestNewGame();
+
+    // Server RPC：客户端请求加载存档
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_RequestLoadGame();
+
+    // Server RPC：客户端请求加载指定关卡
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_RequestLoadLevel(int32 InLevelID);
+
+    // Server RPC：客户端请求使用道具（服务器再做权威检查并执行）
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_UseItem(FName InItemID);
+
 protected:
 	/************************************************************************/
 	/*                               内部调用                               */

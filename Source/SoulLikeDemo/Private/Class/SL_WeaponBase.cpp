@@ -98,6 +98,9 @@ void ASL_WeaponBase::InitializeFromDataRow(const FWeaponDataInfo& InWeaponData)
 	// 设置位置变换
 	SetupOffset();
 
+	// 设置旋转
+	SetupRotator();
+
 	// 设置碰撞盒
 	SetupCollisionBox();
 
@@ -190,10 +193,8 @@ void ASL_WeaponBase::SetupAnimClass()
 
 void ASL_WeaponBase::SetupRotator()
 {
-	if (bIsStaticMesh == true)
-	{
-		StaticWeaponMesh->SetRelativeRotation(WeaponData.Rotator);
-	}
+	RETURN_IF_TRUE(RootComponent == nullptr);
+	RootComponent->SetRelativeRotation(WeaponData.Rotator);
 }
 
 void ASL_WeaponBase::SetupOffset()

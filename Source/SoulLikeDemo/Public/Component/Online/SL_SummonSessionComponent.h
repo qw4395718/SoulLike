@@ -1,0 +1,125 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
+#include "Struct/OnlineSummonStructs.h"
+#include "SL_SummonSessionComponent.generated.h"
+
+class ASL_SummonSign;
+
+/**
+ * 召唤会话组件
+ * 挂在 PlayerController 上，管理玩家的联机状态机和 RPC 通信
+ */
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+class SOULLIKEDEMO_API USL_SummonSessionComponent : public UActorComponent
+{
+	GENERATED_BODY()
+
+public:
+	USL_SummonSessionComponent();
+
+	/************************************************************************/
+	/*                               外部调用                               */
+	/************************************************************************/
+	// 获取当前联机状态
+	UFUNCTION(BlueprintPure, Category = "SummonSession")
+	EOnlinePlayerState GetCurrentState() const { return CurrentState; }
+
+	// 获取当前玩家名称
+	UFUNCTION(BlueprintPure, Category = "SummonSession")
+	FString GetPlayerDisplayName() const;
+
+	// 获取当前玩家等级（用于匹配）
+	UFUNCTION(BlueprintPure, Category = "SummonSession")
+	int32 GetPlayerLevel() const;
+
+	// 获取当前玩家武器等级（用于匹配）
+	UFUNCTION(BlueprintPure, Category = "SummonSession")
+	int32 GetPlayerWeaponLevel() const;
+
+	// ===== 放置者侧 =====
+	// 服务器：放置召唤标记
+	UFUNCTION(BlueprintCallable, Category = "SummonSession")
+	void PlaceSummonSign();
+
+	// 服务器：取消当前标记
+	UFUNCTION(BlueprintCallable, Category = "SummonSession")
+	void CancelSummonSign();
+
+	// 服务器：确认被召唤（接受召唤请求）
+	UFUNCTION(BlueprintCallable, Category = "SummonSession")
+	void AcceptSummon();
+
+	// 服务器：拒绝被召唤
+	UFUNCTION(BlueprintCallable, Category = "SummonSession")
+	void DeclineSummon();
+
+	// ===== 召唤者侧 =====
+	// 服务器：与召唤标记交互，发起召唤请求
+	UFUNCTION(BlueprintCallable, Category = "SummonSession")
+	void InteractWithSign(ASL_SummonSign* InSign);
+
+	// 查询当前关卡可用的召唤标记
+	UFUNCTION(BlueprintPure, Category = "SummonSession")
+	TArray<FSummonSignInfo> QueryAvailableSigns() const;
+
+protected:
+	virtual void BeginPlay() override;
+
+	/************************************************************************/
+	/*                               内部调用                               */
+	/************************************************************************/
+	// 切换状态
+	void SetState(EOnlinePlayerState InNewState);
+
+	// 道具使用回调（通过 GlobalDelegatesManager 监听）
+	UFUNCTION()
+	void OnItemUsedCallback(AActor* InUserActor, FName InItemID);
+
+	// 获取 SignManager
+	class USL_SignManager* GetSignManager() const;
+
+	// 生成标记 Actor
+	ASL_SummonSign* SpawnSummonSignActor(const FTransform& InTransform);
+
+	// 销毁当前标记 Actor
+	void DestroyCurrentSign();
+
+	// 获取所属的 PlayerController
+	class APlayerController* GetOwningPlayerController() const;
+
+	// 获取所属的 Character
+	class ACharacter* GetOwningCharacter() const;
+
+protected:
+	/************************************************************************/
+	/*                               内部访问                               */
+	/************************************************************************/
+	// 当前联机状态
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SummonSession")
+	EOnlinePlayerState CurrentState;
+
+	// 当前放置的标记 Actor（放置者侧）
+	UPROPERTY()
+	ASL_SummonSign* CurrentSummonSign;
+
+	// 当前正在交互的标记 Actor（召唤者侧）
+	UPROPERTY()
+	ASL_SummonSign* TargetSummonSign;
+
+	// 当前被召唤的 SignID
+	FGuid PendingSummonSignID;
+
+	// 匹配配置
+	UPROPERTY(EditDefaultsOnly, Category = "SummonSession|Config")
+	FSummonMatchConfig MatchConfig;
+
+	// 标记 Actor 类（可在蓝图或 C++ 中指定子类）
+	UPROPERTY(EditDefaultsOnly, Category = "SummonSession|Config")
+	TSubclassOf<ASL_SummonSign> SummonSignClass;
+
+	// 召唤符道具 ID（对应道具数据表中的 ItemID）
+	UPROPERTY(EditDefaultsOnly, Category = "SummonSession|Config")
+	FName SummonItemID = FName("SummonSign");
+};

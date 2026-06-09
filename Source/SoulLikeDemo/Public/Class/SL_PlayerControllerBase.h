@@ -11,6 +11,7 @@ class USL_ComboManagerComponent;
 class USL_EquipmentComponent;
 class USL_InventoryComponent;
 class UHUD_ItemUseUI;
+class USL_SummonSessionComponent;
 class UDamageFloatingTextManagerComponent;
 
 UCLASS()
@@ -145,6 +146,10 @@ protected:
 	// 伤害飘字管理器
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		UDamageFloatingTextManagerComponent* FloatingTextManager;
+
+	// 联机召唤会话组件
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		USL_SummonSessionComponent* SummonSessionCmp;
 
 private:
     /************************************************************************/

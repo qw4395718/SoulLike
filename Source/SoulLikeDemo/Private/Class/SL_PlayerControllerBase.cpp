@@ -6,6 +6,7 @@
 #include "Engine/World.h"
 #include <UIManagerSubsystem.h>
 #include <HUD_ItemUseUI.h>
+#include <SL_SummonSessionComponent.h>
 #include <SL_ComboManagerComponent.h>
 #include <HUD_BeginPlayScreen.h>
 #include <SL_GameModeBase.h>
@@ -26,6 +27,7 @@ ASL_PlayerControllerBase::ASL_PlayerControllerBase()
 	UIManager = nullptr;
 	bIsUIInitialized = false;
 	FloatingTextManager = nullptr;
+	SummonSessionCmp = nullptr;
 }
 
 // 游戏开始
@@ -39,6 +41,14 @@ void ASL_PlayerControllerBase::BeginPlay()
 	{
 		FloatingTextManager->RegisterComponent();
 		UE_LOG(LogTemp, Log, TEXT("DamageFloatingTextManagerComponent created"));
+	}
+
+	// 创建联机召唤会话组件
+	SummonSessionCmp = NewObject<USL_SummonSessionComponent>(this, TEXT("SummonSession"));
+	if (SummonSessionCmp)
+	{
+		SummonSessionCmp->RegisterComponent();
+		UE_LOG(LogTemp, Log, TEXT("SummonSessionComponent created"));
 	}
 
 	// 设置初始输入模式为游戏模式

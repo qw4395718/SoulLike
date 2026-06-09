@@ -6,6 +6,14 @@
 
 class UTexture2D;
 
+// ===== 道具使用行为类型 =====
+UENUM(BlueprintType)
+enum class EItemUseBehavior : uint8
+{
+	Default			UMETA(DisplayName = "默认（应用GE效果）"),
+	PlaceSummonSign	UMETA(DisplayName = "放置召唤标记")
+};
+
 USTRUCT(BlueprintType)
 struct FItemDataRow : public FTableRowBase
 {
@@ -51,6 +59,11 @@ struct FItemDataRow : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behavior")
 	bool bCanUse;
+
+	// ===== 行为类型 =====
+	/** 道具被使用时的行为类型 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behavior")
+	EItemUseBehavior UseBehavior = EItemUseBehavior::Default;
 
 	// ===== GAS能力相关 =====
 	// 使用此道具时触发的GameplayTag（对应GAS的ActivationTag）

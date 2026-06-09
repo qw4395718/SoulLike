@@ -615,6 +615,15 @@ struct FSlotItemInfo
 		int32 InitialCount = 1;
 };
 
+// 武器持有状态
+UENUM(BlueprintType)
+enum class EClassType : uint8
+{
+	SingleSword		UMETA(DisplayName = "单手剑"),
+	DoubleBlade		UMETA(DisplayName = "双手剑"),
+	Max				UMETA(Hidden)
+};
+
 // ===== 职业配置表结构 =====
 USTRUCT(BlueprintType)
 struct FClassConfigInfo : public FTableRowBase
@@ -624,6 +633,9 @@ struct FClassConfigInfo : public FTableRowBase
 		// ===== 基础信息 =====
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 		int32 ClassID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
+		EClassType ClassType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Basic")
 		FName ClassName;

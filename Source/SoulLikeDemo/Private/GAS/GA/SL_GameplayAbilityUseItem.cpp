@@ -5,6 +5,7 @@
 #include "GlobalDelegatesManager.h"
 #include "DataTableManager.h"
 #include "ItemDataTable.h"
+#include <SL_InventoryComponent.h>
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 
 USL_GameplayAbilityUseItem::USL_GameplayAbilityUseItem()
@@ -31,8 +32,8 @@ void USL_GameplayAbilityUseItem::ActivateAbility(const FGameplayAbilitySpecHandl
 
 	CachedActorInfo = InActorInfo;
 
-	// 1. 从事件数据中解析道具ID
-	FName ItemID = ParseItemIDFromEventData(InTriggerEventData);
+	// 1. 从持有者的背包组件获取当前选中的道具ID
+	FName ItemID = GetItemIDFromInventory(InActorInfo);
 	if (ItemID.IsNone())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("USL_GameplayAbilityUseItem::ActivateAbility - Failed to parse ItemID from event data"));
@@ -101,16 +102,24 @@ void USL_GameplayAbilityUseItem::ActivateAbility(const FGameplayAbilitySpecHandl
 /*                               内部调用                                */
 /************************************************************************/
 
-FName USL_GameplayAbilityUseItem::ParseItemIDFromEventData(const FGameplayEventData* InEventData) const
+FName USL_GameplayAbilityUseItem::GetItemIDFromInventory(const FGameplayAbilityActorInfo* InActorInfo) const
 {
-	if (!InEventData) return NAME_None;
+	if (!InActorInfo || !InActorInfo->OwnerActor.IsValid()) return NAME_None;
 
-	// 从 ContextString 中获取道具ID
-	/*if (!InEventData->ContextString.IsEmpty())
+	AActor* OwnerActor = InActorInfo->OwnerActor.Get();
+	USL_InventoryComponent* Inventory = Cast<USL_InventoryComponent>(
+		OwnerActor->GetComponentByClass(USL_InventoryComponent::StaticClass()));
+
+	if (Inventory)
 	{
-		return FName(*InEventData->ContextString);
-	}*/
+		FName SelectedID = Inventory->GetSelectedItemID();
+		if (!SelectedID.IsNone())
+		{
+			return SelectedID;
+		}
+	}
 
+	UE_LOG(LogTemp, Warning, TEXT("USL_GameplayAbilityUseItem::GetItemIDFromInventory - No selected item in inventory"));
 	return NAME_None;
 }
 

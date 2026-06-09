@@ -10,7 +10,7 @@
 USL_InventoryComponent::USL_InventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	bAbilityGranted = false;
+	bAbilityGranted = true;
 }
 
 /************************************************************************/

@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Engine/World.h"
 #include <UIManagerSubsystem.h>
+#include <HUD_ItemUseUI.h>
 #include <SL_ComboManagerComponent.h>
 #include <HUD_BeginPlayScreen.h>
 #include <SL_GameModeBase.h>
@@ -121,8 +122,10 @@ void ASL_PlayerControllerBase::SetupInputComponent()
 	// 闪避（A键）
 	InputComponent->BindAction("Dodge", IE_Pressed, this, &ASL_PlayerControllerBase::OnDodgePressed);
 
-	// ===== 新增：道具使用（E键）=====
+	// ===== 道具使用 =====
 	InputComponent->BindAction("UseItem", IE_Pressed, this, &ASL_PlayerControllerBase::OnUseItemPressed);
+	InputComponent->BindAction("SelectPrevItem", IE_Pressed, this, &ASL_PlayerControllerBase::OnSelectPrevItemPressed);
+	InputComponent->BindAction("SelectNextItem", IE_Pressed, this, &ASL_PlayerControllerBase::OnSelectNextItemPressed);
 }
 
 /************************************************************************/
@@ -321,22 +324,29 @@ void ASL_PlayerControllerBase::OnDodgePressed()
 
 }
 
-// ===== 新增：道具使用处理 =====
+// ===== 道具使用处理 =====
 void ASL_PlayerControllerBase::OnUseItemPressed()
 {
-	// 1. 获取背包组件
+	// 1. 从 UI 获取当前选中的道具 ID
+	UHUD_ItemUseUI* ItemUI = GetItemUseUIWidget();
+	if (!ItemUI)
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - ItemUseUI widget not found"));
+		return;
+	}
+
+	FName SelectedItemID = ItemUI->GetCurrentItemID();
+	if (SelectedItemID.IsNone())
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - No item selected in UI"));
+		return;
+	}
+
+	// 2. 获取背包组件
 	USL_InventoryComponent* Inventory = GetInventoryComponent();
 	if (!Inventory)
 	{
 		UE_LOG(LogTemp, Verbose, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - InventoryComponent not found"));
-		return;
-	}
-
-	// 2. 检查是否有选中的道具
-	FName SelectedItemID = Inventory->GetSelectedItemID();
-	if (SelectedItemID.IsNone())
-	{
-		UE_LOG(LogTemp, Verbose, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - No item selected"));
 		return;
 	}
 
@@ -348,8 +358,11 @@ void ASL_PlayerControllerBase::OnUseItemPressed()
 		return;
 	}
 
+	// 3b. 将当前选中的道具ID记录到背包组件（GA从中读取）
+	Inventory->SetSelectedItemID(SelectedItemID);
+
 	// 4. 使用道具
-	bool bSuccess = Inventory->UseSelectedItem();
+	bool bSuccess = Inventory->UseItemByID(SelectedItemID);
 	if (bSuccess)
 	{
 		UE_LOG(LogTemp, Log, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - Used item: %s"), *SelectedItemID.ToString());
@@ -358,6 +371,24 @@ void ASL_PlayerControllerBase::OnUseItemPressed()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - Failed to use item: %s"),
 			*SelectedItemID.ToString());
+	}
+}
+
+void ASL_PlayerControllerBase::OnSelectPrevItemPressed()
+{
+	UHUD_ItemUseUI* ItemUI = GetItemUseUIWidget();
+	if (ItemUI)
+	{
+		ItemUI->SelectPrevious();
+	}
+}
+
+void ASL_PlayerControllerBase::OnSelectNextItemPressed()
+{
+	UHUD_ItemUseUI* ItemUI = GetItemUseUIWidget();
+	if (ItemUI)
+	{
+		ItemUI->SelectNext();
 	}
 }
 
@@ -401,7 +432,6 @@ USL_EquipmentComponent* ASL_PlayerControllerBase::GetEquipmentComponent() const
 	return CachedEquipmentComp.Get();
 }
 
-// ===== 新增：获取背包组件 =====
 USL_InventoryComponent* ASL_PlayerControllerBase::GetInventoryComponent() const
 {
 	// 使用缓存
@@ -418,6 +448,17 @@ USL_InventoryComponent* ASL_PlayerControllerBase::GetInventoryComponent() const
 	}
 
 	return CachedInventoryComp.Get();
+}
+
+UHUD_ItemUseUI* ASL_PlayerControllerBase::GetItemUseUIWidget() const
+{
+	UUIManagerSubsystem* UIMgr = UUIManagerSubsystem::Get(const_cast<ASL_PlayerControllerBase*>(this));
+	if (!UIMgr)
+	{
+		return nullptr;
+	}
+
+	return Cast<UHUD_ItemUseUI>(UIMgr->GetWidget(EWidgetType::EWIDGET_ItemUseUI));
 }
 
 void ASL_PlayerControllerBase::ProcessComboInput(EComboInputActionType InputType)

@@ -31,8 +31,8 @@ protected:
 	/************************************************************************/
 	/*                               内部调用                               */
 	/************************************************************************/
-	// 从触发器事件数据中解析道具ID
-	FName ParseItemIDFromEventData(const FGameplayEventData* InEventData) const;
+	// 从持有者的背包组件获取当前选中的道具ID
+	FName GetItemIDFromInventory(const FGameplayAbilityActorInfo* InActorInfo) const;
 
 	// 查表获取道具配置并应用效果
 	void ApplyItemEffectByID(const FGameplayAbilityActorInfo* InActorInfo, FName InItemID);

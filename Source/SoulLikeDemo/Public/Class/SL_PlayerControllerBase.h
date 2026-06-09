@@ -9,7 +9,8 @@
 class UUIManagerSubsystem;
 class USL_ComboManagerComponent;
 class USL_EquipmentComponent;
-class USL_InventoryComponent;		// ===== 新增：前向声明 =====
+class USL_InventoryComponent;
+class UHUD_ItemUseUI;
 class UDamageFloatingTextManagerComponent;
 
 UCLASS()
@@ -110,18 +111,26 @@ protected:
 
 	void OnDodgePressed();
 
-	// ===== 新增：道具使用 =====
-	// 使用当前选中的道具（绑定"E"键）
+	// ===== 道具使用 =====
+	// 使用当前选中的道具（绑定"R"键）
 	void OnUseItemPressed();
+
+	// 切换到上一个道具（绑定"Q"键）
+	void OnSelectPrevItemPressed();
+
+	// 切换到下一个道具（绑定"E"键）
+	void OnSelectNextItemPressed();
 
 	// 安全获取 ComboManager 
 	USL_ComboManagerComponent* GetComboManagerComponent() const;
 
 	USL_EquipmentComponent* GetEquipmentComponent() const;
 
-	// ===== 新增：获取背包组件 =====
 	// 安全获取 InventoryComponent
 	USL_InventoryComponent* GetInventoryComponent() const;
+
+	// 从 UIManager 获取道具使用界面控件
+	UHUD_ItemUseUI* GetItemUseUIWidget() const;
 
 	// 通用输入处理，所有输入都走这个方法 
 	void ProcessComboInput(EComboInputActionType InputType);

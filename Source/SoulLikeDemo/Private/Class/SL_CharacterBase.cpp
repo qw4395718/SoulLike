@@ -66,18 +66,18 @@ void ASL_CharacterBase::BeginPlay()
 		StatusAttributeSet->SetOwningActor(this);
 	}
 	
-	//if (!IsPlayerControlled())
-	//{// 非自身SL_CharacterBase实例
-	//	if (UUIManagerSubsystem* pUIManagerSystem = UUIManagerSubsystem::Get(this))
-	//	{
-	//		// 创建结构体
-	//		FUICreateParams createParam;
-	//		createParam.Type = EWidgetType::EWIDGET_PawnStatusInScreen;
-	//		createParam.TargetActor = this;
+	if (!IsPlayerControlled())
+	{// 非自身SL_CharacterBase实例
+		if (UUIManagerSubsystem* pUIManagerSystem = UUIManagerSubsystem::Get(this))
+		{
+			// 创建结构体
+			FUICreateParams createParam;
+			createParam.Type = EWidgetType::EWIDGET_PawnStatusInScreen;
+			createParam.TargetActor = this;
 
-	//		pUIManagerSystem->OpenWidget(createParam);
-	//	}
-	//}
+			pUIManagerSystem->OpenWidget(createParam);
+		}
+	}
 
 	UE_LOG(LogTemp, Display, TEXT("ZYF_C++_ASL_CharacterBase::BeginPlay()"));
 
@@ -493,7 +493,21 @@ void ASL_CharacterBase::ApplyEnemyConfig(const FClassConfigInfo& Config)
 		EquipmentCmp->InitializeWithClassID(PlayerClassID);
 	}
 
-	// 3. 授予GAS能力（可配置在数据表中）
+	// 3. 将职业配置中的道具注册到背包
+	if (InventoryCmp)
+	{
+		for (const FSlotItemInfo& SlotItem : Config.SlotItems)
+		{
+			if (SlotItem.ItemID != NAME_None && SlotItem.InitialCount > 0)
+			{
+				InventoryCmp->AddItemByID(SlotItem.ItemID, SlotItem.InitialCount);
+				UE_LOG(LogTemp, Log, TEXT("ASL_CharacterBase::ApplyEnemyConfig - Added item %s x%d to inventory"),
+					*SlotItem.ItemID.ToString(), SlotItem.InitialCount);
+			}
+		}
+	}
+
+	// 4. 授予GAS能力（可配置在数据表中）
 	GrantAbilities(Config.GrantedAbilities);
 
 }

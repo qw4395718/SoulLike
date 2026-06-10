@@ -69,7 +69,7 @@ void ASL_SummonSign::BeginPlay()
 	// 注册到 SignManager
 	if (HasAuthority())
 	{
-		RegisterToManager();
+		if (!bIsRemoteSign) RegisterToManager();
 	}
 }
 

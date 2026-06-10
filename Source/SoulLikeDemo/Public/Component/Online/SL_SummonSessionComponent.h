@@ -64,6 +64,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "SummonSession")
 	TArray<FSummonSignInfo> QueryAvailableSigns() const;
 
+	// Phase 2: 远程查询结果回调
+	UFUNCTION()
+	void OnRemoteQueryResult(const FString& InResultJSON);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -110,6 +114,17 @@ protected:
 
 	// 当前被召唤的 SignID
 	FGuid PendingSummonSignID;
+
+	// Phase 2: 远程标记 Actor 追踪（cleanup 用）
+	UPROPERTY()
+	TMap<FString, ASL_SummonSign*> RemoteSignActors;
+
+	// Phase 2: 生成远程标记 Actor
+	void SpawnRemoteSignActor(const FString& InRemoteSignID, const FString& InOwnerName,
+		int32 InLevel, const FString& InTransformJSON, const FString& InInstanceID);
+
+	// Phase 2: 清理所有远程标记 Actor
+	void ClearRemoteSignActors();
 
 	// 匹配配置
 	UPROPERTY(EditDefaultsOnly, Category = "SummonSession|Config")

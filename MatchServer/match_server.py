@@ -19,6 +19,17 @@ PORT = 7777
 instances = {}        # instance_id -> {"conn": socket, "map": str, "ip": str, "port": int}
 signs = {}            # sign_id -> dict (完整的标记数据)
 conn_owner = {}       # socket -> instance_id (反向查找)
+import re
+
+def normalize_map(map_name):
+    """去除 PIE 模式下的 UEDPIE_N_ 前缀"""
+    if map_name and map_name.startswith('UEDPIE_'):
+        parts = map_name.split('_', 2)
+        if len(parts) == 3:
+            return parts[2]
+    return map_name
+
+
 
 
 def send_json(conn, data):
@@ -85,7 +96,7 @@ def process_message(conn, msg):
         instance_id = msg['instance_id']
         instances[instance_id] = {
             'conn': conn,
-            'map': msg.get('map', ''),
+            'map': normalize_map(msg.get('map', '')),
             'ip': msg.get('ip', ''),
             'port': msg.get('port', 0),
         }
@@ -114,6 +125,7 @@ def process_message(conn, msg):
         sign_data = msg.get('sign_data', {})
         sign_data['sign_id'] = sign_id
         sign_data['instance_id'] = instance_id
+        sign_data['map'] = normalize_map(sign_data.get('map', ''))
         signs[sign_id] = sign_data
         print(f"[标记] {instance_id} 放置标记 {sign_id[:8]}... "
               f"当前总标记: {len(signs)}")
@@ -130,7 +142,7 @@ def process_message(conn, msg):
 
     elif msg_type == 'query_signs':
         instance_id = conn_owner.get(conn)
-        map_name = msg.get('map', '')
+        map_name = normalize_map(msg.get('map', ''))
         level = msg.get('level', 0)
         weapon_level = msg.get('weapon_level', 0)
 

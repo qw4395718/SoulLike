@@ -2,6 +2,10 @@
 #include "SL_SummonSign.h"
 #include "Manager/SL_SignManager.h"
 #include "Manager/Online/SL_MatchClientSubsystem.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 #include "Manager/GlobalDelegatesManager.h"
 #include "Manager/DataTableManager.h"
 #include "Table/ItemDataTable.h"
@@ -20,13 +24,19 @@ USL_SummonSessionComponent::USL_SummonSessionComponent()
 	CurrentSummonSign = nullptr;
 	TargetSummonSign = nullptr;
 
-	// 默认召唤标记类
-	SummonSignClass = ASL_SummonSign::StaticClass();
 }
 
 void USL_SummonSessionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!SummonSignClass)
+	{
+		SummonSignClass = LoadClass<ASL_SummonSign>(
+			nullptr,
+			TEXT("/Game/SoulLikeDemo/Blueprints/Actor/BP_SummonSign.BP_SummonSign_C")
+			);
+	}
 
 	// 监听道具使用事件（召唤符道具通过此回调触发放置标记）
 	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
@@ -35,7 +45,13 @@ void USL_SummonSessionComponent::BeginPlay()
 		UE_LOG(LogTemp, Log, TEXT("USL_SummonSessionComponent::BeginPlay - Bound to OnItemUsed"));
 	}
 
-	// Phase 2: 延迟查询远程标记
+	// Phase 2: 绑定远程标记查询结果回调
+	if (USL_MatchClientSubsystem* MC = GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>())
+	{
+		MC->OnSignQueryResult.AddUObject(this, &USL_SummonSessionComponent::OnRemoteQueryResult);
+	}
+
+	// Phase 2: 定时查询远程标记（每 5 秒刷新一次）
 	if (GetOwner() && GetOwner()->HasAuthority())
 	{
 		FTimerHandle H;
@@ -44,11 +60,9 @@ void USL_SummonSessionComponent::BeginPlay()
 			USL_MatchClientSubsystem* MC = GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>();
 			if (MC && MC->IsConnected())
 			{
-				MC->OnSignQueryResult.AddLambda([](const FString& R)
-				{ UE_LOG(LogTemp, Log, TEXT("RemoteSigns: %s"), *R); });
 				MC->QuerySigns(GetWorld()->GetMapName(), GetPlayerLevel(), GetPlayerWeaponLevel());
 			}
-		}), 3.0f, false);
+		}), 3.0f, true);  // true = 循环执行
 	}
 }
 
@@ -311,11 +325,31 @@ void USL_SummonSessionComponent::InteractWithSign(ASL_SummonSign* InSign)
 		return;
 	}
 
-	// 锁定标记
-	if (!SignManager->ReportSignInteraction(SignInfo.SignID, GetPlayerDisplayName()))
+	// Phase 2: 远程标记走中间服务，本地标记走 SignManager
+	if (InSign->bIsRemoteSign)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("USL_SummonSessionComponent::InteractWithSign - Failed to lock sign %s"),
-			*SignInfo.SignID.ToString());
+		USL_MatchClientSubsystem* MC = GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>();
+		if (!MC || !MC->IsConnected())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("USL_SummonSessionComponent::InteractWithSign - Not connected to match server"));
+			return;
+		}
+
+		MC->RequestSummon(InSign->RemoteSignID, GetPlayerDisplayName(), InSign->RemoteInstanceID, GetPlayerLevel());
+		UE_LOG(LogTemp, Log, TEXT("SummonSession: Remote summon request sent for sign %s"), *InSign->RemoteSignID);
+	}
+	else
+	{
+		// 本地标记
+		if (!SignManager->ReportSignInteraction(SignInfo.SignID, GetPlayerDisplayName()))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("USL_SummonSessionComponent::InteractWithSign - Failed to lock sign %s"),
+				*SignInfo.SignID.ToString());
+			return;
+		}
+		InSign->LockSign();
+		TargetSummonSign = InSign;
+		SetState(EOnlinePlayerState::SummoningOther);
 		return;
 	}
 
@@ -332,7 +366,7 @@ void USL_SummonSessionComponent::InteractWithSign(ASL_SummonSign* InSign)
 void USL_SummonSessionComponent::OnItemUsedCallback(AActor* InUserActor, FName InItemID)
 {
 	// 只处理自己使用的道具
-	if (InUserActor != GetOwner()) return;
+	if (InUserActor != GetOwningCharacter()) return;
 
 	// 查表获取道具的行为类型
 	UDataTableManager* TableManager = UDataTableManager::Get(this);
@@ -395,4 +429,121 @@ TArray<FSummonSignInfo> USL_SummonSessionComponent::QueryAvailableSigns() const
 		GetPlayerWeaponLevel(),
 		MatchConfig
 	);
+}
+
+
+/************************************************************************/
+/*                        Phase 2: 远程标记管理                          */
+/************************************************************************/
+
+void USL_SummonSessionComponent::OnRemoteQueryResult(const FString& InResultJSON)
+{
+	// 解析 JSON
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(InResultJSON);
+	TSharedPtr<FJsonObject> JsonObj;
+	if (!FJsonSerializer::Deserialize(Reader, JsonObj) || !JsonObj.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SummonSession: Failed to parse remote query result"));
+		return;
+	}
+
+	// 清理旧 Actor
+	ClearRemoteSignActors();
+
+	// 解析 signs 数组
+	const TArray<TSharedPtr<FJsonValue>>* SignsArray;
+	if (!JsonObj->TryGetArrayField(TEXT("signs"), SignsArray))
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("SummonSession: Received %d remote signs"), SignsArray->Num());
+
+	for (const TSharedPtr<FJsonValue>& Val : *SignsArray)
+	{
+		TSharedPtr<FJsonObject> SignObj = Val->AsObject();
+		if (!SignObj.IsValid()) continue;
+
+		FString SignID = SignObj->GetStringField(TEXT("sign_id"));
+		FString OwnerName = SignObj->GetStringField(TEXT("owner_name"));
+		int32 OwnerLevel = SignObj->GetIntegerField(TEXT("owner_level"));
+		FString TransformStr = SignObj->GetStringField(TEXT("transform"));
+		FString InstanceID = SignObj->GetStringField(TEXT("instance_id"));
+
+		SpawnRemoteSignActor(SignID, OwnerName, OwnerLevel, TransformStr, InstanceID);
+	}
+}
+
+void USL_SummonSessionComponent::SpawnRemoteSignActor(const FString& InRemoteSignID,
+	const FString& InOwnerName, int32 InLevel,
+	const FString& InTransformJSON, const FString& InInstanceID)
+{
+	if (!SummonSignClass || !GetWorld() || !GetWorld()->IsServer()) return;
+
+	// 解析位置
+	FVector SpawnLocation(0, 0, 0);
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(InTransformJSON);
+	TSharedPtr<FJsonObject> JsonObj;
+	if (FJsonSerializer::Deserialize(Reader, JsonObj) && JsonObj.IsValid())
+	{
+		TSharedPtr<FJsonObject> LocObj = JsonObj->GetObjectField(TEXT("location"));
+		if (LocObj.IsValid())
+		{
+			SpawnLocation.X = LocObj->GetNumberField(TEXT("x"));
+			SpawnLocation.Y = LocObj->GetNumberField(TEXT("y"));
+			SpawnLocation.Z = LocObj->GetNumberField(TEXT("z"));
+		}
+	}
+
+	// 获取召唤者位置作为兜底
+	ACharacter* Character = GetOwningCharacter();
+	if (Character && SpawnLocation.IsZero())
+	{
+		SpawnLocation = Character->GetActorLocation() + Character->GetActorForwardVector() * 200.0f;
+	}
+
+	FTransform SpawnTransform(FRotator::ZeroRotator, SpawnLocation);
+
+	FActorSpawnParameters Params;
+	Params.Owner = Character;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	ASL_SummonSign* Sign = GetWorld()->SpawnActorDeferred<ASL_SummonSign>(SummonSignClass, SpawnTransform);
+	if (Sign)
+	{
+		// 构造标记数据
+		FSummonSignInfo SignInfo;
+		SignInfo.SignID = FGuid::NewGuid();
+		SignInfo.OwnerPlayerName = InOwnerName;
+		SignInfo.OwnerLevel = InLevel;
+		SignInfo.CurrentLevelName = FName(*GetWorld()->GetMapName());
+		SignInfo.SignTransform = SpawnTransform;
+		SignInfo.TimeRemaining = 300.0f;
+		SignInfo.State = ESummonSignState::Active;
+
+		// 标记为远程
+		Sign->bIsRemoteSign = true;
+		Sign->RemoteSignID = InRemoteSignID;
+		Sign->RemoteInstanceID = InInstanceID;
+
+		Sign->InitializeSign(SignInfo);
+		Sign->FinishSpawning(SpawnTransform);
+
+		RemoteSignActors.Add(InRemoteSignID, Sign);
+
+		UE_LOG(LogTemp, Log, TEXT("SummonSession: Spawned remote sign %s from %s"),
+			*InRemoteSignID, *InOwnerName);
+	}
+}
+
+void USL_SummonSessionComponent::ClearRemoteSignActors()
+{
+	for (const auto& Pair : RemoteSignActors)
+	{
+		if (Pair.Value && Pair.Value->IsValidLowLevel())
+		{
+			Pair.Value->Destroy();
+		}
+	}
+	RemoteSignActors.Empty();
 }

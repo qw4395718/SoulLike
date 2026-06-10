@@ -97,7 +97,21 @@ protected:
 	UFUNCTION()
 	void OnRep_SignInfo();
 
+public:
 	// 是否已被锁定
 	UPROPERTY(Replicated)
 	bool bIsLocked;
+
+	// Phase 2: 是否为远程实例的标记
+	UPROPERTY()
+	bool bIsRemoteSign;
+
+	// Phase 2: 中间服务中的远程 sign_id
+	UPROPERTY()
+	FString RemoteSignID;
+
+	// Phase 2: 所属远程实例 ID
+	UPROPERTY()
+	FString RemoteInstanceID;
+
 };

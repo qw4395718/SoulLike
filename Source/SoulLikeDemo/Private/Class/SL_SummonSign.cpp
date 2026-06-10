@@ -4,6 +4,7 @@
 #include "Manager/SL_SignManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/GameInstance.h"
+#include <UObject/ConstructorHelpers.h>
 
 ASL_SummonSign::ASL_SummonSign()
 {
@@ -37,6 +38,13 @@ ASL_SummonSign::ASL_SummonSign()
 	NameWidget->SetRelativeLocation(FVector(0, 0, 120));
 	NameWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	NameWidget->SetDrawSize(FVector2D(200, 40));
+
+	// SL_SummonSign.cpp 构造函数末尾
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> GlowMat(TEXT("/Game/SoulLikeDemo/Materials/MI_SummonGlow_Inst.MI_SummonGlow_Inst"));
+	if (GlowMat.Succeeded())
+	{
+		VisualMesh->SetMaterial(0, GlowMat.Object);
+	}
 }
 
 void ASL_SummonSign::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

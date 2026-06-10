@@ -1,4 +1,5 @@
 #include "SL_SignManager.h"
+#include "Manager/Online/SL_MatchClientSubsystem.h"
 
 void USL_SignManager::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -42,6 +43,18 @@ FGuid USL_SignManager::RegisterSign(const FSummonSignInfo& InSignInfo)
 	// 广播事件
 	OnSignRegistered.Broadcast(NewInfo);
 
+	USL_MatchClientSubsystem* MC = GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>();
+	if (MC && MC->IsConnected())
+	{
+		FString TJSON = FString::Printf(TEXT("{\"x\":%.1f,\"y\":%.1f,\"z\":%.1f}"),
+			NewInfo.SignTransform.GetLocation().X,
+			NewInfo.SignTransform.GetLocation().Y,
+			NewInfo.SignTransform.GetLocation().Z);
+		MC->RegisterSign(NewInfo.OwnerPlayerName, NewInfo.OwnerLevel,
+			NewInfo.OwnerWeaponLevel, NewInfo.CurrentLevelName.ToString(),
+			TJSON, NewInfo.TimeRemaining);
+	}
+
 	return NewInfo.SignID;
 }
 
@@ -53,6 +66,9 @@ bool USL_SignManager::UnregisterSign(const FGuid& InSignID)
 	}
 
 	ActiveSigns.Remove(InSignID);
+
+	USL_MatchClientSubsystem* MC = GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>();
+	if (MC && MC->IsConnected()) MC->UnregisterSign(InSignID.ToString());
 
 	UE_LOG(LogTemp, Log, TEXT("USL_SignManager::UnregisterSign - Sign %s removed"), *InSignID.ToString());
 

@@ -1,6 +1,7 @@
 #include "SL_SummonSessionComponent.h"
 #include "SL_SummonSign.h"
 #include "Manager/SL_SignManager.h"
+#include "Manager/Online/SL_MatchClientSubsystem.h"
 #include "Manager/GlobalDelegatesManager.h"
 #include "Manager/DataTableManager.h"
 #include "Table/ItemDataTable.h"
@@ -32,6 +33,22 @@ void USL_SummonSessionComponent::BeginPlay()
 	{
 		DelegateMgr->OnItemUsed.AddUObject(this, &USL_SummonSessionComponent::OnItemUsedCallback);
 		UE_LOG(LogTemp, Log, TEXT("USL_SummonSessionComponent::BeginPlay - Bound to OnItemUsed"));
+	}
+
+	// Phase 2: 延迟查询远程标记
+	if (GetOwner() && GetOwner()->HasAuthority())
+	{
+		FTimerHandle H;
+		GetWorld()->GetTimerManager().SetTimer(H, FTimerDelegate::CreateLambda([this]()
+		{
+			USL_MatchClientSubsystem* MC = GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>();
+			if (MC && MC->IsConnected())
+			{
+				MC->OnSignQueryResult.AddLambda([](const FString& R)
+				{ UE_LOG(LogTemp, Log, TEXT("RemoteSigns: %s"), *R); });
+				MC->QuerySigns(GetWorld()->GetMapName(), GetPlayerLevel(), GetPlayerWeaponLevel());
+			}
+		}), 3.0f, false);
 	}
 }
 

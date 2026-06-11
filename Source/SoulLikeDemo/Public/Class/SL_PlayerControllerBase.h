@@ -11,6 +11,7 @@ class USL_ComboManagerComponent;
 class USL_EquipmentComponent;
 class USL_InventoryComponent;
 class UHUD_ItemUseUI;
+class ASL_SummonSign;
 class USL_SummonSessionComponent;
 class UDamageFloatingTextManagerComponent;
 
@@ -154,7 +155,14 @@ protected:
 	// 切换到下一个道具（绑定"E"键）
 	void OnSelectNextItemPressed();
 
-	// 安全获取 ComboManager 
+	// 交互（绑定"G"键）
+	void OnInteractPressed();
+
+	// 客户端定期扫描附近的召唤标记（用于显示交互提示）
+	void Client_CheckNearbySummonSigns();
+	void UpdateSummonSignPrompt(class ASL_SummonSign* InSign);
+
+	// 安全获取 ComboManager
 	USL_ComboManagerComponent* GetComboManagerComponent() const;
 
 	USL_EquipmentComponent* GetEquipmentComponent() const;
@@ -183,6 +191,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		USL_SummonSessionComponent* SummonSessionCmp;
 
+	// 当前目标召唤标记（用于交互提示）
+	UPROPERTY()
+		ASL_SummonSign* CurrentSummonSignTarget;
+
 private:
     /************************************************************************/
     /*                               内部访问                                */
@@ -205,4 +217,6 @@ private:
 	// ===== 死亡事件 =====
 	// 死亡委托句柄（防止重复绑定）
 	FDelegateHandle OnPlayerDiedHandle;
+
+	FTimerHandle SummonSignScanTimerHandle;
 };

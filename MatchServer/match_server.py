@@ -156,7 +156,10 @@ def process_message(conn, msg):
                 continue
             if weapon_level and abs(int(s.get('weapon_level', 0)) - int(weapon_level)) > 2:
                 continue
-            results.append(s)
+            s_copy = dict(s)
+            if 'transform' in s_copy and isinstance(s_copy['transform'], dict):
+                s_copy['transform'] = json.dumps(s_copy['transform'],ensure_ascii=False)
+            results.append(s_copy)
 
         send_json(conn, {'type': 'query_signs_result', 'signs': results})
         print(f"[查询] {instance_id} 查询: 地图={map_name}, "

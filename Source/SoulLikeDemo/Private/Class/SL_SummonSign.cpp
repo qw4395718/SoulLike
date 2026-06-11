@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/GameInstance.h"
 #include <UObject/ConstructorHelpers.h>
+#include <GameFramework/Character.h>
 
 ASL_SummonSign::ASL_SummonSign()
 {
@@ -131,8 +132,12 @@ void ASL_SummonSign::OnInteractionOverlapBegin(UPrimitiveComponent* OverlappedCo
 		return;
 	}
 
-	// Phase1: 简单的交互检测
-	// Phase2+: 通过 SummonSessionComponent 处理召唤逻辑
+	// Phase2: 追踪重叠角色（用于交互键确认目标）
+	if (OtherActor->IsA<ACharacter>() && !OverlappingPlayers.Contains(OtherActor))
+	{
+		OverlappingPlayers.Add(OtherActor);
+	}
+
 	UE_LOG(LogTemp, Verbose, TEXT("ASL_SummonSign::OnInteractionOverlapBegin - %s entered sign %s range"),
 		*OtherActor->GetName(), *SignInfo.SignID.ToString());
 }
@@ -140,7 +145,23 @@ void ASL_SummonSign::OnInteractionOverlapBegin(UPrimitiveComponent* OverlappedCo
 void ASL_SummonSign::OnInteractionOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	// 预留：玩家离开标记范围的处理
+	// Phase2: 移除重叠角色追踪
+	if (OtherActor)
+	{
+		OverlappingPlayers.Remove(OtherActor);
+	}
+}
+
+bool ASL_SummonSign::IsOverlappedBy(const AActor* InActor) const
+{
+	for (const TWeakObjectPtr<AActor>& Ptr : OverlappingPlayers)
+	{
+		if (Ptr.Get() == InActor)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void ASL_SummonSign::OnSignExpired()

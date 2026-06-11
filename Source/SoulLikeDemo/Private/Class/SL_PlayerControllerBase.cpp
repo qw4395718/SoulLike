@@ -1,5 +1,7 @@
 // Private/Class/SL_PlayerControllerBase.cpp
 #include "SL_PlayerControllerBase.h"
+#include "SL_SummonSign.h"
+#include "UMG/HUD/HUD_InterActBtnPanel.h"
 #include "SL_CharacterBase.h"
 #include "SL_InventoryComponent.h"
 #include "Blueprint/UserWidget.h"
@@ -63,6 +65,12 @@ void ASL_PlayerControllerBase::BeginPlay()
     {
         // 显示开始界面
         ShowBeginPlayScreen();
+
+	// 客户端启动定期扫描召唤标记（用于显示交互提示）
+	if (GetNetMode() != NM_DedicatedServer)
+	{
+		GetWorld()->GetTimerManager().SetTimer(SummonSignScanTimerHandle, this, &ASL_PlayerControllerBase::Client_CheckNearbySummonSigns, 0.15f, true);
+	}
 
         // 绑定角色死亡事件监听（需在 GameMode 初始化完成后）
         BindPlayerDeathEvent();
@@ -136,6 +144,10 @@ void ASL_PlayerControllerBase::SetupInputComponent()
 	InputComponent->BindAction("UseItem", IE_Pressed, this, &ASL_PlayerControllerBase::OnUseItemPressed);
 	InputComponent->BindAction("SelectPrevItem", IE_Pressed, this, &ASL_PlayerControllerBase::OnSelectPrevItemPressed);
 	InputComponent->BindAction("SelectNextItem", IE_Pressed, this, &ASL_PlayerControllerBase::OnSelectNextItemPressed);
+
+	// ===== 交互 =====
+	InputComponent->BindAction("Interact", IE_Pressed, this, &ASL_PlayerControllerBase::OnInteractPressed);
+
 }
 
 /************************************************************************/
@@ -405,6 +417,113 @@ void ASL_PlayerControllerBase::OnSelectNextItemPressed()
 	if (ItemUI)
 	{
 		ItemUI->SelectNext();
+	}
+}
+
+// ===== 交互处理 =====
+void ASL_PlayerControllerBase::OnInteractPressed()
+{
+	if (!SummonSessionCmp) return;
+
+	ACharacter* MyCharacter = GetCharacter();
+	if (!MyCharacter) return;
+
+	// 在当前世界中查找所有 SummonSign，找最近的、与玩家重叠且未锁定的标记
+	TArray<AActor*> FoundSigns;
+	UGameplayStatics::GetAllActorsOfClass(this, ASL_SummonSign::StaticClass(), FoundSigns);
+
+	ASL_SummonSign* BestSign = nullptr;
+	float BestDist = FLT_MAX;
+
+	for (AActor* Actor : FoundSigns)
+	{
+		ASL_SummonSign* Sign = Cast<ASL_SummonSign>(Actor);
+		if (!Sign || Sign->bIsLocked || !Sign->IsOverlappedBy(MyCharacter))
+		{
+			continue;
+		}
+
+		float Dist = FVector::DistSquared(MyCharacter->GetActorLocation(), Sign->GetActorLocation());
+		if (Dist < BestDist)
+		{
+			BestDist = Dist;
+			BestSign = Sign;
+		}
+	}
+
+	if (BestSign)
+	{
+		SummonSessionCmp->InteractWithSign(BestSign);
+	}
+}
+
+static const float SUMMON_SIGN_INTERACT_RANGE = 120.0f;
+
+void ASL_PlayerControllerBase::Client_CheckNearbySummonSigns()
+{
+	if (!IsLocalController()) return;
+
+	ACharacter* MyChar = GetCharacter();
+	if (!MyChar) return;
+
+	TArray<AActor*> FoundSigns;
+	UGameplayStatics::GetAllActorsOfClass(this, ASL_SummonSign::StaticClass(), FoundSigns);
+
+	ASL_SummonSign* BestSign = nullptr;
+	float BestDist = FLT_MAX;
+
+	for (AActor* Actor : FoundSigns)
+	{
+		ASL_SummonSign* Sign = Cast<ASL_SummonSign>(Actor);
+		if (!Sign || Sign->bIsLocked || Sign->bIsRemoteSign == false) continue;
+
+		float Dist = FVector::Dist2D(MyChar->GetActorLocation(), Sign->GetActorLocation());
+		if (Dist < SUMMON_SIGN_INTERACT_RANGE && Dist < BestDist)
+		{
+			BestDist = Dist;
+			BestSign = Sign;
+		}
+	}
+
+	if (BestSign != CurrentSummonSignTarget)
+	{
+		CurrentSummonSignTarget = BestSign;
+		UpdateSummonSignPrompt(BestSign);
+	}
+}
+
+void ASL_PlayerControllerBase::UpdateSummonSignPrompt(ASL_SummonSign* InSign)
+{
+	UUIManagerSubsystem* UIMgr = UUIManagerSubsystem::Get(this);
+	if (!UIMgr) return;
+
+	if (InSign)
+	{	
+		// 检查是否已经打开了该界面
+		if (UIMgr->IsWidgetOpen(EWidgetType::EWIDGET_InterActPanel) == false)
+		{
+			UIMgr->OpenScreenWidget(EWidgetType::EWIDGET_InterActPanel);
+
+		}
+		
+		if (UUserWidget* Widget = UIMgr->GetWidget(EWidgetType::EWIDGET_InterActPanel))
+		{
+			if (UHUD_InterActBtnPanel* Panel = Cast<UHUD_InterActBtnPanel>(Widget))
+			{
+				FString Prompt = FString::Printf(TEXT("召唤 %s [G]"),
+					*InSign->GetSignInfo().OwnerPlayerName);
+				TArray<FInterActOptionInfo> Options;
+				Options.Add(FInterActOptionInfo(0, nullptr, Prompt));
+				Panel->UpdateBatch(Options);
+				Panel->SetVisible(true);
+			}
+		}
+	}
+	else
+	{
+		UUserWidget* Widget = UIMgr->GetWidget(EWidgetType::EWIDGET_InterActPanel);
+		if (UHUD_InterActBtnPanel* Panel = Cast<UHUD_InterActBtnPanel>(Widget))
+			Panel->SetVisible(false);
 	}
 }
 

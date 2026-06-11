@@ -335,7 +335,8 @@ void USL_SummonSessionComponent::InteractWithSign(ASL_SummonSign* InSign)
 			return;
 		}
 
-		MC->RequestSummon(InSign->RemoteSignID, GetPlayerDisplayName(), InSign->RemoteInstanceID, GetPlayerLevel());
+		MC->RequestSummon(InSign->RemoteSignID, GetPlayerDisplayName(),
+			MC->GetInstanceID(), GetPlayerLevel());
 		UE_LOG(LogTemp, Log, TEXT("SummonSession: Remote summon request sent for sign %s"), *InSign->RemoteSignID);
 	}
 	else
@@ -447,8 +448,8 @@ void USL_SummonSessionComponent::OnRemoteQueryResult(const FString& InResultJSON
 		return;
 	}
 
-	// 清理旧 Actor
-	ClearRemoteSignActors();
+	// 收集本轮查询到的 sign_id，用于增量更新
+	TArray<FString> IncomingSignIDs;
 
 	// 解析 signs 数组
 	const TArray<TSharedPtr<FJsonValue>>* SignsArray;
@@ -465,12 +466,34 @@ void USL_SummonSessionComponent::OnRemoteQueryResult(const FString& InResultJSON
 		if (!SignObj.IsValid()) continue;
 
 		FString SignID = SignObj->GetStringField(TEXT("sign_id"));
+		IncomingSignIDs.Add(SignID);
+
+		if (RemoteSignActors.Contains(SignID))
+		{
+			continue;
+		}
+
 		FString OwnerName = SignObj->GetStringField(TEXT("owner_name"));
 		int32 OwnerLevel = SignObj->GetIntegerField(TEXT("owner_level"));
 		FString TransformStr = SignObj->GetStringField(TEXT("transform"));
 		FString InstanceID = SignObj->GetStringField(TEXT("instance_id"));
-
 		SpawnRemoteSignActor(SignID, OwnerName, OwnerLevel, TransformStr, InstanceID);
+	}
+
+	// 清理已过期（不在本轮查询结果中）的标记
+	TArray<FString> ToRemove;
+	for (const auto& Pair : RemoteSignActors)
+	{
+		if (!IncomingSignIDs.Contains(Pair.Key))
+		{
+			ToRemove.Add(Pair.Key);
+		}
+	}
+	for (const FString& Key : ToRemove)
+	{
+		if (RemoteSignActors[Key] && RemoteSignActors[Key]->IsValidLowLevel())
+			RemoteSignActors[Key]->Destroy();
+		RemoteSignActors.Remove(Key);
 	}
 }
 
@@ -495,18 +518,7 @@ void USL_SummonSessionComponent::SpawnRemoteSignActor(const FString& InRemoteSig
 		}
 	}
 
-	// 获取召唤者位置作为兜底
-	ACharacter* Character = GetOwningCharacter();
-	if (Character && SpawnLocation.IsZero())
-	{
-		SpawnLocation = Character->GetActorLocation() + Character->GetActorForwardVector() * 200.0f;
-	}
-
 	FTransform SpawnTransform(FRotator::ZeroRotator, SpawnLocation);
-
-	FActorSpawnParameters Params;
-	Params.Owner = Character;
-	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 	ASL_SummonSign* Sign = GetWorld()->SpawnActorDeferred<ASL_SummonSign>(SummonSignClass, SpawnTransform);
 	if (Sign)

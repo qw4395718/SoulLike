@@ -44,6 +44,10 @@ public:
 	// 是否已连接
 	UFUNCTION(BlueprintPure, Category = "MatchClient")
 	bool IsConnected() const { return bIsConnected; }
+ 
+	// 获取本实例ID（注册时自动分配）
+	UFUNCTION(BlueprintPure, Category = "MatchClient")
+	FString GetInstanceID() const { return InstanceID; }
 
 	// ===== 消息发送 =====
 

@@ -81,7 +81,7 @@ namespace UILayerUtils
 			break;
 		case EUILayer::Popup:
 			Config.BaseZOrder = 150;
-			Config.DefaultInputMode = EUIInputModeRequirement::UIOnly;
+			Config.DefaultInputMode = EUIInputModeRequirement::GameAndUI;
 			Config.bBlockUnderlying = true;
 			break;
 		case EUILayer::Modal:

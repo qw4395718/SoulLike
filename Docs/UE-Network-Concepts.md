@@ -412,5 +412,143 @@ Server RPC 把结果传回客户端有三种方式：
 ---
 
 > 文档版本：v1.0
-> 最后更新：2026-06-09
+> 文档版本：v2.0
+> 最后更新：2026-06-11
 > 适用项目：SoulLike (UE 4.26)
+
+---
+
+## 10 连接建立与消息路由底层机制
+
+> 本节补充 UE4 网络骨架层的细节：连接如何建立、标识体系如何分层、消息如何路由到正确的 Actor。
+
+### 10.1 连接建立过程
+
+一个客户端连入 ListenServer 时的完整步骤：
+
+```
+客户端                                 ListenServer
+  │                                         │
+  │── UDP（连接请求）─────────────────────→│
+  │   来源 IP:Port（OS 随机分配高位端口）     │
+  │                                         │  new UNetConnection
+  │                                         │  存入 TMap<FInternetAddr, UNetConnection*>
+  │←── UDP（接受连接）─────────────────────│
+  │                                         │
+  │  双方各自在内存中持有 UNetConnection     │
+  │  （不通过网络传输，是纯内存对象）         │
+```
+
+**关键约束：**
+
+- UE4 默认网络传输走 **UDP**，不是 TCP。可靠性（Ack/重传/排序）由引擎的 PacketHandler 层保证
+- 连接标识是 UDP 包自带的**来源 IP:Port**，不是 NetConnection 对象本身。双方的 NetConnection 内存指针从来不通过网络传输
+- 每个客户端在服务器上有一个唯一的 UNetConnection 实例
+
+### 10.2 三层标识体系
+
+UE4 用三个层级的标识符来路由消息，各自解决不同的问题：
+
+```
+┌──────────────────────────────────────────┐
+│         UDP 包头                          │
+│  来源 IP:Port                             │  ← 找到 UNetConnection
+├──────────────────────────────────────────┤
+│         UE4 协议包头                      │
+│  ChannelId → 找到 UActorChannel           │  ← 哪个复制通道
+│  PacketId   → 排序 / Ack                  │
+├──────────────────────────────────────────┤
+│         RPC / 属性载荷                    │
+│  ActorGUID → 找到 AActor*                │  ← 操作哪个游戏对象
+│  函数名 + 参数                            │
+└──────────────────────────────────────────┘
+```
+
+#### 10.2.1 IP:Port（传输层）
+
+- 解决**"谁发的这个包"**问题
+- 服务器 recvfrom() 拿到来源地址 → 查 TMap<FInternetAddr, UNetConnection*> → 找到对应的连接
+- 不是用来查 PlayerId 的键。PlayerId 是 NetConnection 上挂载的属性
+
+#### 10.2.2 FNetworkGUID（Actor 层）
+
+- 解决**"这个包操作哪个 Actor"**问题
+- 是一个内部自增的 uint32（不是 FGuid 的 UUID 格式），作为 Actor 的网络句柄
+- **仅服务器有权分配**。服务器 Spawn Actor 时分配，纳入自己的 GuidCache。客户端收到 Spawn 包时存到自己的 GuidCache
+- 映射关系：TMap<FNetworkGUID, AActor*>（服务器和客户端各自维护）
+
+所以 IP:Port 不能替代 ActorGUID——IP:Port 找到"谁在发信"，ActorGUID 找到"信里说的是哪个对象"。一个客户端可以产生多个 RPC 操作不同的 Actor（自己的 Pawn、目标怪物、掉落物等），必须靠 ActorGUID 区分。
+
+#### 10.2.3 PacketId 与 ChannelId
+
+| 标识 | 权威方 | 用途 |
+|------|--------|------|
+| PacketId | **双方各自独立** | 发送计数器。A 发的包用 A 的序号，B 用 B 的。互不干扰，只用于 Ack 和排序 |
+| ChannelId | **服务器** | 服务器决定对哪些 Actor 开复制通道，分配递增的 ID。客户端被动接受 |
+
+### 10.3 消息路由全流程
+
+以灵体玩家 A 在 B 世界中按下攻击键为例：
+
+```
+① A 的键盘输入
+      ↓
+② A 的 PlayerController（在 B 的进程中，作为远程客户端）
+   → OnLightAttackPressed()
+   → ComboManager / GAS 决定执行哪个能力
+      ↓
+③ 调用 Server RPC
+   → UFUNCTION(Server, Reliable)  Server_DoLightAttack()
+   → 序列化：ActorGUID + 函数签名 + 参数
+      ↓
+④ UDP 打包发送
+   → A 的 UNetConnection（指向 B 的地址）
+   → 包头含来源 IP:Port、PacketId、ChannelId
+      ↓
+⑤ B 的 ListenServer 收到 UDP 包
+   → recvfrom() → IP:Port
+   → 查 TMap → 找到 A 的 UNetConnection
+   → 拿出 A 的 PlayerController / PlayerId
+      ↓
+⑥ 反序列化 RPC 载荷
+   → ActorGUID → 查 GuidCache → Phantom_A
+   → 在 Phantom_A 上执行 Server_DoLightAttack()
+      ↓
+⑦ 服务器权威执行
+   → 播放 Montage（Multicast RPC → 所有客户端）
+   → 碰撞检测 → 伤害计算
+   → 属性复制（位置、血量等自动推送给各客户端）
+```
+
+### 10.4 移动同步（特殊通道）
+
+移动不走普通 RPC，走 **UCharacterMovementComponent** 自己的专用通道——客户端本地预测 + 服务器权威校正：
+
+```
+A 的客户端每帧
+  → PlayerController::PlayerTick()
+  → AddMovementInput()
+  → CharacterMovementComponent 计算期望移动（本地预测）
+  → A 的客户端先动起来（低延迟反馈）
+  → 打包 FSavedMove_Character（方向、时间戳）
+  → 每 ~30-60ms 调用 ServerMove() RPC
+
+B 的服务器
+  → 权威验证移动是否合法（防加速外挂）
+  → 应用移动
+  → 如有偏差，回复 ClientAdjustPosition()
+  → 位置通过属性复制推给所有客户端
+```
+
+这是 UE4 网络最巧妙的设计之一：在保持手感的同时防止作弊。
+
+### 10.5 标识符对照表
+
+| 标识符 | 谁生成 | 客户端知道吗 | 作用域 | 用途 |
+|--------|--------|------------|--------|------|
+| IP:Port | OS 分配 | 知道 | 传输层 | UDP 路由到 NetConnection |
+| FUniqueNetId | 服务器 Login() | 知道 | 逻辑层 | 玩家身份（名字、等级、数据） |
+| FNetworkGUID | 服务器 SpawnActor() | 知道 | Actor 层 | Actor 网络句柄，查 AActor* |
+| UNetConnection* | 双方各自 new | 只知道自己这端 | 连接层 | 内存对象，存对方地址和通道列表 |
+| ChannelId | 服务器 | 被动接受 | 通道层 | 标识 UActorChannel |
+| PacketId | 双方各自计数 | 知道 | 传输层 | 包序号，可靠性保障 |

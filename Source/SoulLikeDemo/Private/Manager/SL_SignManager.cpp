@@ -46,7 +46,7 @@ FGuid USL_SignManager::RegisterSign(const FSummonSignInfo& InSignInfo)
 	USL_MatchClientSubsystem* MC = GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>();
 	if (MC && MC->IsConnected())
 	{
-		FString TJSON = FString::Printf(TEXT("{\"x\":%.1f,\"y\":%.1f,\"z\":%.1f}"),
+		FString TJSON = FString::Printf(TEXT("{\"location\":{\"x\":%.1f,\"y\":%.1f,\"z\":%.1f}}"),
 			NewInfo.SignTransform.GetLocation().X,
 			NewInfo.SignTransform.GetLocation().Y,
 			NewInfo.SignTransform.GetLocation().Z);

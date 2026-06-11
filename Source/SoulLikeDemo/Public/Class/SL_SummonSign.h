@@ -114,4 +114,15 @@ public:
 	UPROPERTY()
 	FString RemoteInstanceID;
 
+	// 外部访问
+	// 获取当前重叠的角色列表
+	const TArray<TWeakObjectPtr<AActor>>& GetOverlappingPlayers() const { return OverlappingPlayers; }
+	// 检查某个角色是否正在重叠此标记
+	bool IsOverlappedBy(const AActor* InActor) const;
+
+protected:
+	// 内部访问 — 当前正在重叠此标记的角色列表（仅服务器端）
+	UPROPERTY()
+	TArray<TWeakObjectPtr<AActor>> OverlappingPlayers;
+
 };

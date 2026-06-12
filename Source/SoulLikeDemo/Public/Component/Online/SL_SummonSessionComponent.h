@@ -6,6 +6,7 @@
 #include "SL_SummonSessionComponent.generated.h"
 
 class ASL_SummonSign;
+class ASL_PhantomCharacter;
 
 /**
  * 召唤会话组件
@@ -161,6 +162,10 @@ protected:
 	// 标记 Actor 类（可在蓝图或 C++ 中指定子类）
 	UPROPERTY(EditDefaultsOnly, Category = "SummonSession|Config")
 	TSubclassOf<ASL_SummonSign> SummonSignClass;
+
+	// Phase 3: 灵体角色类（可在蓝图中指定子类，调整骨骼网格体位置/旋转）
+	UPROPERTY(EditDefaultsOnly, Category = "SummonSession|Config")
+	TSubclassOf<ASL_PhantomCharacter> PhantomCharacterClass;
 
 	// 召唤符道具 ID（对应道具数据表中的 ItemID）
 	UPROPERTY(EditDefaultsOnly, Category = "SummonSession|Config")

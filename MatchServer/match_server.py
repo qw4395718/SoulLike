@@ -88,6 +88,9 @@ def handle_client(conn, addr):
 
 
 def process_message(conn, msg):
+    if not isinstance(msg, dict):
+        print(f"[警告] 跳过非 dict 消息: {type(msg).__name__}")
+        return None
     """处理一条JSON消息，返回可能的instance_id"""
     msg_type = msg.get('type', '')
 
@@ -186,11 +189,14 @@ def process_message(conn, msg):
         signs[sign_id]['state'] = 'BeingSummoned'
 
         owner_conn = instances[owner_instance]['conn']
+        requester_info = instances.get(requester_instance, {})
         send_json(owner_conn, {
             'type': 'summon_request',
             'sign_id': sign_id,
             'requester_name': requester_name,
             'requester_instance': requester_instance,
+            'requester_ip': requester_info.get('ip', ''),
+            'requester_port': requester_info.get('port', 0),
             'requester_level': msg.get('requester_level', 0),
         })
 

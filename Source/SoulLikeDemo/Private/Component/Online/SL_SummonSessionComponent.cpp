@@ -15,6 +15,10 @@
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include <GameFramework/PlayerState.h>
+#include "SL_PhantomCharacter.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include <Animation/AnimInstance.h>
+#include <Policies/CondensedJsonPrintPolicy.h>
 
 USL_SummonSessionComponent::USL_SummonSessionComponent()
 {
@@ -37,7 +41,14 @@ void USL_SummonSessionComponent::BeginPlay()
 			TEXT("/Game/SoulLikeDemo/Blueprints/Actor/BP_SummonSign.BP_SummonSign_C")
 			);
 	}
-
+	if (!PhantomCharacterClass)
+	{
+		PhantomCharacterClass = LoadClass<ASL_PhantomCharacter>(
+			nullptr,
+			TEXT("/Game/SoulLikeDemo/Blueprints/CharacterLogic/BP_PhantomCharacter.BP_PhantomCharacter_C")
+			);
+	}
+	
 	// 监听道具使用事件（召唤符道具通过此回调触发放置标记）
 	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
 	{
@@ -701,8 +712,9 @@ FString FPhantomData::ToJSON() const
 	Obj->SetStringField(TEXT("session_id"), SummonSessionID.ToString());
 
 	FString OutputJSON;
-	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputJSON);
+	TSharedRef<TJsonWriter<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>> Writer = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&OutputJSON);
 	FJsonSerializer::Serialize(Obj.ToSharedRef(), Writer);
+
 	return OutputJSON;
 }
 
@@ -714,6 +726,14 @@ void USL_SummonSessionComponent::OnPhantomDataReceived(const FString& InJSONData
 {
 	// 召唤者侧：收到 PhantomData，在本地生成灵体
 	if (!GetWorld() || !GetWorld()->IsServer()) return;
+
+	// 状态守卫：只有正在等待灵体的召唤者才处理
+	// PIE 模式下所有组件共享同一个 MatchClientSubsystem 委托
+	if (CurrentState != EOnlinePlayerState::HasPhantom && CurrentState != EOnlinePlayerState::SummoningOther)
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("SummonSession: Ignored PhantomData (state=%d, not summoner)"), (int32)CurrentState);
+		return;
+	}
 
 	// 解析 JSON
 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(InJSONData);
@@ -768,8 +788,10 @@ void USL_SummonSessionComponent::OnPhantomDataReceived(const FString& InJSONData
 	FTransform SpawnTransform = Character->GetActorTransform();
 	SpawnTransform.SetLocation(Character->GetActorLocation() + Character->GetActorForwardVector() * 150.0f);
 
+	// 使用可配置的灵体类（可在蓝图中替换以调整 Mesh 位置/旋转）
+	UClass* PhantomClass = PhantomCharacterClass ? PhantomCharacterClass.Get() : ASL_PhantomCharacter::StaticClass();
 	ASL_PhantomCharacter* Phantom = GetWorld()->SpawnActorDeferred<ASL_PhantomCharacter>(
-		ASL_PhantomCharacter::StaticClass(), SpawnTransform);
+		PhantomClass, SpawnTransform);
 	if (Phantom)
 	{
 		Phantom->ApplyPhantomData(Data);
@@ -810,7 +832,8 @@ FPhantomData USL_SummonSessionComponent::PackPhantomData() const
 		Data.AnimBlueprintPath = Mesh->AnimScriptInstance->GetClass()->GetPathName();
 	}
 
-	// 收集材质（按材质索引顺序收集所有覆盖材质）
+	// 收集材质（按材质索引顺序）
+	// 仅收集静态材质资源路径，跳过运行时动态实例
 	if (Mesh)
 	{
 		for (int32 i = 0; i < Mesh->GetNumMaterials(); i++)
@@ -818,7 +841,16 @@ FPhantomData USL_SummonSessionComponent::PackPhantomData() const
 			UMaterialInterface* Mat = Mesh->GetMaterial(i);
 			if (Mat)
 			{
-				Data.MaterialPaths.Add(Mat->GetPathName());
+				// 如果是动态材质实例，取其父级静态材质路径
+				UMaterialInstanceDynamic* MID = Cast<UMaterialInstanceDynamic>(Mat);
+				if (MID && MID->Parent)
+				{
+					Data.MaterialPaths.Add(MID->Parent->GetPathName());
+				}
+				else
+				{
+					Data.MaterialPaths.Add(Mat->GetPathName());
+				}
 			}
 			else
 			{
@@ -835,7 +867,7 @@ FPhantomData USL_SummonSessionComponent::PackPhantomData() const
 	Data.WeaponLevel = GetPlayerWeaponLevel();
 
 	// 获取当前血量百分比
-	if (Character->GetClass()->ImplementsInterface(UDamageable::StaticClass()))
+	if (1)
 	{
 		// 如果将来实现了 IDamageable 接口，从接口获取
 		Data.HealthPercent = 1.0f;

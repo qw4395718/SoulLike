@@ -9,6 +9,7 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "HAL/PlatformProcess.h"
+#include <Policies/CondensedJsonPrintPolicy.h>
 
 USL_MatchClientSubsystem::USL_MatchClientSubsystem()
 	: ServerPort(7777)
@@ -239,10 +240,30 @@ void USL_MatchClientSubsystem::DeclineSummon(const FString& InSignID,
 void USL_MatchClientSubsystem::TransferPhantomData(const FString& InTargetInstance,
 	const FString& InDataJSON)
 {
-	FString Msg = FString::Printf(
-		TEXT("{\"type\":\"transfer_phantom_data\",\"target_instance\":\"%s\",\"data\":%s}"),
-		*InTargetInstance, *InDataJSON);
-	SendMessage(Msg);
+	// 用 FJsonObject 构建消息，避免 Printf + %s 嵌入 JSON 字符串可能引入的换行问题
+	TSharedPtr<FJsonObject> Obj = MakeShareable(new FJsonObject());
+	Obj->SetStringField(TEXT("type"), TEXT("transfer_phantom_data"));
+	Obj->SetStringField(TEXT("target_instance"), InTargetInstance);
+
+	// 解析已有 JSON 字符串为 FJsonObject 再嵌入
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(InDataJSON);
+	TSharedPtr<FJsonObject> DataObj;
+	if (FJsonSerializer::Deserialize(Reader, DataObj) && DataObj.IsValid())
+	{
+		Obj->SetObjectField(TEXT("data"), DataObj);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MatchClient: Failed to parse phantom data JSON, sending as raw string"));
+		Obj->SetStringField(TEXT("data_raw"), InDataJSON);
+	}
+
+	FString OutputJSON;
+	TSharedRef<TJsonWriter<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>> Writer = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&OutputJSON);
+	FJsonSerializer::Serialize(Obj.ToSharedRef(), Writer);
+	SendMessage(OutputJSON);
+
+	UE_LOG(LogTemp, Verbose, TEXT("MatchClient: TransferPhantomData message size = %d bytes"), OutputJSON.Len());
 }
 
 /************************************************************************/
@@ -258,10 +279,23 @@ void USL_MatchClientSubsystem::SendMessage(const FString& InJSON)
 	Data.Append(reinterpret_cast<const uint8*>(Converter.Get()), Converter.Length());
 	Data.Add(static_cast<uint8>('\n'));
 
-	int32 BytesSent = 0;
-	if (!MatchSocket->Send(Data.GetData(), Data.Num(), BytesSent))
+	// 循环发送，处理部分发送的情况
+	int32 TotalSent = 0;
+	while (TotalSent < Data.Num())
 	{
-		UE_LOG(LogTemp, Verbose, TEXT("SL_MatchClientSubsystem::SendMessage - Send failed"));
+		int32 BytesSent = 0;
+		if (!MatchSocket->Send(Data.GetData() + TotalSent, Data.Num() - TotalSent, BytesSent))
+		{
+			UE_LOG(LogTemp, Verbose, TEXT("SL_MatchClientSubsystem::SendMessage - Send failed"));
+			break;
+		}
+		TotalSent += BytesSent;
+		if (BytesSent == 0)
+		{
+			// 0 字节发送说明连接可能有问题，避免死循环
+			UE_LOG(LogTemp, Warning, TEXT("SL_MatchClientSubsystem::SendMessage - Sent 0 bytes, aborting"));
+			break;
+		}
 	}
 }
 

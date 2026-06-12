@@ -91,3 +91,46 @@ struct FSummonSignInfo
 	UPROPERTY()
 	FName WorldInstanceID;
 };
+
+// ===== 灵体数据（跨世界传输） =====
+USTRUCT(BlueprintType)
+struct FPhantomData
+{
+	GENERATED_BODY()
+
+	// 角色外观
+	UPROPERTY(BlueprintReadWrite)
+	FString CharacterMeshPath;
+
+	// 所有材质覆盖的路径列表（按材质索引顺序）
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FString> MaterialPaths;
+
+	// 动画蓝图路径
+	UPROPERTY(BlueprintReadWrite)
+	FString AnimBlueprintPath;
+
+	// 装备武器路径列表
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FString> EquipmentPaths;
+
+	// 角色属性
+	UPROPERTY(BlueprintReadWrite)
+	int32 Level = 0;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 WeaponLevel = 0;
+
+	UPROPERTY(BlueprintReadWrite)
+	float HealthPercent = 1.0f;
+
+	// 身份标识
+	UPROPERTY(BlueprintReadWrite)
+	FString OwnerName;
+
+	UPROPERTY(BlueprintReadWrite)
+	FGuid SummonSessionID;
+
+	// 可以转换为 JSON 字符串（供网络传输）
+	FString ToJSON() const;
+};

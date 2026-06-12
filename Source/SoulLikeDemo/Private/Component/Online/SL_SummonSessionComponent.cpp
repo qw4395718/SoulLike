@@ -49,6 +49,10 @@ void USL_SummonSessionComponent::BeginPlay()
 	if (USL_MatchClientSubsystem* MC = GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>())
 	{
 		MC->OnSignQueryResult.AddUObject(this, &USL_SummonSessionComponent::OnRemoteQueryResult);
+		MC->OnSummonRequested.AddUObject(this, &USL_SummonSessionComponent::OnSummonRequestReceived);
+		MC->OnSummonAccepted.AddUObject(this, &USL_SummonSessionComponent::OnSummonAcceptedByRemote);
+		MC->OnSummonDeclined.AddUObject(this, &USL_SummonSessionComponent::OnSummonDeclinedByRemote);
+		MC->OnPhantomDataReceived.AddUObject(this, &USL_SummonSessionComponent::OnPhantomDataReceived);
 	}
 
 	// Phase 2: 定时查询远程标记（每 5 秒刷新一次）
@@ -253,9 +257,50 @@ void USL_SummonSessionComponent::AcceptSummon()
 	// 取消当前标记（如果有）
 	DestroyCurrentSign();
 
+	// Phase 2: 如果是远程召唤请求，通知中间服务
+	if (!PendingRequesterInstance.IsEmpty())
+	{
+		USL_MatchClientSubsystem* MC = GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>();
+		if (MC && MC->IsConnected())
+		{
+			// 通知中间服务：接受召唤
+			MC->AcceptSummon(PendingRemoteSignID, PendingRequesterInstance);
+			UE_LOG(LogTemp, Log, TEXT("SummonSession: Remote summon accepted, notified match server"));
+
+			// Phase 3: 打包 PhantomData 并传输到召唤者世界
+			FPhantomData PhantomData = PackPhantomData();
+			FString PhantomJSON = PhantomData.ToJSON();
+			MC->TransferPhantomData(PendingRequesterInstance, PhantomJSON);
+			UE_LOG(LogTemp, Log, TEXT("SummonSession: PhantomData sent to %s"), *PendingRequesterInstance);
+		}
+
+		// Phase 3: 客户端网络切换（多实例模式下連到召唤者服务器）
+		if (!PendingRequesterIP.IsEmpty() && PendingRequesterPort > 0)
+		{
+			APlayerController* PC = GetOwningPlayerController();
+			if (PC)
+			{
+				FString TravelURL = FString::Printf(TEXT("%s:%d"), *PendingRequesterIP, PendingRequesterPort);
+				PC->ClientTravel(TravelURL, TRAVEL_Absolute);
+				UE_LOG(LogTemp, Log, TEXT("SummonSession: ClientTravel to %s"), *TravelURL);
+			}
+		}
+		else
+		{
+			// 单服 PIE 模式：不触发 ClientTravel，跳过
+			UE_LOG(LogTemp, Log, TEXT("SummonSession: Skiped ClientTravel (PIE mode or no remote IP)"));
+		}
+
+		PendingRemoteSignID.Empty();
+		PendingRequesterName.Empty();
+		PendingRequesterInstance.Empty();
+		PendingRequesterIP.Empty();
+		PendingRequesterPort = 0;
+	}
+
 	UE_LOG(LogTemp, Log, TEXT("USL_SummonSessionComponent::AcceptSummon - Summon accepted"));
 
-	// Phase2+: 触发世界穿梭流程，保存当前世界状态，切换到召唤者世界
+	// Phase3: 触发世界穿梭流程，保存当前世界状态，切换到召唤者世界
 }
 
 void USL_SummonSessionComponent::DeclineSummon()
@@ -273,6 +318,20 @@ void USL_SummonSessionComponent::DeclineSummon()
 
 	SetState(EOnlinePlayerState::SignActive);
 	PendingSummonSignID = FGuid();
+
+	// Phase 2: 如果是远程召唤请求，通知中间服务
+	if (!PendingRequesterInstance.IsEmpty())
+	{
+		USL_MatchClientSubsystem* MC = GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>();
+		if (MC && MC->IsConnected())
+		{
+			MC->DeclineSummon(PendingRemoteSignID, PendingRequesterInstance);
+			UE_LOG(LogTemp, Log, TEXT("SummonSession: Remote summon declined, notified match server"));
+		}
+		PendingRemoteSignID.Empty();
+		PendingRequesterName.Empty();
+		PendingRequesterInstance.Empty();
+	}
 
 	UE_LOG(LogTemp, Log, TEXT("USL_SummonSessionComponent::DeclineSummon - Summon declined"));
 }
@@ -307,14 +366,19 @@ void USL_SummonSessionComponent::InteractWithSign(ASL_SummonSign* InSign)
 	const FSummonSignInfo& SignInfo = InSign->GetSignInfo();
 
 	// 校验匹配条件
-	TArray<FSummonSignInfo> AvailableSigns = QueryAvailableSigns();
-	bool bIsValid = false;
-	for (const FSummonSignInfo& Info : AvailableSigns)
+	// 远程标记已在中间服务查询时经过匹配过滤，直接放行
+	// 本地标记走 ActiveSigns 查询验证
+	bool bIsValid = InSign->bIsRemoteSign;
+	if (!bIsValid)
 	{
-		if (Info.SignID == SignInfo.SignID)
+		TArray<FSummonSignInfo> AvailableSigns = QueryAvailableSigns();
+		for (const FSummonSignInfo& Info : AvailableSigns)
 		{
-			bIsValid = true;
-			break;
+			if (Info.SignID == SignInfo.SignID)
+			{
+				bIsValid = true;
+				break;
+			}
 		}
 	}
 
@@ -497,6 +561,66 @@ void USL_SummonSessionComponent::OnRemoteQueryResult(const FString& InResultJSON
 	}
 }
 
+/************************************************************************/
+/*               Phase 2: 远程召唤请求/确认回调                            */
+/************************************************************************/
+
+void USL_SummonSessionComponent::OnSummonRequestReceived(const FString& InSignID,
+	const FString& InRequesterName, const FString& InRequesterInstance,
+	const FString& InRequesterIP, int32 InRequesterPort)
+{
+	// 存储待处理召唤信息
+	PendingRemoteSignID = InSignID;
+	PendingRequesterName = InRequesterName;
+	PendingRequesterInstance = InRequesterInstance;
+	PendingRequesterIP = InRequesterIP;
+	PendingRequesterPort = InRequesterPort;
+
+	// 状态转换：SignActive → BeingSummoned
+	SetState(EOnlinePlayerState::BeingSummoned);
+
+	UE_LOG(LogTemp, Log, TEXT("SummonSession: Summon request received from %s (sign=%s, ip=%s:%d)"),
+		*InRequesterName, *InSignID, *InRequesterIP, InRequesterPort);
+
+	// Phase3: 弹出确认/拒绝 UI（需调用 AcceptSummon / DeclineSummon）
+	// 先默认他会直接同意
+	AcceptSummon();
+}
+
+void USL_SummonSessionComponent::OnSummonAcceptedByRemote(const FString& InSignID)
+{
+	// 召唤者侧：放置者已接受召唤
+	if (CurrentState != EOnlinePlayerState::SummoningOther)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SummonSession: Summon accepted but not in SummoningOther state"));
+		return;
+	}
+
+	SetState(EOnlinePlayerState::HasPhantom);
+
+	UE_LOG(LogTemp, Log, TEXT("SummonSession: Summon accepted by owner (sign=%s)"), *InSignID);
+
+	// Phase3: 准备接收 PhantomData，生成灵体
+}
+
+void USL_SummonSessionComponent::OnSummonDeclinedByRemote(const FString& InSignID)
+{
+	// 召唤者侧：放置者拒绝了召唤
+	UE_LOG(LogTemp, Log, TEXT("SummonSession: Summon declined by owner (sign=%s)"), *InSignID);
+
+	// 恢复标记状态（解锁）
+	if (TargetSummonSign)
+	{
+		// 将标记状态恢复为活跃（重置 LockSign 效果）
+		TargetSummonSign->InitializeSign(TargetSummonSign->GetSignInfo());
+		TargetSummonSign = nullptr;
+	}
+
+	SetState(EOnlinePlayerState::Solo);
+
+	UE_LOG(LogTemp, Log, TEXT("SummonSession: Returned to Solo after summon declined"));
+}
+
 void USL_SummonSessionComponent::SpawnRemoteSignActor(const FString& InRemoteSignID,
 	const FString& InOwnerName, int32 InLevel,
 	const FString& InTransformJSON, const FString& InInstanceID)
@@ -546,6 +670,189 @@ void USL_SummonSessionComponent::SpawnRemoteSignActor(const FString& InRemoteSig
 		UE_LOG(LogTemp, Log, TEXT("SummonSession: Spawned remote sign %s from %s"),
 			*InRemoteSignID, *InOwnerName);
 	}
+}
+
+// ===== FPhantomData 序列化 =====
+FString FPhantomData::ToJSON() const
+{
+	TSharedPtr<FJsonObject> Obj = MakeShareable(new FJsonObject());
+
+	Obj->SetStringField(TEXT("character_mesh"), CharacterMeshPath);
+	Obj->SetStringField(TEXT("anim_bp"), AnimBlueprintPath);
+
+	TArray<TSharedPtr<FJsonValue>> MatArray;
+	for (const FString& M : MaterialPaths)
+	{
+		MatArray.Add(MakeShareable(new FJsonValueString(M)));
+	}
+	Obj->SetArrayField(TEXT("materials"), MatArray);
+
+	TArray<TSharedPtr<FJsonValue>> EquipArray;
+	for (const FString& E : EquipmentPaths)
+	{
+		EquipArray.Add(MakeShareable(new FJsonValueString(E)));
+	}
+	Obj->SetArrayField(TEXT("equipment"), EquipArray);
+
+	Obj->SetNumberField(TEXT("level"), Level);
+	Obj->SetNumberField(TEXT("weapon_level"), WeaponLevel);
+	Obj->SetNumberField(TEXT("health_percent"), HealthPercent);
+	Obj->SetStringField(TEXT("owner_name"), OwnerName);
+	Obj->SetStringField(TEXT("session_id"), SummonSessionID.ToString());
+
+	FString OutputJSON;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputJSON);
+	FJsonSerializer::Serialize(Obj.ToSharedRef(), Writer);
+	return OutputJSON;
+}
+
+/************************************************************************/
+/*                       Phase 3: PhantomData 打包                       */
+/************************************************************************/
+
+void USL_SummonSessionComponent::OnPhantomDataReceived(const FString& InJSONData)
+{
+	// 召唤者侧：收到 PhantomData，在本地生成灵体
+	if (!GetWorld() || !GetWorld()->IsServer()) return;
+
+	// 解析 JSON
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(InJSONData);
+	TSharedPtr<FJsonObject> JsonObj;
+	if (!FJsonSerializer::Deserialize(Reader, JsonObj) || !JsonObj.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SummonSession: Failed to parse PhantomData JSON"));
+		return;
+	}
+
+	// 构造 FPhantomData
+	FPhantomData Data;
+	Data.CharacterMeshPath = JsonObj->GetStringField(TEXT("character_mesh"));
+	Data.AnimBlueprintPath = JsonObj->GetStringField(TEXT("anim_bp"));
+	Data.Level = JsonObj->GetIntegerField(TEXT("level"));
+	Data.WeaponLevel = JsonObj->GetIntegerField(TEXT("weapon_level"));
+	Data.HealthPercent = JsonObj->GetNumberField(TEXT("health_percent"));
+	Data.OwnerName = JsonObj->GetStringField(TEXT("owner_name"));
+
+	FString SessionIDStr = JsonObj->GetStringField(TEXT("session_id"));
+	FGuid::Parse(SessionIDStr, Data.SummonSessionID);
+
+	// 材质列表
+	const TArray<TSharedPtr<FJsonValue>>* MatArray;
+	if (JsonObj->TryGetArrayField(TEXT("materials"), MatArray))
+	{
+		for (const TSharedPtr<FJsonValue>& Val : *MatArray)
+		{
+			Data.MaterialPaths.Add(Val->AsString());
+		}
+	}
+
+	// 装备列表
+	const TArray<TSharedPtr<FJsonValue>>* EquipArray;
+	if (JsonObj->TryGetArrayField(TEXT("equipment"), EquipArray))
+	{
+		for (const TSharedPtr<FJsonValue>& Val : *EquipArray)
+		{
+			Data.EquipmentPaths.Add(Val->AsString());
+		}
+	}
+
+	// 在召唤者附近生成灵体
+	APlayerController* PC = GetOwningPlayerController();
+	ACharacter* Character = GetOwningCharacter();
+	if (!Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SummonSession: No character to place phantom near"));
+		return;
+	}
+
+	FTransform SpawnTransform = Character->GetActorTransform();
+	SpawnTransform.SetLocation(Character->GetActorLocation() + Character->GetActorForwardVector() * 150.0f);
+
+	ASL_PhantomCharacter* Phantom = GetWorld()->SpawnActorDeferred<ASL_PhantomCharacter>(
+		ASL_PhantomCharacter::StaticClass(), SpawnTransform);
+	if (Phantom)
+	{
+		Phantom->ApplyPhantomData(Data);
+		Phantom->FinishSpawning(SpawnTransform);
+
+		UE_LOG(LogTemp, Log, TEXT("SummonSession: Phantom spawned for %s (session=%s)"),
+			*Data.OwnerName, *SessionIDStr);
+
+		// Phase3: 后续将 Phantom 的输入映射到召唤者的客户端
+		// 在多实例模式下，客户端网络切换后，PlayerController 直接 Possess 此 Phantom
+	}
+
+	SetState(EOnlinePlayerState::HasPhantom);
+}
+
+FPhantomData USL_SummonSessionComponent::PackPhantomData() const
+{
+	FPhantomData Data;
+
+	APlayerController* PC = GetOwningPlayerController();
+	ACharacter* Character = GetOwningCharacter();
+	if (!Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SummonSession: PackPhantomData - No character found"));
+		return Data;
+	}
+
+	// 收集角色外观
+	USkeletalMeshComponent* Mesh = Character->GetMesh();
+	if (Mesh && Mesh->SkeletalMesh)
+	{
+		Data.CharacterMeshPath = Mesh->SkeletalMesh->GetPathName();
+	}
+
+	// 收集动画蓝图路径
+	if (Mesh && Mesh->AnimScriptInstance)
+	{
+		Data.AnimBlueprintPath = Mesh->AnimScriptInstance->GetClass()->GetPathName();
+	}
+
+	// 收集材质（按材质索引顺序收集所有覆盖材质）
+	if (Mesh)
+	{
+		for (int32 i = 0; i < Mesh->GetNumMaterials(); i++)
+		{
+			UMaterialInterface* Mat = Mesh->GetMaterial(i);
+			if (Mat)
+			{
+				Data.MaterialPaths.Add(Mat->GetPathName());
+			}
+			else
+			{
+				Data.MaterialPaths.Add(TEXT(""));
+			}
+		}
+	}
+
+	// Phase3: 装备路径收集此处为占位，后续从装备系统获取
+	// Data.EquipmentPaths = GetEquipmentSystem()->GetEquippedItemPaths();
+
+	// 角色属性
+	Data.Level = GetPlayerLevel();
+	Data.WeaponLevel = GetPlayerWeaponLevel();
+
+	// 获取当前血量百分比
+	if (Character->GetClass()->ImplementsInterface(UDamageable::StaticClass()))
+	{
+		// 如果将来实现了 IDamageable 接口，从接口获取
+		Data.HealthPercent = 1.0f;
+	}
+	else
+	{
+		// 默认满血
+		Data.HealthPercent = 1.0f;
+	}
+
+	Data.OwnerName = GetPlayerDisplayName();
+	Data.SummonSessionID = FGuid::NewGuid();
+
+	UE_LOG(LogTemp, Log, TEXT("SummonSession: PhantomData packed for %s (mesh=%s, level=%d)"),
+		*Data.OwnerName, *Data.CharacterMeshPath, Data.Level);
+
+	return Data;
 }
 
 void USL_SummonSessionComponent::ClearRemoteSignActors()

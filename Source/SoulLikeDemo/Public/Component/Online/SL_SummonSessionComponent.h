@@ -68,6 +68,25 @@ public:
 	UFUNCTION()
 	void OnRemoteQueryResult(const FString& InResultJSON);
 
+	// Phase 2: 收到远程召唤请求（放置者侧，收到他人召唤自己的请求）
+	UFUNCTION()
+	void OnSummonRequestReceived(const FString& InSignID, const FString& InRequesterName, const FString& InRequesterInstance, const FString& InRequesterIP, int32 InRequesterPort);
+
+	// Phase 2: 召唤被接受（召唤者侧，自己发起的请求被确认）
+	UFUNCTION()
+	void OnSummonAcceptedByRemote(const FString& InSignID);
+
+	// Phase 2: 召唤被拒绝（召唤者侧，自己发起的请求被拒绝）
+	UFUNCTION()
+	void OnSummonDeclinedByRemote(const FString& InSignID);
+
+	// Phase 3: 收到 PhantomData，在本地生成灵体
+	UFUNCTION()
+	void OnPhantomDataReceived(const FString& InJSONData);
+
+	// Phase 3: 打包当前角色的 PhantomData（用于灵体传输）
+	FPhantomData PackPhantomData() const;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -112,8 +131,17 @@ protected:
 	UPROPERTY()
 	ASL_SummonSign* TargetSummonSign;
 
-	// 当前被召唤的 SignID
+	// 当前被召唤的 SignID（本地标记）
 	FGuid PendingSummonSignID;
+
+	// Phase 2: 远程待处理召唤请求信息
+	FString PendingRemoteSignID;
+	FString PendingRequesterName;
+	FString PendingRequesterInstance;
+
+	// Phase 3: 召唤者服务器的连接信息（用于 ClientTravel）
+	FString PendingRequesterIP;
+	int32 PendingRequesterPort;
 
 	// Phase 2: 远程标记 Actor 追踪（cleanup 用）
 	UPROPERTY()

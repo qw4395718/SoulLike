@@ -9,7 +9,7 @@
 // 委托声明（用于接收中间服务的消息）
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchServerConnected, bool /*bSuccess*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSignQueryResult, const FString& /*JSONResult*/);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSummonRequested, const FString& /*SignID*/, const FString& /*RequesterName*/);
+DECLARE_MULTICAST_DELEGATE_FiveParams(FOnSummonRequested, const FString& /*SignID*/, const FString& /*RequesterName*/, const FString& /*RequesterInstance*/, const FString& /*RequesterIP*/, int32 /*RequesterPort*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSummonAccepted, const FString& /*SignID*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSummonDeclined, const FString& /*SignID*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPhantomDataReceived, const FString& /*JSONData*/);

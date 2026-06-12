@@ -349,7 +349,10 @@ void USL_MatchClientSubsystem::ProcessMessage(const FString& InLine)
 	{
 		FString SignID = JsonObj->GetStringField(TEXT("sign_id"));
 		FString RequesterName = JsonObj->GetStringField(TEXT("requester_name"));
-		OnSummonRequested.Broadcast(SignID, RequesterName);
+		FString RequesterInstance = JsonObj->GetStringField(TEXT("requester_instance"));
+		FString RequesterIP = JsonObj->GetStringField(TEXT("requester_ip"));
+		int32 RequesterPort = JsonObj->GetIntegerField(TEXT("requester_port"));
+		OnSummonRequested.Broadcast(SignID, RequesterName, RequesterInstance, RequesterIP, RequesterPort);
 	}
 	else if (MsgType == TEXT("request_summon_ack"))
 	{

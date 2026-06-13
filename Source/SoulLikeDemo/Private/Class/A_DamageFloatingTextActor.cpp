@@ -5,7 +5,6 @@
 #include "Components/TextBlock.h"
 //#include "Engine/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
-#include "../Private/Tests/UnrealAudioTestGenerators.h"
 
 A_DamageFloatingTextActor::A_DamageFloatingTextActor()
 {
@@ -77,7 +76,8 @@ void A_DamageFloatingTextActor::ShowText(const FDamageFloatingTextData& InData)
 	else
 	{
 		// 无攻击者时回退到水平面随机偏移
-		const float Angle = FMath::FRandRange(0.0f, TWO_PI);
+		const float two_pi = 6.3;
+		const float Angle = FMath::FRandRange(0.0f, two_pi);
 		const float Radius = FMath::FRandRange(0.0f, RandomOffsetRadius);
 		RandomOffset = FVector(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius, 0.0f);
 	}

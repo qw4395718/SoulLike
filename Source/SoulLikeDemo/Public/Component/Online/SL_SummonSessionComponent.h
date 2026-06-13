@@ -83,13 +83,29 @@ public:
 
 	// Phase 3: 收到 PhantomData，在本地生成灵体
 	UFUNCTION()
-	void OnPhantomDataReceived(const FString& InJSONData);
+	void OnPhantomDataReceived(const FString& InJSONData, const FString& InPlacerInstance);
 
 	// Phase 3: 打包当前角色的 PhantomData（用于灵体传输）
 	FPhantomData PackPhantomData() const;
 
+	// Phase 3: 收到 phantom_ready 通知，执行 ClientTravel
+	UFUNCTION()
+	void OnPhantomReadyReceived(const FString& InSessionID);
+
+	// Phase 3: 收到 ready_query，回复 phantom_ready
+	UFUNCTION()
+	void OnReadyQueryReceived(const FString& InSessionID, const FString& InRequesterInstance);
+
+	// Phase 3: 召唤超时处理
+	void OnSummonTimeout();
+
+	// Phase 3: 收到召唤错误通知
+	UFUNCTION()
+	void OnSummonErrorReceived(const FString& InSessionID, const FString& InErrorReason);
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	/************************************************************************/
 	/*                               内部调用                               */
@@ -143,6 +159,18 @@ protected:
 	// Phase 3: 召唤者服务器的连接信息（用于 ClientTravel）
 	FString PendingRequesterIP;
 	int32 PendingRequesterPort;
+
+	// Phase 3: 当前 Phantom 会话 ID（用于 Travel URL 和时序保护）
+	FString CurrentPhantomSessionID;
+
+	// Phase 3: 放入者的 InstanceID（B 侧使用，用于发送 phantom_ready）
+	FString PlacerInstanceID;
+
+	// Phase 3: ready_query 重试计数器
+	int32 ReadyQueryRetryCount;
+
+	// Phase 3: ready_query 定时器
+	FTimerHandle ReadyQueryTimerHandle;
 
 	// Phase 2: 远程标记 Actor 追踪（cleanup 用）
 	UPROPERTY()

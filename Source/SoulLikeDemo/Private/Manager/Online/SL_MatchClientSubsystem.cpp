@@ -9,10 +9,12 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "HAL/PlatformProcess.h"
+#include "HAL/PlatformMisc.h"
 #include <Policies/CondensedJsonPrintPolicy.h>
 
 USL_MatchClientSubsystem::USL_MatchClientSubsystem()
 	: ServerPort(7777)
+	, LocalGamePort(17777)
 	, MatchSocket(nullptr)
 	, SocketSubsystem(nullptr)
 	, bIsConnected(false)
@@ -23,15 +25,42 @@ void USL_MatchClientSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
+	// 从命令行读取匹配服务地址和本机游戏端口
+	FString CmdMatchServerIP = TEXT("127.0.0.1");
+	int32 CmdMatchServerPort = 7777;
+	int32 CmdGamePort = 17777;
+
+	FParse::Value(FCommandLine::Get(), TEXT("MatchServerIP="), CmdMatchServerIP);
+	FParse::Value(FCommandLine::Get(), TEXT("MatchServerPort="), CmdMatchServerPort);
+	FParse::Value(FCommandLine::Get(), TEXT("GamePort="), CmdGamePort);
+
+	UE_LOG(LogTemp, Log, TEXT("SL_MatchClientSubsystem::Initialize - GamePort=%d, MatchServer=%s:%d"),
+		CmdGamePort, *CmdMatchServerIP, CmdMatchServerPort);
+
+	LocalGamePort = CmdGamePort;
+
 	// Phase 2 验证：延迟一帧自动连接中间匹配服务
 	FTimerHandle DummyHandle;
 	GetGameInstance()->GetTimerManager().SetTimer(DummyHandle,
-		FTimerDelegate::CreateLambda([this]()
+		FTimerDelegate::CreateLambda([this, CmdMatchServerIP, CmdMatchServerPort, CmdGamePort]()
 		{
-			if (Connect(TEXT("127.0.0.1"), 7777))
+			// PIE 模式检测：未指定 -GamePort 时自动使用 17778
+			int32 EffectiveGamePort = CmdGamePort;
+			UWorld* World = GetGameInstance()->GetWorld();
+			if (World && World->WorldType == EWorldType::PIE)
+			{
+				if (!FParse::Param(FCommandLine::Get(), TEXT("GamePort")))
+				{
+					EffectiveGamePort = 17778;
+				}
+				UE_LOG(LogTemp, Log, TEXT("MatchClient: PIE mode, GamePort=%d"), EffectiveGamePort);
+			}
+			LocalGamePort = EffectiveGamePort;
+
+			if (Connect(CmdMatchServerIP, CmdMatchServerPort))
 			{
 				FString UniqueID = FString::Printf(TEXT("Instance_%s"), *FGuid::NewGuid().ToString(EGuidFormats::Short));
-			RegisterInstance(UniqueID, GetGameInstance()->GetWorld()->GetMapName(), TEXT("127.0.0.1"), 17777);
+				RegisterInstance(UniqueID, GetGameInstance()->GetWorld()->GetMapName(), TEXT("127.0.0.1"), EffectiveGamePort);
 			}
 		}), 0.1f, false);
 }
@@ -267,6 +296,40 @@ void USL_MatchClientSubsystem::TransferPhantomData(const FString& InTargetInstan
 }
 
 /************************************************************************/
+/*                      时序保护：消息发送                                */
+/************************************************************************/
+
+void USL_MatchClientSubsystem::SendReadyQuery(const FString& InSessionID, const FString& InTargetInstance)
+{
+	FString Msg = FString::Printf(
+		TEXT("{\"type\":\"ready_query\",\"session_id\":\"%s\",\"target_instance\":\"%s\"}"),
+		*InSessionID, *InTargetInstance);
+	SendMessage(Msg);
+
+	UE_LOG(LogTemp, Verbose, TEXT("MatchClient: SendReadyQuery (session=%s, target=%s)"), *InSessionID, *InTargetInstance);
+}
+
+void USL_MatchClientSubsystem::SendPhantomReady(const FString& InSessionID, const FString& InTargetInstance)
+{
+	FString Msg = FString::Printf(
+		TEXT("{\"type\":\"phantom_ready\",\"session_id\":\"%s\",\"target_instance\":\"%s\"}"),
+		*InSessionID, *InTargetInstance);
+	SendMessage(Msg);
+
+	UE_LOG(LogTemp, Log, TEXT("MatchClient: SendPhantomReady (session=%s, target=%s)"), *InSessionID, *InTargetInstance);
+}
+
+void USL_MatchClientSubsystem::SendSummonError(const FString& InSessionID, const FString& InTargetInstance, const FString& InReason)
+{
+	FString Msg = FString::Printf(
+		TEXT("{\"type\":\"summon_error\",\"session_id\":\"%s\",\"target_instance\":\"%s\",\"reason\":\"%s\"}"),
+		*InSessionID, *InTargetInstance, *InReason);
+	SendMessage(Msg);
+
+	UE_LOG(LogTemp, Warning, TEXT("MatchClient: SendSummonError (session=%s, target=%s, reason=%s)"), *InSessionID, *InTargetInstance, *InReason);
+}
+
+/************************************************************************/
 /*                               内部调用                               */
 /************************************************************************/
 
@@ -406,14 +469,32 @@ void USL_MatchClientSubsystem::ProcessMessage(const FString& InLine)
 	}
 	else if (MsgType == TEXT("phantom_data_received"))
 	{
+		FString PlacerInstance = JsonObj->GetStringField(TEXT("placer_instance"));
 		TSharedPtr<FJsonObject> DataObj = JsonObj->GetObjectField(TEXT("data"));
 		if (DataObj.IsValid())
 		{
 			FString DataJSON;
 			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&DataJSON);
 			FJsonSerializer::Serialize(DataObj.ToSharedRef(), Writer);
-			OnPhantomDataReceived.Broadcast(DataJSON);
+			OnPhantomDataReceived.Broadcast(DataJSON, PlacerInstance);
 		}
+	}
+	else if (MsgType == TEXT("ready_query"))
+	{
+		FString SessionID = JsonObj->GetStringField(TEXT("session_id"));
+		FString RequesterInstance = JsonObj->GetStringField(TEXT("requester_instance"));
+		OnReadyQuery.Broadcast(SessionID, RequesterInstance);
+	}
+	else if (MsgType == TEXT("phantom_ready"))
+	{
+		FString SessionID = JsonObj->GetStringField(TEXT("session_id"));
+		OnPhantomReady.Broadcast(SessionID);
+	}
+	else if (MsgType == TEXT("summon_error"))
+	{
+		FString SessionID = JsonObj->GetStringField(TEXT("session_id"));
+		FString Reason = JsonObj->GetStringField(TEXT("reason"));
+		OnSummonError.Broadcast(SessionID, Reason);
 	}
 	else if (MsgType == TEXT("pong"))
 	{

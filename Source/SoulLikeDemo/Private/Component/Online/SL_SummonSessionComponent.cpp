@@ -6,6 +6,7 @@
 #include "Dom/JsonValue.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Class/SL_GameModeBase.h"
 #include "Manager/GlobalDelegatesManager.h"
 #include "Manager/DataTableManager.h"
 #include "Table/ItemDataTable.h"
@@ -79,6 +80,14 @@ void USL_SummonSessionComponent::BeginPlay()
 			}
 		}), 3.0f, true);  // true = 循环执行
 	}
+}
+
+void USL_SummonSessionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// 清理 ready_query 定时器（防止悬挂回调）
+	GetWorld()->GetTimerManager().ClearTimer(ReadyQueryTimerHandle);
+
+	Super::EndPlay(EndPlayReason);
 }
 
 /************************************************************************/
@@ -268,9 +277,13 @@ void USL_SummonSessionComponent::AcceptSummon()
 	// 取消当前标记（如果有）
 	DestroyCurrentSign();
 
-	// Phase 2: 如果是远程召唤请求，通知中间服务
+	// Phase 2+3: 远程召唤请求 + 时序保护
 	if (!PendingRequesterInstance.IsEmpty())
 	{
+		// 生成 Phantom 会话 ID（与 PhantomData 中的一致，用于时序保护）
+		CurrentPhantomSessionID = FGuid::NewGuid().ToString(EGuidFormats::Short);
+		ReadyQueryRetryCount = 0;
+
 		USL_MatchClientSubsystem* MC = GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>();
 		if (MC && MC->IsConnected())
 		{
@@ -278,40 +291,127 @@ void USL_SummonSessionComponent::AcceptSummon()
 			MC->AcceptSummon(PendingRemoteSignID, PendingRequesterInstance);
 			UE_LOG(LogTemp, Log, TEXT("SummonSession: Remote summon accepted, notified match server"));
 
-			// Phase 3: 打包 PhantomData 并传输到召唤者世界
+			// 打包 PhantomData，使用一致的 SessionID
 			FPhantomData PhantomData = PackPhantomData();
+			PhantomData.SummonSessionID = FGuid(CurrentPhantomSessionID);
 			FString PhantomJSON = PhantomData.ToJSON();
 			MC->TransferPhantomData(PendingRequesterInstance, PhantomJSON);
-			UE_LOG(LogTemp, Log, TEXT("SummonSession: PhantomData sent to %s"), *PendingRequesterInstance);
+			UE_LOG(LogTemp, Log, TEXT("SummonSession: PhantomData sent to %s (session=%s)"),
+				*PendingRequesterInstance, *CurrentPhantomSessionID);
 		}
 
-		// Phase 3: 客户端网络切换（多实例模式下連到召唤者服务器）
-		if (!PendingRequesterIP.IsEmpty() && PendingRequesterPort > 0)
-		{
-			APlayerController* PC = GetOwningPlayerController();
-			if (PC)
+		// 启动 ready_query 定时器：每 1s 询问 B 是否准备好了，最多 10 次
+		GetWorld()->GetTimerManager().SetTimer(ReadyQueryTimerHandle,
+			FTimerDelegate::CreateLambda([this]()
 			{
-				FString TravelURL = FString::Printf(TEXT("%s:%d"), *PendingRequesterIP, PendingRequesterPort);
-				PC->ClientTravel(TravelURL, TRAVEL_Absolute);
-				UE_LOG(LogTemp, Log, TEXT("SummonSession: ClientTravel to %s"), *TravelURL);
-			}
-		}
-		else
-		{
-			// 单服 PIE 模式：不触发 ClientTravel，跳过
-			UE_LOG(LogTemp, Log, TEXT("SummonSession: Skiped ClientTravel (PIE mode or no remote IP)"));
-		}
+				if (!CurrentPhantomSessionID.IsEmpty())
+				{
+					USL_MatchClientSubsystem* MC = GetWorld() ? GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>() : nullptr;
+					if (MC && MC->IsConnected())
+					{
+						MC->SendReadyQuery(CurrentPhantomSessionID, PendingRequesterInstance);
+						ReadyQueryRetryCount++;
 
-		PendingRemoteSignID.Empty();
-		PendingRequesterName.Empty();
-		PendingRequesterInstance.Empty();
-		PendingRequesterIP.Empty();
-		PendingRequesterPort = 0;
+						if (ReadyQueryRetryCount >= 10)
+						{
+							// 超时：中断流程
+							GetWorld()->GetTimerManager().ClearTimer(ReadyQueryTimerHandle);
+							OnSummonTimeout();
+						}
+					}
+				}
+			}), 1.0f, true, 0.5f);  // 首次 0.5s 后开始，之后每 1s
+
+		// 不再立即 ClientTravel，而是等收到 phantom_ready 后由 OnPhantomReadyReceived 处理
+	}
+	else
+	{
+		// 单服 PIE 模式：无远程请求，直接跳过
+		UE_LOG(LogTemp, Log, TEXT("SummonSession: AcceptSummon in PIE mode, no remote travel"));
+		CurrentPhantomSessionID.Empty();
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("USL_SummonSessionComponent::AcceptSummon - Summon accepted"));
+	UE_LOG(LogTemp, Log, TEXT("USL_SummonSessionComponent::AcceptSummon - Summon accepted, waiting for phantom_ready"));
+}
 
-	// Phase3: 触发世界穿梭流程，保存当前世界状态，切换到召唤者世界
+void USL_SummonSessionComponent::OnPhantomReadyReceived(const FString& InSessionID)
+{
+	// 检查是否匹配当前等待的会话
+	if (InSessionID != CurrentPhantomSessionID) return;
+	if (CurrentState != EOnlinePlayerState::SummonedAsPhantom) return;
+
+	// 停止 ready_query 定时器
+	GetWorld()->GetTimerManager().ClearTimer(ReadyQueryTimerHandle);
+
+	// 执行 ClientTravel（B 已确认 PhantomCharacter 初始化完成）
+	if (!PendingRequesterIP.IsEmpty() && PendingRequesterPort > 0)
+	{
+		APlayerController* PC = GetOwningPlayerController();
+		if (PC)
+		{
+			FString TravelURL = FString::Printf(TEXT("%s:%d?PhantomSession=%s"),
+				*PendingRequesterIP, PendingRequesterPort, *CurrentPhantomSessionID);
+			PC->ClientTravel(TravelURL, TRAVEL_Absolute);
+			UE_LOG(LogTemp, Log, TEXT("SummonSession: phantom_ready received, ClientTravel to %s"), *TravelURL);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("SummonSession: phantom_ready received but no remote IP, skip travel"));
+	}
+
+	// 清理临时数据
+	CurrentPhantomSessionID.Empty();
+	ReadyQueryRetryCount = 0;
+	PendingRemoteSignID.Empty();
+	PendingRequesterName.Empty();
+	PendingRequesterInstance.Empty();
+	PendingRequesterIP.Empty();
+	PendingRequesterPort = 0;
+}
+
+void USL_SummonSessionComponent::OnReadyQueryReceived(const FString& InSessionID, const FString& InRequesterInstance)
+{
+	// B 侧：收到 A 的 ready_query，检查当前状态
+	if (CurrentState != EOnlinePlayerState::HasPhantom && CurrentState != EOnlinePlayerState::SummoningOther)
+	{
+		// 还没准备好（PhantomCharacter 还未生成），忽略这次查询
+		UE_LOG(LogTemp, Verbose, TEXT("SummonSession: OnReadyQueryReceived ignored (state=%d)"), (int32)CurrentState);
+		return;
+	}
+
+	if (USL_MatchClientSubsystem* MC = GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>())
+	{
+		if (MC->IsConnected() && !PlacerInstanceID.IsEmpty())
+		{
+			// 回复 phantom_ready，通知 A 可以连接了
+			MC->SendPhantomReady(InSessionID, InRequesterInstance);
+			UE_LOG(LogTemp, Log, TEXT("SummonSession: OnReadyQueryReceived - sent phantom_ready to %s (session=%s)"),
+				*InRequesterInstance, *InSessionID);
+		}
+	}
+}
+
+void USL_SummonSessionComponent::OnSummonTimeout()
+{
+	UE_LOG(LogTemp, Warning, TEXT("SummonSession: Summon TIMEOUT after %d retries, returning to Solo"), ReadyQueryRetryCount);
+
+	// 清理所有待处理数据
+	CurrentPhantomSessionID.Empty();
+	ReadyQueryRetryCount = 0;
+	PendingRemoteSignID.Empty();
+	PendingRequesterName.Empty();
+	PendingRequesterInstance.Empty();
+	PendingRequesterIP.Empty();
+	PendingRequesterPort = 0;
+
+	SetState(EOnlinePlayerState::Solo);
+}
+
+void USL_SummonSessionComponent::OnSummonErrorReceived(const FString& InSessionID, const FString& InErrorReason)
+{
+	UE_LOG(LogTemp, Warning, TEXT("SummonSession: Summon error (session=%s, reason=%s) - aborting"), *InSessionID, *InErrorReason);
+	OnSummonTimeout();
 }
 
 void USL_SummonSessionComponent::DeclineSummon()
@@ -722,7 +822,7 @@ FString FPhantomData::ToJSON() const
 /*                       Phase 3: PhantomData 打包                       */
 /************************************************************************/
 
-void USL_SummonSessionComponent::OnPhantomDataReceived(const FString& InJSONData)
+void USL_SummonSessionComponent::OnPhantomDataReceived(const FString& InJSONData, const FString& InPlacerInstance)
 {
 	// 召唤者侧：收到 PhantomData，在本地生成灵体
 	if (!GetWorld() || !GetWorld()->IsServer()) return;

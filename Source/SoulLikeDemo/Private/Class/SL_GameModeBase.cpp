@@ -4,6 +4,7 @@
 #include "SL_CharacterBase.h"
 #include "WaveManagerSystem.h"
 #include "SL_GameSaveSubsystem.h"
+#include "SL_PhantomCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
 ASL_GameModeBase::ASL_GameModeBase()
@@ -45,6 +46,173 @@ void ASL_GameModeBase::CreateLevelManager()
 	if (LevelManager)
 	{
 		UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::CreateLevelManager - LevelManager created"));
+	}
+}
+
+/************************************************************************/
+/*                   Phantom 客户端连接检测                              */
+/************************************************************************/
+
+void ASL_GameModeBase::PreLogin(const FString& Options, const FString& Address,
+	const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+{
+	// 检查连接 URL 中是否包含 PhantomSession 参数
+	FString SessionID = UGameplayStatics::ParseOption(Options, TEXT("PhantomSession"));
+	if (!SessionID.IsEmpty())
+	{
+		ExpectedPhantomSessions.Add(SessionID);
+		UE_LOG(LogTemp, Log, TEXT("GameMode: PreLogin - Expected phantom session %s"), *SessionID);
+	}
+
+	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
+}
+
+void ASL_GameModeBase::PostLogin(APlayerController* NewPlayer)
+{
+	if (!NewPlayer)
+	{
+		Super::PostLogin(nullptr);
+		return;
+	}
+
+	// 检查这个客户端是否在等待灵体（基于 PreLogin 中保存的 ExpectedPhantomSessions）
+	bool bPhantomPossessed = false;
+	for (int32 i = ExpectedPhantomSessions.Num() - 1; i >= 0; i--)
+	{
+		const FString& SessionID = ExpectedPhantomSessions[i];
+		ASL_PhantomCharacter* Phantom = TakePendingPhantom(SessionID);
+		if (Phantom)
+		{
+			// 关键：在 Super::PostLogin 之前 Possess，
+			// 这样 HandleStartingNewPlayer 发现已有 Pawn 会跳过 RestartPlayer
+			NewPlayer->Possess(Phantom);
+			ExpectedPhantomSessions.RemoveAt(i);
+			bPhantomPossessed = true;
+
+			UE_LOG(LogTemp, Log, TEXT("GameMode: PostLogin - Client possessed phantom %s (session=%s)"),
+				*Phantom->GetName(), *SessionID);
+			break;
+		}
+	}
+
+	if (!bPhantomPossessed && ExpectedPhantomSessions.Num() > 0)
+	{
+		// PhantomCharacter 还没生成，保存 PC 等待
+		FString SessionID = ExpectedPhantomSessions.Pop();
+		WaitingPhantomControllers.Add(SessionID, NewPlayer);
+
+		// 每帧重试，直到 Phantom 生成或超时
+		FString SessionIDCopy = SessionID;
+		GetWorld()->GetTimerManager().SetTimerForNextTick(
+			FTimerDelegate::CreateLambda([this, SessionIDCopy]()
+			{
+				RetryPhantomPossession(SessionIDCopy);
+			}));
+
+		UE_LOG(LogTemp, Log, TEXT("GameMode: PostLogin - Phantom not ready yet, queued PC for session %s"), *SessionID);
+	}
+
+	// 调用基类
+	Super::PostLogin(NewPlayer);
+}
+
+/************************************************************************/
+/*                    灵体追踪管理                                       */
+/************************************************************************/
+
+void ASL_GameModeBase::RegisterPendingPhantom(const FString& InSessionID, ASL_PhantomCharacter* InPhantom)
+{
+	if (!InPhantom || InSessionID.IsEmpty()) return;
+
+	PendingPhantoms.Add(InSessionID, InPhantom);
+
+	// 检查是否有 PC 正在等待这个 PhantomCharacter
+	if (APlayerController** PC = WaitingPhantomControllers.Find(InSessionID))
+	{
+		// Phantom 已就绪，立即 Possess
+		if (APawn* OldPawn = (*PC)->GetPawn())
+		{
+			OldPawn->Destroy();
+		}
+		(*PC)->Possess(InPhantom);
+		PendingPhantoms.Remove(InSessionID);
+		WaitingPhantomControllers.Remove(InSessionID);
+
+		UE_LOG(LogTemp, Log, TEXT("GameMode: RegisterPendingPhantom - Immediate possess of %s (session=%s)"),
+			*InPhantom->GetName(), *InSessionID);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("GameMode: Registered pending phantom %s for session %s"),
+			*InPhantom->GetName(), *InSessionID);
+	}
+}
+
+ASL_PhantomCharacter* ASL_GameModeBase::TakePendingPhantom(const FString& InSessionID)
+{
+	ASL_PhantomCharacter** Found = PendingPhantoms.Find(InSessionID);
+	if (Found)
+	{
+		ASL_PhantomCharacter* Result = *Found;
+		PendingPhantoms.Remove(InSessionID);
+		return Result;
+	}
+	return nullptr;
+}
+
+void ASL_GameModeBase::RetryPhantomPossession(const FString& InSessionID)
+{
+	APlayerController** PC = WaitingPhantomControllers.Find(InSessionID);
+	if (!PC)
+	{
+		// PC 已被其他路径取出（例如 RegisterPendingPhantom 中的提前处理）
+		return;
+	}
+
+	ASL_PhantomCharacter* Phantom = TakePendingPhantom(InSessionID);
+	if (Phantom)
+	{
+		// Phantom 已就绪
+		if (APawn* OldPawn = (*PC)->GetPawn())
+		{
+			OldPawn->Destroy();
+		}
+		(*PC)->Possess(Phantom);
+		WaitingPhantomControllers.Remove(InSessionID);
+
+		UE_LOG(LogTemp, Log, TEXT("GameMode: RetryPhantomPossession - Possessed phantom (session=%s)"), *InSessionID);
+	}
+	else if ((*PC)->GetPawn())
+	{
+		// 已有默认 Pawn（RestartPlayer 给了默认角色），尝试销毁重新 Possess
+		// 为防止死循环，设定一个最大尝试次数
+		static int32 RetryCount = 0;
+		if (RetryCount < 100)
+		{
+			RetryCount++;
+			FString SessionIDCopy = InSessionID;
+			GetWorld()->GetTimerManager().SetTimerForNextTick(
+				FTimerDelegate::CreateLambda([this, SessionIDCopy]()
+				{
+					RetryPhantomPossession(SessionIDCopy);
+				}));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("GameMode: RetryPhantomPossession - MAX RETRIES for session %s"), *InSessionID);
+			WaitingPhantomControllers.Remove(InSessionID);
+			RetryCount = 0;
+		}
+	}
+	else
+	{
+		// 继续等待
+		FString SessionIDCopy = InSessionID;
+		GetWorld()->GetTimerManager().SetTimerForNextTick(
+			FTimerDelegate::CreateLambda([this, SessionIDCopy]()
+			{
+				RetryPhantomPossession(SessionIDCopy);
+			}));
 	}
 }
 

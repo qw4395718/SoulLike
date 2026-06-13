@@ -12,7 +12,10 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnSignQueryResult, const FString& /*JSONRes
 DECLARE_MULTICAST_DELEGATE_FiveParams(FOnSummonRequested, const FString& /*SignID*/, const FString& /*RequesterName*/, const FString& /*RequesterInstance*/, const FString& /*RequesterIP*/, int32 /*RequesterPort*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSummonAccepted, const FString& /*SignID*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSummonDeclined, const FString& /*SignID*/);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPhantomDataReceived, const FString& /*JSONData*/);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPhantomDataReceived, const FString& /*JSONData*/, const FString& /*PlacerInstance*/);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReadyQuery, const FString& /*SessionID*/, const FString& /*RequesterInstance*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPhantomReady, const FString& /*SessionID*/);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSummonError, const FString& /*SessionID*/, const FString& /*ErrorReason*/);
 
 /**
  * 中间匹配服务客户端组件
@@ -49,6 +52,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "MatchClient")
 	FString GetInstanceID() const { return InstanceID; }
 
+	// 获取本地游戏端口
+	int32 GetLocalGamePort() const { return LocalGamePort; }
+
 	// ===== 消息发送 =====
 
 	// 注册本世界实例
@@ -82,6 +88,15 @@ public:
 	// 传输灵体数据
 	void TransferPhantomData(const FString& InTargetInstance, const FString& InDataJSON);
 
+	// 时序保护：询问目标实例是否已准备好
+	void SendReadyQuery(const FString& InSessionID, const FString& InTargetInstance);
+
+	// 时序保护：通知放置者 PhantomCharacter 已准备好
+	void SendPhantomReady(const FString& InSessionID, const FString& InTargetInstance);
+
+	// 时序保护：通知放置者召唤流程出错
+	void SendSummonError(const FString& InSessionID, const FString& InTargetInstance, const FString& InReason);
+
 	// ===== 委托（外部绑定回调） =====
 
 	FOnMatchServerConnected OnConnected;
@@ -90,6 +105,9 @@ public:
 	FOnSummonAccepted OnSummonAccepted;
 	FOnSummonDeclined OnSummonDeclined;
 	FOnPhantomDataReceived OnPhantomDataReceived;
+	FOnReadyQuery OnReadyQuery;
+	FOnPhantomReady OnPhantomReady;
+	FOnSummonError OnSummonError;
 
 protected:
 	/************************************************************************/
@@ -108,7 +126,6 @@ protected:
 	// 清理 Socket
 	void CleanUpSocket();
 
-protected:
 	/************************************************************************/
 	/*                               内部访问                               */
 	/************************************************************************/
@@ -118,6 +135,9 @@ protected:
 
 	UPROPERTY()
 	int32 ServerPort;
+
+	UPROPERTY()
+	int32 LocalGamePort;
 
 	FString InstanceID;
 

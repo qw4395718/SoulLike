@@ -12,6 +12,7 @@ class USL_EquipmentComponent;
 class USL_InventoryComponent;
 class UHUD_ItemUseUI;
 class ASL_SummonSign;
+class ASL_PhantomCharacter;
 class USL_SummonSessionComponent;
 class UDamageFloatingTextManagerComponent;
 

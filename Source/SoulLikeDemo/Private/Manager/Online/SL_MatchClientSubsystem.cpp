@@ -59,8 +59,20 @@ void USL_MatchClientSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 			if (Connect(CmdMatchServerIP, CmdMatchServerPort))
 			{
+				// 从引擎 URL 读取实际监听端口（覆盖 GamePort 猜测值，确保 ClientTravel 连到正确端口）
+				int32 ActualListenPort = EffectiveGamePort;
+				if (World && World->URL.Port > 0)
+				{
+					ActualListenPort = World->URL.Port;
+					if (ActualListenPort != EffectiveGamePort)
+					{
+						UE_LOG(LogTemp, Log, TEXT("MatchClient: Using actual listen port %d (GamePort=%d)"), ActualListenPort, EffectiveGamePort);
+					}
+				}
+				LocalGamePort = ActualListenPort;
+
 				FString UniqueID = FString::Printf(TEXT("Instance_%s"), *FGuid::NewGuid().ToString(EGuidFormats::Short));
-				RegisterInstance(UniqueID, GetGameInstance()->GetWorld()->GetMapName(), TEXT("127.0.0.1"), EffectiveGamePort);
+				RegisterInstance(UniqueID, World->GetMapName(), TEXT("127.0.0.1"), ActualListenPort);
 			}
 		}), 0.1f, false);
 }
@@ -469,7 +481,8 @@ void USL_MatchClientSubsystem::ProcessMessage(const FString& InLine)
 	}
 	else if (MsgType == TEXT("phantom_data_received"))
 	{
-		FString PlacerInstance = JsonObj->GetStringField(TEXT("placer_instance"));
+		FString PlacerInstance;
+		JsonObj->TryGetStringField(TEXT("placer_instance"), PlacerInstance);
 		TSharedPtr<FJsonObject> DataObj = JsonObj->GetObjectField(TEXT("data"));
 		if (DataObj.IsValid())
 		{

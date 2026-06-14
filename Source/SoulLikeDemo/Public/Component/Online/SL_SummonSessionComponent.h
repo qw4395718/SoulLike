@@ -6,7 +6,7 @@
 #include "SL_SummonSessionComponent.generated.h"
 
 class ASL_SummonSign;
-class ASL_PhantomCharacter;
+class ASL_CharacterBase;
 
 /**
  * 召唤会话组件
@@ -172,6 +172,9 @@ protected:
 	// Phase 3: ready_query 定时器
 	FTimerHandle ReadyQueryTimerHandle;
 
+	// Phase 2: 定时查询远程标记定时器
+	FTimerHandle PeriodicQueryTimerHandle;
+
 	// Phase 2: 远程标记 Actor 追踪（cleanup 用）
 	UPROPERTY()
 	TMap<FString, ASL_SummonSign*> RemoteSignActors;
@@ -193,7 +196,7 @@ protected:
 
 	// Phase 3: 灵体角色类（可在蓝图中指定子类，调整骨骼网格体位置/旋转）
 	UPROPERTY(EditDefaultsOnly, Category = "SummonSession|Config")
-	TSubclassOf<ASL_PhantomCharacter> PhantomCharacterClass;
+	TSubclassOf<ASL_CharacterBase> PhantomCharacterClass;
 
 	// 召唤符道具 ID（对应道具数据表中的 ItemID）
 	UPROPERTY(EditDefaultsOnly, Category = "SummonSession|Config")

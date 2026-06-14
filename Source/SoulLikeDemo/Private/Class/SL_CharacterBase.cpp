@@ -2,6 +2,10 @@
 
 
 #include "SL_CharacterBase.h"
+#include "Net/UnrealNetwork.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimBlueprintGeneratedClass.h"
+#include "Components/CapsuleComponent.h"
 #include "WeaponAnimNotify_IF.h"
 #include "SL_AbilitySystemComponent.h"
 #include <SL_StatusAttributeSet.h>
@@ -19,12 +23,31 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include "Components/SkeletalMeshComponent.h"
 #include <Engine/NetConnection.h>
+#include "Materials/MaterialInstanceDynamic.h"
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
+
+
+void ASL_CharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASL_CharacterBase, CurrentIdentity);
+	DOREPLIFETIME(ASL_CharacterBase, PhantomData);
+	DOREPLIFETIME(ASL_CharacterBase, bCanInteractWithWorld);
+	DOREPLIFETIME(ASL_CharacterBase, bCanBeDamagedByWorld);
+}
 
 ASL_CharacterBase::ASL_CharacterBase(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	bReplicates = true;
+	CurrentIdentity = ECharacterIdentity::Normal;
+	bCanInteractWithWorld = true;
+	bCanBeDamagedByWorld = true;
+	PhantomMaterialOverride = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/Game/SoulLikeDemo/Materials/MI_Phantom.MI_Phantom")));
+
+
 	/************************************************************************/
 	/*                                GAS组件相关                                      */
 	/************************************************************************/
@@ -732,3 +755,123 @@ ASL_WeaponBase* ASL_CharacterBase::GetWeaponByHand(int32 HandIndex) const
     return EquipmentCmp->GetWeaponByHand(HandIndex);
 }
 
+
+/************************************************************************/
+/*                             身份相关方法                               */
+/************************************************************************/
+
+void ASL_CharacterBase::SetIdentity(ECharacterIdentity InIdentity)
+{
+	CurrentIdentity = InIdentity;
+
+	if (HasAuthority() && InIdentity == ECharacterIdentity::Phantom)
+	{
+		bCanInteractWithWorld = false;
+		bCanBeDamagedByWorld = true;
+	}
+}
+
+void ASL_CharacterBase::ApplyPhantomData(const FPhantomData& InData)
+{
+	PhantomData = InData;
+	CurrentIdentity = ECharacterIdentity::Phantom;
+
+	RebuildAppearance();
+	ApplyTranslucentEffect();
+	ApplyPhantomRestrictions();
+
+	UE_LOG(LogTemp, Log, TEXT("CharacterBase: Applied phantom data for %s (mesh=%s)"),
+		*PhantomData.OwnerName, *PhantomData.CharacterMeshPath);
+}
+
+void ASL_CharacterBase::SetInteractionEnabled(bool bEnabled)
+{
+	bCanInteractWithWorld = bEnabled;
+}
+
+void ASL_CharacterBase::Repatriate(EReturnReason InReason)
+{
+	UE_LOG(LogTemp, Log, TEXT("CharacterBase: Repatriating %s (reason=%d)"),
+		*PhantomData.OwnerName, (int32)InReason);
+	SetLifeSpan(1.0f);
+}
+
+void ASL_CharacterBase::RebuildAppearance()
+{
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	if (!MeshComp) return;
+
+	if (!PhantomData.CharacterMeshPath.IsEmpty())
+	{
+		USkeletalMesh* LoadedMesh = Cast<USkeletalMesh>(
+			StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, *PhantomData.CharacterMeshPath));
+		if (LoadedMesh)
+			MeshComp->SetSkeletalMesh(LoadedMesh);
+	}
+
+	if (!PhantomData.AnimBlueprintPath.IsEmpty())
+	{
+		UClass* AnimBPClass = Cast<UClass>(
+			StaticLoadObject(UClass::StaticClass(), nullptr, *PhantomData.AnimBlueprintPath));
+		if (AnimBPClass)
+			MeshComp->SetAnimInstanceClass(AnimBPClass);
+	}
+
+	PhantomMaterials.Empty();
+	for (int32 i = 0; i < PhantomData.MaterialPaths.Num(); i++)
+	{
+		const FString& MatPath = PhantomData.MaterialPaths[i];
+		if (!MatPath.IsEmpty())
+		{
+			UMaterialInterface* Mat = Cast<UMaterialInterface>(
+				StaticLoadObject(UMaterialInterface::StaticClass(), nullptr, *MatPath));
+			if (Mat)
+				MeshComp->SetMaterial(i, Mat);
+		}
+	}
+}
+
+void ASL_CharacterBase::ApplyTranslucentEffect()
+{
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	if (!MeshComp) return;
+
+	UMaterialInterface* TranslucentMat = PhantomMaterialOverride.LoadSynchronous();
+	if (!TranslucentMat)
+	{
+		TranslucentMat = UMaterial::GetDefaultMaterial(MD_Surface);
+		if (!TranslucentMat) return;
+	}
+
+	PhantomMaterials.Empty();
+	for (int32 i = 0; i < MeshComp->GetNumMaterials(); i++)
+	{
+		UMaterialInstanceDynamic* DynMat = UMaterialInstanceDynamic::Create(TranslucentMat, this);
+		if (DynMat)
+		{
+			DynMat->SetScalarParameterValue(FName("Opacity"), 0.6f);
+			DynMat->SetScalarParameterValue(FName("GlowIntensity"), 0.3f);
+			MeshComp->SetMaterial(i, DynMat);
+			PhantomMaterials.Add(DynMat);
+		}
+	}
+
+	MeshComp->SetCastShadow(false);
+	MeshComp->bReceivesDecals = false;
+}
+
+void ASL_CharacterBase::ApplyPhantomRestrictions()
+{
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetSimulatePhysics(false);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+}
+
+void ASL_CharacterBase::OnRep_PhantomData()
+{
+	if (CurrentIdentity == ECharacterIdentity::Phantom)
+	{
+		RebuildAppearance();
+		ApplyTranslucentEffect();
+	}
+}

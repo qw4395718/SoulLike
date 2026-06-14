@@ -4,7 +4,7 @@
 #include "SL_CharacterBase.h"
 #include "WaveManagerSystem.h"
 #include "SL_GameSaveSubsystem.h"
-#include "SL_PhantomCharacter.h"
+
 #include "Kismet/GameplayStatics.h"
 
 ASL_GameModeBase::ASL_GameModeBase()
@@ -80,7 +80,7 @@ void ASL_GameModeBase::PostLogin(APlayerController* NewPlayer)
 	for (int32 i = ExpectedPhantomSessions.Num() - 1; i >= 0; i--)
 	{
 		const FString& SessionID = ExpectedPhantomSessions[i];
-		ASL_PhantomCharacter* Phantom = TakePendingPhantom(SessionID);
+		ASL_CharacterBase* Phantom = TakePendingPhantom(SessionID);
 		if (Phantom)
 		{
 			// 关键：在 Super::PostLogin 之前 Possess，
@@ -112,15 +112,27 @@ void ASL_GameModeBase::PostLogin(APlayerController* NewPlayer)
 		UE_LOG(LogTemp, Log, TEXT("GameMode: PostLogin - Phantom not ready yet, queued PC for session %s"), *SessionID);
 	}
 
-	// 调用基类
-	Super::PostLogin(NewPlayer);
+	if (bPhantomPossessed)
+	{
+		// 灵体客户端：跳过 Super::PostLogin（避免 K2_PostLogin 触发 Blueprint 初始化和 UI 显示）
+		// 手动初始化 PlayerState
+		if (NewPlayer->PlayerState == nullptr)
+		{
+			//NewPlayer->PlayerState = NewObject<APlayerState>(NewPlayer, PlayerStateClass);
+		}
+	}
+	else
+	{
+		// 正常客户端：走标准流程
+		Super::PostLogin(NewPlayer);
+	}
 }
 
 /************************************************************************/
 /*                    灵体追踪管理                                       */
 /************************************************************************/
 
-void ASL_GameModeBase::RegisterPendingPhantom(const FString& InSessionID, ASL_PhantomCharacter* InPhantom)
+void ASL_GameModeBase::RegisterPendingPhantom(const FString& InSessionID, ASL_CharacterBase* InPhantom)
 {
 	if (!InPhantom || InSessionID.IsEmpty()) return;
 
@@ -148,12 +160,12 @@ void ASL_GameModeBase::RegisterPendingPhantom(const FString& InSessionID, ASL_Ph
 	}
 }
 
-ASL_PhantomCharacter* ASL_GameModeBase::TakePendingPhantom(const FString& InSessionID)
+ASL_CharacterBase* ASL_GameModeBase::TakePendingPhantom(const FString& InSessionID)
 {
-	ASL_PhantomCharacter** Found = PendingPhantoms.Find(InSessionID);
+	ASL_CharacterBase** Found = PendingPhantoms.Find(InSessionID);
 	if (Found)
 	{
-		ASL_PhantomCharacter* Result = *Found;
+		ASL_CharacterBase* Result = *Found;
 		PendingPhantoms.Remove(InSessionID);
 		return Result;
 	}
@@ -169,7 +181,7 @@ void ASL_GameModeBase::RetryPhantomPossession(const FString& InSessionID)
 		return;
 	}
 
-	ASL_PhantomCharacter* Phantom = TakePendingPhantom(InSessionID);
+	ASL_CharacterBase* Phantom = TakePendingPhantom(InSessionID);
 	if (Phantom)
 	{
 		// Phantom 已就绪

@@ -39,6 +39,15 @@ enum class EReturnReason : uint8
 	Timeout				UMETA(DisplayName = "超时")
 };
 
+
+// ===== 角色身份枚举 =====
+UENUM(BlueprintType)
+enum class ECharacterIdentity : uint8
+{
+	Normal		UMETA(DisplayName = "正常角色"),
+	Phantom		UMETA(DisplayName = "灵体化身")
+};
+
 // ===== 匹配配置 =====
 USTRUCT(BlueprintType)
 struct FSummonMatchConfig
@@ -123,6 +132,10 @@ struct FPhantomData
 
 	UPROPERTY(BlueprintReadWrite)
 	float HealthPercent = 1.0f;
+
+	// 职业ID（用于初始化灵体的能力/装备）
+	UPROPERTY(BlueprintReadWrite)
+	int32 PlayerClassID = 0;
 
 	// 身份标识
 	UPROPERTY(BlueprintReadWrite)

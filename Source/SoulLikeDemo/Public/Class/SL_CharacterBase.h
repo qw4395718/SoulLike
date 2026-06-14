@@ -18,6 +18,7 @@
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemInterface.h"
 #include <WeaponAccessory_IF.h>
 #include <ActorState_IF.h>
+#include <OnlineSummonStructs.h>
 #include "SL_CharacterBase.generated.h"
 
 // 声明一个自定义日志类别
@@ -160,10 +161,49 @@ public:
 	/************************************************************************/
 	// 白盒初始化
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
-		void InitializeCharacter();
+	void InitializeCharacter();
+
+	// ===== 身份管理 =====
+	UFUNCTION(BlueprintCallable, Category = "CharacterIdentity")
+	void SetIdentity(ECharacterIdentity InIdentity);
+
+	UFUNCTION(BlueprintPure, Category = "CharacterIdentity")
+	ECharacterIdentity GetIdentity() const { return CurrentIdentity; }
+
+	// 用 PhantomData 初始化灵体外观
+	UFUNCTION(BlueprintCallable, Category = "Phantom")
+	void ApplyPhantomData(const FPhantomData& InData);
+
+	// 获取灵体数据
+	UFUNCTION(BlueprintPure, Category = "Phantom")
+	const FPhantomData& GetPhantomData() const { return PhantomData; }
+
+	// 设置能否与世界交互
+	UFUNCTION(BlueprintCallable, Category = "Phantom")
+	void SetInteractionEnabled(bool bEnabled);
+
+	// 遣返灵体
+	UFUNCTION(BlueprintCallable, Category = "Phantom")
+	void Repatriate(EReturnReason InReason);
+
+protected:
+	// 重建灵体外观
+	void RebuildAppearance();
+
+	// 应用半透明视觉效果
+	void ApplyTranslucentEffect();
+
+	// 应用灵体交互限制
+	void ApplyPhantomRestrictions();
+
+	// 属性复制回调
+	UFUNCTION()
+	void OnRep_PhantomData();
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitPartmentComponent();
+
+public:
 
 	// 获取背包组件引用
 	UFUNCTION(BlueprintPure, Category = "CharacterOperation")
@@ -202,6 +242,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitCharacterWithClassID(int32 InPlayerClassID);
+
+	UFUNCTION(BlueprintPure, Category = "CharacterOperation")
+		int32 GetClassID() const { return PlayerClassID; }
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void SetClassID(int32 InPlayerClassID);
@@ -253,6 +296,30 @@ protected:
 
 	UPROPERTY()
 		USL_ComboManagerComponent* ComboManagerCmp;
+
+	// ===== 身份相关 =====
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Identity")
+	ECharacterIdentity CurrentIdentity;
+
+	// 灵体数据
+	UPROPERTY(ReplicatedUsing = OnRep_PhantomData)
+	FPhantomData PhantomData;
+
+	// 能否与世界交互
+	UPROPERTY(Replicated)
+	bool bCanInteractWithWorld;
+
+	// 能否受到伤害
+	UPROPERTY(Replicated)
+	bool bCanBeDamagedByWorld;
+
+	// 半透明材质实例
+	UPROPERTY()
+	TArray<UMaterialInstanceDynamic*> PhantomMaterials;
+
+	// 半透明材质覆盖
+	UPROPERTY(EditDefaultsOnly, Category = "Identity|Visual")
+	TSoftObjectPtr<UMaterialInterface> PhantomMaterialOverride;
 
 	// 这个状态仅用于确定是否需要触发死亡布娃娃系统
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")

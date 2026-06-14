@@ -570,6 +570,156 @@ SignManager (Server Only):
 
 ---
 
-> 文档版本：v2.0
-> 最后更新：2026-06-10
-> 状态：Phase 1 完成，Phase 2 规划中
+> 文档版本：v2.1
+> 最后更新：2026-06-14
+> 状态：Phase 1 完成，Phase 2 完成，Phase 3 开发中
+
+
+---
+
+## 附录 A：完整消息流参考
+
+### A.1 消息流总图
+
+```
+设下标记者 (A 放置者/灵体)          中间匹配服务 (TCP 7777)          房主 (B 召唤者)
+      │                                       │                           │
+      │======== Phase 1: 实例注册 ============│                           │
+      │                                       │                           │
+      ├── RegisterInstance(A_ID, map, ip, port) ──┤                           │
+      │                                       ├── RegisterInstance(B_ID, map, ip, port) ←──┤
+      │                                       │                           │
+      │======== Phase 2: 标记放置与可见性 =====│                           │
+      │                                       │                           │
+      ├── RegisterSign(owner=A, ...) ────────┤                           │
+      │                                       │                           │
+      │                                       │←── QuerySigns(map, level) ─┤
+      │                                       ├── QuerySignsResult ──────→┤ 看到远程标记
+      │                                       │                           │
+      │======== Phase 3: 召唤请求 ============│                           │
+      │                                       │                           │
+      │                                       │←── RequestSummon(sign_id, B_id) ─┤
+      │←─ SummonRequest(sign_id, B_name, B_ip:port) ───┤                           │
+      │  OnSummonRequestReceived              │                           │
+      │  state = BeingSummoned               │                           │
+      │                                       │                           │
+      │======== Phase 4: 接受召唤 & PhantomData 传输 ===│
+      │                                       │                           │
+      │  AcceptSummon()                       │                           │
+      │  CurrentPhantomSessionID = GUID       │                           │
+      │  PackPhantomData()                    │                           │
+      │  PhantomData.SummonSessionID = GUID   │                           │
+      │                                       │                           │
+      ├── AcceptSummon(sign_id, B_id) ───────┤                           │
+      │                                       ├── SummonAccepted ───────→┤ 状态机流转
+      │  ├── TransferPhantomData(B_id, JSON) ─┤                           │
+      │  │                                    ├── PhantomDataReceived ────┤ OnPhantomDataReceived
+      │  │                                    │    + placer_instance       │ PlacerInstanceID = ...
+      │  │                                    │                           │ CurrentPhantomSessionID = ...
+      │  │                                    │                           │ Spawn PhantomCharacter
+      │  │                                    │                           │ GM->RegisterPendingPhantom()
+      │  │                                    │                           │ state = HasPhantom
+      │  │                                    │                           │
+      │  └── 启动 ready_query 定时器 (1s x 10) │                           │
+      │                                       │                           │
+      │======== Phase 5: 时序保护 ============│                           │
+      │                                       │                           │
+      ├── ReadyQuery(session, target=B) ─────┤                           │
+      │  (每 1s, 最多 10 次)                  ├── ReadyQuery ────────────→┤ OnReadyQueryReceived
+      │                                       │                           │ 检查 state == HasPhantom
+      │                                       │                           │ MC->SendPhantomReady()
+      │                                       │                           │
+      │                                       │←── PhantomReady ─────────┤
+      │←─ PhantomReady ─────────────────────┤                           │
+      │  OnPhantomReadyReceived              │                           │
+      │  停止定时器                          │                           │
+      │  ClientTravel("ip:port?PhantomSession=GUID")                    │
+      │                                       │                           │
+      │======== Phase 6: 客户端穿梭 ==========│                           │
+      │                                       │                           │
+      │  ── ClientTravel ──────────────────────────────────────────────→┤
+      │                                       │                           │ PreLogin
+      │                                       │                           │   ParseOption("PhantomSession")
+      │                                       │                           │   ExpectedPhantomSessions.Add()
+      │                                       │                           │
+      │                                       │                           │ PostLogin
+      │                                       │                           │   TakePendingPhantom(session)
+      │                                       │                           │   NewPlayer->Possess(Phantom)
+      │                                       │                           │
+      │                                       │                           │ RegisterPendingPhantom 调用时:
+      │                                       │                           │   如果 PC 已在 WaitingPhantomControllers
+      │                                       │                           │   → 立即 Possess
+      │                                       │                           │
+      │  A 现在控制 PhantomCharacter ✔         │                           │
+      │                                       │                           │
+```
+
+### A.2 各组件绑定关系
+
+| 匹配服务消息类型 | UE4 发送方 | UE4 接收委托 | 绑定情况 |
+|----------------|-----------|-------------|---------|
+| `register_instance_ack` | — | (仅日志) | 无委托 |
+| `register_sign_ack` | — | (仅日志) | 无委托 |
+| `query_signs_result` | MC->QuerySigns() | `OnSignQueryResult` | ✅ SummonSessionComponent::OnRemoteQueryResult |
+| `summon_request` | MC->RequestSummon() | `OnSummonRequested` | ✅ SummonSessionComponent::OnSummonRequestReceived |
+| `request_summon_ack` | — | (仅日志) | 无委托 |
+| `summon_accepted` | MC->AcceptSummon() | `OnSummonAccepted` | ✅ SummonSessionComponent::OnSummonAcceptedByRemote |
+| `summon_declined` | MC->DeclineSummon() | `OnSummonDeclined` | ✅ SummonSessionComponent::OnSummonDeclinedByRemote |
+| `phantom_data_received` | MC->TransferPhantomData() | `OnPhantomDataReceived` | ✅ SummonSessionComponent::OnPhantomDataReceived |
+| `ready_query` | MC->SendReadyQuery() | `OnReadyQuery` | ✅ SummonSessionComponent::OnReadyQueryReceived |
+| `phantom_ready` | MC->SendPhantomReady() | `OnPhantomReady` | ✅ SummonSessionComponent::OnPhantomReadyReceived |
+| `summon_error` | MC->SendSummonError() | `OnSummonError` | ✅ SummonSessionComponent::OnSummonErrorReceived |
+
+### A.3 GameMode 追踪闭合
+
+```
+GameMode 成员变量                    作用
+────────────────────────────────────────────────────
+ExpectedPhantomSessions[]            PreLogin 中从 URL 提取的 PhantomSession
+PendingPhantoms (SessionID->Phantom) OnPhantomDataReceived 注册的 PhantomCharacter
+WaitingPhantomControllers            PC 先到时存起来等 Phantom
+
+GameMode 方法                        调用链
+────────────────────────────────────────────────────
+PreLogin                            引擎 → 捕获 PhantomSession
+PostLogin                           引擎 → 检查 ExpectedPhantomSessions → TakePendingPhantom → Possess
+RegisterPendingPhantom               SummonSessionComponent → 存入 PendingPhantoms + 检查 WaitingPhantomControllers
+TakePendingPhantom                   PostLogin / RetryPhantomPossession → 取出并移除
+RetryPhantomPossession               PostLogin 未就绪时出发 → 每帧轮询
+```
+
+### A.4 状态机变更
+
+```
+A (放置者/灵体) 侧:
+  Solo → PlacingSign → SignActive → BeingSummoned → SummonedAsPhantom
+                                                      │
+                                                      ├── 收到 phantom_ready → ClientTravel
+                                                      └── 超时 (10次 ready_query 无回复) → Solo
+
+B (召唤者/房主) 侧:
+  Solo → SummoningOther → HasPhantom → (等待 A 连接)
+                                │
+                                └── A 连接 → PostLogin Possess → 战斗
+```
+
+### A.5 消息 JSON 格式参考
+
+```json
+// 注册实例
+{"type":"register_instance","instance_id":"Instance_xxx","map":"ThirdPersonExampleMap","ip":"127.0.0.1","port":17777}
+
+// 标记查询结果
+{"type":"query_signs_result","signs":[{"sign_id":"...","owner_name":"...","instance_id":"...","transform":"...","map":"..."}]}
+
+// 召唤请求 (匹配服务→放置者)
+{"type":"summon_request","sign_id":"...","requester_name":"...","requester_instance":"...","requester_ip":"127.0.0.1","requester_port":17777}
+
+// PhantomData 转发
+{"type":"phantom_data_received","placer_instance":"Instance_xxx","data":{"character_mesh":"...","session_id":"...",...}}
+
+// 时序保护
+{"type":"ready_query","session_id":"...","target_instance":"Instance_xxx"}
+{"type":"phantom_ready","session_id":"...","target_instance":"Instance_xxx"}
+```
+

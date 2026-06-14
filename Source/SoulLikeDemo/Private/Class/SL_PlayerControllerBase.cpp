@@ -63,8 +63,21 @@ void ASL_PlayerControllerBase::BeginPlay()
     FTimerHandle DelayHandle;
     GetWorld()->GetTimerManager().SetTimer(DelayHandle, FTimerDelegate::CreateLambda([this]()
     {
-        // 显示开始界面
-        ShowBeginPlayScreen();
+        // 显示开始界面（灵体客户端跳过，直接创建状态UI）
+        ASL_CharacterBase* MyChar = GetPawn() ? Cast<ASL_CharacterBase>(GetPawn()) : nullptr;
+        if (MyChar && MyChar->GetIdentity() == ECharacterIdentity::Phantom)
+        {
+            // 灵体客户端：跳过开始界面，直接创建血量/状态UI和道具UI
+            CreatePlayerStatusUI();
+            if (UIManager)
+            {
+                UIManager->OpenScreenWidget(EWidgetType::EWIDGET_ItemUseUI, 100);
+            }
+        }
+        else
+        {
+            ShowBeginPlayScreen();
+        }
 
 	// 客户端启动定期扫描召唤标记（用于显示交互提示）
 	if (GetNetMode() != NM_DedicatedServer)

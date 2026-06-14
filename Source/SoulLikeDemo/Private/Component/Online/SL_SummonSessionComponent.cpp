@@ -16,10 +16,11 @@
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include <GameFramework/PlayerState.h>
-#include "SL_PhantomCharacter.h"
+
 #include "Materials/MaterialInstanceDynamic.h"
 #include <Animation/AnimInstance.h>
 #include <Policies/CondensedJsonPrintPolicy.h>
+#include <SL_CharacterBase.h>
 
 USL_SummonSessionComponent::USL_SummonSessionComponent()
 {
@@ -44,9 +45,9 @@ void USL_SummonSessionComponent::BeginPlay()
 	}
 	if (!PhantomCharacterClass)
 	{
-		PhantomCharacterClass = LoadClass<ASL_PhantomCharacter>(
+		PhantomCharacterClass = LoadClass<ASL_CharacterBase>(
 			nullptr,
-			TEXT("/Game/SoulLikeDemo/Blueprints/CharacterLogic/BP_PhantomCharacter.BP_PhantomCharacter_C")
+			TEXT("/Game/SoulLikeDemo/Blueprints/CharacterLogic/SoulLike_AnimMan_CharacterBP.SoulLike_AnimMan_CharacterBP_C")
 			);
 	}
 	
@@ -65,13 +66,15 @@ void USL_SummonSessionComponent::BeginPlay()
 		MC->OnSummonAccepted.AddUObject(this, &USL_SummonSessionComponent::OnSummonAcceptedByRemote);
 		MC->OnSummonDeclined.AddUObject(this, &USL_SummonSessionComponent::OnSummonDeclinedByRemote);
 		MC->OnPhantomDataReceived.AddUObject(this, &USL_SummonSessionComponent::OnPhantomDataReceived);
+		MC->OnPhantomReady.AddUObject(this, &USL_SummonSessionComponent::OnPhantomReadyReceived);
+		MC->OnReadyQuery.AddUObject(this, &USL_SummonSessionComponent::OnReadyQueryReceived);
+		MC->OnSummonError.AddUObject(this, &USL_SummonSessionComponent::OnSummonErrorReceived);
 	}
 
 	// Phase 2: 定时查询远程标记（每 5 秒刷新一次）
 	if (GetOwner() && GetOwner()->HasAuthority())
 	{
-		FTimerHandle H;
-		GetWorld()->GetTimerManager().SetTimer(H, FTimerDelegate::CreateLambda([this]()
+		GetWorld()->GetTimerManager().SetTimer(PeriodicQueryTimerHandle, FTimerDelegate::CreateLambda([this]()
 		{
 			USL_MatchClientSubsystem* MC = GetWorld()->GetGameInstance()->GetSubsystem<USL_MatchClientSubsystem>();
 			if (MC && MC->IsConnected())
@@ -84,8 +87,9 @@ void USL_SummonSessionComponent::BeginPlay()
 
 void USL_SummonSessionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	// 清理 ready_query 定时器（防止悬挂回调）
+	// 清理 ready_query 定时器和周期性查询定时器
 	GetWorld()->GetTimerManager().ClearTimer(ReadyQueryTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(PeriodicQueryTimerHandle);
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -336,6 +340,7 @@ void USL_SummonSessionComponent::AcceptSummon()
 
 void USL_SummonSessionComponent::OnPhantomReadyReceived(const FString& InSessionID)
 {
+	UE_LOG(LogTemp, Log, TEXT("USL_SummonSessionComponent: OnPhantomReadyReceived Start"));
 	// 检查是否匹配当前等待的会话
 	if (InSessionID != CurrentPhantomSessionID) return;
 	if (CurrentState != EOnlinePlayerState::SummonedAsPhantom) return;
@@ -368,6 +373,9 @@ void USL_SummonSessionComponent::OnPhantomReadyReceived(const FString& InSession
 	PendingRequesterInstance.Empty();
 	PendingRequesterIP.Empty();
 	PendingRequesterPort = 0;
+
+	UE_LOG(LogTemp, Log, TEXT("USL_SummonSessionComponent: OnPhantomReadyReceived End"));
+
 }
 
 void USL_SummonSessionComponent::OnReadyQueryReceived(const FString& InSessionID, const FString& InRequesterInstance)
@@ -808,6 +816,7 @@ FString FPhantomData::ToJSON() const
 	Obj->SetNumberField(TEXT("level"), Level);
 	Obj->SetNumberField(TEXT("weapon_level"), WeaponLevel);
 	Obj->SetNumberField(TEXT("health_percent"), HealthPercent);
+	Obj->SetNumberField(TEXT("player_class_id"), PlayerClassID);
 	Obj->SetStringField(TEXT("owner_name"), OwnerName);
 	Obj->SetStringField(TEXT("session_id"), SummonSessionID.ToString());
 
@@ -835,6 +844,9 @@ void USL_SummonSessionComponent::OnPhantomDataReceived(const FString& InJSONData
 		return;
 	}
 
+	// 记录放入者的 InstanceID（用于稍后回复 phantom_ready）
+	PlacerInstanceID = InPlacerInstance;
+
 	// 解析 JSON
 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(InJSONData);
 	TSharedPtr<FJsonObject> JsonObj;
@@ -851,10 +863,24 @@ void USL_SummonSessionComponent::OnPhantomDataReceived(const FString& InJSONData
 	Data.Level = JsonObj->GetIntegerField(TEXT("level"));
 	Data.WeaponLevel = JsonObj->GetIntegerField(TEXT("weapon_level"));
 	Data.HealthPercent = JsonObj->GetNumberField(TEXT("health_percent"));
+	Data.PlayerClassID = JsonObj->GetIntegerField(TEXT("player_class_id"));
 	Data.OwnerName = JsonObj->GetStringField(TEXT("owner_name"));
 
 	FString SessionIDStr = JsonObj->GetStringField(TEXT("session_id"));
 	FGuid::Parse(SessionIDStr, Data.SummonSessionID);
+
+	// 保存会话 ID（统一转为 Short 格式，与 ClientTravel URL 中的一致）
+	{
+		FGuid TmpGuid;
+		if (FGuid::Parse(SessionIDStr, TmpGuid))
+		{
+			CurrentPhantomSessionID = TmpGuid.ToString(EGuidFormats::Short);
+		}
+		else
+		{
+			CurrentPhantomSessionID = SessionIDStr;
+		}
+	}
 
 	// 材质列表
 	const TArray<TSharedPtr<FJsonValue>>* MatArray;
@@ -889,19 +915,25 @@ void USL_SummonSessionComponent::OnPhantomDataReceived(const FString& InJSONData
 	SpawnTransform.SetLocation(Character->GetActorLocation() + Character->GetActorForwardVector() * 150.0f);
 
 	// 使用可配置的灵体类（可在蓝图中替换以调整 Mesh 位置/旋转）
-	UClass* PhantomClass = PhantomCharacterClass ? PhantomCharacterClass.Get() : ASL_PhantomCharacter::StaticClass();
-	ASL_PhantomCharacter* Phantom = GetWorld()->SpawnActorDeferred<ASL_PhantomCharacter>(
+	UClass* PhantomClass = PhantomCharacterClass ? PhantomCharacterClass.Get() : ASL_CharacterBase::StaticClass();
+	ASL_CharacterBase* Phantom = GetWorld()->SpawnActorDeferred<ASL_CharacterBase>(
 		PhantomClass, SpawnTransform);
 	if (Phantom)
 	{
 		Phantom->ApplyPhantomData(Data);
 		Phantom->FinishSpawning(SpawnTransform);
 
-		UE_LOG(LogTemp, Log, TEXT("SummonSession: Phantom spawned for %s (session=%s)"),
-			*Data.OwnerName, *SessionIDStr);
+		// 职业初始化（能力赋予、装备加载、属性设置）
+		Phantom->InitCharacterWithClassID(Data.PlayerClassID);
 
-		// Phase3: 后续将 Phantom 的输入映射到召唤者的客户端
-		// 在多实例模式下，客户端网络切换后，PlayerController 直接 Possess 此 Phantom
+		// 注册到 GameMode（等待灵体客户端连接后 Possess）
+		if (ASL_GameModeBase* GM = Cast<ASL_GameModeBase>(GetWorld()->GetAuthGameMode()))
+		{
+			GM->RegisterPendingPhantom(CurrentPhantomSessionID, Phantom);
+		}
+
+		UE_LOG(LogTemp, Log, TEXT("SummonSession: Phantom spawned for %s (session=%s), registered with GameMode"),
+			*Data.OwnerName, *SessionIDStr);
 	}
 
 	SetState(EOnlinePlayerState::HasPhantom);
@@ -976,6 +1008,15 @@ FPhantomData USL_SummonSessionComponent::PackPhantomData() const
 	{
 		// 默认满血
 		Data.HealthPercent = 1.0f;
+	}
+
+	// 获取角色职业ID
+	{
+		ASL_CharacterBase* Char = Cast<ASL_CharacterBase>(GetOwningCharacter());
+		if (Char)
+		{
+			Data.PlayerClassID = Char->GetClassID();
+		}
 	}
 
 	Data.OwnerName = GetPlayerDisplayName();

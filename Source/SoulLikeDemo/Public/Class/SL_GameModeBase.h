@@ -7,7 +7,7 @@
 
 class ALevelManager;
 class USL_GameSaveSubsystem;
-class ASL_PhantomCharacter;
+class ASL_CharacterBase;
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_GameModeBase : public AGameModeBase
@@ -60,9 +60,9 @@ public:
 
 	// ===== 跨世界灵体追踪（供 SummonSessionComponent 调用） =====
 	// 注册一个 PhantomCharacter，等待灵体客户端连接后 Possess
-	void RegisterPendingPhantom(const FString& InSessionID, ASL_PhantomCharacter* InPhantom);
+	void RegisterPendingPhantom(const FString& InSessionID, ASL_CharacterBase* InPhantom);
 	// 尝试取出匹配的 PhantomCharacter
-	ASL_PhantomCharacter* TakePendingPhantom(const FString& InSessionID);
+	ASL_CharacterBase* TakePendingPhantom(const FString& InSessionID);
 
 protected:
 	/** 创建 LevelManager */
@@ -94,7 +94,7 @@ protected:
 	// 从连接 URL 中提取到的等待灵体的 SessionID 列表
 	TArray<FString> ExpectedPhantomSessions;
 	// 已生成但还未被领取的 PhantomCharacter（SessionID → Phantom）
-	TMap<FString, ASL_PhantomCharacter*> PendingPhantoms;
+	TMap<FString, ASL_CharacterBase*> PendingPhantoms;
 	// 客户端已到达但 PhantomCharacter 尚未生成的等待队列
 	TMap<FString, APlayerController*> WaitingPhantomControllers;
 };

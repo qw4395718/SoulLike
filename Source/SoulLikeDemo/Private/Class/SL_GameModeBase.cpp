@@ -114,16 +114,13 @@ void ASL_GameModeBase::PostLogin(APlayerController* NewPlayer)
 
 	if (bPhantomPossessed)
 	{
-		// 灵体客户端：跳过 Super::PostLogin（避免 K2_PostLogin 触发 Blueprint 初始化和 UI 显示）
-		// 手动初始化 PlayerState
-		if (NewPlayer->PlayerState == nullptr)
-		{
-			//NewPlayer->PlayerState = NewObject<APlayerState>(NewPlayer, PlayerStateClass);
-		}
+		// 灵体客户端：安全调用 Super::PostLogin
+		// 已在上方 Possess 了 Phantom，HandleStartingNewPlayer 发现已有 Pawn 会跳过 RestartPlayer
+		// 确保 PlayerState 创建、K2_PostLogin 等标准初始化流程正常运行
+		Super::PostLogin(NewPlayer);
 	}
 	else
 	{
-		// 正常客户端：走标准流程
 		Super::PostLogin(NewPlayer);
 	}
 }

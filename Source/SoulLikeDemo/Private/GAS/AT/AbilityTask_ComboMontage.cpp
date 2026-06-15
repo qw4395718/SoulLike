@@ -92,7 +92,7 @@ void UAbilityTask_ComboMontage::Activate()
 	// 连招接续：惯性化过渡 + 从指定时间点开始播放（跳过Idle段）
 	if (StartingPosition > 0.0f)
 	{
-		AnimInstance->StartInertialization();
+		//AnimInstance->StartInertialization();
 	}
 	AnimInstance->Montage_Play(Montage, PlayRate, EMontagePlayReturnType::MontageLength, StartingPosition);
 

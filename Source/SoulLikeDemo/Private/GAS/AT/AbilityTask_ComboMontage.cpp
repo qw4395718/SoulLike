@@ -13,12 +13,14 @@ UAbilityTask_ComboMontage* UAbilityTask_ComboMontage::CreateComboMontageTask(
 	UGameplayAbility* OwningAbility,
 	UAnimMontage* MontageToPlay,
 	float InBlendOutTime,
-	float InPlayRate)
+	float InPlayRate,
+	float InStartingPosition)
 {
 	UAbilityTask_ComboMontage* Task = NewAbilityTask<UAbilityTask_ComboMontage>(OwningAbility);
 	Task->Montage = MontageToPlay;
 	Task->BlendOutTime = InBlendOutTime;
 	Task->PlayRate = InPlayRate;
+	Task->StartingPosition = InStartingPosition;
 	return Task;
 }
 
@@ -87,7 +89,12 @@ void UAbilityTask_ComboMontage::Activate()
 		return;
 	}
 
-	AnimInstance->Montage_Play(Montage, PlayRate);
+	// 连招接续：惯性化过渡 + 从指定时间点开始播放（跳过Idle段）
+	if (StartingPosition > 0.0f)
+	{
+		AnimInstance->StartInertialization();
+	}
+	AnimInstance->Montage_Play(Montage, PlayRate, EMontagePlayReturnType::MontageLength, StartingPosition);
 
 	// 绑定蒙太奇结束委托
 	FOnMontageEnded MontageEndedDelegate;

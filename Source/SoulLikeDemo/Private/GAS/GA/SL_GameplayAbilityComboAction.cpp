@@ -37,9 +37,12 @@ void USL_GameplayAbilityComboAction::ActivateAbility(
         return;
     }
 
-    // 创建 ComboMontage Task
+    // 获取连招接续入口时间
+    float ComboEntryTime = ComboMgr->GetCurrentComboInfo().ComboEntryTime;
+
+    // 创建 ComboMontage Task（传入入口时间，跳过Idle段）
     ComboTask = UAbilityTask_ComboMontage::CreateComboMontageTask(
-        this, Montage, 0.2f, 1.0f);
+        this, Montage, 0.2f, 1.0f, ComboEntryTime);
     if (!ComboTask)
     {
         EndAbility(Handle, ActorInfo, ActivationInfo, true, false);

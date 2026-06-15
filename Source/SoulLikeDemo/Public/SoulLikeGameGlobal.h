@@ -471,6 +471,11 @@ struct FComboInfo : public FTableRowBase
 	// 蓄力占位 GA（按住期间持续激活，播放蓄力姿态动画）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Charge")
 	TSubclassOf<UGameplayAbility> ChargeHoldAbilityClass;
+
+	// ===== 连招接续参数 =====
+	// 连招接续入口时间（秒），第一招=0，后续招式填跳过起始预备段的时间
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ComboTransition")
+	float ComboEntryTime = 0.0f;
 };
 
 // 连击查询用复合Key（拍平双层Map为单层，避免UPROPERTY不支持嵌套容器）

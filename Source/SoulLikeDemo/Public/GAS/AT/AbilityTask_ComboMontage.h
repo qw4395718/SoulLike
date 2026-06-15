@@ -51,7 +51,8 @@ public:
             UGameplayAbility* OwningAbility,
             UAnimMontage* MontageToPlay,
             float InBlendOutTime = 0.2f,
-            float InPlayRate = 1.0f
+            float InPlayRate = 1.0f,
+            float InStartingPosition = 0.0f
         );
 
     // ========== 动画通知回调接口 ==========
@@ -106,6 +107,9 @@ private:
 
     UPROPERTY()
         FGameplayTag ComboWindowTag;
+
+    // 从指定时间点开始播放（跳过Idle段）
+    float StartingPosition = 0.0f;
 
 	/** 在AllowBlend之前是否有暂存的输入 */
 	bool bHasPendingInput = false;

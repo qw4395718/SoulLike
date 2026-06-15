@@ -5,6 +5,7 @@
 #include <SL_Macros.h>
 #include <SL_CharacterBase.h>
 #include "SL_EnemyBase.h"
+#include "CombatEventDisplay_IF.h"
 #include <Components/CapsuleComponent.h>
 
 #include "Stats/Stats.h"
@@ -153,8 +154,8 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 			// Calculate 'actual' damage applied that respects min and max health
 			const float ChangeNumber = OldValue - NewValue;
 
-			// 广播伤害飘字
-			if (ChangeNumber > 0.0f && globalDelegatesManager != nullptr)
+			// 广播伤害飘字（通过 Multicast RPC 发送到所有客户端）
+			if (ChangeNumber > 0.0f)
 			{
 				FDamageFloatingTextData TextData;
 				TextData.DamageValue = ChangeNumber;
@@ -180,11 +181,11 @@ void USL_StatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 					TextData.AttackSourceLocation = EffectCauser->GetActorLocation();
 				}
  
-				// 暴击判定：通过 GE 携带的 Tag "Combat.CriticalHit" 识别
-				TextData.bIsCriticalHit = true/*Data.EffectSpec.CapturedSourceTags.GetAggregatedTags()->HasTag(
-					FGameplayTag::RequestGameplayTag(FName("Combat.CriticalHit")))*/;
-
-				globalDelegatesManager->BroadcastDamageFloatingText(TextData);
+				// 通过接口通知角色展示伤害飘字（兼容玩家/敌人/Boss等所有角色类型）
+				if (ICombatEventDisplay_IF* DisplayTarget = Cast<ICombatEventDisplay_IF>(OwningActor))
+				{
+					DisplayTarget->BroadcastDamageFloatingText(TextData);
+				}
 			}
 
 			if (UAbilitySystemComponent* OwningAbilitySystemComponent = GetOwningAbilitySystemComponent())
@@ -276,7 +277,13 @@ void USL_StatusAttributeSet::OnCharacterDeath(AActor* DeathActor)
     ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Alive"));
     ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.Dead"));
 
-    // 2. 广播死亡事件
+    // 2. 通过接口广播死亡事件到所有客户端（兼容所有角色类型）
+    if (ICombatEventDisplay_IF* DisplayTarget = Cast<ICombatEventDisplay_IF>(OwnerActor))
+    {
+        DisplayTarget->BroadcastCharacterDeath(OwnerActor, nullptr);
+    }
+
+    // 服务器本地委托（供服务器端监听器使用）
     if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
     {
         DelegateMgr->OnCharacterDied.Broadcast(OwnerActor, nullptr);

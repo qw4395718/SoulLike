@@ -60,6 +60,12 @@ void ASL_EnemyAIController::Tick(float DeltaTime)
 
 void ASL_EnemyAIController::InitializeAI(UBehaviorTree* InBehaviorTree, UBlackboardData* InBlackboardData)
 {
+    // 只在服务器执行AI初始化
+    if (!HasAuthority())
+    {
+        return;
+    }
+
     if (!InBehaviorTree || !InBlackboardData)
     {
         UE_LOG(LogTemp, Error, TEXT("ASL_EnemyAIController::InitializeAI - Invalid BT or BB"));
@@ -74,6 +80,9 @@ void ASL_EnemyAIController::InitializeAI(UBehaviorTree* InBehaviorTree, UBlackbo
 
 void ASL_EnemyAIController::SetTargetActor(AActor* NewTarget)
 {
+    // 目标仅在服务器设定
+    if (!HasAuthority()) return;
+
     if (Blackboard)
     {
         Blackboard->SetValueAsObject(FName("TargetActor"), NewTarget);
@@ -91,6 +100,9 @@ AActor* ASL_EnemyAIController::GetTargetActor() const
 
 void ASL_EnemyAIController::SetBlackboardValue(const FName& KeyName, bool bValue)
 {
+    // 黑板值仅在服务器修改
+    if (!HasAuthority()) return;
+
     if (Blackboard)
     {
         Blackboard->SetValueAsBool(KeyName, bValue);
@@ -99,6 +111,9 @@ void ASL_EnemyAIController::SetBlackboardValue(const FName& KeyName, bool bValue
 
 void ASL_EnemyAIController::SetBlackboardValueAsObject(const FName& KeyName, UObject* Value)
 {
+    // 黑板值仅在服务器修改
+    if (!HasAuthority()) return;
+
     if (Blackboard)
     {
         Blackboard->SetValueAsObject(KeyName, Value);

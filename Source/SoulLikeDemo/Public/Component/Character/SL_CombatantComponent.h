@@ -84,18 +84,23 @@ protected:
 
 protected:
 	/************************************************************************/
+	/*                               网络复制                               */
+	/************************************************************************/
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/************************************************************************/
 	/*                              内部变量                                        */
 	/************************************************************************/
 	// 所属阵营
-	UPROPERTY()
+	UPROPERTY(Replicated)
 		int TeamID;
 
 	// 是否待处决
-	UPROPERTY()
+	UPROPERTY(Replicated)
 		bool bWaitingForExecuted;
 
 	// 是否可背刺
-	UPROPERTY()
+	UPROPERTY(Replicated)
 		bool bAllowedBackStabsed;
 
 	UPROPERTY()

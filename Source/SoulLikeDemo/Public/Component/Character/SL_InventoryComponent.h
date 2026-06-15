@@ -95,6 +95,11 @@ protected:
 
 protected:
 	/************************************************************************/
+	/*                               网络复制                               */
+	/************************************************************************/
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/************************************************************************/
 	/*                               内部访问                               */
 	/************************************************************************/
 	// 通用道具使用能力的类
@@ -102,11 +107,11 @@ protected:
 		TSubclassOf<USL_GameplayAbilityUseItem> UseItemAbilityClass;
 
 	// 道具库存（道具ID -> 数量）
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory")
 		TMap<FName, int32> ItemInventory;
 
 	// 当前选中的道具ID（用于"E"键使用）
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory")
 		FName SelectedItemID;
 
 	// 委托句柄

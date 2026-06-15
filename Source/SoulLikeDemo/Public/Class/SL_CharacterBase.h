@@ -19,6 +19,7 @@
 #include <WeaponAccessory_IF.h>
 #include <ActorState_IF.h>
 #include <OnlineSummonStructs.h>
+#include <CombatEventDisplay_IF.h>
 #include "SL_CharacterBase.generated.h"
 
 // 声明一个自定义日志类别
@@ -44,7 +45,8 @@ public ICharacterComponent_IF,
 public IAnimNotify_IF, 
 public IAbilitySystemInterface,
 public IWeaponAccessory_IF,
-public IActorState_IF
+public IActorState_IF,
+public ICombatEventDisplay_IF
 {
 	GENERATED_BODY()
 
@@ -239,6 +241,14 @@ public:
 	float GetCurrentStamina() const;
 	UFUNCTION(BlueprintPure, Category = "Attributes")
 	float GetMaxStamina() const;
+
+	// ICombatEventDisplay_IF 接口实现
+	virtual void BroadcastDamageFloatingText(const struct FDamageFloatingTextData& InData) override;
+	virtual void BroadcastCharacterDeath(AActor* InDeadActor, AActor* InInstigator) override;
+
+	// 广播伤害飘字（服务器→所有客户端）
+	UFUNCTION(NetMulticast, Reliable, Category = "Combat")
+	void Multicast_OnDamageFloatingText(const struct FDamageFloatingTextData& InData);
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitCharacterWithClassID(int32 InPlayerClassID);

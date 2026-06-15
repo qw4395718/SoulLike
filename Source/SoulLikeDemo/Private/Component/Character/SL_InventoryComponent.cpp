@@ -1,5 +1,6 @@
 // Private/Component/Character/SL_InventoryComponent.cpp
 #include "SL_InventoryComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "SL_CharacterBase.h"
 #include "SL_AbilitySystemComponent.h"
 #include "SL_GameplayAbilityUseItem.h"
@@ -308,6 +309,18 @@ void USL_InventoryComponent::OnItemUsedCallback(AActor* InUserActor, FName InIte
 
 	// 消耗道具数量
 	RemoveItemByID(InItemID, 1);
+}
+
+/************************************************************************/
+/*                               网络复制                                */
+/************************************************************************/
+
+void USL_InventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USL_InventoryComponent, ItemInventory);
+	DOREPLIFETIME(USL_InventoryComponent, SelectedItemID);
 }
 
 ASL_CharacterBase* USL_InventoryComponent::GetOwningCharacter() const

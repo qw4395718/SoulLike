@@ -2,6 +2,7 @@
 
 
 #include "SL_CombatantComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -15,6 +16,19 @@
 #include "StateCalculate_IF.h"
 #include "BehavioralResponse_IF.h"
 #include "CharacterComponent_IF.h"
+
+/************************************************************************/
+/*                               网络复制                               */
+/************************************************************************/
+
+void USL_CombatantComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USL_CombatantComponent, TeamID);
+	DOREPLIFETIME(USL_CombatantComponent, bWaitingForExecuted);
+	DOREPLIFETIME(USL_CombatantComponent, bAllowedBackStabsed);
+}
 
 USL_CombatantComponent::USL_CombatantComponent()
 {

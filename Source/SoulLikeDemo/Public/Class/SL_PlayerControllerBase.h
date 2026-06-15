@@ -132,6 +132,14 @@ public:
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_UseItem(FName InItemID);
 
+    // Client RPC：服务器通知客户端生成伤害飘字
+    UFUNCTION(Client, Reliable)
+    void Client_OnDamageFloatingText(const struct FDamageFloatingTextData& InData);
+
+    // Server RPC：客户端请求 Combo 输入（服务器做权威判定）
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_ProcessComboInput(EComboInputActionType InputType);
+
 protected:
 	/************************************************************************/
 	/*                               内部调用                               */

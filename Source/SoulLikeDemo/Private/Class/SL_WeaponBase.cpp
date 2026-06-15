@@ -29,6 +29,9 @@ ASL_WeaponBase::ASL_WeaponBase()
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisionBox->SetGenerateOverlapEvents(false);
 
+	// 网络复制
+	bReplicates = true;
+
 	// 骨骼网格体
 	SkeletalWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalWeaponMesh->SetupAttachment(RootComponent);

@@ -1019,6 +1019,19 @@ FPhantomData USL_SummonSessionComponent::PackPhantomData() const
 		}
 	}
 
+	// 记录放置者服务器的连接信息（用于遣返）
+	{
+		APlayerController* InplacePC = GetOwningPlayerController();
+		if (InplacePC && InplacePC->GetWorld() && InplacePC->GetWorld()->URL.Port != 0)
+		{
+			const FURL& WorldURL = InplacePC->GetWorld()->URL;
+			Data.PlacerIP = WorldURL.Host;
+			Data.PlacerPort = WorldURL.Port;
+			UE_LOG(LogTemp, Log, TEXT("SummonSession: Packed home server %s:%d for phantom"),
+				*Data.PlacerIP, Data.PlacerPort);
+		}
+	}
+
 	Data.OwnerName = GetPlayerDisplayName();
 	Data.SummonSessionID = FGuid::NewGuid();
 

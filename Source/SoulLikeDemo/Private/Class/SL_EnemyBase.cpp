@@ -43,6 +43,9 @@ ASL_EnemyBase::ASL_EnemyBase()
 	StatusAttributeSet = CreateDefaultSubobject<USL_StatusAttributeSet>(TEXT("StatusSet"));
 
 	// 
+	// 网络复制
+	bReplicates = true;
+
 	ScreenWidgetCmp = CreateDefaultSubobject<UWidgetComponent>(TEXT("ScreenWidgetCmp"));
 	ScreenWidgetCmp->SetupAttachment(GetMesh()); // 挂在骨骼上
 	ScreenWidgetCmp->SetWidgetSpace(EWidgetSpace::Screen);
@@ -126,6 +129,42 @@ bool ASL_EnemyBase::IsDie() const
 	FGameplayTagContainer currentTags;
 	AbilitySystemComp->GetOwnedGameplayTags(currentTags);
 	return currentTags.HasTag(FGameplayTag::RequestGameplayTag(TEXT("State.Dead")));
+}
+
+/************************************************************************/
+/*                    ICombatEventDisplay_IF 接口实现                        */
+/************************************************************************/
+
+void ASL_EnemyBase::BroadcastDamageFloatingText(const FDamageFloatingTextData& InData)
+{
+	Multicast_OnDamageFloatingText(InData);
+}
+
+void ASL_EnemyBase::BroadcastCharacterDeath(AActor* InDeadActor, AActor* InInstigator)
+{
+	Multicast_OnCharacterDeath(InDeadActor, InInstigator);
+}
+
+/************************************************************************/
+/*                               网络RPC                                */
+/************************************************************************/
+
+void ASL_EnemyBase::Multicast_OnDamageFloatingText_Implementation(const FDamageFloatingTextData& InData)
+{
+	// 所有客户端触发 GlobalDelegatesManager 广播
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		DelegateMgr->BroadcastDamageFloatingText(InData);
+	}
+}
+
+void ASL_EnemyBase::Multicast_OnCharacterDeath_Implementation(AActor* InDeadActor, AActor* InInstigator)
+{
+	// 所有客户端触发 GlobalDelegatesManager 广播
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		DelegateMgr->OnCharacterDied.Broadcast(InDeadActor, InInstigator);
+	}
 }
 
 ASL_EnemyAIController* ASL_EnemyBase::GetEnemyAIController() const

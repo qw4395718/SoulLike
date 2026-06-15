@@ -137,6 +137,13 @@ struct FPhantomData
 	UPROPERTY(BlueprintReadWrite)
 	int32 PlayerClassID = 0;
 
+	// 放置者服务器连接信息（用于灵体遣返时 ClientTravel 回家）
+	UPROPERTY(BlueprintReadWrite)
+	FString PlacerIP;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 PlacerPort = 0;
+
 	// 身份标识
 	UPROPERTY(BlueprintReadWrite)
 	FString OwnerName;

@@ -8,6 +8,7 @@
 #include <WeaponAccessory_IF.h>
 #include <AbilitySystemInterface.h>
 #include <ActorState_IF.h>
+#include "CombatEventDisplay_IF.h"
 #include "SL_EnemyBase.generated.h"
 
 /** 敌人状态 */
@@ -24,7 +25,8 @@ UCLASS()
 class SOULLIKEDEMO_API ASL_EnemyBase : public ACharacter,
 public IWeaponAccessory_IF,
 public IAbilitySystemInterface,
-public IActorState_IF
+public IActorState_IF,
+public ICombatEventDisplay_IF
 {
 	GENERATED_BODY()
 
@@ -67,6 +69,20 @@ public:
 	virtual bool IsAlive() const override;
 	virtual bool IsDie() const override;
 	virtual void Destroyed() override;
+
+	/************************************************************************/
+	/*                    ICombatEventDisplay_IF 接口实现                        */
+	/************************************************************************/
+	virtual void BroadcastDamageFloatingText(const struct FDamageFloatingTextData& InData) override;
+	virtual void BroadcastCharacterDeath(AActor* InDeadActor, AActor* InInstigator) override;
+
+	// 网络RPC：广播伤害飘字（服务器→所有客户端）
+	UFUNCTION(NetMulticast, Reliable, Category = "Combat")
+	void Multicast_OnDamageFloatingText(const struct FDamageFloatingTextData& InData);
+
+	// 网络RPC：广播死亡事件（服务器→所有客户端）
+	UFUNCTION(NetMulticast, Reliable, Category = "Combat")
+	void Multicast_OnCharacterDeath(AActor* InDeadActor, AActor* InInstigator);
 
 	/*
 	 * 公开给AIController访问

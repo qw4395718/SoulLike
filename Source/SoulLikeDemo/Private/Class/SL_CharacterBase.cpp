@@ -566,12 +566,19 @@ void ASL_CharacterBase::OnGASCharacterDied(AActor* DiedActor, AActor* KillerActo
 	// 检查是否是自己的死亡事件
 	if (DiedActor != this) return;
 
-	UE_LOG(LogTemp, Log, TEXT("ASL_CharacterBase::OnGASCharacterDied - Enemy %s died"), *GetName());
+	UE_LOG(LogTemp, Log, TEXT("ASL_CharacterBase::OnGASCharacterDied - %s died (identity=%d)"),
+		*GetName(), (int32)CurrentIdentity);
 
 	// 确保执行死亡逻辑
 	if (CurrentState != EPlayerState::Dead)
 	{
 		Die();
+	}
+
+	// 灵体死亡后自动遣返
+	if (CurrentIdentity == ECharacterIdentity::Phantom)
+	{
+		Repatriate(EReturnReason::PhantomDied);
 	}
 }
 
@@ -685,6 +692,33 @@ void ASL_CharacterBase::SetTeamID(int32 InTeamID)
 	TeamID = InTeamID;
 }
 
+/************************************************************************/
+/*                               网络RPC                                */
+/************************************************************************/
+
+void ASL_CharacterBase::BroadcastDamageFloatingText(const FDamageFloatingTextData& InData)
+{
+	Multicast_OnDamageFloatingText(InData);
+}
+
+void ASL_CharacterBase::BroadcastCharacterDeath(AActor* InDeadActor, AActor* InInstigator)
+{
+	// 所有客户端触发 GlobalDelegatesManager 广播
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		DelegateMgr->OnCharacterDied.Broadcast(InDeadActor, InInstigator);
+	}
+}
+
+void ASL_CharacterBase::Multicast_OnDamageFloatingText_Implementation(const FDamageFloatingTextData& InData)
+{
+	// 客户端本地触发 GlobalDelegatesManager 广播
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		DelegateMgr->BroadcastDamageFloatingText(InData);
+	}
+}
+
 FString ASL_CharacterBase::GetNetworkGUIDString(AActor* InActor)
 {
 	if(InActor == nullptr){return TEXT("InActor InValid"); }
@@ -791,8 +825,25 @@ void ASL_CharacterBase::SetInteractionEnabled(bool bEnabled)
 
 void ASL_CharacterBase::Repatriate(EReturnReason InReason)
 {
-	UE_LOG(LogTemp, Log, TEXT("CharacterBase: Repatriating %s (reason=%d)"),
-		*PhantomData.OwnerName, (int32)InReason);
+	if (!HasAuthority()) return;
+
+	UE_LOG(LogTemp, Log, TEXT("CharacterBase: Repatriating %s (reason=%d, server=%s:%d)"),
+		*PhantomData.OwnerName, (int32)InReason,
+		*PhantomData.PlacerIP, PhantomData.PlacerPort);
+
+	// 通知客户端返回自己的世界
+	if (!PhantomData.PlacerIP.IsEmpty() && PhantomData.PlacerPort > 0)
+	{
+		FString ReturnURL = FString::Printf(TEXT("%s:%d"),
+			*PhantomData.PlacerIP, PhantomData.PlacerPort);
+
+		APlayerController* PC = GetController<APlayerController>();
+		if (PC)
+		{
+			PC->ClientTravel(ReturnURL, TRAVEL_Absolute);
+		}
+	}
+
 	SetLifeSpan(1.0f);
 }
 

@@ -97,6 +97,12 @@ float USL_StaminaComponent::GetStaminaPercentage() const
 
 void USL_StaminaComponent::ConsumeStamina(float InAmount)
 {
+	// 只在服务器执行消耗
+	if (!GetOwner() || !GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
 	if (!GetCacheASC() || InAmount <= 0.0f) return;
 
 	// 通过GE方式消耗（走GAS管道，支持网络同步）

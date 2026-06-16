@@ -14,6 +14,7 @@
 #include <AbilitySystemComponent.h>
 #include <ActorState_IF.h>
 #include <SL_ComboManagerComponent.h>
+#include <Manager/GlobalDelegatesManager.h>
 
 ASL_WeaponBase::ASL_WeaponBase()
 {
@@ -410,6 +411,14 @@ void ASL_WeaponBase::ApplyDamageToOverlappingActors()
 				*GetName(), FinalDamage, *Actor->GetName());
 		}
 
+		// 触发命中反馈（Hit Stop + Camera Shake + 屏幕效果）
+		// 仅在服务器端触发 Multicast 广播
+		if (HasAuthority())
+		{
+			FVector HitLocation = Actor->GetActorLocation();
+			TriggerHitFeedback(Actor, HitLocation, EHitSeverity::Light);
+		}
+
 		// 记录已命中
 		AlreadyHitActors.Add(Actor);
 	}
@@ -487,4 +496,32 @@ USL_WeaponAnimSet* ASL_WeaponBase::GetWeaponAnimSet() const
 {
 	if (WeaponData.WeaponAnimSet.IsNull()) return nullptr;
 	return WeaponData.WeaponAnimSet.LoadSynchronous();
+}
+
+
+/************************************************************************/
+/*                       打击感：命中反馈（RPC 中继）                      */
+/************************************************************************/
+
+void ASL_WeaponBase::TriggerHitFeedback(AActor* InTarget, const FVector& InHitLocation, EHitSeverity InSeverity)
+{
+	if (!HasAuthority() || !InTarget) return;
+
+	FHitFeedbackData Data;
+	Data.Severity = InSeverity;
+	Data.InstigatorActor = OwningCharacter;
+	Data.TargetActor = InTarget;
+	Data.HitLocation = InHitLocation;
+
+	// Multicast RPC → 所有客户端 → GlobalDelegatesManager 广播
+	Multicast_OnHitFeedback(Data);
+}
+
+void ASL_WeaponBase::Multicast_OnHitFeedback_Implementation(const FHitFeedbackData& InData)
+{
+	// 通过 GlobalDelegatesManager 广播到本机所有订阅者
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		DelegateMgr->BroadcastHitFeedback(InData);
+	}
 }

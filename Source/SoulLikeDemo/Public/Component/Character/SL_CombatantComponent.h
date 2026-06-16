@@ -20,6 +20,16 @@ public:
 	// Sets default values for this component's properties
 	USL_CombatantComponent();
 
+protected:
+	/************************************************************************/
+	/*                              内部重载                                        */
+	/************************************************************************/
+	virtual void PostInitProperties() override;
+
+	virtual void OnRegister() override;
+
+	virtual void OnUnregister() override;
+
 public:
 	/************************************************************************/
 	/*                              接口实现                                        */

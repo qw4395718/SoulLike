@@ -15,28 +15,12 @@ UCombatComponent::UCombatComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	/************************************************************************/
-	/*                              组件初始化                                        */
-	/************************************************************************/
+	// 内部变量初始化
 	LH_EquippedWeapon = nullptr;
 	RH_EquippedWeapon = nullptr;
 	// ...
 	// 创建事件分发器
 	DamageDispatcher = nullptr;
-}
-
-void UCombatComponent::InitializeComponent()
-{
-	Super::InitializeComponent();
-
-	// 获取所属角色
-	CharacterOwner = Cast<ASL_CharacterBase>(GetOwner());
-	if (!CharacterOwner) return;
-
-	if (DamageDispatcher == nullptr)
-	{
-		DamageDispatcher = NewObject<UDamageEventDispatcher>(this,TEXT("DamageDispatcher"));
-	}
 
 	// 初始化武器库存
 	WeaponInventory.Empty(4); // 类魂标准4武器槽
@@ -46,9 +30,46 @@ void UCombatComponent::InitializeComponent()
 	ActionPoint = 100.0f;
 	HealthPointMaxValue = 100.0f;
 	ActionPointMaxValue = 100.0f;
+}
+
+void UCombatComponent::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+}
+
+void UCombatComponent::OnRegister()
+{
+	Super::OnRegister();
+
+	// 获取所属角色
+	CharacterOwner = Cast<ASL_CharacterBase>(GetOwner());
+	if (!CharacterOwner) return;
+
+	if (DamageDispatcher == nullptr)
+	{
+		DamageDispatcher = NewObject<UDamageEventDispatcher>(this, TEXT("DamageDispatcher"));
+	}
 
 	//将函数绑定到事件上
 	DamageDispatcher->OnDamageEvent.AddDynamic(this, &UCombatComponent::HandleDamage);
+
+}
+
+void UCombatComponent::OnUnregister()
+{
+	if (DamageDispatcher != nullptr)
+	{
+		DamageDispatcher->OnDamageEvent.Clear();
+	}
+	
+	Super::OnUnregister();
+}
+
+void UCombatComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+
 
 	Initialize();
 }

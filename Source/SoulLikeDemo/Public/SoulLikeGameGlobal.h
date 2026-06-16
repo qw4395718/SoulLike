@@ -974,3 +974,53 @@ struct FEnemyConfigInfo : public FTableRowBase
 
 	
 };
+
+/************************************************************************/
+/*                              打击感反馈                                      */
+/************************************************************************/
+
+// 命中严重程度
+UENUM(BlueprintType)
+enum class EHitSeverity : uint8
+{
+	Light       UMETA(DisplayName = "轻击"),
+	Heavy       UMETA(DisplayName = "重击"),
+	Execute     UMETA(DisplayName = "处决"),
+	Parry       UMETA(DisplayName = "弹反"),
+	Block       UMETA(DisplayName = "格挡"),
+	Max         UMETA(Hidden)
+};
+
+// 命中反馈数据
+USTRUCT(BlueprintType)
+struct FHitFeedbackData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	EHitSeverity Severity;
+
+	UPROPERTY(BlueprintReadWrite)
+	AActor* InstigatorActor;
+
+	UPROPERTY(BlueprintReadWrite)
+	AActor* TargetActor;
+
+	UPROPERTY(BlueprintReadWrite)
+	FVector HitLocation;
+
+	UPROPERTY(BlueprintReadWrite)
+	float HitStopDuration;
+
+	UPROPERTY(BlueprintReadWrite)
+	float ShakeScale;
+
+	FHitFeedbackData()
+		: Severity(EHitSeverity::Light)
+		, InstigatorActor(nullptr)
+		, TargetActor(nullptr)
+		, HitLocation(FVector::ZeroVector)
+		, HitStopDuration(0.1f)
+		, ShakeScale(1.0f)
+	{}
+};

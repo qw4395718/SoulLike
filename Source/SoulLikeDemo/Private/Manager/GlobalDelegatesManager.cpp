@@ -51,6 +51,7 @@ void UGlobalDelegatesManager::ClearAllBinding()
 	OnItemEffectTriggered.RemoveAll(this);
 	OnItemCountChanged.RemoveAll(this);
 	OnDamageFloatingText.RemoveAll(this);
+	OnHitFeedback.RemoveAll(this);
 }
 
 /************************************************************************/
@@ -93,4 +94,13 @@ void UGlobalDelegatesManager::BroadcastItemCountChanged(AActor* InOwnerActor, FN
 void UGlobalDelegatesManager::BroadcastDamageFloatingText(const FDamageFloatingTextData& InData)
 {
 	OnDamageFloatingText.Broadcast(InData);
+}
+
+/************************************************************************/
+/*                              命中反馈委托广播                         */
+/************************************************************************/
+
+void UGlobalDelegatesManager::BroadcastHitFeedback(const FHitFeedbackData& InData)
+{
+	OnHitFeedback.Broadcast(InData);
 }

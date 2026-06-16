@@ -8,18 +8,20 @@
 UDamageFloatingTextManagerComponent::UDamageFloatingTextManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+
+void UDamageFloatingTextManagerComponent::PostInitProperties()
+{
+	Super::PostInitProperties();
+
 	bIsDelegateBound = false;
 }
 
-/************************************************************************/
-/* 继承实现                                                                     */
-/************************************************************************/
 
-void UDamageFloatingTextManagerComponent::BeginPlay()
+void UDamageFloatingTextManagerComponent::OnRegister()
 {
-	Super::BeginPlay();
-
-	PreAllocatePool();
+	Super::OnRegister();
 
 	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
 	{
@@ -29,7 +31,8 @@ void UDamageFloatingTextManagerComponent::BeginPlay()
 	}
 }
 
-void UDamageFloatingTextManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+
+void UDamageFloatingTextManagerComponent::OnUnregister()
 {
 	if (bIsDelegateBound)
 	{
@@ -49,6 +52,23 @@ void UDamageFloatingTextManagerComponent::EndPlay(const EEndPlayReason::Type End
 		bIsDelegateBound = false;
 	}
 
+	Super::OnUnregister();
+}
+
+/************************************************************************/
+/* 继承实现                                                                     */
+/************************************************************************/
+
+void UDamageFloatingTextManagerComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	PreAllocatePool();
+
+}
+
+void UDamageFloatingTextManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
 	for (A_DamageFloatingTextActor* Actor : ActorPool)
 	{
 		if (Actor && Actor->IsValidLowLevel())

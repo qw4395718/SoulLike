@@ -20,6 +20,17 @@ public:
 	// Sets default values for this component's properties
 	UCombatComponent();
 
+protected:
+	/************************************************************************/
+	/*                              内部重载                                        */
+	/************************************************************************/
+	virtual void PostInitProperties() override;
+
+	virtual void OnRegister() override;
+
+	virtual void OnUnregister() override;
+
+public:
 	/************************************************************************/
 	/*外部初始化                                                                     */
 	/************************************************************************/

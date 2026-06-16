@@ -24,6 +24,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include <Engine/NetConnection.h>
 #include "Materials/MaterialInstanceDynamic.h"
+#include <SL_HitFeedbackManagerComponent.h>
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 
@@ -336,21 +337,20 @@ void ASL_CharacterBase::InitPartmentComponent()
 	if (CombatCmp == nullptr && true)
 	{
 		CombatCmp = NewObject<USL_CombatantComponent>(this);
+		CombatCmp->RegisterComponent();
 		CombatCmp->InitCombatComponentInfo(this, TEXT("/Game/SoulLikeDemo/Anim/AM_Character_Hit.AM_Character_Hit") ,0,true);
 	}
 
 	if (EquipmentCmp == nullptr && true)
 	{
 		EquipmentCmp = NewObject<USL_EquipmentComponent>(this);
-		if (EquipmentCmp)
-		{
-			EquipmentCmp->SetOwner(this);
-		}
+		EquipmentCmp->RegisterComponent();
 	}
 
 	if (HealthCmp == nullptr && true)
 	{
 		HealthCmp = NewObject<USL_HealthComponent>(this);
+		HealthCmp->RegisterComponent();
 		float HealthMax = 100.0f;
 		HealthCmp->InitHealthInfo(HealthMax);
 	}
@@ -358,34 +358,46 @@ void ASL_CharacterBase::InitPartmentComponent()
 	if (InventoryCmp == nullptr && true)
 	{
 		InventoryCmp = NewObject<USL_InventoryComponent>(this);
+		InventoryCmp->RegisterComponent();
 	}
 
 	if (StaminaCmp == nullptr && true)
 	{
 		StaminaCmp = NewObject<USL_StaminaComponent>(this);
-		StaminaCmp->InitializeStaminaComponent();
+		StaminaCmp->RegisterComponent();
+		//StaminaCmp->InitializeStaminaComponent();
 	}
 
 	if (LockOnCmp == nullptr && true)
 	{
 		LockOnCmp = NewObject<USL_LockOnComponent>(this);
-		LockOnCmp->InitializeLockOnComponent();
+		LockOnCmp->RegisterComponent();
+		//LockOnCmp->InitializeLockOnComponent();
 	}
 
 	if (StateCmp == nullptr && true)
 	{
 		StateCmp = NewObject<USL_StateComponent>(this);
+		StateCmp->RegisterComponent();
 	}
 
 	if (MovementCmp == nullptr && true)
 	{
 		MovementCmp = NewObject<USL_MovementComponent>(this);
-		MovementCmp->InitMovemenetInfo(true,"");
+		MovementCmp->RegisterComponent();
+		//MovementCmp->InitMovemenetInfo(true,"");
 	}
 
 	if (ComboManagerCmp == nullptr && true)
 	{
 		ComboManagerCmp = NewObject<USL_ComboManagerComponent>(this);
+		ComboManagerCmp->RegisterComponent();
+	}
+
+	if (HitFeedbackManagerCmp == nullptr && true)
+	{
+		HitFeedbackManagerCmp = NewObject<USL_HitFeedbackManagerComponent>(this);
+		HitFeedbackManagerCmp->RegisterComponent();
 	}
 }
 

@@ -44,6 +44,21 @@ USL_CombatantComponent::USL_CombatantComponent()
 	ActorOwner = nullptr;
 }
 
+void USL_CombatantComponent::PostInitProperties()
+{
+	Super::PostInitProperties();
+}
+
+void USL_CombatantComponent::OnRegister()
+{
+	Super::OnRegister();
+}
+
+void USL_CombatantComponent::OnUnregister()
+{
+	Super::OnUnregister();
+}
+
 void USL_CombatantComponent::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	//// 直接使用生命接口,后续属性组件完成时，先由组件进行计算后再发给生命组件

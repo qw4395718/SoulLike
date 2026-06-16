@@ -34,6 +34,9 @@ DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnItemCountChangedEvent, AActor* OwnerAc
 // 伤害飘字事件委托
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageFloatingTextEvent, const struct FDamageFloatingTextData&);
 
+// 命中反馈事件委托
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHitFeedbackEvent, const struct FHitFeedbackData&);
+
 UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UGlobalDelegatesManager : public UGameInstanceSubsystem
 {
@@ -73,6 +76,9 @@ public:
 	// 伤害飘字事件
 	FOnDamageFloatingTextEvent OnDamageFloatingText;
 
+	// 命中反馈事件
+	FOnHitFeedbackEvent OnHitFeedback;
+
 	/**
 	 * 委托响应函数
 	 */
@@ -101,6 +107,11 @@ public:
 	// 广播伤害飘字请求
 	UFUNCTION(BlueprintCallable, Category = "Global Delegates|Combat")
 		void BroadcastDamageFloatingText(const struct FDamageFloatingTextData& InData);
+
+	// ===== 命中反馈委托广播 =====
+	// 广播命中反馈
+	UFUNCTION(BlueprintCallable, Category = "Global Delegates|Combat")
+		void BroadcastHitFeedback(const struct FHitFeedbackData& InData);
 
 protected:
 

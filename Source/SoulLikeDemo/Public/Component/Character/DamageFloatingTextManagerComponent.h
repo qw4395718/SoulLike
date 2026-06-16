@@ -16,11 +16,17 @@ class SOULLIKEDEMO_API UDamageFloatingTextManagerComponent : public UActorCompon
 public:
 	UDamageFloatingTextManagerComponent();
 
+protected:
 	/************************************************************************/
-	/* 继承实现                                                                     */
+	/*                              内部重载                                        */
 	/************************************************************************/
+	virtual void PostInitProperties() override;
+	virtual void OnRegister() override;
+	virtual void OnUnregister() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+public:
 
 	/************************************************************************/
 	/* 外部调用                                                                     */

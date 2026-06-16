@@ -96,6 +96,14 @@ protected:
 
 	void ApplyParryToOverlappingActors();
 
+	// ===== 打击感：命中反馈 =====
+	/** 触发命中反馈（Server 端：Hit Stop + Multicast 广播） */
+	void TriggerHitFeedback(AActor* InTarget, const FVector& InHitLocation, EHitSeverity InSeverity);
+
+	/** Multicast RPC：所有客户端同步执行命中反馈 */
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnHitFeedback(const FHitFeedbackData& InData);
+
 	// ===== 辅助方法 =====
 	void LoadWeaponAssets();
 
@@ -159,4 +167,6 @@ protected:
 
 	UPROPERTY()
 		FName SocketName;
+
+
 };

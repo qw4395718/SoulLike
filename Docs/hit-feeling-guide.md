@@ -53,7 +53,58 @@
 | 弹反（Parry） | 需要独特的音效和视觉标识 |
 | 韧性系统 | 不同韧性下受击反馈不同 |
 
+### 1.3 打击感数据流（v2 架构）
+
+```
+Q ── 代表 服务器端执行
+R ── 代表 网络 RPC 传输
+C ── 代表 所有客户端执行
+L ── 代表 仅本机客户端执行
+```
+
+```
+[Server] 武器碰撞命中
+  │
+  │  Q  ASL_WeaponBase::ApplyDamageToOverlappingActors()
+  │     ├── 计算伤害 → GAS ApplyGameplayEffectSpecToSelf
+  │     └── TriggerHitFeedback(Actor, HitLocation, Severity)
+  │
+  │  Q  TriggerHitFeedback()
+  │     └── 填充 FHitFeedbackData { Severity, Instigator, Target, HitLocation }
+  │
+  │  R  Multicast_OnHitFeedback(Data)    -- NetMulticast, Reliable
+  │
+  ▼
+[All Clients]  Multicast_OnHitFeedback_Implementation()
+  │
+  │  C  GlobalDelegatesManager::BroadcastHitFeedback(Data)
+  │     └── OnHitFeedback 广播
+  │
+  │  C  HitFeedbackManagerComponent::OnHitFeedback(Data)  -- 订阅委托
+  │     │
+  │     ├── C  ApplyHitStop()
+  │     │      ├── 攻击者.CustomTimeDilation = 0.001f
+  │     │      ├── 受击者.CustomTimeDilation = 0.001f
+  │     │      └── FTimerHandle → 恢复 1.0f
+  │     │
+  │     └── L  本机角色判定（是否是攻击者/受击者）
+  │            ├── PlayHitCameraShake()    → PlayerCameraManager
+  │            └── PlayHitScreenEffect()   → StartCameraFade
+  │
+  ▼
+[HitStop 管理]  HitStopTimerHandles 位于 HitFeedbackManagerComponent
+  │
+  ├── 不随武器销毁丢失（组件生命周期 ≥ 武器生命周期）
+  └── EndPlay 时自动恢复所有暂停的 Actor
+```
+
+**注意：**
+- Hit Stop 通过 CustomTimeDilation 实现，只暂停攻击者和受击者两个 Actor，不影响摄像机和其他 AI
+- Camera Shake 和屏幕特效只在本机客户端执行，不进行网络同步
+- 所有打击感参数（HitStop 时长、Shake 缩放）集中在 HitFeedbackManagerComponent 的 UPROPERTY(EditDefaultsOnly) 中，可在蓝图编辑器中调整
+
 ---
+
 
 ## 2 命中停顿（Hit Stop / Freeze Frame）
 

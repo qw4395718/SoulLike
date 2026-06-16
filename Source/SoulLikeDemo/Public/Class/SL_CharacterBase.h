@@ -30,8 +30,6 @@ class USL_StatusAttributeSet;
 class UGameplayAbility;
 class UWidgetComponent;
 class USL_ComboManagerComponent;
-class USL_HitFeedbackManagerComponent;
-
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
@@ -307,9 +305,6 @@ protected:
 
 	UPROPERTY()
 		USL_ComboManagerComponent* ComboManagerCmp;
-
-	UPROPERTY()
-		USL_HitFeedbackManagerComponent* HitFeedbackManagerCmp;
 
 	// ===== 身份相关 =====
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Identity")

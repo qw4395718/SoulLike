@@ -15,6 +15,7 @@ class ASL_SummonSign;
 class ASL_PhantomCharacter;
 class USL_SummonSessionComponent;
 class UDamageFloatingTextManagerComponent;
+class USL_HitFeedbackManagerComponent;
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_PlayerControllerBase : public APlayerController
@@ -195,6 +196,10 @@ protected:
 	// 伤害飘字管理器
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		UDamageFloatingTextManagerComponent* FloatingTextManager;
+
+	// 打击感管理器
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		USL_HitFeedbackManagerComponent* HitFeedbackManagerCmp;
 
 	// 联机召唤会话组件
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

@@ -24,7 +24,6 @@
 #include "Components/SkeletalMeshComponent.h"
 #include <Engine/NetConnection.h>
 #include "Materials/MaterialInstanceDynamic.h"
-#include <SL_HitFeedbackManagerComponent.h>
 
 DEFINE_LOG_CATEGORY(SL_CharacterBase);
 
@@ -394,11 +393,7 @@ void ASL_CharacterBase::InitPartmentComponent()
 		ComboManagerCmp->RegisterComponent();
 	}
 
-	if (HitFeedbackManagerCmp == nullptr && true)
-	{
-		HitFeedbackManagerCmp = NewObject<USL_HitFeedbackManagerComponent>(this);
-		HitFeedbackManagerCmp->RegisterComponent();
-	}
+
 }
 
 UAbilitySystemComponent* ASL_CharacterBase::GetAbilitySystemComponent() const

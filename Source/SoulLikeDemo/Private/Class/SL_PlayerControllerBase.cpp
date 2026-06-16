@@ -18,6 +18,7 @@
 #include "Pop_DeathScreen.h"
 #include "Kismet/GameplayStatics.h"
 #include "DamageFloatingTextManagerComponent.h"
+#include "Component/HitFeedback/SL_HitFeedbackManagerComponent.h"
 
 // 构造函数
 ASL_PlayerControllerBase::ASL_PlayerControllerBase()
@@ -51,6 +52,14 @@ void ASL_PlayerControllerBase::BeginPlay()
 	{
 		SummonSessionCmp->RegisterComponent();
 		UE_LOG(LogTemp, Log, TEXT("SummonSessionComponent created"));
+	}
+
+	// 创建打击感管理器
+	HitFeedbackManagerCmp = NewObject<USL_HitFeedbackManagerComponent>(this, TEXT("HitFeedbackManager"));
+	if (HitFeedbackManagerCmp)
+	{
+		HitFeedbackManagerCmp->RegisterComponent();
+		UE_LOG(LogTemp, Log, TEXT("HitFeedbackManagerComponent created"));
 	}
 
 	// 设置初始输入模式为游戏模式

@@ -20,10 +20,20 @@ USL_EquipmentComponent::USL_EquipmentComponent()
 	WeaponBaseClass = ASL_WeaponBase::StaticClass();
 }
 
-void USL_EquipmentComponent::SetOwner(AActor* NewOwner)
+void USL_EquipmentComponent::PostInitProperties()
 {
-	RETURN_IF_TRUE(NewOwner == nullptr);
-	OwningCharacter = Cast<ASL_CharacterBase>(NewOwner);
+	Super::PostInitProperties();
+}
+
+void USL_EquipmentComponent::OnRegister()
+{
+	Super::OnRegister();
+	OwningCharacter = Cast<ASL_CharacterBase>(GetOwner());
+}
+
+void USL_EquipmentComponent::OnUnregister()
+{
+	Super::OnUnregister();
 }
 
 void USL_EquipmentComponent::WeaponAnimNotifyResponse(int NotifyType)

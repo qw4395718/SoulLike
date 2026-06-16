@@ -32,7 +32,7 @@ void USL_HitFeedbackManagerComponent::EndPlay(const EEndPlayReason::Type EndPlay
 	{
 		if (Pair.Key)
 		{
-			Pair.Key->CustomTimeDilation = 1.0f;
+			Pair.Key->CustomTimeDilation = 0.001f;
 			GetWorld()->GetTimerManager().ClearTimer(Pair.Value);
 		}
 	}
@@ -69,12 +69,12 @@ void USL_HitFeedbackManagerComponent::OnHitFeedback(const FHitFeedbackData& InDa
 	if (bIsLocalInstigator)
 	{
 		PlayHitCameraShake(InData.Severity, Scale * 0.5f);
-		PlayHitScreenEffect(InData.Severity);
+		//PlayHitScreenEffect(InData.Severity);
 	}
 	else if (bIsLocalTarget)
 	{
 		PlayHitCameraShake(InData.Severity, Scale);
-		PlayHitScreenEffect(InData.Severity);
+		//PlayHitScreenEffect(InData.Severity);
 	}
 }
 

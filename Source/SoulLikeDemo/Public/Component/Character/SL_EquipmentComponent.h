@@ -22,6 +22,13 @@ class SOULLIKEDEMO_API USL_EquipmentComponent : public UActorComponent, public I
 public:
 	USL_EquipmentComponent();
 
+	/************************************************************************/
+	/*                              内部重载                                        */
+	/************************************************************************/
+	virtual void PostInitProperties() override;
+	virtual void OnRegister() override;
+	virtual void OnUnregister() override;
+
 
 	/************************************************************************/
 	/*                               接口实现                               */
@@ -31,9 +38,6 @@ public:
 	/************************************************************************/
 	/*                               外部调用                               */
 	/************************************************************************/
-	// 设置组件的持有者
-	void SetOwner(AActor* NewOwner);
-
 	// ===== 初始化 =====
 	/** 根据职业索引初始化装备组件 */
 	UFUNCTION(BlueprintCallable, Category = "Equipment")

@@ -200,6 +200,8 @@ protected:
 	// 属性复制回调
 	UFUNCTION()
 	void OnRep_PhantomData();
+	UFUNCTION()
+	void OnRep_CurrentIdentity();
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void InitPartmentComponent();
@@ -307,7 +309,7 @@ protected:
 		USL_ComboManagerComponent* ComboManagerCmp;
 
 	// ===== 身份相关 =====
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Identity")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentIdentity, Category = "Identity")
 	ECharacterIdentity CurrentIdentity;
 
 	// 灵体数据

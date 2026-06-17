@@ -59,6 +59,7 @@ void ASL_WeaponBase::BeginPlay()
 
 void ASL_WeaponBase::SetOwner(AActor* NewOwner)
 {
+	Super::SetOwner(NewOwner);
 	RETURN_IF_TRUE(NewOwner == nullptr);
 	OwningCharacter = Cast<ACharacter>(NewOwner);
 }

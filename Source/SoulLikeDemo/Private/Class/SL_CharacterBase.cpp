@@ -927,9 +927,31 @@ void ASL_CharacterBase::ApplyPhantomRestrictions()
 
 void ASL_CharacterBase::OnRep_PhantomData()
 {
-	if (CurrentIdentity == ECharacterIdentity::Phantom)
-	{
-		RebuildAppearance();
-		ApplyTranslucentEffect();
-	}
+	RebuildAppearance();
+	ApplyTranslucentEffect();
 }
+
+
+
+void ASL_CharacterBase::OnRep_CurrentIdentity()
+
+{
+
+	if (CurrentIdentity == ECharacterIdentity::Phantom)
+
+	{
+
+		if (!PhantomData.CharacterMeshPath.IsEmpty())
+
+		{
+
+			RebuildAppearance();
+
+			ApplyTranslucentEffect();
+
+		}
+
+	}
+
+}
+

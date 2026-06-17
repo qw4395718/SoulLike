@@ -7,6 +7,7 @@
 #include "WeaponDataTable.h"
 #include "SL_Macros.h"
 #include "Engine/World.h"
+#include "Net/UnrealNetwork.h"
 
 USL_EquipmentComponent::USL_EquipmentComponent()
 {
@@ -203,5 +204,12 @@ int32 USL_EquipmentComponent::GetSelectSlotItemID() const
 {
 	RETURN_VALUE_IF_TRUE(CurrentSelectSlotIndex <= 0 || CurrentSelectSlotIndex > SlotItemIDList.Num(),0);
 	return SlotItemIDList[CurrentSelectSlotIndex];
+}
 
+void USL_EquipmentComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USL_EquipmentComponent, CurrentLeftHandWeapon);
+	DOREPLIFETIME(USL_EquipmentComponent, CurrentRightHandWeapon);
 }

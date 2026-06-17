@@ -91,6 +91,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Equipment|Events")
 		FOnWeaponEquippedDelegate OnRightHandWeaponEquipped;
 
+	// ===== Replication =====
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	/************************************************************************/
 	/*                               内部调用                               */
@@ -120,11 +123,11 @@ protected:
 
 	// ===== 武器实例 =====
 	/** 当前左手武器实例 */
-	UPROPERTY()
+	UPROPERTY(Replicated)
 		ASL_WeaponBase* CurrentLeftHandWeapon;
 
 	/** 当前右手武器实例 */
-	UPROPERTY()
+	UPROPERTY(Replicated)
 		ASL_WeaponBase* CurrentRightHandWeapon;
 
 	// ===== 道具数据 =====

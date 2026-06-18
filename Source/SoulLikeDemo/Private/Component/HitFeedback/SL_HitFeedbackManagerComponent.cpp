@@ -32,7 +32,7 @@ void USL_HitFeedbackManagerComponent::EndPlay(const EEndPlayReason::Type EndPlay
 	{
 		if (Pair.Key)
 		{
-			Pair.Key->CustomTimeDilation = 0.001f;
+			Pair.Key->CustomTimeDilation = 1.0f;
 			GetWorld()->GetTimerManager().ClearTimer(Pair.Value);
 		}
 	}
@@ -85,19 +85,20 @@ void USL_HitFeedbackManagerComponent::OnHitFeedback(const FHitFeedbackData& InDa
 void USL_HitFeedbackManagerComponent::ApplyHitStop(const FHitFeedbackData& InData)
 {
 	float Duration = 0.1f;
+	float Dilation = 0.5f;
 	switch (InData.Severity)
 	{
-	case EHitSeverity::Light:   Duration = HitStop_Light;   break;
-	case EHitSeverity::Heavy:   Duration = HitStop_Heavy;   break;
-	case EHitSeverity::Execute: Duration = HitStop_Execute; break;
-	case EHitSeverity::Parry:   Duration = HitStop_Parry;   break;
-	case EHitSeverity::Block:   Duration = HitStop_Block;   break;
+	case EHitSeverity::Light:   Duration = HitStop_Light;   Dilation = HitStopDilation_Light;   break;
+	case EHitSeverity::Heavy:   Duration = HitStop_Heavy;   Dilation = HitStopDilation_Heavy;   break;
+	case EHitSeverity::Execute: Duration = HitStop_Execute; Dilation = HitStopDilation_Execute; break;
+	case EHitSeverity::Parry:   Duration = HitStop_Parry;   Dilation = HitStopDilation_Parry;   break;
+	case EHitSeverity::Block:   Duration = HitStop_Block;   Dilation = HitStopDilation_Block;   break;
 	}
 
-	auto PauseAndSchedule = [this, Duration](AActor* InActor)
+	auto PauseAndSchedule = [this, Duration, Dilation](AActor* InActor)
 	{
 		if (!InActor) return;
-		InActor->CustomTimeDilation = 0.001f;
+		InActor->CustomTimeDilation = Dilation;
 		FTimerHandle& Handle = HitStopTimerHandles.FindOrAdd(InActor);
 		GetWorld()->GetTimerManager().ClearTimer(Handle);
 		GetWorld()->GetTimerManager().SetTimer(Handle, FTimerDelegate::CreateUFunction(this,

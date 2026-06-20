@@ -153,14 +153,19 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 					else
 					{
 						SCOPE_CYCLE_COUNTER(STAT_ComboManagerComponent_FirstCombo);
-						// 初始连段
-						CurrentComboInfo = FoundComboInfo;
-						ASC->TryActivateAbilityByClass(FoundComboInfo.NextAbilityClass);
-
-						if (USL_StaminaComponent* StaminaComp = GetCachedStaminaComp())
+						UAbilityTask_ComboMontage* ComboTask = ActiveComboTask.Get();
+						if (ComboTask == nullptr || 
+							!IsValid(ComboTask))
 						{
-							StaminaComp->OnComboStarted();
-							StaminaComp->ConsumeStamina(FoundComboInfo.StaminaCost);
+							// 初始连段
+							CurrentComboInfo = FoundComboInfo;
+							ASC->TryActivateAbilityByClass(FoundComboInfo.NextAbilityClass);
+
+							if (USL_StaminaComponent* StaminaComp = GetCachedStaminaComp())
+							{
+								StaminaComp->OnComboStarted();
+								StaminaComp->ConsumeStamina(FoundComboInfo.StaminaCost);
+							}
 						}
 					}
 					break;

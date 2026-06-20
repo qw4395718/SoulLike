@@ -59,6 +59,22 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "HitFeedback|HitStop")
 	float HitStop_Block = 0.08f;
 
+	// ===== Hit Stop 时间膨胀系数（越小越接近冻结） =====
+	UPROPERTY(EditDefaultsOnly, Category = "HitFeedback|HitStop", meta = (ClampMin = "0.001", ClampMax = "1.0"))
+	float HitStopDilation_Light = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HitFeedback|HitStop", meta = (ClampMin = "0.001", ClampMax = "1.0"))
+	float HitStopDilation_Heavy = 0.15f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HitFeedback|HitStop", meta = (ClampMin = "0.001", ClampMax = "1.0"))
+	float HitStopDilation_Execute = 0.02f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HitFeedback|HitStop", meta = (ClampMin = "0.001", ClampMax = "1.0"))
+	float HitStopDilation_Parry = 0.1f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HitFeedback|HitStop", meta = (ClampMin = "0.001", ClampMax = "1.0"))
+	float HitStopDilation_Block = 0.6f;
+
 	// ===== Camera Shake 缩放 =====
 	UPROPERTY(EditDefaultsOnly, Category = "HitFeedback|CameraShake")
 	float Shake_Light = 0.5f;

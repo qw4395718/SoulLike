@@ -1,14 +1,14 @@
 // Effects/SL_CameraShake_Hit.h
-// 打击感：相机震动 —— Perlin 噪声 CameraShake
+// 打击感：相机震动 —— UE4.26 兼容版（使用旧版 UCameraShake + FOscillator）
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Camera/CameraShakeBase.h"
+#include "Camera/CameraShake.h"
 #include "SL_CameraShake_Hit.generated.h"
 
 UCLASS()
-class SOULLIKEDEMO_API USL_CameraShake_Hit : public UCameraShakeBase
+class SOULLIKEDEMO_API USL_CameraShake_Hit : public UMatineeCameraShake
 {
 	GENERATED_BODY()
 

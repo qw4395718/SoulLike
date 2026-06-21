@@ -36,6 +36,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	// 网络复制
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 public:
     /************************************************************************/
     /*                    IWeaponAccessory_IF 接口实现                        */
@@ -56,6 +59,14 @@ public:
 	/** 初始化敌人数据 */
 	UFUNCTION(BlueprintCallable, Category = "Enemy")
 		void InitializeEnemy(int32 EnemyID);
+
+	/** 敌人ID（复制到客户端，供晚加入时重新初始化视觉配置） */
+	UPROPERTY(ReplicatedUsing = OnRep_EnemyID, VisibleInstanceOnly, Category = "Enemy|Network")
+		int32 NetEnemyID;
+
+	/** 客户端收到 NetEnemyID 后重新初始化外观、武器等配置 */
+	UFUNCTION()
+		void OnRep_EnemyID();
 
 	UFUNCTION(BlueprintPure, Category = "Enemy")
 		EEnemyState GetEnemyState() const { return CurrentState; }
@@ -209,11 +220,11 @@ protected:
 	
 	    // ===== 新增：敌人持有的武器 =====
     /** 左手武器实例（在 ApplyEnemyConfig 中创建） */
-    UPROPERTY()
+    UPROPERTY(Replicated)
         ASL_WeaponBase* LeftHandWeapon;
 
     /** 右手武器实例 */
-    UPROPERTY()
+    UPROPERTY(Replicated)
         ASL_WeaponBase* RightHandWeapon;
 
 };

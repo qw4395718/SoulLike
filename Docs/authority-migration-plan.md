@@ -231,6 +231,81 @@ grep -rn "UPROPERTY(.*Replicated" Source\SoulLikeDemo\Public\ --include="*.h"
 
 ---
 
+### 4.5 P0-S5: SL_EnemyBase 晚加入同步 — Replicate EnemyID + OnRep 重构
+
+**状态**：✅ 已完成（2026-06-21）
+
+**问题**：客户端A晚加入客户端B的世界时，世界B中已存在的怪物（通过 `UWaveManagerSystem::SpawnWaveMonsters` 在服务器生成）缺少模型资源、BehaviorTree、BlackboardData 等配置数据。这是因为 `ASL_EnemyBase` 的初始化（`InitializeEnemy` → `ApplyEnemyConfig`）只在服务器执行，配置数据没有被复制到晚加入的客户端。
+
+**根因分析**：
+
+| 成员 | 原因 |
+|------|------|
+| `BehaviorTree` / `BlackboardData` | `UPROPERTY()` 无 `Replicated`，客户端为 null |
+| `EnemyConfig` | `UPROPERTY(EditDefaultsOnly)` 无 `Replicated`，客户端拿不到配置 |
+| `LeftHandWeapon` / `RightHandWeapon` | `UPROPERTY()` 无 `Replicated`，客户端不知武器存在 |
+| 骨骼网格体 / AnimBP | `SetSkeletalMesh` / `SetAnimInstanceClass` 不保证复制到晚加入客户端 |
+
+**方案：Replicate 最小标识符 + OnRep 客户端自重建**
+
+```
+服务器: InitializeEnemy 时保存 NetEnemyID = EnemyID
+        ↓
+        DOREPLIFETIME(ASL_EnemyBase, NetEnemyID)
+        ↓
+客户端晚加入 → OnRep_EnemyID 触发
+        ↓
+        查本地 DataTableManager → EnemyConfigInfoTable
+        ↓
+        重新调用:
+            LoadEnemyAppearance  (骨骼网格体 + AnimBP)
+            SpawnEnemyWeapons    (已有武器指针时跳过 SpawnActor)
+            设置胶囊体/缩放/GAS属性/移速/队伍
+```
+
+**改动文件**：
+
+- `Public/Class/SL_EnemyBase.h` — 3处改动
+  - 新增 `GetLifetimeReplicatedProps` 声明
+  - 新增 `UPROPERTY(ReplicatedUsing=OnRep_EnemyID) int32 NetEnemyID` + `UFUNCTION() void OnRep_EnemyID()`
+  - `LeftHandWeapon` / `RightHandWeapon` 改为 `UPROPERTY(Replicated)`
+
+- `Private/Class/SL_EnemyBase.cpp` — 5处改动
+  - 新增 `#include "Net/UnrealNetwork.h"`
+  - `InitializeEnemy` 中保存 `NetEnemyID = EnemyID`
+  - 实现 `GetLifetimeReplicatedProps` — 注册 `NetEnemyID`、`LeftHandWeapon`、`RightHandWeapon`
+  - 实现 `OnRep_EnemyID` — 客户端从 DataTable 重建视觉配置
+  - `SpawnEnemyWeapons` 增加武器已存在检查，防止客户端重复生成
+
+**不涉及改动的文件**：
+
+- `SL_EnemyAIController.cpp` — `OnPossess` 已有 BT/BB 空指针检查，`InitializeAI` 内部有 `HasAuthority()` 守卫，客户端直接 return，不需要运行行为树
+
+**关键注意事项**：
+
+- DataTable 必须在客户端可用（`UDataTableManager` + `EnemyConfigInfoTable`），否则 `OnRep_EnemyID` 静默失效
+- GAS 属性通过属性复制同步，不依赖 `OnRep_EnemyID`，`BeginPlay` 中 `InitAbilityActorInfo` 已在客户端初始化 ASC
+- OnRep（复制回调）不等同于 RPC：OnRep 是属性收到新值后的副作用回调（只发生在接收端）；RPC 是远程函数调用（有发送方和接收方）
+- 武器 Actor 本身已有 `bReplicates = true`，标记 `LeftHandWeapon`/`RightHandWeapon` 为 `Replicated` 只是让基类能在客户端通过成员指针访问到已存在的武器 Actor
+
+**此模式在 UE4 网络编程中的定位**：
+
+| 同步场景 | 推荐方案 | 原因 |
+|---------|---------|------|
+| 晚加入时还原已存在 Actor 的状态 | `ReplicatedUsing` + OnRep | 客户端根据最小标识符自重建，复制流量最小 |
+| 一次性事件通知（伤害飘字、音效） | `NetMulticast RPC` | 事件不需要持久化状态 |
+| 持续变化的状态（血量、位置） | 属性复制（引擎自动） | 引擎有插值和差值优化 |
+| 客户端操作请求（攻击、使用道具） | `Server RPC` | 客户端触发、服务器裁决 |
+
+**单元检验**：
+
+1. ✅ 服务器生成怪物后→客户端看到正确的骨骼网格体、动画蓝图、武器模型
+2. ✅ 服务器怪物已被击杀→晚加入客户端不显示已死亡的怪物
+3. ✅ 客户端无法通过 NetEnemyID 自行修改服务器数据（int32 只读）
+4. ✅ OnRep_EnemyID 触发的 `LoadSynchronous()` 在主线程阻塞加载，怪物数量较多时需关注卡顿
+
+---
+
 ## 5 P1 — 执行 Authority
 
 ### 5.1 P1-S1: SL_StaminaComponent Authority 守卫
@@ -539,6 +614,141 @@ P3 — Lua Widget 数据源审查通过
 - 每个步骤增量提交，Git tag 可回退
 - `Replicated` 标记添加后可去掉
 - `HasAuthority()` 守卫只加代码不删逻辑，回退只需删除判断行
+
+---
+
+## 10 附录：UE4 网络复制机制原理
+
+### 10.1 组件复制：运行时动态创建的组件如何同步
+
+构造函数中 `CreateDefaultSubobject` 创建的组件，服务器和客户端各有一个同名实例，天然存在。不需要额外处理。
+
+**运行时动态创建的组件**需要手动开启复制：
+
+```cpp
+// 服务器端：动态创建组件
+UMyComponent* MyComp = NewObject<UMyComponent>(this, TEXT("RuntimeComp_Weapon"));
+MyComp->bReplicates = true;      // 必须开复制
+MyComp->RegisterComponent();     // 注册到世界，否则引擎不知道它的存在
+```
+
+引擎的 `ActorChannel` 会在下一个复制周期检测到新组件，自动在客户端创建对应的实例：
+
+```
+服务器:
+  NewObject<UMyComp> + RegisterComponent()
+    ↓
+  ActorChannel 发现新组件
+    ↓
+  创建 FObjectReplicator 管理该组件的属性复制
+    ↓
+  将组件的创建指令 + 初始属性编码到网络包
+    ↓
+客户端:
+  收到网络包 → 在 Actor 的组件列表中找到/创建同名组件
+    ↓
+  为该组件创建 FObjectReplicator
+    ↓
+  后续属性变更自动复制（与默认组件相同机制）
+```
+
+**约束条件**：
+
+- `bReplicates = true` 和 `RegisterComponent()` **缺一不可**：前者告诉引擎要复制，后者让引擎知道组件存在
+- 组件名称（`FName`）必须稳定：引擎靠组件名来匹配服务器和客户端的实例。`CreateDefaultSubobject` 时显式指定名称；动态创建时传一个明确的 `FName` 参数（如 `TEXT("RuntimeComp_Weapon")`），不要用 `NAME_None`
+- **不要复制组件指针**：`UPROPERTY(Replicated) UMyComponent* Comp` 是错误做法。服务器上的指针地址指向的是服务器进程的地址空间，客户端拿这个地址毫无意义。组件实例的匹配靠的是**路径名**，不是**内存地址**
+
+---
+
+### 10.2 属性同步机制：不同进程地址不同的对象，数据怎么同步的？
+
+UE4 的网络复制不依赖内存地址。它的工作逻辑分三步：
+
+#### 第一步：对象识别 —— 用路径名，不用地址
+
+```
+服务器端对象路径：
+  World[/Game/Map].PlayerCharacter_0.InventoryComponent
+
+客户端对象路径（完全一致）：
+  World[/Game/Map].PlayerCharacter_0.InventoryComponent
+```
+
+每个 Actor 和 Component 有一个全局唯一的路径名，由 UWorld 名 + Actor 名 + 组件树层次拼接而成。引擎通过网络包中的 `FNetworkGUID` 来传递这个对象引用，而不是用指针地址。
+
+#### 第二步：属性定位 —— 用 RepLayout（类元数据），不用硬编码偏移
+
+每个 UClass 在加载时生成一个 `FRepLayout`，这是一个描述类中所有 `Replicated` 属性的结构：
+
+```
+类 UInventoryComponent 的 RepLayout:
+  Gold:    int32,         offset=0x120
+  Items:   TArray<FItem>, offset=0x130
+  SelectedItemID: FName,  offset=0x148
+```
+
+关键的属性：offset 是类编译期确定的，同一个类在所有进程中布局完全一致。引擎不直接写死偏移值，而是通过 `UPROPERTY()` 反射系统在运行时查询属性的 offset。
+
+#### 第三步：值传输 —— 序列化，不是内存拷贝
+
+```
+服务器                               客户端
+  │                                   
+  ├── 读取 ServerComp->Gold = 500     
+  ├── 编码为：属性名 + 序列化值        
+  │   "Gold" → int32(500)             
+  │   "Items[0]" → {ID=3, Count=2}    
+  │────────────────────────────────►  
+  │                                    ├── 用路径名找到 ClientComp
+  │                                    ├── 查 RepLayout 找到 Gold 的 offset
+  │                                    ├── memcpy(ClientComp + offset, 500)
+  │                                    └── 触发 OnRep_Gold()
+```
+
+服务器不发送"地址"，只发送"属性名 + 值"。客户端根据 RepLayout 反查该属性在本地对象中的存储位置，然后写入。
+
+**核心结论**：
+
+```
+对象 → 用路径名 + FNetworkGUID 匹配（不是地址）
+属性 → 用 RepLayout 按名定位（不是固定偏移）
+值   → 序列化传输（不是内存拷贝）
+```
+
+这就是为什么服务器 `@0x1000` 和客户端 `@0x7000` 的两个不同对象能正确同步数据——它们只是同一份数据的两个副本，引擎通过名称和布局来保持一致，不需要关心地址。
+
+#### GAS 的特殊之处
+
+GAS 不依赖标准的 `DOREPLIFETIME` 机制，它用自定义的 `FGameplayAttributeData::NetSerialize` 做批量属性同步：
+
+```cpp
+struct FGameplayAttributeData {
+    float BaseValue;
+    float CurrentValue;
+    
+    bool NetSerialize(FArchive& Ar, ...) {
+        Ar << CurrentValue;  // 自定义序列化
+        return true;
+    }
+};
+```
+
+`UAbilitySystemComponent` 用 `FMinimalReplicationTagCountMap` 跟踪哪些属性发生了变动，然后在 `OnRep_MinimalReplicationInfo` 中一次性批量更新。这比每个属性一个 `DOREPLIFETIME` 更高效，也是 GAS 层不需要开发者手动注册复制属性的原因。
+
+---
+
+### 10.3 组件数据同步的两种方案对比
+
+| | 方案A：组件属性标记 Replicated | 方案B：Actor 上放 ID + OnRep 自初始化 |
+|--|-------------------------------|--------------------------------------|
+| 数据来源 | 服务器逻辑运算 | DataTable / 资产表配置 |
+| 运行时是否变化 | 持续变化（血量、位置、库存数量） | 固定不变（骨骼网格体、行为树资产） |
+| 复制内容 | 每条属性独立编码传输 | 仅传输一个 int32/FName |
+| 复制开销 | 每条变化单独编码（带宽随数据量线性增长） | 极小（4字节的 EnemyID） |
+| 客户端恢复方式 | 引擎自动写入目标属性 | 查 DataTable → 按结果自行重建 |
+| 典型场景 | 血量/体力（GAS Attribute）、库存数量、战斗状态开关 | 怪物配置（EnemyBase）、玩家初始装备、关卡静态数据 |
+
+**关键原则**：固定的配置走 ID + OnRep 自初始化，动态变化的值走组件属性直接 `Replicated`。两者可以混用——同一个组件可以同时有 `Replicated` 的实时变量和 OnRep 后查表加载的固定配置。
 
 ---
 

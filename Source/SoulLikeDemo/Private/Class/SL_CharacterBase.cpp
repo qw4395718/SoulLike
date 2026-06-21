@@ -927,8 +927,12 @@ void ASL_CharacterBase::ApplyPhantomRestrictions()
 
 void ASL_CharacterBase::OnRep_PhantomData()
 {
-	RebuildAppearance();
-	ApplyTranslucentEffect();
+#if !UE_SERVER
+	if (HasAuthority()) return;
+	if (PhantomData.PlayerClassID <= 0) return;
+
+	InitCharacterWithClassID(PhantomData.PlayerClassID);
+#endif
 }
 
 

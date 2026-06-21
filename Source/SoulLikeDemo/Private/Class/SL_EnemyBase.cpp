@@ -20,6 +20,7 @@
 #include <Components/WidgetComponent.h>
 #include <Animation/AnimBlueprint.h>
 #include <Animation/AnimBlueprintGeneratedClass.h>
+#include "Net/UnrealNetwork.h"
 
 ASL_EnemyBase::ASL_EnemyBase()
 {
@@ -105,6 +106,9 @@ void ASL_EnemyBase::InitializeEnemy(int32 EnemyID)
 	// 保存配置
 	EnemyConfig = Config;
 
+	// 保存 EnemyID 用于复制到客户端（晚加入时重新初始化）
+	NetEnemyID = EnemyID;
+
 	// 应用配置
 	ApplyEnemyConfig(Config);
 
@@ -165,6 +169,14 @@ void ASL_EnemyBase::Multicast_OnCharacterDeath_Implementation(AActor* InDeadActo
 	{
 		DelegateMgr->OnCharacterDied.Broadcast(InDeadActor, InInstigator);
 	}
+}
+
+void ASL_EnemyBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASL_EnemyBase, NetEnemyID);
+	DOREPLIFETIME(ASL_EnemyBase, LeftHandWeapon);
+	DOREPLIFETIME(ASL_EnemyBase, RightHandWeapon);
 }
 
 ASL_EnemyAIController* ASL_EnemyBase::GetEnemyAIController() const
@@ -459,44 +471,118 @@ void ASL_EnemyBase::InitializeEnemyAI(const FEnemyConfigInfo& Config)
 		PerceptionRange, AttackRange);
 }
 
+void ASL_EnemyBase::OnRep_EnemyID()
+{
+#if !UE_SERVER
+	if (HasAuthority()) return;
+	if (NetEnemyID <= 0) return;
+
+	// 客户端从本地 DataTable 重新查询配置
+	UDataTableManager* TableManager = UDataTableManager::Get(this);
+	if (!TableManager) return;
+
+	UEnemyConfigInfoTable* EnemyTable = Cast<UEnemyConfigInfoTable>(
+		TableManager->GetDataTable(EDataTableType::DT_EnemyConfigInfo));
+	if (!EnemyTable) return;
+
+	FEnemyConfigInfo Config;
+	if (!EnemyTable->GetEnemyConfig(NetEnemyID, Config))
+	{
+		UE_LOG(LogTemp, Error, TEXT("ASL_EnemyBase::OnRep_EnemyID - EnemyID=%d not found in config table"), NetEnemyID);
+		return;
+	}
+
+	// 保存配置（使 GetBehaviorTree/GetBlackboardData 等访问器在客户端可用）
+	EnemyConfig = Config;
+
+	// 胶囊体大小
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->SetCapsuleSize(Config.CapsuleRadius, Config.CapsuleHalfHeight);
+	}
+
+	// 模型变换（缩放、旋转、偏移）
+	if (GetMesh())
+	{
+		GetMesh()->SetRelativeScale3D(Config.MeshScale);
+		GetMesh()->SetRelativeRotation(Config.MeshRelativeRotate);
+		GetMesh()->SetRelativeLocation(FVector(0, 0, -Config.CapsuleHalfHeight));
+	}
+
+	// 外观（骨骼网格体 + 动画蓝图）
+	LoadEnemyAppearance(Config);
+
+	// 武器（已有复制武器指针时跳过 SpawnActor）
+	SpawnEnemyWeapons(Config);
+
+	// AI 配置（供 AI Controller 引用）
+	PerceptionRange = Config.PerceptionRange;
+	AttackRange = Config.AttackRange;
+	if (!Config.BehaviorTree.IsNull())
+	{
+		BehaviorTree = Config.BehaviorTree.LoadSynchronous();
+	}
+	if (!Config.BlackboardData.IsNull())
+	{
+		BlackboardData = Config.BlackboardData.LoadSynchronous();
+	}
+
+	// 基础移速
+	GetCharacterMovement()->MaxWalkSpeed = Config.BaseMoveSpeed;
+
+	// 队伍
+	SetTeamID(Config.TeamID);
+
+	UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::OnRep_EnemyID - Client reinitialized: ID=%d"), NetEnemyID);
+#endif
+}
+
 // ===== 新增：生成敌人武器 =====
 void ASL_EnemyBase::SpawnEnemyWeapons(const FEnemyConfigInfo& Config)
 {
-    // 生成左手武器
-    if (Config.LeftHandWeaponID > 0)
-    {
-        LeftHandWeapon = SpawnWeaponByID(Config.LeftHandWeaponID);
-        if (LeftHandWeapon)
-        {
-            // 附加到左手插槽
-            FName SocketName = (Config.LeftHandSocketName != NAME_None) 
-                ? Config.LeftHandSocketName 
-                : FName("Weapon_L");
-            
-            LeftHandWeapon->AttachToComponent(GetMesh(), 
-                FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
-            
-            // 设置缩放
-            LeftHandWeapon->SetActorScale3D(FVector(Config.LeftHandWeaponScale));
-        }
-    }
+	// 生成左手武器
+	if (Config.LeftHandWeaponID > 0)
+	{
+		// 客户端上武器已通过复制到达时跳过生成，只做重定位
+		if (!LeftHandWeapon || LeftHandWeapon->IsPendingKillPending())
+		{
+			LeftHandWeapon = SpawnWeaponByID(Config.LeftHandWeaponID);
+		}
+		if (LeftHandWeapon)
+		{
+			// 附加到左手插槽
+			FName SocketName = (Config.LeftHandSocketName != NAME_None)
+				? Config.LeftHandSocketName
+				: FName("Weapon_L");
 
-    // 生成右手武器
-    if (Config.RightHandWeaponID > 0)
-    {
-        RightHandWeapon = SpawnWeaponByID(Config.RightHandWeaponID);
-        if (RightHandWeapon)
-        {
-            FName SocketName = (Config.RightHandSocketName != NAME_None) 
-                ? Config.RightHandSocketName 
-                : FName("Weapon_R");
-            
-            RightHandWeapon->AttachToComponent(GetMesh(), 
-                FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
-            
-            RightHandWeapon->SetActorScale3D(FVector(Config.RightHandWeaponScale));
-        }
-    }
+			LeftHandWeapon->AttachToComponent(GetMesh(),
+				FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+
+			// 设置缩放
+			LeftHandWeapon->SetActorScale3D(FVector(Config.LeftHandWeaponScale));
+		}
+	}
+
+	// 生成右手武器
+	if (Config.RightHandWeaponID > 0)
+	{
+		// 客户端上武器已通过复制到达时跳过生成，只做重定位
+		if (!RightHandWeapon || RightHandWeapon->IsPendingKillPending())
+		{
+			RightHandWeapon = SpawnWeaponByID(Config.RightHandWeaponID);
+		}
+		if (RightHandWeapon)
+		{
+			FName SocketName = (Config.RightHandSocketName != NAME_None)
+				? Config.RightHandSocketName
+				: FName("Weapon_R");
+
+			RightHandWeapon->AttachToComponent(GetMesh(),
+				FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+
+			RightHandWeapon->SetActorScale3D(FVector(Config.RightHandWeaponScale));
+		}
+	}
 }
 
 // ===== 新增：根据武器ID派生武器实例 =====

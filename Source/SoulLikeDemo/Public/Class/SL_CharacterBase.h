@@ -59,6 +59,9 @@ protected:
 	/************************************************************************/
 	/*                               继承实现                                       */
 	/************************************************************************/
+	// 组件初始化
+	virtual void PostInitializeComponents() override;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -199,7 +202,11 @@ protected:
 
 	// 属性复制回调
 	UFUNCTION()
-	void OnRep_PhantomData();
+		void OnRep_PhantomData();
+
+	UFUNCTION()
+		void OnRep_PlayerClassID();
+
 	UFUNCTION()
 	void OnRep_CurrentIdentity();
 
@@ -340,7 +347,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
 		FClassConfigInfo ClassConfig;
 
-	int32 PlayerClassID;
+	UPROPERTY(ReplicatedUsing = OnRep_PlayerClassID)
+		int32 PlayerClassID;
 
 	// 所属队伍
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")

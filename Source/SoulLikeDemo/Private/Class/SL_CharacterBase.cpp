@@ -36,6 +36,7 @@ void ASL_CharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(ASL_CharacterBase, PhantomData);
 	DOREPLIFETIME(ASL_CharacterBase, bCanInteractWithWorld);
 	DOREPLIFETIME(ASL_CharacterBase, bCanBeDamagedByWorld);
+	DOREPLIFETIME(ASL_CharacterBase, PlayerClassID);
 }
 
 ASL_CharacterBase::ASL_CharacterBase(const FObjectInitializer& ObjectInitializer)
@@ -72,11 +73,16 @@ ASL_CharacterBase::ASL_CharacterBase(const FObjectInitializer& ObjectInitializer
 
 }
 
+void ASL_CharacterBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	// 初始化角色(包含组件)
+	InitializeCharacter();
+}
+
 void ASL_CharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	// 初始化角色(包含组件)
-	InitializeCharacter();
 
 	// 为ASC设置持有者和化身
 	if (AbilitySystemComp)
@@ -927,15 +933,22 @@ void ASL_CharacterBase::ApplyPhantomRestrictions()
 
 void ASL_CharacterBase::OnRep_PhantomData()
 {
-#if !UE_SERVER
-	if (HasAuthority()) return;
-	if (PhantomData.PlayerClassID <= 0) return;
-
-	InitCharacterWithClassID(PhantomData.PlayerClassID);
-#endif
+//#if !UE_SERVER
+//	if (HasAuthority()) return;
+//	if (PhantomData.PlayerClassID <= 0) return;
+//
+//	InitCharacterWithClassID(PhantomData.PlayerClassID);
+//#endif
 }
 
 
+
+void ASL_CharacterBase::OnRep_PlayerClassID()
+{
+#if !UE_SERVER
+	InitCharacterWithClassID(PlayerClassID);
+#endif
+}
 
 void ASL_CharacterBase::OnRep_CurrentIdentity()
 

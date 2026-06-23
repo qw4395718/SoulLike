@@ -23,6 +23,6 @@ public:
 	TArray<int32> GetAllEnemyIDs() const;
 
 protected:
-	UPROPERTY()
+
 	TMap<int32, TArray<FPartBreakConfig>> PartBreakConfigMap;
 };

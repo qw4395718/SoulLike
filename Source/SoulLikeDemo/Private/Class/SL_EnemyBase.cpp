@@ -21,6 +21,7 @@
 #include <Animation/AnimBlueprint.h>
 #include <Animation/AnimBlueprintGeneratedClass.h>
 #include "Net/UnrealNetwork.h"
+#include <PartBreakDataTable.h>
 
 ASL_EnemyBase::ASL_EnemyBase()
 {
@@ -266,15 +267,15 @@ void ASL_EnemyBase::Multicast_OnPartBreak_Implementation(FName PartID, int32 Bre
 		DelegateMgr->BroadcastPartBroken(this, PartID);
 	}
 
-	// 显示屏幕通知
-	UNotifyMessageManager* NotifyMgr = NewObject<UNotifyMessageManager>(this);
-	if (NotifyMgr)
-	{
-		FText Msg = FText::Format(
-			NSLOCTEXT("PartBreak", "BreakFormat", "{0} 部位破坏！"),
-			FText::FromName(PartID));
-		NotifyMgr->ShowNotification(Msg);
-	}
+	//// 显示屏幕通知
+	//UNotifyMessageManager* NotifyMgr = NewObject<UNotifyMessageManager>(this);
+	//if (NotifyMgr)
+	//{
+	//	FText Msg = FText::Format(
+	//		NSLOCTEXT("PartBreak", "BreakFormat", "{0} 部位破坏！"),
+	//		FText::FromName(PartID));
+	//	NotifyMgr->ShowNotification(Msg);
+	//}
 
 	if (!Config->BrokenMaterial.IsNull())
 	{

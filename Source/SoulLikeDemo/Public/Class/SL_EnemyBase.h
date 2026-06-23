@@ -9,6 +9,7 @@
 #include <AbilitySystemInterface.h>
 #include <ActorState_IF.h>
 #include "CombatEventDisplay_IF.h"
+#include "SL_DropItemActor.h"
 #include "SL_EnemyBase.generated.h"
 
 /** 敌人状态 */

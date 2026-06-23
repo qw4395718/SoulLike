@@ -823,6 +823,37 @@ enum class EEnemyAttackType : uint8
 	Max			UMETA(Hidden)
 };
 
+/************************************************************************/
+/*                              掉落物数据类型                                  */
+/************************************************************************/
+
+UENUM(BlueprintType)
+enum class EDropType : uint8
+{
+	OnBreak		UMETA(DisplayName = "破坏时掉落"),
+	OnCarve		UMETA(DisplayName = "死亡剥取"),
+	OnDeath		UMETA(DisplayName = "死亡时自动掉落"),
+	Max			UMETA(Hidden)
+};
+
+USTRUCT(BlueprintType)
+struct FDropItemInfo
+{
+	GENERATED_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FName ItemID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 Count = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float DropProbability = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		EDropType DropType = EDropType::OnBreak;
+};
+
 // ===== 敌人配置表结构 =====
 USTRUCT(BlueprintType)
 struct FEnemyConfigInfo : public FTableRowBase
@@ -981,37 +1012,6 @@ struct FEnemyConfigInfo : public FTableRowBase
 		float CapsuleHalfHeight = 44.0f;
 
 	
-};
-
-/************************************************************************/
-/*                              掉落物数据类型                                  */
-/************************************************************************/
-
-UENUM(BlueprintType)
-enum class EDropType : uint8
-{
-	OnBreak		UMETA(DisplayName = "破坏时掉落"),
-	OnCarve		UMETA(DisplayName = "死亡剥取"),
-	OnDeath		UMETA(DisplayName = "死亡时自动掉落"),
-	Max			UMETA(Hidden)
-};
-
-USTRUCT(BlueprintType)
-struct FDropItemInfo
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName ItemID;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Count = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DropProbability = 1.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EDropType DropType = EDropType::OnBreak;
 };
 
 /************************************************************************/

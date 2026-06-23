@@ -14,6 +14,8 @@
 #include <LevelConfigInfoTable.h>
 #include <GameFramework/PlayerStart.h>
 #include <GlobalDelegatesManager.h>
+#include <SL_PlayerControllerBase.h>
+#include <SL_PlayerStateBase.h>
 
 ALevelManager::ALevelManager()
 {
@@ -105,7 +107,16 @@ void ALevelManager::ResetPlayerState()
 	TeleportPlayerToStart(PlayerCharacter);
 
 	// 2. 职业初始化（含血量/体力/魔法满值重置 + 装备加载）
-	PlayerCharacter->InitCharacterWithClassID(CurrentPlayerClassID);
+
+	// 更新到palyerstate上
+	if (ASL_PlayerControllerBase* PC = PlayerCharacter->GetController<ASL_PlayerControllerBase>())
+	{
+		if (ASL_PlayerStateBase* PS = PC->GetPlayerState<ASL_PlayerStateBase>())
+		{
+			PS->RequestSetClassID(CurrentPlayerClassID);
+		}
+	}
+	//PlayerCharacter->InitCharacterWithClassID(CurrentPlayerClassID);
 
 }
 

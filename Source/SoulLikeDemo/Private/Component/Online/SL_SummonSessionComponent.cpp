@@ -21,6 +21,8 @@
 #include <Animation/AnimInstance.h>
 #include <Policies/CondensedJsonPrintPolicy.h>
 #include <SL_CharacterBase.h>
+#include <SL_PlayerControllerBase.h>
+#include <SL_PlayerStateBase.h>
 
 USL_SummonSessionComponent::USL_SummonSessionComponent()
 {
@@ -924,7 +926,15 @@ void USL_SummonSessionComponent::OnPhantomDataReceived(const FString& InJSONData
 		Phantom->FinishSpawning(SpawnTransform);
 
 		// 职业初始化（能力赋予、装备加载、属性设置）
-		Phantom->InitCharacterWithClassID(Data.PlayerClassID);
+		//Phantom->InitCharacterWithClassID(Data.PlayerClassID);
+		// 更新到palyerstate上
+		if (ASL_PlayerControllerBase* OtherPC = Phantom->GetController<ASL_PlayerControllerBase>())
+		{
+			if (ASL_PlayerStateBase* PS = OtherPC->GetPlayerState<ASL_PlayerStateBase>())
+			{
+				PS->RequestSetClassID(Data.PlayerClassID);
+			}
+		}
 
 		// 注册到 GameMode（等待灵体客户端连接后 Possess）
 		if (ASL_GameModeBase* GM = Cast<ASL_GameModeBase>(GetWorld()->GetAuthGameMode()))

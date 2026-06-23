@@ -30,8 +30,9 @@ void ASL_DropItemActor::InitializeDrop(FName InItemID, int32 InCount)
 	ItemCount = InCount;
 
 	// 60秒后自动销毁
+	FTimerHandle DelayHandle;
 	GetWorld()->GetTimerManager().SetTimer(
-		FTimerHandle(),
+		DelayHandle,
 		this,
 		&ASL_DropItemActor::OnLifeTimeExpired,
 		LifeTime,

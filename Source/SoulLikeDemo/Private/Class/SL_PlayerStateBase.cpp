@@ -7,7 +7,8 @@
 
 ASL_PlayerStateBase::ASL_PlayerStateBase()
 {
-	PlayerClassID = 1001; // 默认职业ID
+	bReplicates = true;
+	PlayerClassID = 0; // 默认职业ID
 }
 
 /************************************************************************/
@@ -53,7 +54,7 @@ void ASL_PlayerStateBase::Server_SetClassID_Implementation(int32 InNewClassID)
 	PlayerClassID = InNewClassID;
 
 	UE_LOG(LogTemp, Log, TEXT("ASL_PlayerStateBase::Server_SetClassID - Player %s set ClassID to %d"),
-		*GetPlayerName(), InNewClassID);
+		*GetPlayerName(), PlayerClassID);
 }
 
 /************************************************************************/

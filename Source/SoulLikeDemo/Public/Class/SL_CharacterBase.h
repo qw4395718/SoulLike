@@ -205,9 +205,6 @@ protected:
 		void OnRep_PhantomData();
 
 	UFUNCTION()
-		void OnRep_PlayerClassID();
-
-	UFUNCTION()
 	void OnRep_CurrentIdentity();
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
@@ -347,7 +344,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
 		FClassConfigInfo ClassConfig;
 
-	UPROPERTY(ReplicatedUsing = OnRep_PlayerClassID)
+	UPROPERTY()
 		int32 PlayerClassID;
 
 	// 所属队伍

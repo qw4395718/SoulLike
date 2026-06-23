@@ -440,6 +440,20 @@ void ASL_PlayerControllerBase::Server_ProcessComboInput_Implementation(EComboInp
 	ProcessComboInput(InputType);
 }
 
+void ASL_PlayerControllerBase::Server_ReleaseCharge_Implementation()
+{
+	USL_ComboManagerComponent* ComboMgr = GetComboManagerComponent();
+	if (ComboMgr)
+	{
+		ComboMgr->ReleaseCharge();
+	}
+}
+
+bool ASL_PlayerControllerBase::Server_ReleaseCharge_Validate()
+{
+	return true;
+}
+
 void ASL_PlayerControllerBase::Client_OnDamageFloatingText_Implementation(const FDamageFloatingTextData& InData)
 {
 	// 客户端本地通过 FloatingTextManager 生成飘字

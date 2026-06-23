@@ -141,6 +141,10 @@ public:
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_ProcessComboInput(EComboInputActionType InputType);
 
+	// Server RPC：客户端释放蓄力（服务器用自身的蓄力等级做权威判定）
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_ReleaseCharge();
+
 protected:
 	/************************************************************************/
 	/*                               内部调用                               */

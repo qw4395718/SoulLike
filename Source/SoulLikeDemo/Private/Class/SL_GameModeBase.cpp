@@ -2,6 +2,7 @@
 #include "SL_GameModeBase.h"
 #include "LevelManager.h"
 #include "SL_CharacterBase.h"
+#include "SL_PlayerStateBase.h"
 #include "WaveManagerSystem.h"
 #include "SL_GameSaveSubsystem.h"
 
@@ -11,6 +12,7 @@ ASL_GameModeBase::ASL_GameModeBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	LevelManagerClass = ALevelManager::StaticClass();
+	PlayerStateClass = ASL_PlayerStateBase::StaticClass();
 	bUseSaveData = false;
 }
 
@@ -247,7 +249,7 @@ void ASL_GameModeBase::StartTargetLevel(int32 InLevelID)
 	}
 
 	// 初始化玩家装备
-	InitializePlayer(PlayerClassID);
+	// InitializePlayer(PlayerClassID);
 
 	// 开始关卡
 	LevelManager->StartLevel(InLevelID, PlayerClassID);
@@ -301,14 +303,15 @@ void ASL_GameModeBase::SaveCurrentProgress()
 
 void ASL_GameModeBase::InitializePlayer(int32 InPlayerClassID)
 {
-	ASL_CharacterBase* PlayerCharacter = Cast<ASL_CharacterBase>(
-		UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	//ASL_CharacterBase* PlayerCharacter = Cast<ASL_CharacterBase>(
+	//	UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-	if (PlayerCharacter)
-	{
-		PlayerCharacter->SetClassID(InPlayerClassID);
-		UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::InitializePlayer - Player initialized with class %d"), InPlayerClassID);
-	}
+	//if (PlayerCharacter)
+	//{
+	//	PlayerCharacter->SetClassID(InPlayerClassID);
+	//	UE_LOG(LogTemp, Log, TEXT("SL_GameModeBase::InitializePlayer - Player initialized with class %d"), InPlayerClassID);
+	//}
+
 }
 
 bool ASL_GameModeBase::HasSaveData() const

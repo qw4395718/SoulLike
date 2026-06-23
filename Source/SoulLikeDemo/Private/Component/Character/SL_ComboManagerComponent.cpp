@@ -81,6 +81,7 @@ UAnimMontage* USL_ComboManagerComponent::ResolveCurrentMontage() const
 
 void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputType)
 {
+	if (!GetOwner()->HasAuthority()) return;
 	// 获取当前角色的激活窗口状态
 	FGameplayTagContainer currentTags;
 	if (UAbilitySystemComponent* ASC = GetCachedASC())
@@ -316,6 +317,7 @@ void USL_ComboManagerComponent::UpdateCharge(float DeltaTime)
 
 void USL_ComboManagerComponent::ReleaseCharge()
 {
+	if (!GetOwner()->HasAuthority()) return;
 	if (!m_bIsCharging) return;
 
 	m_bIsCharging = false;

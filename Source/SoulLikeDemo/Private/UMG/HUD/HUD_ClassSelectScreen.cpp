@@ -15,6 +15,8 @@
 #include "HUD_LobbyScreen.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include <SL_PlayerControllerBase.h>
+#include <SL_PlayerStateBase.h>
 
 UHUD_ClassSelectScreen::UHUD_ClassSelectScreen(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -323,19 +325,15 @@ void UHUD_ClassSelectScreen::OnConfirmClicked()
 			m_playerClassID, m_selectedClassID);
 	}
 
-	// 通知 LobbyScreen 刷新职业名显示
-	UIManager = UUIManagerSubsystem::Get(this);
-	if (UIManager)
+	// 更新到palyerstate上
+	if (ASL_PlayerControllerBase* PC = Cast<ASL_PlayerControllerBase>(GetOwningPlayer()))
 	{
-		UUserWidget* FoundWidget = UIManager->GetWidget(EWidgetType::EWIDGET_LobbyScreen);
-		if (FoundWidget)
+		if (ASL_PlayerStateBase* PS = PC->GetPlayerState<ASL_PlayerStateBase>())
 		{
-			if (UHUD_LobbyScreen* LobbyScreen = Cast<UHUD_LobbyScreen>(FoundWidget))
-			{
-				LobbyScreen->RefreshClassDisplay();
-			}
+			PS->RequestSetClassID(m_selectedClassID);
 		}
 	}
+	
 
 	// 关闭界面
 	CloseScreen();

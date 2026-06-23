@@ -1,4 +1,4 @@
-// Public/Class/SL_EnemyBase.h
+﻿// Public/Class/SL_EnemyBase.h
 
 #pragma once
 
@@ -20,6 +20,7 @@ enum class EEnemyState : uint8
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDied);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPartBroken, FName, PartID, int32, BreakLevel);
 
 UCLASS()
 class SOULLIKEDEMO_API ASL_EnemyBase : public ACharacter,
@@ -110,6 +111,20 @@ public:
     UFUNCTION(BlueprintPure, Category = "Enemy|AI")
         class ASL_EnemyAIController* GetEnemyAIController() const;
 
+	// ===== 部位破坏 =====
+	UFUNCTION(BlueprintCallable, Category = "Enemy|PartBreak")
+	void AccumulatePartDamage(FName InBoneName, float InDamage);
+
+	void InitializePartBreak();
+
+	// ===== 掉落物 =====
+	void SpawnBreakDrops(const TArray<FDropItemInfo>& InDropItems);
+
+	void SpawnCarvePoint();
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy|Drop")
+	void CarveItem();
+
 	// ===== 战斗接口 =====
 
 	/** 死亡处理 */
@@ -135,6 +150,9 @@ public:
 	// ===== 委托 =====
 	UPROPERTY(BlueprintAssignable, Category = "Enemy|Events")
 		FOnEnemyDied OnEnemyDied;
+
+	UPROPERTY(BlueprintAssignable, Category = "Enemy|Events")
+	FOnPartBroken OnPartBroken;
 
 	/** 绑定GAS死亡事件 */
 	void BindGASDeathEvent();
@@ -163,9 +181,33 @@ protected:
 
     /** 根据配置生成左右手武器 */
     void SpawnEnemyWeapons(const FEnemyConfigInfo& Config);
+
+	// ===== 部位破坏内部方法 =====
+	void CheckPartBreak(const FPartBreakConfig& Config, FPartBreakState& State);
+	void ApplyPartBreak(const FPartBreakConfig& Config, FPartBreakState& State, int32 NewLevel);
+	FPartBreakConfig* FindPartConfig(FName InBoneName);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_OnPartBreak(FName PartID, int32 BreakLevel);
 	
 protected:
 	// ===== 配置数据 =====
+	// ===== 部位破坏配置 =====
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enemy|PartBreak")
+	TArray<FPartBreakConfig> PartBreakConfigs;
+
+	// ===== 掉落物配置 =====
+	/** 掉落物 Actor 模板 */
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Drop")
+	TSubclassOf<ASL_DropItemActor> DropItemActorClass;
+
+	/** 剩余剥取次数 */
+	UPROPERTY(Replicated)
+	int32 RemainingCarveCount;
+
+	UPROPERTY(Replicated)
+	TArray<FPartBreakState> PartStates;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Config")
 		FEnemyConfigInfo EnemyConfig;
 

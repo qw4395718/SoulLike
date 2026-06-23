@@ -1,4 +1,4 @@
-// GlobalDelegatesManager.cpp
+﻿// GlobalDelegatesManager.cpp
 #include "GlobalDelegatesManager.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
@@ -103,4 +103,9 @@ void UGlobalDelegatesManager::BroadcastDamageFloatingText(const FDamageFloatingT
 void UGlobalDelegatesManager::BroadcastHitFeedback(const FHitFeedbackData& InData)
 {
 	OnHitFeedback.Broadcast(InData);
+}
+
+void UGlobalDelegatesManager::BroadcastPartBroken(AActor* InEnemyActor, FName InPartID)
+{
+	OnPartBroken.Broadcast(InEnemyActor, InPartID);
 }

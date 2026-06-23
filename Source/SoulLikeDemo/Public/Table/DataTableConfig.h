@@ -1,4 +1,4 @@
-// DataTableType.h
+﻿// DataTableType.h
 #pragma once
 
 #include "CoreMinimal.h"
@@ -25,6 +25,7 @@ enum class EDataTableType : uint8
 	DT_EnemyConfigInfo		UMETA(DisplayName = "EnemyConfigInfo"),
 	DT_ItemConfigInfo		UMETA(DisplayName = "ItemConfigInfo"),
 	DT_LevelConfigInfo		UMETA(DisplayName = "LevelConfigInfo"),
+	DT_PartBreakConfig		UMETA(DisplayName = "PartBreakConfig"),
 	DT_Max					UMETA(Hidden)
 };
 

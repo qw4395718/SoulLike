@@ -1,4 +1,4 @@
-// Public/Class/WeaponBase.h
+﻿// Public/Class/WeaponBase.h
 
 #pragma once
 
@@ -157,6 +157,10 @@ protected:
 
 	UPROPERTY()
 		TSet<AActor*> AlreadyParryActors;
+
+	// 首次命中时记录的骨骼名
+	UPROPERTY()
+	TMap<AActor*, FName> HitBoneMap;
 
 	// ===== 配置 =====
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Config")

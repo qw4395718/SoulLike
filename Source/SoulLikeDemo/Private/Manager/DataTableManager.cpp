@@ -1,4 +1,4 @@
-// DataTableManager.cpp
+﻿// DataTableManager.cpp
 #include "DataTableManager.h"
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
@@ -12,6 +12,7 @@
 #include <EnemyConfigInfoTable.h>
 #include <ItemDataTable.h>
 #include <LevelConfigInfoTable.h>
+#include <PartBreakDataTable.h>
 
 // 静态常量定义
 const FString UDataTableManager::DefaultConfigTablePath = TEXT("/Game/SoulLikeDemo/Data/DataTables/Config/DT_DataTableConfig.DT_DataTableConfig");
@@ -100,6 +101,7 @@ void UDataTableManager::RegisterDefaultTableClasses()
 	RegisterTableClass(EDataTableType::DT_EnemyConfigInfo, UEnemyConfigInfoTable::StaticClass());
 	RegisterTableClass(EDataTableType::DT_ItemConfigInfo, UItemDataTable::StaticClass());
 	RegisterTableClass(EDataTableType::DT_LevelConfigInfo, ULevelConfigInfoTable::StaticClass());
+	RegisterTableClass(EDataTableType::DT_PartBreakConfig, UPartBreakDataTable::StaticClass());
 
 	UE_LOG(LogTemp, Log, TEXT("DataTableManager::RegisterDefaultTableClasses - Default classes registered"));
 }

@@ -1,4 +1,4 @@
-// Private/Class/WeaponBase.cpp
+﻿// Private/Class/WeaponBase.cpp
 
 #include "SL_WeaponBase.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -258,6 +258,7 @@ void ASL_WeaponBase::DisableAttackCollision()
 	// 清空已命中目标记录
 	AlreadyHitActors.Reset();
 	AttackOverlappingActors.Empty();
+	HitBoneMap.Empty();
 
 	UE_LOG(LogTemp, Warning, TEXT("ASL_WeaponBase::DisableAttackCollision"));
 }
@@ -334,6 +335,26 @@ void ASL_WeaponBase::OnCollisionOverlapBegin(UPrimitiveComponent* OverlappedComp
 		else
 		{
 			AttackOverlappingActors.AddUnique(OtherActor);
+
+			// 通过短射线获取命中骨骼名
+			if (ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(OtherActor))
+			{
+				FVector TraceStart = CollisionBox->GetComponentLocation();
+				FVector TraceEnd = Enemy->GetActorLocation();
+				FCollisionQueryParams Params;
+				Params.AddIgnoredActor(this);
+				Params.AddIgnoredActor(OwningCharacter);
+				Params.bTraceComplex = true;
+				FHitResult BoneHit;
+				if (GetWorld()->LineTraceSingleByChannel(BoneHit, TraceStart, TraceEnd, ECC_Visibility, Params))
+				{
+					if (BoneHit.BoneName != NAME_None)
+					{
+						HitBoneMap.Add(OtherActor, BoneHit.BoneName);
+					}
+				}
+			}
+
 			UE_LOG(LogTemp, Warning, TEXT("WeaponBase:OnCollisionOverlapBegin"));
 		}
 	}
@@ -404,6 +425,13 @@ void ASL_WeaponBase::ApplyDamageToOverlappingActors()
 			// 5. 通过SetByCaller设置伤害值
 			FGameplayTag DamageTag = FGameplayTag::RequestGameplayTag(FName("Data.DamageNumber"), true);
 			SpecHandle.Data->SetSetByCallerMagnitude(DamageTag, FinalDamage);
+
+		// 部位破坏值积累
+		if (ASL_EnemyBase* Enemy = Cast<ASL_EnemyBase>(Actor))
+		{
+			FName HitBone = HitBoneMap.FindRef(Actor);
+			Enemy->AccumulatePartDamage(HitBone, FinalDamage);
+		}
 
 			// 6. 应用GE到目标
 			TargetASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());

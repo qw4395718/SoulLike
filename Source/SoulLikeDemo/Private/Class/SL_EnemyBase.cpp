@@ -1,4 +1,4 @@
-// Private/Class/SL_EnemyBase.cpp
+﻿// Private/Class/SL_EnemyBase.cpp
 
 #include "SL_EnemyBase.h"
 #include <BehaviorTree/BehaviorTree.h>
@@ -115,6 +115,9 @@ void ASL_EnemyBase::InitializeEnemy(int32 EnemyID)
 	// 绑定死亡委托
 	BindGASDeathEvent();
 
+	// 初始化部位破坏
+	InitializePartBreak();
+
 	UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::InitializeEnemy - Initialized enemy: ID=%d, Name=%s, Type=%d"),
 		EnemyID, *Config.EnemyName.ToString(), (int32)Config.EnemyType);
 }
@@ -171,12 +174,199 @@ void ASL_EnemyBase::Multicast_OnCharacterDeath_Implementation(AActor* InDeadActo
 	}
 }
 
+/************************************************************************/
+/*                              部位破坏实现                                       */
+/************************************************************************/
+
+void ASL_EnemyBase::InitializePartBreak()
+{
+	PartStates.Reset();
+
+	// 优先从数据表加载部位破坏配置
+	if (NetEnemyID > 0)
+	{
+		if (UDataTableManager* DTManager = UDataTableManager::Get(this))
+		{
+			if (UPartBreakDataTable* PartTable = Cast<UPartBreakDataTable>(DTManager->GetDataTable(EDataTableType::DT_PartBreakConfig)))
+			{
+				TArray<FPartBreakConfig> TableConfigs;
+				if (PartTable->GetPartBreakConfigs(NetEnemyID, TableConfigs) && TableConfigs.Num() > 0)
+				{
+					PartBreakConfigs = TableConfigs;
+					UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::InitializePartBreak - Loaded %d parts from table for EnemyID=%d"),
+						TableConfigs.Num(), NetEnemyID);
+				}
+			}
+		}
+	}
+
+	// 从 PartBreakConfigs 初始化运行时状态
+	for (const FPartBreakConfig& Config : PartBreakConfigs)
+	{
+		FPartBreakState State;
+		State.PartID = Config.PartID;
+		PartStates.Add(State);
+	}
+}
+
+void ASL_EnemyBase::AccumulatePartDamage(FName InBoneName, float InDamage)
+{
+	if (!HasAuthority()) return;
+	FPartBreakConfig* Config = FindPartConfig(InBoneName);
+	if (!Config) return;
+	FPartBreakState* State = PartStates.FindByPredicate([&](const FPartBreakState& S){
+		return S.PartID == Config->PartID;
+	});
+	if (!State || State->bIsFullyBroken) return;
+	State->AccumulatedDamage += InDamage;
+	CheckPartBreak(*Config, *State);
+}
+
+void ASL_EnemyBase::CheckPartBreak(const FPartBreakConfig& Config, FPartBreakState& State)
+{
+	float RequiredDamage = Config.BreakThreshold * (State.CurrentBreakLevel + 1);
+	if (State.AccumulatedDamage >= RequiredDamage)
+	{
+		ApplyPartBreak(Config, State, State.CurrentBreakLevel + 1);
+	}
+}
+
+void ASL_EnemyBase::ApplyPartBreak(const FPartBreakConfig& Config, FPartBreakState& State, int32 NewLevel)
+{
+	State.CurrentBreakLevel = NewLevel;
+	if (NewLevel >= Config.BreakLevelCount)
+		State.bIsFullyBroken = true;
+
+	// 生成部位破坏掉落物
+	SpawnBreakDrops(Config.DropItems);
+
+	Multicast_OnPartBreak(Config.PartID, NewLevel);
+	OnPartBroken.Broadcast(Config.PartID, NewLevel);
+}
+
+FPartBreakConfig* ASL_EnemyBase::FindPartConfig(FName InBoneName)
+{
+	FString BoneStr = InBoneName.ToString();
+	for (FPartBreakConfig& Config : PartBreakConfigs)
+	{
+		if (BoneStr.StartsWith(Config.PartID.ToString()))
+			return &Config;
+	}
+	return nullptr;
+}
+
+void ASL_EnemyBase::Multicast_OnPartBreak_Implementation(FName PartID, int32 BreakLevel)
+{
+	FPartBreakConfig* Config = FindPartConfig(PartID);
+	if (!Config) return;
+
+	// 通过 GlobalDelegatesManager 广播部位破坏事件
+	if (UGlobalDelegatesManager* DelegateMgr = UGlobalDelegatesManager::Get(this))
+	{
+		DelegateMgr->BroadcastPartBroken(this, PartID);
+	}
+
+	// 显示屏幕通知
+	UNotifyMessageManager* NotifyMgr = NewObject<UNotifyMessageManager>(this);
+	if (NotifyMgr)
+	{
+		FText Msg = FText::Format(
+			NSLOCTEXT("PartBreak", "BreakFormat", "{0} 部位破坏！"),
+			FText::FromName(PartID));
+		NotifyMgr->ShowNotification(Msg);
+	}
+
+	if (!Config->BrokenMaterial.IsNull())
+	{
+		GetMesh()->SetMaterialByName(PartID, Config->BrokenMaterial.LoadSynchronous());
+	}
+	if (!Config->BrokenMesh.IsNull() && BreakLevel >= 2)
+	{
+		GetMesh()->SetSkeletalMesh(Config->BrokenMesh.LoadSynchronous());
+	}
+}
+
+/************************************************************************/
+/*                              掉落物实现                                       */
+/************************************************************************/
+
+void ASL_EnemyBase::SpawnBreakDrops(const TArray<FDropItemInfo>& InDropItems)
+{
+	if (!HasAuthority() || !DropItemActorClass) return;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	for (const FDropItemInfo& DropInfo : InDropItems)
+	{
+		if (FMath::FRand() > DropInfo.DropProbability) continue;
+
+		FVector DropLoc = GetActorLocation() + FMath::VRand() * FMath::FRandRange(50.0f, 150.0f);
+		DropLoc.Z = GetActorLocation().Z;
+
+		ASL_DropItemActor* Drop = GetWorld()->SpawnActor<ASL_DropItemActor>(
+			DropItemActorClass, FTransform(DropLoc), SpawnParams);
+
+		if (Drop)
+		{
+			Drop->InitializeDrop(DropInfo.ItemID, DropInfo.Count);
+		}
+	}
+}
+
+void ASL_EnemyBase::SpawnCarvePoint()
+{
+	if (!HasAuthority() || !DropItemActorClass || RemainingCarveCount <= 0) return;
+
+	// 在尸体旁生成一个可剥取的光点
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	FVector DropLoc = GetActorLocation() + FVector(0, 0, 50);
+
+	ASL_DropItemActor* Drop = GetWorld()->SpawnActor<ASL_DropItemActor>(
+		DropItemActorClass, FTransform(DropLoc), SpawnParams);
+
+	if (Drop)
+	{
+		Drop->InitializeDrop(NAME_None, 0);
+	}
+}
+
+void ASL_EnemyBase::CarveItem()
+{
+	if (!HasAuthority() || RemainingCarveCount <= 0) return;
+
+	// 从配置中随机取一条
+	if (EnemyConfig.CarveItems.Num() > 0)
+	{
+		int32 Index = FMath::RandRange(0, EnemyConfig.CarveItems.Num() - 1);
+		const FDropItemInfo& DropInfo = EnemyConfig.CarveItems[Index];
+
+		if (FMath::FRand() <= DropInfo.DropProbability)
+		{
+			// TODO: 通过 InventoryComponent 添加物品到玩家背包
+			UE_LOG(LogTemp, Log, TEXT("ASL_EnemyBase::CarveItem - Carved %s x%d"),
+				*DropInfo.ItemID.ToString(), DropInfo.Count);
+		}
+	}
+
+	RemainingCarveCount--;
+
+	if (RemainingCarveCount <= 0)
+	{
+		// 剥取完毕，销毁剥取光点
+	}
+}
+
 void ASL_EnemyBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ASL_EnemyBase, NetEnemyID);
 	DOREPLIFETIME(ASL_EnemyBase, LeftHandWeapon);
 	DOREPLIFETIME(ASL_EnemyBase, RightHandWeapon);
+	DOREPLIFETIME(ASL_EnemyBase, PartStates);
+	DOREPLIFETIME(ASL_EnemyBase, RemainingCarveCount);
 }
 
 ASL_EnemyAIController* ASL_EnemyBase::GetEnemyAIController() const
@@ -189,6 +379,11 @@ void ASL_EnemyBase::Die()
 	if (CurrentState == EEnemyState::Dead) return;
 
 	CurrentState = EEnemyState::Dead;
+
+	// 初始化剥取次数
+	RemainingCarveCount = EnemyConfig.MaxCarveCount;
+	// 生成剥取光点
+	SpawnCarvePoint();
 
 	// === 修正：先广播死亡事件（WaveManager会收到这个） ===
 	OnEnemyDied.Broadcast();

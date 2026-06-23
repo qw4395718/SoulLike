@@ -1,4 +1,4 @@
-// GlobalDelegatesManager.h
+﻿// GlobalDelegatesManager.h
 #pragma once
 
 #include "CoreMinimal.h"
@@ -36,6 +36,9 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageFloatingTextEvent, const struct FDa
 
 // 命中反馈事件委托
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHitFeedbackEvent, const struct FHitFeedbackData&);
+
+// 部位破坏事件委托
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPartBrokenEvent, AActor* EnemyActor, FName PartID);
 
 UCLASS(BlueprintType, Blueprintable)
 class SOULLIKEDEMO_API UGlobalDelegatesManager : public UGameInstanceSubsystem
@@ -79,6 +82,9 @@ public:
 	// 命中反馈事件
 	FOnHitFeedbackEvent OnHitFeedback;
 
+	// 部位破坏事件
+	FOnPartBrokenEvent OnPartBroken;
+
 	/**
 	 * 委托响应函数
 	 */
@@ -112,6 +118,10 @@ public:
 	// 广播命中反馈
 	UFUNCTION(BlueprintCallable, Category = "Global Delegates|Combat")
 		void BroadcastHitFeedback(const struct FHitFeedbackData& InData);
+
+	// ===== 部位破坏委托广播 =====
+	UFUNCTION(BlueprintCallable, Category = "Global Delegates|Combat")
+		void BroadcastPartBroken(AActor* InEnemyActor, FName InPartID);
 
 protected:
 

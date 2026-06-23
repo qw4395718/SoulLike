@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CoreMinimal.h"
 #include "SL_Macros.h"
 #include <Engine/DataTable.h>
@@ -942,6 +942,14 @@ struct FEnemyConfigInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop")
 		TMap<int32, float> DropItems;
 
+	/** 死亡剥取列表 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop")
+		TArray<FDropItemInfo> CarveItems;
+
+	/** 最大剥取次数 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop")
+		int32 MaxCarveCount = 3;
+
 	// ===== 连击配置 =====
 	/** 此敌人使用的连击窗口Tag（对应ComboInfo表中的攻击模式） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combo")
@@ -975,6 +983,99 @@ struct FEnemyConfigInfo : public FTableRowBase
 	
 };
 
+/************************************************************************/
+/*                              掉落物数据类型                                  */
+/************************************************************************/
+
+UENUM(BlueprintType)
+enum class EDropType : uint8
+{
+	OnBreak		UMETA(DisplayName = "破坏时掉落"),
+	OnCarve		UMETA(DisplayName = "死亡剥取"),
+	OnDeath		UMETA(DisplayName = "死亡时自动掉落"),
+	Max			UMETA(Hidden)
+};
+
+USTRUCT(BlueprintType)
+struct FDropItemInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName ItemID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Count = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DropProbability = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EDropType DropType = EDropType::OnBreak;
+};
+
+/************************************************************************/
+/*                              部位破坏                                      */
+/************************************************************************/
+
+// 部位破坏配置
+USTRUCT(BlueprintType)
+struct FPartBreakConfig : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName PartID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float BreakThreshold = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DamageMultiplier = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float PostBreakDamageMultiplier = 1.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<USkeletalMesh> BrokenMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UMaterialInterface> BrokenMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 BreakLevelCount = 1;
+
+	// 破坏时掉落的道具
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FDropItemInfo> DropItems;
+};
+
+// 运行时部位状态
+USTRUCT()
+struct FPartBreakState
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FName PartID;
+	float AccumulatedDamage = 0.0f;
+	int32 CurrentBreakLevel = 0;
+	bool bIsFullyBroken = false;
+};
+
+// ===== 部位破坏配置表行 =====
+USTRUCT(BlueprintType)
+struct FPartBreakEnemyRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 EnemyID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FPartBreakConfig> Parts;
+};
+ 
 /************************************************************************/
 /*                              打击感反馈                                      */
 /************************************************************************/

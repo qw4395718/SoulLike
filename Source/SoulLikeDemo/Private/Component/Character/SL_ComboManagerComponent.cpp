@@ -55,9 +55,9 @@ UComboInfoTable* USL_ComboManagerComponent::GetCurrentWeaponComboTable() const
 	return TM ? Cast<UComboInfoTable>(TM->GetDataTable(AnimSet->ComboTableType)) : nullptr;
 }
 
-UAnimMontage* USL_ComboManagerComponent::ResolveCurrentMontage() const
+UAnimMontage* USL_ComboManagerComponent::ResolveMontageByTag(FGameplayTag MontageTag) const
 {
-	if (!CurrentComboInfo.OutputMontageTag.IsValid())
+	if (!MontageTag.IsValid())
 		return nullptr;
 
 	AActor* Owner = GetOwner();
@@ -72,7 +72,12 @@ UAnimMontage* USL_ComboManagerComponent::ResolveCurrentMontage() const
 	USL_WeaponAnimSet* AnimSet = Weapon->GetWeaponAnimSet();
 	if (!AnimSet) return nullptr;
 
-	return AnimSet->GetComboMontageByTag(CurrentComboInfo.OutputMontageTag);
+	return AnimSet->GetComboMontageByTag(MontageTag);
+}
+
+UAnimMontage* USL_ComboManagerComponent::ResolveCurrentMontage() const
+{
+	return ResolveMontageByTag(CurrentComboInfo.OutputMontageTag);
 }
 
 /************************************************************************/
@@ -191,6 +196,13 @@ void USL_ComboManagerComponent::HandleInputPressed(EComboInputActionType InputTy
 				}
 
 				case EComboExecuteType::Channel:
+				{
+					CurrentComboInfo = FoundComboInfo;
+					ASC->TryActivateAbilityByClass(FoundComboInfo.NextAbilityClass);
+					break;
+				}
+
+				case EComboExecuteType::Aerial:
 				{
 					CurrentComboInfo = FoundComboInfo;
 					ASC->TryActivateAbilityByClass(FoundComboInfo.NextAbilityClass);

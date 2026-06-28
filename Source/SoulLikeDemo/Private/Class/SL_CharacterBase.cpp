@@ -12,6 +12,7 @@
 #include <Abilities/GameplayAbilityTypes.h>
 #include <Components/WidgetComponent.h>
 #include <UIManagerSubsystem.h>
+#include <AT/AbilityTask_Aerial.h>
 #include <SL_PlayerStateBase.h>
 #include <Engine/PackageMapClient.h>
 #include <GameplayTagContainer.h>
@@ -699,6 +700,27 @@ void ASL_CharacterBase::Revive()
 	CurrentState = EPlayerState::Alive;
 
 	RagDollEnd();
+}
+
+void ASL_CharacterBase::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	// 通知浮空 Task：角色已落地
+	if (AerialTask.IsValid())
+	{
+		AerialTask->OnLanded();
+	}
+}
+
+void ASL_CharacterBase::SetAerialTask(UAbilityTask_Aerial* InTask)
+{
+	AerialTask = InTask;
+}
+
+void ASL_CharacterBase::ClearAerialTask()
+{
+	AerialTask.Reset();
 }
 
 void ASL_CharacterBase::RagDollEnd()

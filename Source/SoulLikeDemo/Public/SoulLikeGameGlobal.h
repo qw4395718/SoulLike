@@ -371,6 +371,7 @@ enum class EComboExecuteType : uint8
 	Instant     UMETA(DisplayName = "Instant"),     // 瞬发型：按下立即执行
 	Charge      UMETA(DisplayName = "Charge"),      // 蓄力型：按住蓄力，释放触发
 	Channel     UMETA(DisplayName = "Channel"),     // 持续型：按住持续生效
+	Aerial      UMETA(DisplayName = "Aerial"),      // 浮空型：升空→悬空→落地
 	Max         UMETA(Hidden)
 };
 
@@ -423,6 +424,17 @@ struct FStatusIconInfo
 	int32 TotalTime;
 	int32 ElapsedTime;
 };
+
+// 浮空技阶段类型
+UENUM(BlueprintType)
+enum class ELaunchType : uint8
+{
+	None        UMETA(DisplayName = "None"),        // 非浮空技
+	Launch      UMETA(DisplayName = "Launch"),      // 升空起跳
+	AirLoop     UMETA(DisplayName = "AirLoop"),     // 空中循环攻击
+	Dive        UMETA(DisplayName = "Dive")         // 下劈落地
+};
+
 USTRUCT(BlueprintType)
 struct FComboInfo : public FTableRowBase
 {
@@ -476,6 +488,23 @@ struct FComboInfo : public FTableRowBase
 	// 连招接续入口时间（秒），第一招=0，后续招式填跳过起始预备段的时间
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ComboTransition")
 	float ComboEntryTime = 0.0f;
+
+	// ===== 浮空技参数（仅 ExecuteType == Aerial 时有效）=====
+	// 浮空阶段类型
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aerial")
+	ELaunchType LaunchType;
+
+	// 最长悬空时间（秒），超时自动下落
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aerial", meta = (EditCondition = "LaunchType == ELaunchType::AirLoop"))
+	float MaxAirTime = 1.5f;
+
+	// 下劈蒙太奇 Tag（ExecuteType == Aerial 时使用）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aerial")
+	FGameplayTag DiveMontageTag;
+
+	// 落地后衔接的地面蒙太奇 Tag（为空则直接结束浮空进入硬直）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aerial")
+	FGameplayTag GroundFollowUpMontageTag;
 };
 
 // 连击查询用复合Key（拍平双层Map为单层，避免UPROPERTY不支持嵌套容器）

@@ -67,6 +67,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combo")
 	UAnimMontage* ResolveCurrentMontage() const;
 
+	/** 从当前武器 AnimSet 按 Tag 解析蒙太奇（通用查询） */
+	UFUNCTION(BlueprintCallable, Category = "Combo")
+	UAnimMontage* ResolveMontageByTag(FGameplayTag MontageTag) const;
+
 	/************************************************************************/
 	/*                              蓄力系统                                        */
 	/************************************************************************/

@@ -30,6 +30,7 @@ class USL_StatusAttributeSet;
 class UGameplayAbility;
 class UWidgetComponent;
 class USL_ComboManagerComponent;
+class UAbilityTask_Aerial;
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
@@ -73,6 +74,9 @@ protected:
 
 	// PlayerState 复制就绪回调（用于客户端视觉初始化）
 	virtual void OnRep_PlayerState() override;
+
+	// 落地回调（浮空技检测落地用）
+	virtual void Landed(const FHitResult& Hit) override;
 
 public:
 	/************************************************************************/
@@ -240,6 +244,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	// ===== 浮空技接口 =====
+	/** 注册当前的浮空 Task（用于 Landed 回传） */
+	void SetAerialTask(UAbilityTask_Aerial* InTask);
+
+	/** 清除浮空 Task 引用 */
+	void ClearAerialTask();
+
 	// ===== 属性值访问器 =====
 	UFUNCTION(BlueprintPure, Category = "Attributes")
 	float GetCurrentHealth() const;
@@ -360,6 +371,9 @@ protected:
 
 	// 死亡委托的句柄
 	FDelegateHandle OnCharacterDiedHandle;
+
+	// 当前浮空 Task（弱引用，自动失效）
+	TWeakObjectPtr<UAbilityTask_Aerial> AerialTask;
 
 	// 复活委托的句柄
 	FDelegateHandle OnCharacterLivedHandle;

@@ -336,14 +336,7 @@ void ASL_PlayerControllerBase::DestroyPlayerStatusUI()
 
 void ASL_PlayerControllerBase::OnLightAttackPressed()
 {
-	if (HasAuthority())
-	{
-		ProcessComboInput(EComboInputActionType::EComboInputAction_Light);
-	}
-	else
-	{
-		Server_ProcessComboInput(EComboInputActionType::EComboInputAction_Light);
-	}
+	ProcessComboInput(EComboInputActionType::EComboInputAction_Light);
 }
 
 void ASL_PlayerControllerBase::OnLightAttackReleased()
@@ -353,14 +346,7 @@ void ASL_PlayerControllerBase::OnLightAttackReleased()
 
 void ASL_PlayerControllerBase::OnHeavyAttackPressed()
 {
-	if (HasAuthority())
-	{
-		ProcessComboInput(EComboInputActionType::EComboInputAction_Height);
-	}
-	else
-	{
-		Server_ProcessComboInput(EComboInputActionType::EComboInputAction_Height);
-	}
+	ProcessComboInput(EComboInputActionType::EComboInputAction_Height);
 }
 
 void ASL_PlayerControllerBase::OnHeavyAttackReleased()
@@ -374,14 +360,7 @@ void ASL_PlayerControllerBase::OnHeavyAttackReleased()
 
 void ASL_PlayerControllerBase::OnSpecialAttackPressed()
 {
-	if (HasAuthority())
-	{
-		ProcessComboInput(EComboInputActionType::EComboInputAction_Special);
-	}
-	else
-	{
-		Server_ProcessComboInput(EComboInputActionType::EComboInputAction_Special);
-	}
+	ProcessComboInput(EComboInputActionType::EComboInputAction_Special);
 }
 
 void ASL_PlayerControllerBase::OnDodgePressed()
@@ -427,31 +406,6 @@ void ASL_PlayerControllerBase::OnUseItemPressed()
 	Server_UseItem(SelectedItemID);
 
 	UE_LOG(LogTemp, Log, TEXT("ASL_PlayerControllerBase::OnUseItemPressed - Item use requested: %s"), *SelectedItemID.ToString());
-}
-
-bool ASL_PlayerControllerBase::Server_ProcessComboInput_Validate(EComboInputActionType InputType)
-{
-	return InputType > EComboInputActionType::EComboInputAction_None &&
-		InputType < EComboInputActionType::EComboInputAction_Max;
-}
-
-void ASL_PlayerControllerBase::Server_ProcessComboInput_Implementation(EComboInputActionType InputType)
-{
-	ProcessComboInput(InputType);
-}
-
-void ASL_PlayerControllerBase::Server_ReleaseCharge_Implementation()
-{
-	USL_ComboManagerComponent* ComboMgr = GetComboManagerComponent();
-	if (ComboMgr)
-	{
-		ComboMgr->ReleaseCharge();
-	}
-}
-
-bool ASL_PlayerControllerBase::Server_ReleaseCharge_Validate()
-{
-	return true;
 }
 
 void ASL_PlayerControllerBase::Client_OnDamageFloatingText_Implementation(const FDamageFloatingTextData& InData)

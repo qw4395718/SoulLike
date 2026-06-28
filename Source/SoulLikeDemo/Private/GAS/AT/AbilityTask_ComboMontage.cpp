@@ -89,12 +89,17 @@ void UAbilityTask_ComboMontage::Activate()
 		return;
 	}
 
-	// 连招接续：惯性化过渡 + 从指定时间点开始播放（跳过Idle段）
-	if (StartingPosition > 0.0f)
+	// 通过 ASC 播放蒙太奇（走 GAS 网络复制，更新 RepAnimMontageInfo）
+	UAbilitySystemComponent* ASC = Ability->GetAbilitySystemComponentFromActorInfo();
+	if (ASC)
 	{
-		//AnimInstance->StartInertialization();
+		ASC->PlayMontage(Ability, Ability->GetCurrentActivationInfo(), Montage, PlayRate, NAME_None, StartingPosition);
 	}
-	AnimInstance->Montage_Play(Montage, PlayRate, EMontagePlayReturnType::MontageLength, StartingPosition);
+	else
+	{
+		// 回退：直接播放（仅本地）
+		AnimInstance->Montage_Play(Montage, PlayRate, EMontagePlayReturnType::MontageLength, StartingPosition);
+	}
 
 	// 绑定蒙太奇结束委托
 	FOnMontageEnded MontageEndedDelegate;

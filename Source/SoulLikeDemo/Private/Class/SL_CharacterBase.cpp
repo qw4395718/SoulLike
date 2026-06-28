@@ -12,6 +12,7 @@
 #include <Abilities/GameplayAbilityTypes.h>
 #include <Components/WidgetComponent.h>
 #include <UIManagerSubsystem.h>
+#include <SL_PlayerStateBase.h>
 #include <Engine/PackageMapClient.h>
 #include <GameplayTagContainer.h>
 #include <SL_ComboManagerComponent.h>
@@ -154,6 +155,21 @@ void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 }
 
+
+
+void ASL_CharacterBase::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	if (ASL_PlayerStateBase* PS = GetPlayerState<ASL_PlayerStateBase>())
+	{
+		int32 ClassID = PS->GetClassID();
+		if (ClassID > 0)
+		{
+			ApplyClassAppearance(ClassID);
+		}
+	}
+}
 
 UActorComponent* ASL_CharacterBase::GetCombatantComponent()
 {
@@ -433,6 +449,41 @@ void ASL_CharacterBase::SetClassID(int32 InPlayerClassID)
 	PlayerClassID = InPlayerClassID;
 	// 此处临时存档,需要等gamemodebase 重写RestartPlayer后才能走begin正常初始化的流程
 	InitCharacterWithClassID(PlayerClassID);
+}
+
+// 客户端视觉初始化（由 OnRep_PlayerClassID 触发）
+void ASL_CharacterBase::ApplyClassAppearance(int32 InClassID)
+{
+	// 加载职业配置以获取视觉数据（武器装备、动画等）
+	UDataTableManager* TableManager = UDataTableManager::Get(this);
+	if (!TableManager) return;
+
+	UClassConfigInfoTable* ClassTable = Cast<UClassConfigInfoTable>(
+		TableManager->GetDataTable(EDataTableType::DT_ClassConfigInfo));
+	if (!ClassTable) return;
+
+	FClassConfigInfo Config;
+	if (!ClassTable->GetClassConfig(InClassID, Config))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ApplyClassAppearance - ClassConfig not found for ClassID=%d"), InClassID);
+		return;
+	}
+
+	ClassConfig = Config;
+	PlayerClassID = InClassID;
+
+	// 客户端装备初始化（仅缓存配置，武器实例由服务端生成的复制同步过来）
+	if (EquipmentCmp)
+	{
+		EquipmentCmp->InitializeWithConfig(Config);
+	}
+
+	// TODO: 在此处添加更多客户端视觉初始化
+	// - 动画蓝图切换
+	// - 材质覆盖
+	// - 粒子效果等
+
+	UE_LOG(LogTemp, Log, TEXT("ASL_CharacterBase::ApplyClassAppearance - Applied class %d appearance"), InClassID);
 }
 
 // ==================== GAS能力授予 ====================

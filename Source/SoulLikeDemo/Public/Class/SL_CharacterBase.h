@@ -71,6 +71,9 @@ protected:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// PlayerState 复制就绪回调（用于客户端视觉初始化）
+	virtual void OnRep_PlayerState() override;
+
 public:
 	/************************************************************************/
 	/*                               接口实现(ICharacterComponent_IF)                                       */
@@ -263,6 +266,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
 		void SetClassID(int32 InPlayerClassID);
+
+	// 客户端视觉初始化（武器模型挂载、动画切换等）—— 在 OnRep 中由 PlayerState 触发
+	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")
+		void ApplyClassAppearance(int32 InClassID);
 
 	/** 根据职业配置授予GAS能力（替代蓝图中手动GiveAbility） */
 	UFUNCTION(BlueprintCallable, Category = "CharacterOperation")

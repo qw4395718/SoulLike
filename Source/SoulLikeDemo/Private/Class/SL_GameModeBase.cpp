@@ -120,6 +120,26 @@ void ASL_GameModeBase::PostLogin(APlayerController* NewPlayer)
 		// 已在上方 Possess 了 Phantom，HandleStartingNewPlayer 发现已有 Pawn 会跳过 RestartPlayer
 		// 确保 PlayerState 创建、K2_PostLogin 等标准初始化流程正常运行
 		Super::PostLogin(NewPlayer);
+
+		// ===== 服务器权威初始化：装备 + GAS + 背包 + 外观 =====
+		// 从 Phantom 的 PhantomData 中读取职业 ID，完成完整初始化
+		if (ASL_CharacterBase* Phantom = Cast<ASL_CharacterBase>(NewPlayer->GetPawn()))
+		{
+			int32 ClassID = Phantom->GetPhantomData().PlayerClassID;
+			if (ClassID > 0)
+			{
+				// 服务器端完整初始化（GAS 能力授予、属性设置、装备派生、背包物品）
+				Phantom->InitCharacterWithClassID(ClassID);
+
+				// 将职业 ID 同步到 PlayerState（自动复制到所有客户端）
+				if (ASL_PlayerStateBase* PS = NewPlayer->GetPlayerState<ASL_PlayerStateBase>())
+				{
+					PS->RequestSetClassID(ClassID);
+				}
+
+				UE_LOG(LogTemp, Log, TEXT("GameMode: PostLogin - Phantom initialized with ClassID=%d"), ClassID);
+			}
+		}
 	}
 	else
 	{

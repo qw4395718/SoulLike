@@ -95,28 +95,27 @@ void ALevelManager::LoadLevelConfig(int32 LevelID)
 
 void ALevelManager::ResetPlayerState()
 {
-	ASL_CharacterBase* PlayerCharacter = Cast<ASL_CharacterBase>(
-		UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	if (!PlayerCharacter)
+	// 遍历所有玩家控制器（多人模式下不限于 player index 0）
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("LevelManager::ResetPlayerState - PlayerCharacter not found"));
-		return;
-	}
+		APlayerController* PC = It->Get();
+		if (!PC) continue;
 
-	// 1. 查找玩家出生点并传送
-	TeleportPlayerToStart(PlayerCharacter);
+		ASL_CharacterBase* PlayerCharacter = Cast<ASL_CharacterBase>(PC->GetPawn());
+		if (!PlayerCharacter) continue;
 
-	// 2. 职业初始化（含血量/体力/魔法满值重置 + 装备加载）
+		// 1. 查找玩家出生点并传送
+		TeleportPlayerToStart(PlayerCharacter);
 
-	// 更新到palyerstate上
-	if (ASL_PlayerControllerBase* PC = PlayerCharacter->GetController<ASL_PlayerControllerBase>())
-	{
+		// 2. 职业初始化（含血量/体力/魔法满值重置 + 装备加载）
+		PlayerCharacter->InitCharacterWithClassID(CurrentPlayerClassID);
+
+		// 更新到 PlayerState 上（服务端设值后自动复制到所有客户端）
 		if (ASL_PlayerStateBase* PS = PC->GetPlayerState<ASL_PlayerStateBase>())
 		{
 			PS->RequestSetClassID(CurrentPlayerClassID);
 		}
 	}
-	//PlayerCharacter->InitCharacterWithClassID(CurrentPlayerClassID);
 
 }
 

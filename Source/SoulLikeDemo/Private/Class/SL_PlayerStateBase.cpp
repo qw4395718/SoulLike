@@ -4,6 +4,7 @@
 #include "HUD_LobbyScreen.h"
 #include "UIManagerSubsystem.h"
 #include <SL_CharacterBase.h>
+#include "EngineUtils.h"
 
 ASL_PlayerStateBase::ASL_PlayerStateBase()
 {
@@ -65,26 +66,75 @@ void ASL_PlayerStateBase::OnRep_PlayerClassID()
 {
 	UE_LOG(LogTemp, Log, TEXT("ASL_PlayerStateBase::OnRep_ClassID - ClassID replicated to %d"), PlayerClassID);
 
-	// 如果当前拥有者是本机客户端，通知 LobbyScreen 刷新职业名
-	APlayerController* PC = Cast<APlayerController>(GetOwner());
-	if (PC && PC->IsLocalController())
+	// ===== UI 刷新（仅本机玩家） =====
+	if (APlayerController* PC = Cast<APlayerController>(GetOwner()))
 	{
-		// UI上面的同步
-		UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(PC);
-		if (UIManager)
+		if (PC->IsLocalController())
 		{
-			UUserWidget* Widget = UIManager->GetWidget(EWidgetType::EWIDGET_LobbyScreen);
-			if (UHUD_LobbyScreen* Lobby = Cast<UHUD_LobbyScreen>(Widget))
+			UUIManagerSubsystem* UIManager = UUIManagerSubsystem::Get(PC);
+			if (UIManager)
 			{
-				Lobby->RefreshClassDisplay();
+				UUserWidget* Widget = UIManager->GetWidget(EWidgetType::EWIDGET_LobbyScreen);
+				if (UHUD_LobbyScreen* Lobby = Cast<UHUD_LobbyScreen>(Widget))
+				{
+					Lobby->RefreshClassDisplay();
+				}
 			}
 		}
 	}
 
-	// 角色同步
-	if (ASL_CharacterBase* PosseedActor = Cast<ASL_CharacterBase>(GetPawn()))
+	// ===== 查找此 PlayerState 对应的角色 =====
+	// 方式一：通过 Owner PC 获取（本机玩家）
+	ASL_CharacterBase* TargetPawn = nullptr;
+	if (APlayerController* PC = Cast<APlayerController>(GetOwner()))
 	{
-		PosseedActor->SetClassID(PlayerClassID);
+		TargetPawn = Cast<ASL_CharacterBase>(PC->GetPawn());
+	}
+
+	// 方式二：远程玩家（PC 不在本客户端），遍历世界中的 Pawn 匹配 PlayerState
+	if (!TargetPawn && GetWorld())
+	{
+		for (TActorIterator<ACharacter> It(GetWorld()); It; ++It)
+		{
+			ACharacter* Pawn = *It;
+			if (Pawn && Pawn->GetPlayerState() == this)
+			{
+				TargetPawn = Cast<ASL_CharacterBase>(Pawn);
+				break;
+			}
+		}
+	}
+
+	// ===== 应用外观 =====
+	if (TargetPawn)
+	{
+		TargetPawn->ApplyClassAppearance(PlayerClassID);
+	}
+
+	// ===== [诊断] 验证远程玩家 Pawn 匹配失败的原因 =====
+	if (!TargetPawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[OnRep_PlayerClassID] FAILED to find Pawn | PS=%s | Role=%d | Owner=%s | ClassID=%d"),
+			*GetName(),
+			(int32)GetLocalRole(),
+			*GetNameSafe(GetOwner()),
+			PlayerClassID);
+
+		if (GetWorld())
+		{
+			int32 PawnIdx = 0;
+			for (TActorIterator<ACharacter> It(GetWorld()); It; ++It)
+			{
+				ACharacter* Pawn = *It;
+				UE_LOG(LogTemp, Log, TEXT("  [Pawn %d] Char=%s | GetPlayerState=%s | GetController=%s | Controller.PlayerState=%s"),
+					PawnIdx++,
+					*GetNameSafe(Pawn),
+					*GetNameSafe(Pawn ? Pawn->GetPlayerState() : nullptr),
+					*GetNameSafe(Pawn ? Pawn->GetController() : nullptr),
+					*GetNameSafe(Pawn && Pawn->GetController() ? Pawn->GetController()->PlayerState : nullptr));
+			}
+		}
+
 	}
 	
 }

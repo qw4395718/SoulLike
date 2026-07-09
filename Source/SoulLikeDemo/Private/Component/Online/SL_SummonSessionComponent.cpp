@@ -746,7 +746,7 @@ void USL_SummonSessionComponent::SpawnRemoteSignActor(const FString& InRemoteSig
 	const FString& InOwnerName, int32 InLevel,
 	const FString& InTransformJSON, const FString& InInstanceID)
 {
-	if (!SummonSignClass || !GetWorld() || !GetWorld()->IsServer()) return;
+	if (!SummonSignClass || !GetWorld() || GetWorld()->GetNetMode() == NM_Client) return;
 
 	// 解析位置
 	FVector SpawnLocation(0, 0, 0);
@@ -836,7 +836,7 @@ FString FPhantomData::ToJSON() const
 void USL_SummonSessionComponent::OnPhantomDataReceived(const FString& InJSONData, const FString& InPlacerInstance)
 {
 	// 召唤者侧：收到 PhantomData，在本地生成灵体
-	if (!GetWorld() || !GetWorld()->IsServer()) return;
+	if (!GetWorld() || GetWorld()->GetNetMode() == NM_Client) return;
 
 	// 状态守卫：只有正在等待灵体的召唤者才处理
 	// PIE 模式下所有组件共享同一个 MatchClientSubsystem 委托

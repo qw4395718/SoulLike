@@ -214,7 +214,7 @@ void UCombatComponent::ChangeAP(float CostNum)
 			-1,               // Key（-1 表示不覆盖旧消息）
 			5.0f,             // 显示时间（秒）
 			FColor::Green,    // 颜色
-			FString::Printf(TEXT("CurrentAP %f CostNum"), ActionPoint, CostNum) // 消息内容
+			FString::Printf(TEXT("CurrentAP %f CostNum %f"), ActionPoint, CostNum) // 消息内容
 		);
 	}
 }

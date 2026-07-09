@@ -3,7 +3,7 @@
 
 #include "SL_ActiveParry_CB_NS.h"
 
-void USL_ActiveParry_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
+void USL_ActiveParry_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{
@@ -12,7 +12,7 @@ void USL_ActiveParry_CB_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimS
 	}
 }
 
-void USL_ActiveParry_CB_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
+void USL_ActiveParry_CB_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{

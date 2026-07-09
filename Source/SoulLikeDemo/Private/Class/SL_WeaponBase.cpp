@@ -9,6 +9,8 @@
 #include "DataTableManager.h"
 #include "WeaponDataTable.h"
 #include <SL_CharacterBase.h>
+
+#include <SL_EnemyBase.h>
 #include <SL_WeaponAnimSet.h>
 #include <AbilitySystemInterface.h>
 #include <AbilitySystemComponent.h>
@@ -191,7 +193,7 @@ void ASL_WeaponBase::SetupAnimClass()
 		UAnimInstance* NewAnimClass = WeaponData.AnimClass.LoadSynchronous();
 		if (NewAnimClass && bIsStaticMesh == false)
 		{
-			SkeletalWeaponMesh->SetAnimClass(NewAnimClass->GetClass());
+			SkeletalWeaponMesh->SetAnimInstanceClass(NewAnimClass->GetClass());
 		}
 	}
 }

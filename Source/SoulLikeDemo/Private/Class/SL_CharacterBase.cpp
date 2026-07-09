@@ -144,13 +144,13 @@ void ASL_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	// ASC能力
 	if (!AbilitySystemComp)
 		return;
-	FString EnumName = TEXT("EMyAbilitySlotsEnum");
+
 	FGameplayAbilityInputBinds Binds(
 		"ConfirmTargeting",     // 确认动作名
 		"CancelTargeting",      // 取消动作名
-		EnumName,               // 枚举名称（直接传FString）
+		FTopLevelAssetPath(TEXT("/Script/SoulLikeDemo"), TEXT("EMyAbilitySlotsEnum")),  // 完整的枚举路径
 		0,                      // 可选的起始输入ID
-		true                    // 是否尝试将枚举值映射到输入ID
+		-1                      // 自动映射枚举值到输入ID
 	);
 	AbilitySystemComp->BindAbilityActivationToInputComponent(PlayerInputComponent, Binds);
 

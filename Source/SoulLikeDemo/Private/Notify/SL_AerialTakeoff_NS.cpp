@@ -9,9 +9,9 @@
 #include "AbilityTask_Aerial.h"
 
 
-void USL_AerialTakeoff_NS::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
+void USL_AerialTakeoff_NS::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(MeshComp, Animation);
+	Super::Notify(MeshComp, Animation, EventReference);
 
 	if (!MeshComp || !MeshComp->GetOwner()) return;
 

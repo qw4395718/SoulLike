@@ -144,7 +144,7 @@ protected:
 	class FSocket* MatchSocket;
 	class ISocketSubsystem* SocketSubsystem;
 	FString ReceiveBuffer;
-	FDelegateHandle TickHandle;
+	FTSTicker::FDelegateHandle TickHandle;
 
 	bool bIsConnected;
 };

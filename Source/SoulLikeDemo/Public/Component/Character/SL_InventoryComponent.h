@@ -107,8 +107,8 @@ protected:
 		TSubclassOf<USL_GameplayAbilityUseItem> UseItemAbilityClass;
 
 	// 道具库存（道具ID -> 数量）
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory")
-		TMap<FName, int32> ItemInventory;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory")
+	TMap<FName, int32> ItemInventory;
 
 	// 当前选中的道具ID（用于"E"键使用）
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory")

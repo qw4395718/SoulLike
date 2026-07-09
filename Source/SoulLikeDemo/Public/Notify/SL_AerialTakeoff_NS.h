@@ -17,7 +17,7 @@ class SOULLIKEDEMO_API USL_AerialTakeoff_NS : public UAnimNotify
 
 public:
 
-	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
 public:
 

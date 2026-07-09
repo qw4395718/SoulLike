@@ -161,7 +161,7 @@ bool USL_MatchClientSubsystem::Connect(const FString& InIP, int32 InPort)
 		return false;
 	}
 
-	TickHandle = FTicker::GetCoreTicker().AddTicker(
+	TickHandle = FTSTicker::GetCoreTicker().AddTicker(
 		FTickerDelegate::CreateUObject(this, &USL_MatchClientSubsystem::Tick),
 		0.05f
 	);
@@ -177,7 +177,7 @@ void USL_MatchClientSubsystem::Disconnect()
 {
 	if (TickHandle.IsValid())
 	{
-		FTicker::GetCoreTicker().RemoveTicker(TickHandle);
+		FTSTicker::GetCoreTicker().RemoveTicker(TickHandle);
 		TickHandle.Reset();
 	}
 

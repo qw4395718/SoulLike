@@ -5,7 +5,7 @@
 #include "GameFramework/Character.h"
 #include "AnimNotify_IF.h"
 
-void USL_CharacterAnim_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
+void USL_CharacterAnim_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{
@@ -19,7 +19,7 @@ void USL_CharacterAnim_NS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSe
 	}
 }
 
-void USL_CharacterAnim_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
+void USL_CharacterAnim_NS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	if (MeshComp && MeshComp->GetOwner())
 	{

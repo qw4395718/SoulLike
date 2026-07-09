@@ -65,7 +65,7 @@ void USL_GameplayAbilityBase::ApplyEffectToTarget(TSubclassOf<UGameplayEffect> E
 		FGameplayEffectSpecHandle SpecHandle = ASCSource->MakeOutgoingSpec(EffectClass, Level, ASCSource->MakeEffectContext());
 		if (SpecHandle.IsValid())
 		{
-			ASCSource->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data, TargetASC, FPredictionKey(ScopedWindow.ScopedPredictionKey));
+			ASCSource->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data, TargetASC, ASCSource->GetPredictionKeyForNewAction());
 		}
 	}
 }

@@ -4,11 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Camera/CameraShake.h"
+#include "Camera/CameraShakeBase.h"
 #include "SL_CameraShake_Hit.generated.h"
 
 UCLASS()
-class SOULLIKEDEMO_API USL_CameraShake_Hit : public UMatineeCameraShake
+class SOULLIKEDEMO_API USL_CameraShake_Hit : public UCameraShakeBase
 {
 	GENERATED_BODY()
 

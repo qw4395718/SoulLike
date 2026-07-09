@@ -7,7 +7,6 @@
 #include "Fonts/SlateFontInfo.h"
 #include "Fonts/FontMeasure.h"
 #include "GlobalDelegatesManager.h"
-#include "UnLua.h"
 
 
 UHUD_Dialog::UHUD_Dialog(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)

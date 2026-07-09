@@ -2,6 +2,7 @@
 #include "A_DamageFloatingTextActor.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Animation/WidgetAnimation.h"
 #include "Components/TextBlock.h"
 //#include "Engine/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"

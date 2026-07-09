@@ -6,9 +6,9 @@
 #include <AT/AbilityTask_ComboMontage.h>
 #include <SL_ComboManagerComponent.h>
 
-void USL_ComboWindow_ANS::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
+void USL_ComboWindow_ANS::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(MeshComp, Animation);
+	Super::Notify(MeshComp, Animation, EventReference);
 
 	if (!MeshComp || !MeshComp->GetOwner()) return;
 

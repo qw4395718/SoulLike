@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "SoulLikeGameGlobal.h"
+#include <SoulLikeGameGlobal.h>
 #include "SL_HitFeedbackManagerComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))

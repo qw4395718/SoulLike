@@ -10,6 +10,12 @@ public class SoulLikeDemo : ModuleRules
 	public SoulLikeDemo(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		
+		#if UE_5_2_OR_LATER
+			IWYUSupport = IWYUSupport.None;
+		#else
+			bEnforceIWYU = false;
+		#endif
 
         // 递归获取所有 Public 子目录
         string publicPath = Path.Combine(ModuleDirectory, "Public");
@@ -30,16 +36,14 @@ public class SoulLikeDemo : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore",
-			"UnLua",
             "GameplayAbilities", "GameplayTags", "GameplayTasks",
             "AIModule",
             "Sockets",
             "Networking",
             "Json",
             "JsonUtilities",
+			"EngineCameras",
 		});
-
-		PrivateDependencyModuleNames.AddRange(new string[] { "Lua" });
 
 		if (Target.bBuildEditor)
 		{
@@ -47,7 +51,7 @@ public class SoulLikeDemo : ModuleRules
 		}
 
 		// Uncomment if you are using Slate UI
-		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "UMG", "Slate", "SlateCore" });
 		
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");

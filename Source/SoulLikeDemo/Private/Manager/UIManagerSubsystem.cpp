@@ -62,8 +62,6 @@ EPlatformType UUIManagerSubsystem::GetPlatform() const
 {
 #if PLATFORM_ANDROID || PLATFORM_IOS
 	return EPlatformType::Mobile;
-#elif PLATFORM_XBOXONE || PLATFORM_PS4
-	return EPlatformType::Console;
 #else
 	return EPlatformType::PC;
 #endif
